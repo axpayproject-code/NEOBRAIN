@@ -15,7 +15,7 @@ const fadeUp = {
 
 const CRISIS_STATS = [
   { value: "22M+", label: "Children under 15 in the Philippines", sub: "~3.5 million have a developmental concern" },
-  { value: "278", label: "Licensed developmental pediatricians", sub: "For 110 million Filipinos — as of 2023" },
+  { value: "278", label: "Licensed developmental pediatricians", sub: "For 110 million Filipinos — Philippine Pediatric Society, 2025" },
   { value: "1:370K", label: "Specialist-to-child ratio", sub: "WHO recommends 1:5,000" },
   { value: "88%", label: "Children who need help never get it", sub: "Only 12% ever access any form of intervention" },
 ];
@@ -55,6 +55,12 @@ const TIMELINE = [
     year: "2024",
     title: "NEOBRAIN is founded",
     desc: "ACCENTECX launches NEOBRAIN — AI-assisted infrastructure built specifically for the Philippine healthcare system. The mission: reach 10 million children by 2028, in all 17 regions, regardless of zip code or income.",
+    color: "border-[#9FE870]",
+  },
+  {
+    year: "2026",
+    title: "Phase 2 — scaling nationally",
+    desc: "NEOBRAIN expands beyond Metro Manila into all 17 regions. Over 100,000 children are now actively tracked on the platform. 500+ licensed clinicians, 50 schools, and the first 5 LGU government partnerships are live. The DOH data-sharing pilot begins.",
     color: "border-[#9FE870]",
     highlight: true,
   },
@@ -99,24 +105,24 @@ const ROADMAP = [
     period: "2024 – 2025",
     target: "100,000 children",
     goals: [
-      "Launch in Metro Manila, Cebu, Davao",
-      "500 licensed clinicians on-platform",
+      "Launched in Metro Manila, Cebu, Davao",
+      "500+ licensed clinicians on-platform",
       "50 partner schools integrated",
       "Core AI screening engine live",
     ],
-    status: "active",
+    status: "done",
   },
   {
     phase: "Phase 2",
     period: "2026 – 2027",
     target: "2 million children",
     goals: [
-      "Expand to all 17 regions",
+      "Expanding to all 17 regions",
       "5,000 clinicians and therapists",
       "500 schools and 50 LGUs",
-      "DOH data-sharing pilot",
+      "DOH data-sharing pilot underway",
     ],
-    status: "planned",
+    status: "active",
   },
   {
     phase: "Phase 3",
@@ -350,10 +356,11 @@ export default function About() {
                 <div className="flex items-center justify-between mb-4">
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     phase.status === "active" ? "bg-[#9FE870] text-[#163300]" :
+                    phase.status === "done" ? "bg-white/15 text-white/80" :
                     phase.status === "mission" ? "bg-white/20 text-white" :
                     "bg-white/10 text-white/60"
                   }`}>
-                    {phase.status === "active" ? "● Live" : phase.status === "mission" ? "🎯 Mission Goal" : "Planned"}
+                    {phase.status === "active" ? "● Live Now" : phase.status === "done" ? "✓ Completed" : phase.status === "mission" ? "🎯 Mission Goal" : "Planned"}
                   </span>
                   <span className="text-xs text-white/50">{phase.period}</span>
                 </div>
