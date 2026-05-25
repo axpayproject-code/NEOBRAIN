@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashboardLayout";
 import {
   LayoutDashboard, Users, CreditCard, Brain, Building2,
@@ -963,11 +964,113 @@ function SupportTab() {
   );
 }
 
+function FeesTab() {
+  const qc = useQueryClient();
+  const { data: fees, isLoading } = useListSpecialtyFees({ query: { queryKey: getListSpecialtyFeesQueryKey() } });
+  const upsertFee = useUpsertSpecialtyFee();
+  const [editing, setEditing] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState<string | null>(null);
+  const [saved, setSaved] = useState<string | null>(null);
+
+  const LABELS: Record<string, string> = {
+    developmental_pediatrician: "Developmental Pediatrician",
+    psychologist: "Child Psychologist",
+    psychiatrist: "Child Psychiatrist",
+    speech_therapist: "Speech-Language Therapist",
+    occupational_therapist: "Occupational Therapist",
+    behavioral_therapist: "Behavioral Therapist",
+  };
+
+  async function handleSave(specialistType: string) {
+    const val = editing[specialistType];
+    if (!val) return;
+    setSaving(specialistType);
+    await upsertFee.mutateAsync({
+      specialistType,
+      data: { feeAmount: Number(val), currency: "PHP" },
+    });
+    await qc.invalidateQueries({ queryKey: getListSpecialtyFeesQueryKey() });
+    setSaving(null);
+    setSaved(specialistType);
+    setTimeout(() => setSaved(null), 2000);
+    setEditing(e => { const n = { ...e }; delete n[specialistType]; return n; });
+  }
+
+  return (
+    <div className="p-6 lg:p-8 space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold">Consultation Fees</h1>
+        <p className="text-sm text-muted-foreground">Set the consultation fee (PHP) for each specialist type</p>
+      </div>
+      {isLoading ? (
+        <div className="space-y-3">{Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
+      ) : (
+        <div className="space-y-3">
+          {(fees ?? []).map(fee => (
+            <div key={fee.specialistType} className="flex items-center gap-4 rounded-xl border bg-card px-5 py-4">
+              <div className="flex-1">
+                <p className="font-semibold text-sm">{LABELS[fee.specialistType] ?? fee.specialistType}</p>
+                <p className="text-xs text-muted-foreground capitalize">{fee.specialistType.replace(/_/g, " ")}</p>
+              </div>
+              {saved === fee.specialistType ? (
+                <span className="text-sm text-green-700 font-medium flex items-center gap-1">
+                  <CheckCircle className="h-4 w-4" /> Saved
+                </span>
+              ) : editing[fee.specialistType] !== undefined ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-muted-foreground">₱</span>
+                  <Input
+                    className="w-28 h-8 text-sm"
+                    type="number"
+                    min={0}
+                    value={editing[fee.specialistType]}
+                    onChange={e => setEditing(p => ({ ...p, [fee.specialistType]: e.target.value }))}
+                  />
+                  <Button
+                    size="sm"
+                    className="h-8 bg-[#163300] text-white hover:bg-[#1e4a00]"
+                    disabled={saving === fee.specialistType}
+                    onClick={() => handleSave(fee.specialistType)}
+                  >
+                    {saving === fee.specialistType ? "…" : "Save"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8"
+                    onClick={() => setEditing(e => { const n = { ...e }; delete n[fee.specialistType]; return n; })}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <span className="text-lg font-bold text-[#163300]">₱{fee.feeAmount.toLocaleString()}</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs"
+                    onClick={() => setEditing(p => ({ ...p, [fee.specialistType]: String(fee.feeAmount) }))}
+                  >
+                    Edit
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      <p className="text-xs text-muted-foreground">All fees are in Philippine Peso (PHP) and apply to all appointments booked on the platform.</p>
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   overview: PlatformOverviewTab,
   users: UserManagementTab,
   subscriptions: SubscriptionsTab,
+  fees: FeesTab,
   "ai-monitoring": AIMonitoringTab,
   onboarding: OnboardingTab,
   analytics: AnalyticsTab,

@@ -107,8 +107,6 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
           durationMinutes: Number(form.duration),
           telehealth: form.telehealth,
           notes: form.notes || undefined,
-          paymentStatus: feeAmount > 0 ? "unpaid" : "waived",
-          feeAmount: feeAmount || undefined,
         },
       });
       setCreatedApptId(result.id);

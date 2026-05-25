@@ -11,6 +11,7 @@ import {
   useListAvailability, useCreateAvailability, useDeleteAvailability,
   getListAvailabilityQueryKey
 } from "@workspace/api-client-react";
+import type { AvailabilityInput } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -58,7 +59,7 @@ export default function AvailabilityManager({ practitionerName, specialistType }
       body.specificDate = form.specificDate;
     }
 
-    await createAvailability.mutateAsync({ data: body as Parameters<typeof createAvailability.mutateAsync>[0]["data"] });
+    await createAvailability.mutateAsync({ data: body as unknown as AvailabilityInput });
     await qc.invalidateQueries({ queryKey: getListAvailabilityQueryKey({ practitionerName }) });
     setSaving(false);
     setAdding(false);

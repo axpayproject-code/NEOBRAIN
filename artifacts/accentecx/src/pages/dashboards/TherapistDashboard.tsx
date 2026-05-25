@@ -6,6 +6,7 @@ import {
   Clock, AlertTriangle, Plus, Video, CalendarDays, Link
 } from "lucide-react";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
+import AvailabilityManagerWidget from "@/components/appointments/AvailabilityManager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -748,10 +749,9 @@ function TelehealthTab() {
 function TherapistAvailabilityTab() {
   const { user } = useAuth();
   const practitionerName = user?.name ?? "Therapist";
-  const AvailabilityManager = require("@/components/appointments/AvailabilityManager").default;
   return (
     <div className="p-6 lg:p-8">
-      <AvailabilityManager practitionerName={practitionerName} specialistType="speech_therapist" />
+      <AvailabilityManagerWidget practitionerName={practitionerName} specialistType="speech_therapist" />
     </div>
   );
 }
@@ -766,6 +766,7 @@ const TABS: Record<string, TabComponent> = {
   progress: ProgressTrackingTab,
   homework: HomeworkTab,
   communication: CommunicationTab,
+  availability: TherapistAvailabilityTab,
 };
 
 export default function TherapistDashboard() {

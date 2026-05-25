@@ -16,6 +16,7 @@ export interface TelehealthAppt {
   notes?: string | null;
   specialistType?: string | null;
   telehealth?: boolean | null;
+  meetingUrl?: string | null;
 }
 
 interface TelehealthCallModalProps {

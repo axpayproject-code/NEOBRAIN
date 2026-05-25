@@ -24,6 +24,7 @@ import {
   useGetChildDomainScores, useGetChildTimeline,
   useRequestReschedule, getListAppointmentsQueryKey
 } from "@workspace/api-client-react";
+import type { Appointment } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { motion } from "framer-motion";
@@ -448,6 +449,159 @@ function AIResultsTab() {
   );
 }
 
+type AppointmentItem = Appointment;
+
+function RescheduleSection({
+  upcoming, isLoading, STATUS_ICONS, SPECIALIST_LABELS, onJoin,
+}: {
+  upcoming: AppointmentItem[];
+  isLoading: boolean;
+  STATUS_ICONS: Record<string, React.ElementType>;
+  SPECIALIST_LABELS: Record<string, string>;
+  onJoin: (a: TelehealthAppt) => void;
+}) {
+  const qc = useQueryClient();
+  const requestReschedule = useRequestReschedule();
+  const [rescheduleAppt, setRescheduleAppt] = useState<AppointmentItem | null>(null);
+  const [proposedDate, setProposedDate] = useState("");
+  const [proposedTime, setProposedTime] = useState("");
+  const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  async function handleRequestReschedule() {
+    if (!rescheduleAppt || !proposedDate || !proposedTime) return;
+    setSubmitting(true);
+    const proposedAt = new Date(`${proposedDate}T${proposedTime}:00+08:00`).toISOString();
+    await requestReschedule.mutateAsync({
+      id: rescheduleAppt.id,
+      data: { requestedByRole: "parent", proposedAt, reason: reason || undefined },
+    });
+    await qc.invalidateQueries({ queryKey: getListAppointmentsQueryKey() });
+    setSubmitting(false);
+    setSubmitted(true);
+    setTimeout(() => {
+      setSubmitted(false);
+      setRescheduleAppt(null);
+      setProposedDate("");
+      setProposedTime("");
+      setReason("");
+    }, 2000);
+  }
+
+  return (
+    <div className="space-y-3">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Upcoming</h2>
+      {isLoading ? Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />) :
+        upcoming.map(appt => {
+          const StatusIcon = STATUS_ICONS[appt.status] ?? Clock;
+          return (
+            <div key={appt.id} className="rounded-xl border bg-card px-5 py-4 flex items-center gap-4" data-testid={`appointment-${appt.id}`}>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#163300]/5 shrink-0">
+                <StatusIcon className="h-5 w-5 text-[#163300]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">{appt.specialistName}</p>
+                <p className="text-xs text-muted-foreground">{SPECIALIST_LABELS[appt.specialistType] ?? appt.specialistType} · {appt.childName}</p>
+                {appt.notes && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{appt.notes}</p>}
+                {appt.meetingUrl && (
+                  <a href={appt.meetingUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline mt-0.5 block truncate max-w-xs">
+                    {appt.meetingUrl}
+                  </a>
+                )}
+              </div>
+              <div className="text-right shrink-0 space-y-1">
+                <p className="text-sm font-medium">{new Date(appt.scheduledAt).toLocaleDateString("en-PH", { dateStyle: "medium" })}</p>
+                <p className="text-xs text-muted-foreground">{new Date(appt.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                <div className="flex items-center gap-1.5 justify-end flex-wrap">
+                  {appt.telehealth && <Badge className="text-xs bg-blue-100 text-blue-800">Telehealth</Badge>}
+                  <Badge className="text-xs bg-green-100 text-green-800 capitalize">{appt.status}</Badge>
+                </div>
+                <div className="flex items-center gap-1.5 justify-end flex-wrap pt-0.5">
+                  {appt.telehealth && (
+                    <Button
+                      size="sm"
+                      className="text-xs h-7 bg-[#163300] text-white hover:bg-[#1e4a00] gap-1"
+                      data-testid={`button-join-${appt.id}`}
+                      onClick={() => onJoin(appt as TelehealthAppt)}
+                    >
+                      <Video className="h-3 w-3" /> Join Call
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs h-7 gap-1"
+                    onClick={() => setRescheduleAppt(appt)}
+                  >
+                    <AlertTriangle className="h-3 w-3" /> Reschedule
+                  </Button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+      <Dialog open={!!rescheduleAppt} onOpenChange={o => { if (!o) { setRescheduleAppt(null); setProposedDate(""); setProposedTime(""); setReason(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Reschedule</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {submitted ? (
+              <div className="text-center space-y-2 py-4">
+                <CheckCircle className="h-10 w-10 text-green-500 mx-auto" />
+                <p className="font-semibold text-green-800">Reschedule request sent!</p>
+                <p className="text-sm text-muted-foreground">The specialist will review and respond to your request.</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Propose a new time for your appointment with <strong>{rescheduleAppt?.specialistName}</strong>.
+                </p>
+                <div className="space-y-1">
+                  <Label>Proposed Date *</Label>
+                  <Input
+                    type="date"
+                    value={proposedDate}
+                    min={new Date().toISOString().split("T")[0]}
+                    onChange={e => setProposedDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Proposed Time *</Label>
+                  <Input type="time" value={proposedTime} onChange={e => setProposedTime(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Reason (optional)</Label>
+                  <textarea
+                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#163300]/30"
+                    placeholder="Why do you need to reschedule?"
+                    value={reason}
+                    onChange={e => setReason(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          {!submitted && (
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setRescheduleAppt(null)}>Cancel</Button>
+              <Button
+                className="flex-1 bg-[#163300] text-white hover:bg-[#1e4a00]"
+                disabled={!proposedDate || !proposedTime || submitting}
+                onClick={handleRequestReschedule}
+              >
+                {submitting ? "Sending…" : "Send Request"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 function AppointmentsTab() {
   const [scheduling, setScheduling] = useState(false);
   const [joinAppt, setJoinAppt] = useState<TelehealthAppt | null>(null);
@@ -515,43 +669,7 @@ function AppointmentsTab() {
       )}
 
       {upcoming.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Upcoming</h2>
-          {isLoading ? Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />) :
-            upcoming.map(appt => {
-              const StatusIcon = STATUS_ICONS[appt.status] ?? Clock;
-              return (
-                <div key={appt.id} className="rounded-xl border bg-card px-5 py-4 flex items-center gap-4" data-testid={`appointment-${appt.id}`}>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#163300]/5 shrink-0">
-                    <StatusIcon className="h-5 w-5 text-[#163300]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm">{appt.specialistName}</p>
-                    <p className="text-xs text-muted-foreground">{SPECIALIST_LABELS[appt.specialistType] ?? appt.specialistType} · {appt.childName}</p>
-                    {appt.notes && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{appt.notes}</p>}
-                  </div>
-                  <div className="text-right shrink-0 space-y-1">
-                    <p className="text-sm font-medium">{new Date(appt.scheduledAt).toLocaleDateString("en-PH", { dateStyle: "medium" })}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(appt.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                    <div className="flex items-center gap-1.5 justify-end">
-                      {appt.telehealth && <Badge className="text-xs bg-blue-100 text-blue-800">Telehealth</Badge>}
-                      <Badge className="text-xs bg-green-100 text-green-800 capitalize">{appt.status}</Badge>
-                    </div>
-                    {appt.telehealth && (
-                      <Button
-                        size="sm"
-                        className="text-xs h-7 bg-[#163300] text-white hover:bg-[#1e4a00] gap-1"
-                        data-testid={`button-join-${appt.id}`}
-                        onClick={() => setJoinAppt(appt as TelehealthAppt)}
-                      >
-                        <Video className="h-3 w-3" /> Join Call
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-        </div>
+        <RescheduleSection upcoming={upcoming} isLoading={isLoading} STATUS_ICONS={STATUS_ICONS} SPECIALIST_LABELS={SPECIALIST_LABELS} onJoin={setJoinAppt} />
       )}
 
       {past.length > 0 && (

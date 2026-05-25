@@ -65,9 +65,10 @@ router.get("/availability/slots", async (req, res) => {
   const { practitionerName, date, durationMinutes } = parsed.data;
   const slotDuration = durationMinutes ?? 60;
 
-  // Parse date and figure out day of week
-  const dateObj = new Date(`${date}T00:00:00+08:00`);
-  const dayOfWeek = dateObj.getDay(); // 0=Sun … 6=Sat
+  // Parse date and figure out day of week — always UTC so timezone doesn't shift the date
+  const [y, m, d] = date.split("-").map(Number);
+  const dateObj = new Date(Date.UTC(y, m - 1, d));
+  const dayOfWeek = dateObj.getUTCDay(); // 0=Sun … 6=Sat
 
   // Find availability blocks for this practitioner matching either day-of-week or specific date
   const allBlocks = await db
@@ -87,8 +88,8 @@ router.get("/availability/slots", async (req, res) => {
   }
 
   // Fetch booked appointments for this practitioner on this date
-  const dayStart = new Date(`${date}T00:00:00+08:00`);
-  const dayEnd = new Date(`${date}T23:59:59+08:00`);
+  const dayStart = new Date(`${date}T00:00:00.000Z`);
+  const dayEnd = new Date(`${date}T23:59:59.999Z`);
 
   const bookedAppts = await db
     .select()
