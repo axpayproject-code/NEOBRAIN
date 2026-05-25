@@ -672,6 +672,7 @@ export default function Home() {
           <a href="#ai" className="hover:text-foreground transition-colors">AI Engine</a>
           <a href="#live-demo" className="hover:text-foreground transition-colors font-semibold text-[#163300]">Live Demo</a>
           <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+          <Link href="/about" className="hover:text-foreground transition-colors">Our Story</Link>
         </nav>
         <div className="ml-auto flex items-center gap-3">
           <Link href="/login">
@@ -1055,7 +1056,7 @@ export default function Home() {
               <div className="text-sm font-semibold text-foreground mb-3">Company</div>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 {[
-                  { label: "About NEOBRAIN", href: "/about" },
+                  { label: "Our Story", href: "/about" },
                   { label: "Clinical Partners", href: "/clinical-partners" },
                   { label: "For Government", href: "/for-government" },
                   { label: "Privacy Policy", href: "/privacy" },
