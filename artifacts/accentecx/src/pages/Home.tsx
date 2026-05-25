@@ -1032,16 +1032,34 @@ export default function Home() {
             <div>
               <div className="text-sm font-semibold text-foreground mb-3">Platform</div>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                {["Family Care System", "Clinical System", "Therapy System", "School Integration", "Telehealth", "National Analytics"].map(l => (
-                  <li key={l} className="hover:text-foreground transition-colors cursor-pointer">{l}</li>
+                {[
+                  { label: "Family Care System", href: "/family-care" },
+                  { label: "Clinical System", href: "/clinical-system" },
+                  { label: "Therapy System", href: "/therapy-system" },
+                  { label: "School Integration", href: "/school-integration" },
+                  { label: "Telehealth", href: "/telehealth" },
+                  { label: "National Analytics", href: "/national-analytics" },
+                ].map(l => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="hover:text-foreground transition-colors">{l.label}</Link>
+                  </li>
                 ))}
               </ul>
             </div>
             <div>
               <div className="text-sm font-semibold text-foreground mb-3">Company</div>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                {["About ACCENTECX", "Clinical Partners", "For Government", "Privacy Policy", "Terms of Service", "Contact"].map(l => (
-                  <li key={l} className="hover:text-foreground transition-colors cursor-pointer">{l}</li>
+                {[
+                  { label: "About ACCENTECX", href: "/about" },
+                  { label: "Clinical Partners", href: "/clinical-partners" },
+                  { label: "For Government", href: "/for-government" },
+                  { label: "Privacy Policy", href: "/privacy" },
+                  { label: "Terms of Service", href: "/terms" },
+                  { label: "Contact", href: "/contact" },
+                ].map(l => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="hover:text-foreground transition-colors">{l.label}</Link>
+                  </li>
                 ))}
               </ul>
             </div>

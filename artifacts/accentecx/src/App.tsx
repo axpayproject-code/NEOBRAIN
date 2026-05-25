@@ -15,6 +15,22 @@ import DoctorDashboard from "@/pages/dashboards/DoctorDashboard";
 import TherapistDashboard from "@/pages/dashboards/TherapistDashboard";
 import AdminDashboard from "@/pages/dashboards/AdminDashboard";
 
+// Platform pages
+import FamilyCare from "@/pages/platform/FamilyCare";
+import ClinicalSystem from "@/pages/platform/ClinicalSystem";
+import TherapySystem from "@/pages/platform/TherapySystem";
+import SchoolIntegration from "@/pages/platform/SchoolIntegration";
+import Telehealth from "@/pages/platform/Telehealth";
+import NationalAnalytics from "@/pages/platform/NationalAnalytics";
+
+// Company pages
+import About from "@/pages/company/About";
+import ClinicalPartners from "@/pages/company/ClinicalPartners";
+import ForGovernment from "@/pages/company/ForGovernment";
+import Privacy from "@/pages/company/Privacy";
+import Terms from "@/pages/company/Terms";
+import Contact from "@/pages/company/Contact";
+
 // Legacy generic pages (still accessible for reference)
 import { SidebarLayout } from "@/components/layout/SidebarLayout";
 import Dashboard from "@/pages/Dashboard";
@@ -41,6 +57,7 @@ function AppRoutes() {
 
   return (
     <Switch>
+      {/* ── Landing ── */}
       <Route path="/" component={Home} />
       <Route path="/login">
         {user ? <Redirect to={`/${user.role}`} /> : <Login />}
@@ -60,6 +77,22 @@ function AppRoutes() {
       <Route path="/admin">
         <ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>
       </Route>
+
+      {/* ── Platform pages ── */}
+      <Route path="/family-care" component={FamilyCare} />
+      <Route path="/clinical-system" component={ClinicalSystem} />
+      <Route path="/therapy-system" component={TherapySystem} />
+      <Route path="/school-integration" component={SchoolIntegration} />
+      <Route path="/telehealth" component={Telehealth} />
+      <Route path="/national-analytics" component={NationalAnalytics} />
+
+      {/* ── Company pages ── */}
+      <Route path="/about" component={About} />
+      <Route path="/clinical-partners" component={ClinicalPartners} />
+      <Route path="/for-government" component={ForGovernment} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/contact" component={Contact} />
 
       {/* ── Legacy generic routes ── */}
       <Route path="/dashboard">
