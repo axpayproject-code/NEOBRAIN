@@ -3,7 +3,7 @@ import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashb
 import {
   Users, HeartPulse, ClipboardList, TrendingUp,
   BookOpen, MessageSquare, LayoutDashboard, CheckCircle,
-  Clock, AlertTriangle
+  Clock, AlertTriangle, Plus
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   useListChildren, useListTherapyPlans, useListAppointments,
   useGetChildDomainScores, getListTherapyPlansQueryKey, useUpdateTherapyPlan
@@ -240,13 +241,52 @@ function TherapyPlansTab() {
   );
 }
 
+type SessionLog = {
+  child: string;
+  type: string;
+  date: string;
+  duration: string;
+  notes: string;
+  outcome: string;
+};
+
+const INITIAL_SESSIONS: SessionLog[] = [
+  { child: "Isabella Tan", type: "Speech Therapy", date: "May 24, 2026", duration: "45 min", notes: "Practiced vowel sounds, 2-word combinations. Parent reported improvement in morning routines.", outcome: "Positive" },
+  { child: "Lucas Dela Cruz", type: "Behavioral Therapy", date: "May 23, 2026", duration: "60 min", notes: "Token economy system introduced. 3 of 5 target behaviors achieved in session.", outcome: "Positive" },
+  { child: "Miguel Santos", type: "Speech Therapy", date: "May 22, 2026", duration: "45 min", notes: "Articulation exercises. Vocabulary expansion cards completed. First 3-word sentence milestone!", outcome: "Milestone" },
+  { child: "Isabella Tan", type: "Occupational Therapy", date: "May 21, 2026", duration: "45 min", notes: "Sensory bin play, playdough fine motor exercises. Reduced tactile aversion noted.", outcome: "Positive" },
+];
+
+const THERAPY_TYPES = ["Speech Therapy", "Occupational Therapy", "Behavioral Therapy", "Cognitive Therapy", "Physical Therapy", "Play Therapy"];
+const OUTCOMES = ["Positive", "Milestone", "Neutral", "Needs Review", "Challenging"];
+
 function SessionLogsTab() {
-  const sessions = [
-    { child: "Isabella Tan", type: "Speech Therapy", date: "May 24, 2026", duration: "45 min", notes: "Practiced vowel sounds, 2-word combinations. Parent reported improvement in morning routines.", outcome: "Positive" },
-    { child: "Lucas Dela Cruz", type: "Behavioral Therapy", date: "May 23, 2026", duration: "60 min", notes: "Token economy system introduced. 3 of 5 target behaviors achieved in session.", outcome: "Positive" },
-    { child: "Miguel Santos", type: "Speech Therapy", date: "May 22, 2026", duration: "45 min", notes: "Articulation exercises. Vocabulary expansion cards completed. First 3-word sentence milestone!", outcome: "Milestone" },
-    { child: "Isabella Tan", type: "Occupational Therapy", date: "May 21, 2026", duration: "45 min", notes: "Sensory bin play, playdough fine motor exercises. Reduced tactile aversion noted.", outcome: "Positive" },
-  ];
+  const { data: children } = useListChildren({ query: { queryKey: ["children-session"] } });
+  const [sessions, setSessions] = useState<SessionLog[]>(INITIAL_SESSIONS);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    child: "", type: "Speech Therapy", date: new Date().toISOString().split("T")[0],
+    duration: "45", notes: "", outcome: "Positive",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleLog = async () => {
+    if (!form.child || !form.notes.trim()) return;
+    setSubmitting(true);
+    await new Promise(r => setTimeout(r, 500));
+    const today = new Date(form.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    setSessions(s => [{
+      child: form.child,
+      type: form.type,
+      date: today,
+      duration: `${form.duration} min`,
+      notes: form.notes,
+      outcome: form.outcome,
+    }, ...s]);
+    setForm({ child: "", type: "Speech Therapy", date: new Date().toISOString().split("T")[0], duration: "45", notes: "", outcome: "Positive" });
+    setSubmitting(false);
+    setOpen(false);
+  };
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
@@ -255,7 +295,7 @@ function SessionLogsTab() {
           <h1 className="text-2xl font-bold">Session Logs</h1>
           <p className="text-sm text-muted-foreground">Record and review therapy session notes</p>
         </div>
-        <Button className="rounded-full gap-2" data-testid="button-new-session">
+        <Button className="rounded-full gap-2" data-testid="button-new-session" onClick={() => setOpen(true)}>
           <ClipboardList className="h-4 w-4" /> Log Session
         </Button>
       </div>
@@ -268,7 +308,13 @@ function SessionLogsTab() {
                   <p className="font-semibold">{s.child}</p>
                   <p className="text-xs text-muted-foreground">{s.type} · {s.date} · {s.duration}</p>
                 </div>
-                <Badge className={s.outcome === "Milestone" ? "bg-secondary text-secondary-foreground" : "bg-green-100 text-green-800"}>
+                <Badge className={
+                  s.outcome === "Milestone" ? "bg-secondary text-secondary-foreground" :
+                  s.outcome === "Positive" ? "bg-green-100 text-green-800" :
+                  s.outcome === "Challenging" ? "bg-red-100 text-red-800" :
+                  s.outcome === "Needs Review" ? "bg-orange-100 text-orange-800" :
+                  "bg-muted text-muted-foreground"
+                }>
                   {s.outcome}
                 </Badge>
               </div>
@@ -277,6 +323,100 @@ function SessionLogsTab() {
           </Card>
         ))}
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-primary" />
+              Log New Therapy Session
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Child / Client</Label>
+              <select
+                className="w-full h-9 rounded-lg border bg-background px-3 text-sm"
+                value={form.child}
+                onChange={e => setForm(f => ({ ...f, child: e.target.value }))}
+                data-testid="select-session-child"
+              >
+                <option value="">Select child...</option>
+                {(children ?? []).map(c => (
+                  <option key={c.id} value={c.fullName}>{c.fullName}</option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Therapy Type</Label>
+                <select
+                  className="w-full h-9 rounded-lg border bg-background px-3 text-sm"
+                  value={form.type}
+                  onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+                  data-testid="select-session-type"
+                >
+                  {THERAPY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Outcome</Label>
+                <select
+                  className="w-full h-9 rounded-lg border bg-background px-3 text-sm"
+                  value={form.outcome}
+                  onChange={e => setForm(f => ({ ...f, outcome: e.target.value }))}
+                  data-testid="select-session-outcome"
+                >
+                  {OUTCOMES.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Session Date</Label>
+                <Input
+                  type="date"
+                  value={form.date}
+                  onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                  data-testid="input-session-date"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Duration (minutes)</Label>
+                <Input
+                  type="number"
+                  value={form.duration}
+                  onChange={e => setForm(f => ({ ...f, duration: e.target.value }))}
+                  min="15" max="120" step="15"
+                  data-testid="input-session-duration"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Session Notes</Label>
+              <Textarea
+                value={form.notes}
+                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                placeholder="Describe what was practiced, child's response, milestones reached, and parent feedback..."
+                rows={4}
+                data-testid="input-session-notes"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" className="rounded-full" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button
+              className="rounded-full gap-1.5"
+              onClick={handleLog}
+              disabled={submitting || !form.child || !form.notes.trim()}
+              data-testid="button-submit-session"
+            >
+              <Plus className="h-4 w-4" />
+              {submitting ? "Saving..." : "Save Session"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

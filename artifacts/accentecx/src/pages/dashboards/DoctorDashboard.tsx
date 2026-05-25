@@ -2,7 +2,8 @@ import { useState } from "react";
 import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashboardLayout";
 import {
   Users, ClipboardList, Video, Stethoscope, FileText,
-  HeartPulse, History, LayoutDashboard, AlertTriangle, Clock
+  HeartPulse, History, LayoutDashboard, AlertTriangle, Clock,
+  Mic, MicOff, VideoOff, PhoneOff, MonitorUp, CheckCircle2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   useListChildren, useListScreenings, useListAppointments,
   useListTherapyPlans, useGetChildTimeline, useCreateTherapyPlan,
@@ -138,7 +140,6 @@ function AISummariesTab() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                {/* Domain scores */}
                 <div className="grid grid-cols-5 gap-2">
                   {[
                     { label: "Comm.", val: s.communicationScore },
@@ -174,7 +175,64 @@ function AISummariesTab() {
   );
 }
 
+type VideoSession = {
+  child: string;
+  task: string;
+  duration: string;
+  status: string;
+  features: string;
+  aiFindings: { label: string; detail: string; severity: "low" | "moderate" | "high" }[];
+  recommendation: string;
+};
+
+const VIDEO_SESSIONS: VideoSession[] = [
+  {
+    child: "Isabella Tan",
+    task: "Joint Attention Test",
+    duration: "4:32",
+    status: "Pending Review",
+    features: "Gaze tracking anomalies, limited reciprocal communication, repetitive movement",
+    aiFindings: [
+      { label: "Gaze Tracking", detail: "Eye contact initiated 2 of 8 prompts (25%). Below developmental baseline of 70%.", severity: "high" },
+      { label: "Joint Attention", detail: "No gaze following detected on pointing gestures. Protodeclarative pointing absent.", severity: "high" },
+      { label: "Reciprocal Communication", detail: "Turn-taking initiated once in 4:32 min session. Response latency avg 6.2s.", severity: "moderate" },
+      { label: "Repetitive Movement", detail: "Hand-flapping pattern detected 3 instances. Duration avg 8s per episode.", severity: "moderate" },
+    ],
+    recommendation: "Referral to developmental pediatrician recommended. ADOS-2 assessment suggested. Immediate enrollment in joint attention intervention program.",
+  },
+  {
+    child: "Lucas Dela Cruz",
+    task: "Social Play Simulation",
+    duration: "6:15",
+    status: "Pending Review",
+    features: "Impulsive interaction patterns, brief peer engagement, attention shifts",
+    aiFindings: [
+      { label: "Attention Duration", detail: "Mean attention span 42s on structured tasks. Unstructured play: 18s. ADHD-range indicator.", severity: "high" },
+      { label: "Impulse Control", detail: "Grabbed peer toy 5 times without social cue. Waiting behavior absent in turn-taking.", severity: "moderate" },
+      { label: "Peer Engagement", detail: "Parallel play predominant. Interactive play episodes: 2 in 6 min. Brief but positive.", severity: "moderate" },
+      { label: "Emotional Regulation", detail: "1 dysregulation episode when toy removed. Recovery time: 2m 10s.", severity: "low" },
+    ],
+    recommendation: "ADHD behavioral screen recommended. Parent-Child Interaction Therapy (PCIT) referral. Classroom accommodation letter advised.",
+  },
+  {
+    child: "Miguel Santos",
+    task: "Communication Prompts",
+    duration: "3:48",
+    status: "Reviewed",
+    features: "Speech presence detected, 2-word utterances, improved response latency",
+    aiFindings: [
+      { label: "Speech Presence", detail: "Vocalizations detected in 78% of prompted intervals. Clear improvement vs. baseline (34%).", severity: "low" },
+      { label: "Utterance Complexity", detail: "2-word combinations achieved in 4 of 7 prompts. First 3-word utterance milestone recorded at 3:12.", severity: "low" },
+      { label: "Response Latency", detail: "Avg 2.1s response latency (improved from 4.8s at intake). Within age-appropriate range.", severity: "low" },
+      { label: "Intelligibility", detail: "Intelligibility rated 72% by AI phoneme model. Target: 85% by next review.", severity: "moderate" },
+    ],
+    recommendation: "Continue current speech therapy plan. Increase home practice to 3x/week. Re-assess in 30 days. Positive trajectory confirmed.",
+  },
+];
+
 function VideoReviewTab() {
+  const [selected, setSelected] = useState<VideoSession | null>(null);
+
   return (
     <div className="p-6 lg:p-8 space-y-5">
       <div>
@@ -183,9 +241,9 @@ function VideoReviewTab() {
       </div>
       <div className="grid sm:grid-cols-3 gap-4">
         {[
-          { title: "Pending Review", count: 3, color: "bg-orange-100 border-orange-200 text-orange-800" },
+          { title: "Pending Review", count: VIDEO_SESSIONS.filter(v => v.status === "Pending Review").length, color: "bg-orange-100 border-orange-200 text-orange-800" },
           { title: "Under Analysis", count: 1, color: "bg-blue-100 border-blue-200 text-blue-800" },
-          { title: "Reviewed", count: 12, color: "bg-green-100 border-green-200 text-green-800" },
+          { title: "Reviewed", count: VIDEO_SESSIONS.filter(v => v.status === "Reviewed").length, color: "bg-green-100 border-green-200 text-green-800" },
         ].map(s => (
           <div key={s.title} className={`rounded-xl border p-5 ${s.color}`} data-testid={`video-stat-${s.title.toLowerCase().replace(/ /g, "-")}`}>
             <p className="text-3xl font-bold">{s.count}</p>
@@ -193,43 +251,105 @@ function VideoReviewTab() {
           </div>
         ))}
       </div>
-      {[
-        { child: "Isabella Tan", task: "Joint Attention Test", duration: "4:32", status: "Pending Review", features: "Gaze tracking anomalies, limited reciprocal communication, repetitive movement" },
-        { child: "Lucas Dela Cruz", task: "Social Play Simulation", duration: "6:15", status: "Pending Review", features: "Impulsive interaction patterns, brief peer engagement, attention shifts" },
-        { child: "Miguel Santos", task: "Communication Prompts", duration: "3:48", status: "Reviewed", features: "Speech presence detected, 2-word utterances, improved response latency" },
-      ].map((v, i) => (
-        <Card key={i} data-testid={`video-session-${i}`}>
-          <CardContent className="p-5 flex items-center gap-4">
-            <div className="flex h-16 w-24 items-center justify-center rounded-xl bg-primary/10 shrink-0">
-              <Video className="h-6 w-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold">{v.child}</p>
-              <p className="text-xs text-muted-foreground">{v.task} · {v.duration}</p>
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-1">AI Extracted: {v.features}</p>
-            </div>
-            <div className="shrink-0 text-right">
-              <Badge className={v.status === "Reviewed" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"}>
-                {v.status}
-              </Badge>
-              <div className="mt-2">
-                <Button size="sm" variant="outline" className="rounded-full text-xs" data-testid={`button-review-video-${i}`}>
-                  Review
-                </Button>
+      <div className="space-y-3">
+        {VIDEO_SESSIONS.map((v, i) => (
+          <Card key={i} data-testid={`video-session-${i}`}>
+            <CardContent className="p-5 flex items-center gap-4">
+              <div className="flex h-16 w-24 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+                <Video className="h-6 w-6 text-primary" />
               </div>
+              <div className="flex-1">
+                <p className="font-semibold">{v.child}</p>
+                <p className="text-xs text-muted-foreground">{v.task} · {v.duration}</p>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-1">AI Extracted: {v.features}</p>
+              </div>
+              <div className="shrink-0 text-right">
+                <Badge className={v.status === "Reviewed" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"}>
+                  {v.status}
+                </Badge>
+                <div className="mt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full text-xs"
+                    data-testid={`button-review-video-${i}`}
+                    onClick={() => setSelected(v)}
+                  >
+                    Review
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Video className="h-5 w-5 text-primary" />
+              AI Video Analysis — {selected?.child}
+            </DialogTitle>
+            <p className="text-xs text-muted-foreground mt-1">{selected?.task} · {selected?.duration}</p>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="rounded-xl border bg-amber-50 border-amber-200 p-3 flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-800">AI analysis is a clinical decision-support tool only. All findings must be interpreted by a licensed clinician.</p>
             </div>
-          </CardContent>
-        </Card>
-      ))}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold">AI-Detected Findings</h3>
+              {selected?.aiFindings.map((f, i) => (
+                <div key={i} className="rounded-xl border bg-card p-4 space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-sm">{f.label}</span>
+                    <Badge className={`text-xs capitalize ${
+                      f.severity === "high" ? "bg-red-100 text-red-800" :
+                      f.severity === "moderate" ? "bg-orange-100 text-orange-800" :
+                      "bg-green-100 text-green-800"
+                    }`}>{f.severity} severity</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{f.detail}</p>
+                </div>
+              ))}
+            </div>
+            <div className="rounded-xl border bg-secondary/10 border-secondary/30 p-4">
+              <p className="text-xs font-semibold mb-1.5">Clinical Recommendation (AI-Generated)</p>
+              <p className="text-sm text-foreground/80 leading-relaxed">{selected?.recommendation}</p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" className="rounded-full" onClick={() => setSelected(null)}>Close</Button>
+            <Button className="rounded-full" onClick={() => setSelected(null)}>
+              <CheckCircle2 className="h-4 w-4 mr-1.5" /> Mark as Reviewed
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
+type TelehealthAppt = {
+  id: number;
+  childName: string | null;
+  scheduledAt: string;
+  durationMinutes: number | null;
+  notes: string | null;
+  meetingUrl: string | null;
+  specialistName: string;
+};
 
 function ConsultationRoomTab() {
   const { data: appointments } = useListAppointments({ status: "scheduled" }, {
     query: { queryKey: ["appointments-scheduled"] }
   });
-  const scheduled = (appointments ?? []).filter(a => a.telehealth);
+  const scheduled = (appointments ?? []).filter(a => a.telehealth) as TelehealthAppt[];
+  const [joinAppt, setJoinAppt] = useState<TelehealthAppt | null>(null);
+  const [micOn, setMicOn] = useState(true);
+  const [camOn, setCamOn] = useState(true);
+  const [inCall, setInCall] = useState(false);
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
@@ -241,6 +361,7 @@ function ConsultationRoomTab() {
         <div className="rounded-xl border border-dashed p-10 text-center text-muted-foreground" data-testid="no-telehealth">
           <Video className="h-10 w-10 mx-auto mb-3 opacity-40" />
           <p>No telehealth sessions currently scheduled</p>
+          <p className="text-xs mt-1">Telehealth appointments will appear here when booked</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -255,16 +376,114 @@ function ConsultationRoomTab() {
                   <p className="text-xs text-muted-foreground">{new Date(a.scheduledAt).toLocaleString()} · {a.durationMinutes} min</p>
                   {a.notes && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{a.notes}</p>}
                 </div>
-                {a.meetingUrl && (
-                  <Button size="sm" className="rounded-full gap-1.5" data-testid={`button-join-${a.id}`}>
-                    <Video className="h-3.5 w-3.5" /> Join
-                  </Button>
-                )}
+                <Button
+                  size="sm"
+                  className="rounded-full gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00]"
+                  data-testid={`button-join-${a.id}`}
+                  onClick={() => { setJoinAppt(a); setInCall(false); setMicOn(true); setCamOn(true); }}
+                >
+                  <Video className="h-3.5 w-3.5" /> Join
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      <Dialog open={!!joinAppt} onOpenChange={() => setJoinAppt(null)}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Video className="h-5 w-5 text-blue-600" />
+              {inCall ? "In Session" : "Pre-Call Check"} — {joinAppt?.childName}
+            </DialogTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              NEOBRAIN Telehealth · {joinAppt?.durationMinutes} min session
+            </p>
+          </DialogHeader>
+          {!inCall ? (
+            <div className="space-y-4 py-2">
+              <div className="rounded-xl bg-muted/50 border aspect-video flex items-center justify-center">
+                <div className="text-center space-y-2">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mx-auto">
+                    <Video className="h-8 w-8 text-primary" />
+                  </div>
+                  <p className="text-sm font-medium">Camera Preview</p>
+                  <p className="text-xs text-muted-foreground">Your video will appear here</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => setMicOn(m => !m)}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-colors ${micOn ? "border-primary bg-primary/10 text-primary" : "border-red-300 bg-red-50 text-red-600"}`}
+                  data-testid="button-toggle-mic"
+                >
+                  {micOn ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+                </button>
+                <button
+                  onClick={() => setCamOn(c => !c)}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-colors ${camOn ? "border-primary bg-primary/10 text-primary" : "border-red-300 bg-red-50 text-red-600"}`}
+                  data-testid="button-toggle-cam"
+                >
+                  {camOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
+                </button>
+              </div>
+              <div className="rounded-xl border bg-card p-4 space-y-1.5">
+                <p className="text-sm font-semibold">Session Details</p>
+                <p className="text-xs text-muted-foreground">Patient: <span className="text-foreground font-medium">{joinAppt?.childName}</span></p>
+                <p className="text-xs text-muted-foreground">Clinician: <span className="text-foreground font-medium">{joinAppt?.specialistName}</span></p>
+                <p className="text-xs text-muted-foreground">Duration: <span className="text-foreground font-medium">{joinAppt?.durationMinutes} minutes</span></p>
+                <p className="text-xs text-muted-foreground">Scheduled: <span className="text-foreground font-medium">{joinAppt && new Date(joinAppt.scheduledAt).toLocaleString()}</span></p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 py-2">
+              <div className="rounded-xl bg-[#163300] aspect-video flex items-center justify-center relative">
+                <div className="text-center text-white space-y-2">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 mx-auto">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <p className="font-semibold">{joinAppt?.childName}</p>
+                  <p className="text-xs text-white/70">Connected · Session in progress</p>
+                </div>
+                <div className="absolute bottom-3 right-3 rounded-lg bg-white/10 border border-white/20 p-2 text-xs text-white font-mono">
+                  00:00
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-4">
+                <button onClick={() => setMicOn(m => !m)} className={`flex h-11 w-11 items-center justify-center rounded-full border-2 transition-colors ${micOn ? "border-border bg-card" : "border-red-300 bg-red-50 text-red-600"}`}>
+                  {micOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+                </button>
+                <button onClick={() => setCamOn(c => !c)} className={`flex h-11 w-11 items-center justify-center rounded-full border-2 transition-colors ${camOn ? "border-border bg-card" : "border-red-300 bg-red-50 text-red-600"}`}>
+                  {camOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
+                </button>
+                <button className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-border bg-card">
+                  <MonitorUp className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setJoinAppt(null)}
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-red-600 text-white hover:bg-red-700"
+                  data-testid="button-end-call"
+                >
+                  <PhoneOff className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" className="rounded-full" onClick={() => setJoinAppt(null)}>Cancel</Button>
+            {!inCall && (
+              <Button
+                className="rounded-full bg-[#163300] text-white hover:bg-[#1e4a00] gap-1.5"
+                onClick={() => setInCall(true)}
+                data-testid="button-start-call"
+              >
+                <Video className="h-4 w-4" /> Start Session
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -273,7 +492,39 @@ function DiagnosisNotesTab() {
   const { data: children } = useListChildren({ query: { queryKey: ["children-diag"] } });
   const [selectedChild, setSelectedChild] = useState<string>("");
   const [note, setNote] = useState("");
-  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedNotes, setSavedNotes] = useState<Record<string, { name: string; note: string; savedAt: string }>>({});
+
+  const handleSave = async () => {
+    if (!selectedChild || !note.trim()) return;
+    setSaving(true);
+    await new Promise(r => setTimeout(r, 600));
+    const child = (children ?? []).find(c => String(c.id) === selectedChild);
+    setSavedNotes(prev => ({
+      ...prev,
+      [selectedChild]: { name: child?.fullName ?? "Unknown", note, savedAt: new Date().toLocaleString() }
+    }));
+    setSaving(false);
+    setNote("");
+  };
+
+  const existingNotes = [...(children ?? []).filter(c => c.diagnosisNotes).map(c => ({
+    id: String(c.id),
+    name: c.fullName,
+    note: c.diagnosisNotes ?? "",
+    riskLevel: c.riskLevel,
+    savedAt: null as string | null,
+  }))];
+
+  const sessionNotes = Object.entries(savedNotes).map(([id, s]) => ({
+    id,
+    name: s.name,
+    note: s.note,
+    riskLevel: (children ?? []).find(c => String(c.id) === id)?.riskLevel ?? "low",
+    savedAt: s.savedAt,
+  }));
+
+  const allNotes = [...sessionNotes, ...existingNotes.filter(n => !savedNotes[n.id])];
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
@@ -291,7 +542,7 @@ function DiagnosisNotesTab() {
         <CardContent className="p-5 space-y-4">
           <div className="space-y-1.5">
             <Label>Patient</Label>
-            <Select onValueChange={setSelectedChild}>
+            <Select onValueChange={v => { setSelectedChild(v); setNote(savedNotes[v]?.note ?? (children ?? []).find(c => String(c.id) === v)?.diagnosisNotes ?? ""); }}>
               <SelectTrigger data-testid="select-diagnosis-patient">
                 <SelectValue placeholder="Select patient" />
               </SelectTrigger>
@@ -306,32 +557,45 @@ function DiagnosisNotesTab() {
             <Label>Clinical Notes</Label>
             <Textarea
               value={note}
-              onChange={e => { setNote(e.target.value); setSaved(false); }}
+              onChange={e => setNote(e.target.value)}
               placeholder="Enter clinical observations, referral notes, or formal documentation here..."
               rows={6}
               data-testid="input-diagnosis-notes"
             />
           </div>
           <div className="flex items-center gap-3">
-            <Button className="rounded-full" onClick={() => setSaved(true)} data-testid="button-save-notes">
-              {saved ? "Saved" : "Save Notes"}
+            <Button
+              className="rounded-full"
+              onClick={handleSave}
+              disabled={saving || !selectedChild || !note.trim()}
+              data-testid="button-save-notes"
+            >
+              {saving ? "Saving..." : "Save Notes"}
             </Button>
-            {saved && <span className="text-xs text-green-700 font-medium">Notes saved successfully</span>}
+            {savedNotes[selectedChild] && (
+              <span className="text-xs text-green-700 font-medium flex items-center gap-1">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Saved at {savedNotes[selectedChild].savedAt}
+              </span>
+            )}
           </div>
         </CardContent>
       </Card>
       <div>
-        <h2 className="text-base font-semibold mb-3">Recent Notes</h2>
+        <h2 className="text-base font-semibold mb-3">Clinical Notes ({allNotes.length})</h2>
         <div className="space-y-3">
-          {(children ?? []).filter(c => c.diagnosisNotes).map(c => (
-            <div key={c.id} className="rounded-xl border bg-card px-5 py-4" data-testid={`existing-note-${c.id}`}>
+          {allNotes.map(n => (
+            <div key={n.id} className="rounded-xl border bg-card px-5 py-4" data-testid={`existing-note-${n.id}`}>
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-medium text-sm">{c.fullName}</span>
-                <Badge className={`text-xs capitalize ${RISK_COLORS[c.riskLevel]}`}>{c.riskLevel}</Badge>
+                <span className="font-medium text-sm">{n.name}</span>
+                <Badge className={`text-xs capitalize ${RISK_COLORS[n.riskLevel]}`}>{n.riskLevel}</Badge>
+                {n.savedAt && <span className="text-xs text-muted-foreground ml-auto">Saved {n.savedAt}</span>}
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{c.diagnosisNotes}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{n.note}</p>
             </div>
           ))}
+          {allNotes.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-6">No clinical notes yet. Select a patient and enter your notes above.</p>
+          )}
         </div>
       </div>
     </div>
