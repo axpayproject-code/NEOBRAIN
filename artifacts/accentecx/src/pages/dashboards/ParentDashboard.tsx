@@ -3,7 +3,7 @@ import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashb
 import {
   LayoutDashboard, Users, ClipboardList, Brain, Calendar,
   HeartPulse, FileText, Settings, Plus, ChevronRight,
-  AlertTriangle, CheckCircle, Clock, TrendingUp, Activity
+  AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,12 +27,17 @@ import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tool
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/contexts/AuthContext";
+import ScreeningWizard from "@/components/screening/ScreeningWizard";
+import ScreeningResultDisplay, { type ScreeningResult } from "@/components/screening/ScreeningResult";
+import VideoProtocol from "@/components/screening/VideoProtocol";
+import AppointmentScheduler from "@/components/appointments/AppointmentScheduler";
 
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "children", label: "My Children", icon: Users },
   { id: "screening", label: "Screenings", icon: ClipboardList },
   { id: "ai-results", label: "AI Results", icon: Brain },
+  { id: "video", label: "Video Assessment", icon: Video },
   { id: "appointments", label: "Appointments", icon: Calendar },
   { id: "therapy", label: "Therapy Tracking", icon: HeartPulse },
   { id: "reports", label: "Reports", icon: FileText },
@@ -270,6 +275,9 @@ function ChildrenTab() {
 }
 
 function ScreeningTab() {
+  const [mode, setMode] = useState<"list" | "wizard" | "result">("list");
+  const [result, setResult] = useState<ScreeningResult | null>(null);
+  const [scheduleAfter, setScheduleAfter] = useState(false);
   const { data: screenings, isLoading } = useListScreenings({}, { query: { queryKey: ["screenings-list"] } });
 
   const TYPE_LABELS: Record<string, string> = {
@@ -286,49 +294,111 @@ function ScreeningTab() {
     reviewed: "bg-purple-100 text-purple-800",
   };
 
+  if (mode === "wizard") {
+    return (
+      <div className="p-6 lg:p-8">
+        <ScreeningWizard
+          onComplete={(r) => { setResult(r); setMode("result"); }}
+          onCancel={() => setMode("list")}
+        />
+      </div>
+    );
+  }
+
+  if (mode === "result" && result) {
+    if (scheduleAfter) {
+      return (
+        <div className="p-6 lg:p-8">
+          <AppointmentScheduler
+            onSuccess={() => { setScheduleAfter(false); setMode("list"); }}
+            onCancel={() => setScheduleAfter(false)}
+          />
+        </div>
+      );
+    }
+    return (
+      <div className="p-6 lg:p-8">
+        <ScreeningResultDisplay
+          result={result}
+          onNewScreening={() => { setResult(null); setMode("wizard"); }}
+          onScheduleAppointment={() => setScheduleAfter(true)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 lg:p-8 space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold">Screenings</h1>
-        <p className="text-sm text-muted-foreground">Developmental screening assessments across all domains</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Screenings</h1>
+          <p className="text-sm text-muted-foreground">Developmental screening assessments across all domains</p>
+        </div>
+        <Button
+          onClick={() => setMode("wizard")}
+          className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-2 shrink-0"
+          data-testid="start-screening-btn"
+        >
+          <Plus className="w-4 h-4" /> Start New Screening
+        </Button>
       </div>
-      <div className="rounded-xl border overflow-hidden">
-        <table className="w-full text-sm" data-testid="screenings-table">
-          <thead className="bg-muted/50">
-            <tr>
-              {["Child", "Type", "Status", "Risk Level", "Date", "Domains"].map(h => (
-                <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              Array(5).fill(0).map((_, i) => (
-                <tr key={i}><td colSpan={6} className="px-4 py-3"><Skeleton className="h-5 w-full" /></td></tr>
-              ))
-            ) : (screenings ?? []).map(s => (
-              <tr key={s.id} className="border-t hover:bg-muted/20 transition-colors" data-testid={`screening-row-${s.id}`}>
-                <td className="px-4 py-3 font-medium">{s.childName ?? "Unknown"}</td>
-                <td className="px-4 py-3 text-muted-foreground text-xs">{TYPE_LABELS[s.screeningType] ?? s.screeningType}</td>
-                <td className="px-4 py-3">
-                  <Badge className={`text-xs capitalize ${STATUS_COLORS[s.status] ?? ""}`}>{s.status}</Badge>
-                </td>
-                <td className="px-4 py-3">
-                  {s.riskLevel && <Badge className={`text-xs capitalize ${RISK_COLORS[s.riskLevel]}`}>{s.riskLevel}</Badge>}
-                </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(s.createdAt).toLocaleDateString()}</td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-1 flex-wrap">
-                    {s.communicationScore != null && <span className="text-xs bg-muted rounded px-1">C:{s.communicationScore}</span>}
-                    {s.socialScore != null && <span className="text-xs bg-muted rounded px-1">S:{s.socialScore}</span>}
-                    {s.attentionScore != null && <span className="text-xs bg-muted rounded px-1">A:{s.attentionScore}</span>}
-                  </div>
-                </td>
+
+      {(screenings ?? []).length === 0 && !isLoading && (
+        <Card className="border-dashed">
+          <CardContent className="pt-10 pb-10 text-center space-y-4">
+            <ClipboardList className="w-12 h-12 text-muted-foreground mx-auto" />
+            <div>
+              <p className="font-semibold text-lg">No screenings yet</p>
+              <p className="text-sm text-muted-foreground mt-1">Complete a developmental screening to get AI-assisted domain scores and clinical observations.</p>
+            </div>
+            <Button onClick={() => setMode("wizard")} className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-2">
+              <Brain className="w-4 h-4" /> Start Your First Screening
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {(isLoading || (screenings ?? []).length > 0) && (
+        <div className="rounded-xl border overflow-hidden">
+          <table className="w-full text-sm" data-testid="screenings-table">
+            <thead className="bg-muted/50">
+              <tr>
+                {["Child", "Type", "Status", "Risk Level", "Domain Scores", "Date"].map(h => (
+                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                Array(5).fill(0).map((_, i) => (
+                  <tr key={i}><td colSpan={6} className="px-4 py-3"><Skeleton className="h-5 w-full" /></td></tr>
+                ))
+              ) : (screenings ?? []).map(s => (
+                <tr key={s.id} className="border-t hover:bg-muted/20 transition-colors" data-testid={`screening-row-${s.id}`}>
+                  <td className="px-4 py-3 font-medium">{s.childName ?? "Unknown"}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">{TYPE_LABELS[s.screeningType] ?? s.screeningType}</td>
+                  <td className="px-4 py-3">
+                    <Badge className={`text-xs capitalize ${STATUS_COLORS[s.status] ?? ""}`}>{s.status}</Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    {s.riskLevel && <Badge className={`text-xs capitalize ${RISK_COLORS[s.riskLevel] ?? ""}`}>{s.riskLevel}</Badge>}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1 flex-wrap">
+                      {s.communicationScore != null && <span className="text-xs bg-blue-50 text-blue-700 rounded px-1.5 py-0.5">C:{s.communicationScore}</span>}
+                      {s.socialScore != null && <span className="text-xs bg-purple-50 text-purple-700 rounded px-1.5 py-0.5">S:{s.socialScore}</span>}
+                      {s.attentionScore != null && <span className="text-xs bg-yellow-50 text-yellow-700 rounded px-1.5 py-0.5">A:{s.attentionScore}</span>}
+                      {s.motorScore != null && <span className="text-xs bg-green-50 text-green-700 rounded px-1.5 py-0.5">M:{s.motorScore}</span>}
+                      {s.emotionalScore != null && <span className="text-xs bg-red-50 text-red-700 rounded px-1.5 py-0.5">E:{s.emotionalScore}</span>}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(s.createdAt).toLocaleDateString("en-PH")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
@@ -377,6 +447,7 @@ function AIResultsTab() {
 }
 
 function AppointmentsTab() {
+  const [scheduling, setScheduling] = useState(false);
   const { data: appointments, isLoading } = useListAppointments({}, { query: { queryKey: ["appointments-parent"] } });
 
   const STATUS_ICONS: Record<string, typeof CheckCircle> = {
@@ -395,38 +466,106 @@ function AppointmentsTab() {
     behavioral_therapist: "Behavioral Therapist",
   };
 
+  if (scheduling) {
+    return (
+      <div className="p-6 lg:p-8">
+        <AppointmentScheduler
+          onSuccess={() => setScheduling(false)}
+          onCancel={() => setScheduling(false)}
+        />
+      </div>
+    );
+  }
+
+  const upcoming = (appointments ?? []).filter(a => a.status === "scheduled" || a.status === "pending");
+  const past = (appointments ?? []).filter(a => a.status === "completed" || a.status === "cancelled");
+
   return (
     <div className="p-6 lg:p-8 space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold">Appointments</h1>
-        <p className="text-sm text-muted-foreground">Upcoming and past specialist consultations</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Appointments</h1>
+          <p className="text-sm text-muted-foreground">Upcoming and past specialist consultations</p>
+        </div>
+        <Button
+          onClick={() => setScheduling(true)}
+          className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-2 shrink-0"
+          data-testid="schedule-appointment-btn"
+        >
+          <Plus className="w-4 h-4" /> Schedule Appointment
+        </Button>
       </div>
-      <div className="space-y-3">
-        {isLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />) :
-          (appointments ?? []).map(appt => {
-            const StatusIcon = STATUS_ICONS[appt.status] ?? Clock;
-            return (
-              <div key={appt.id} className="rounded-xl border bg-card px-5 py-4 flex items-center gap-4" data-testid={`appointment-${appt.id}`}>
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/5 shrink-0">
-                  <StatusIcon className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm">{appt.specialistName}</p>
-                  <p className="text-xs text-muted-foreground">{SPECIALIST_LABELS[appt.specialistType] ?? appt.specialistType} · {appt.childName}</p>
-                  {appt.notes && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{appt.notes}</p>}
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-medium">{new Date(appt.scheduledAt).toLocaleDateString()}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(appt.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                  <div className="flex items-center gap-1.5 mt-1 justify-end">
-                    {appt.telehealth && <Badge className="text-xs bg-blue-100 text-blue-800">Telehealth</Badge>}
-                    <Badge className={`text-xs capitalize ${appt.status === "scheduled" ? "bg-green-100 text-green-800" : appt.status === "completed" ? "bg-muted text-muted-foreground" : "bg-red-100 text-red-800"}`}>{appt.status}</Badge>
+
+      {upcoming.length === 0 && past.length === 0 && !isLoading && (
+        <Card className="border-dashed">
+          <CardContent className="pt-10 pb-10 text-center space-y-4">
+            <Calendar className="w-12 h-12 text-muted-foreground mx-auto" />
+            <div>
+              <p className="font-semibold text-lg">No appointments scheduled</p>
+              <p className="text-sm text-muted-foreground mt-1">Book a telehealth or in-person consultation with a developmental specialist.</p>
+            </div>
+            <Button onClick={() => setScheduling(true)} className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-2">
+              <Plus className="w-4 h-4" /> Schedule First Appointment
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {upcoming.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Upcoming</h2>
+          {isLoading ? Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />) :
+            upcoming.map(appt => {
+              const StatusIcon = STATUS_ICONS[appt.status] ?? Clock;
+              return (
+                <div key={appt.id} className="rounded-xl border bg-card px-5 py-4 flex items-center gap-4" data-testid={`appointment-${appt.id}`}>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#163300]/5 shrink-0">
+                    <StatusIcon className="h-5 w-5 text-[#163300]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm">{appt.specialistName}</p>
+                    <p className="text-xs text-muted-foreground">{SPECIALIST_LABELS[appt.specialistType] ?? appt.specialistType} · {appt.childName}</p>
+                    {appt.notes && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{appt.notes}</p>}
+                  </div>
+                  <div className="text-right shrink-0 space-y-1">
+                    <p className="text-sm font-medium">{new Date(appt.scheduledAt).toLocaleDateString("en-PH", { dateStyle: "medium" })}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(appt.scheduledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                    <div className="flex items-center gap-1.5 justify-end">
+                      {appt.telehealth && <Badge className="text-xs bg-blue-100 text-blue-800">Telehealth</Badge>}
+                      <Badge className="text-xs bg-green-100 text-green-800 capitalize">{appt.status}</Badge>
+                    </div>
+                    {appt.telehealth && appt.meetingUrl && (
+                      <a href={appt.meetingUrl} target="_blank" rel="noreferrer">
+                        <Button size="sm" className="text-xs h-7 bg-[#163300] text-white hover:bg-[#1e4a00]">Join Call</Button>
+                      </a>
+                    )}
                   </div>
                 </div>
+              );
+            })}
+        </div>
+      )}
+
+      {past.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Past</h2>
+          {past.map(appt => (
+            <div key={appt.id} className="rounded-xl border bg-muted/20 px-5 py-4 flex items-center gap-4 opacity-75">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted shrink-0">
+                <CheckCircle className="h-5 w-5 text-muted-foreground" />
               </div>
-            );
-          })}
-      </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">{appt.specialistName}</p>
+                <p className="text-xs text-muted-foreground">{SPECIALIST_LABELS[appt.specialistType] ?? appt.specialistType} · {appt.childName}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-sm">{new Date(appt.scheduledAt).toLocaleDateString("en-PH", { dateStyle: "medium" })}</p>
+                <Badge className={`text-xs capitalize ${appt.status === "completed" ? "bg-muted text-muted-foreground" : "bg-red-100 text-red-800"}`}>{appt.status}</Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -563,12 +702,25 @@ function SettingsTab() {
   );
 }
 
+function VideoTab() {
+  return (
+    <div className="p-6 lg:p-8 space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold">Video Assessment</h1>
+        <p className="text-sm text-muted-foreground">Structured video protocols for AI-assisted behavioral observation</p>
+      </div>
+      <VideoProtocol />
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   overview: OverviewTab,
   children: ChildrenTab,
   screening: ScreeningTab,
   "ai-results": AIResultsTab,
+  video: VideoTab,
   appointments: AppointmentsTab,
   therapy: TherapyTab,
   reports: ReportsTab,
