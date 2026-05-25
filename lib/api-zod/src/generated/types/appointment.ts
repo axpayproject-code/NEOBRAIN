@@ -5,6 +5,7 @@
  * ACCENTECX AI CARE Platform API
  * OpenAPI spec version: 0.1.0
  */
+import type { AppointmentPaymentStatus } from './appointmentPaymentStatus';
 import type { AppointmentSpecialistType } from './appointmentSpecialistType';
 import type { AppointmentStatus } from './appointmentStatus';
 
@@ -23,5 +24,8 @@ export interface Appointment {
   meetingUrl?: string | null;
   /** @nullable */
   notes?: string | null;
+  paymentStatus: AppointmentPaymentStatus;
+  /** @nullable */
+  feeAmount?: number | null;
   createdAt: string;
 }

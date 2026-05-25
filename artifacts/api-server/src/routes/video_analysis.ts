@@ -113,6 +113,7 @@ riskLevel rules:
       return res.status(500).json({ error: "AI analysis failed. Please try again." });
     }
   }
+  return res.status(500).json({ error: "Max retries exceeded. Please try again." });
 });
 
 export default router;

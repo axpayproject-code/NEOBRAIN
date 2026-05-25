@@ -6,3 +6,7 @@ export * from "./reports";
 export * from "./timeline_events";
 export * from "./conversations";
 export * from "./messages";
+export * from "./practitioner_availability";
+export * from "./specialty_fees";
+export * from "./appointment_payments";
+export * from "./reschedule_requests";

@@ -7,6 +7,10 @@ import therapyPlansRouter from "./therapy_plans";
 import reportsRouter from "./reports";
 import dashboardRouter from "./dashboard";
 import videoAnalysisRouter from "./video_analysis";
+import availabilityRouter from "./availability";
+import specialtyFeesRouter from "./specialty_fees";
+import paymentsRouter from "./payments";
+import rescheduleRouter from "./reschedule";
 
 const router: IRouter = Router();
 
@@ -14,6 +18,10 @@ router.use(healthRouter);
 router.use(childrenRouter);
 router.use(screeningsRouter);
 router.use(appointmentsRouter);
+router.use(availabilityRouter);
+router.use(specialtyFeesRouter);
+router.use(paymentsRouter);
+router.use(rescheduleRouter);
 router.use(therapyPlansRouter);
 router.use(reportsRouter);
 router.use(dashboardRouter);

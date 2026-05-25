@@ -271,6 +271,8 @@ export const ListAppointmentsResponseItem = zod.object({
   "telehealth": zod.boolean().optional(),
   "meetingUrl": zod.string().nullish(),
   "notes": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'waived']),
+  "feeAmount": zod.number().nullish(),
   "createdAt": zod.string()
 })
 export const ListAppointmentsResponse = zod.array(ListAppointmentsResponseItem)
@@ -310,6 +312,8 @@ export const GetAppointmentResponse = zod.object({
   "telehealth": zod.boolean().optional(),
   "meetingUrl": zod.string().nullish(),
   "notes": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'waived']),
+  "feeAmount": zod.number().nullish(),
   "createdAt": zod.string()
 })
 
@@ -343,6 +347,230 @@ export const UpdateAppointmentResponse = zod.object({
   "telehealth": zod.boolean().optional(),
   "meetingUrl": zod.string().nullish(),
   "notes": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'waived']),
+  "feeAmount": zod.number().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List practitioner availability blocks
+ */
+export const ListAvailabilityQueryParams = zod.object({
+  "practitionerName": zod.coerce.string().optional(),
+  "specialistType": zod.coerce.string().optional()
+})
+
+export const ListAvailabilityResponseItem = zod.object({
+  "id": zod.number(),
+  "practitionerName": zod.string(),
+  "specialistType": zod.string().nullish(),
+  "dayOfWeek": zod.number().nullish().describe('0=Sunday, 1=Monday, …, 6=Saturday. Null if specificDate is set.'),
+  "specificDate": zod.string().nullish().describe('YYYY-MM-DD. Null if dayOfWeek is set.'),
+  "startTime": zod.string().describe('HH:MM'),
+  "endTime": zod.string().describe('HH:MM'),
+  "slotDurationMinutes": zod.number().optional(),
+  "isActive": zod.boolean().optional(),
+  "createdAt": zod.string()
+})
+export const ListAvailabilityResponse = zod.array(ListAvailabilityResponseItem)
+
+
+/**
+ * @summary Create a practitioner availability block
+ */
+export const CreateAvailabilityBody = zod.object({
+  "practitionerName": zod.string(),
+  "specialistType": zod.string().optional(),
+  "dayOfWeek": zod.number().optional(),
+  "specificDate": zod.string().optional(),
+  "startTime": zod.string(),
+  "endTime": zod.string(),
+  "slotDurationMinutes": zod.number().optional()
+})
+
+
+/**
+ * @summary Remove an availability block
+ */
+export const DeleteAvailabilityParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Get computed available time slots for a practitioner on a date
+ */
+export const GetAvailableSlotsQueryParams = zod.object({
+  "practitionerName": zod.coerce.string(),
+  "date": zod.coerce.string().describe('Date in YYYY-MM-DD format'),
+  "durationMinutes": zod.coerce.number().optional()
+})
+
+export const GetAvailableSlotsResponseItem = zod.object({
+  "time": zod.string().describe('HH:MM'),
+  "available": zod.boolean()
+})
+export const GetAvailableSlotsResponse = zod.array(GetAvailableSlotsResponseItem)
+
+
+/**
+ * @summary List all specialty fees
+ */
+export const ListSpecialtyFeesResponseItem = zod.object({
+  "specialistType": zod.string(),
+  "feeAmount": zod.number(),
+  "currency": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListSpecialtyFeesResponse = zod.array(ListSpecialtyFeesResponseItem)
+
+
+/**
+ * @summary Create or update fee for a specialist type (admin only)
+ */
+export const UpsertSpecialtyFeeParams = zod.object({
+  "specialistType": zod.coerce.string()
+})
+
+export const UpsertSpecialtyFeeBody = zod.object({
+  "feeAmount": zod.number(),
+  "currency": zod.string().optional()
+})
+
+export const UpsertSpecialtyFeeResponse = zod.object({
+  "specialistType": zod.string(),
+  "feeAmount": zod.number(),
+  "currency": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Process payment for an appointment (simulated)
+ */
+export const PayAppointmentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PayAppointmentBody = zod.object({
+  "amount": zod.number(),
+  "currency": zod.string().optional(),
+  "transactionRef": zod.string().optional()
+})
+
+export const PayAppointmentResponse = zod.object({
+  "id": zod.number(),
+  "appointmentId": zod.number(),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "status": zod.enum(['pending', 'paid', 'failed', 'refunded']),
+  "transactionRef": zod.string().nullish(),
+  "paidAt": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Get payment record for an appointment
+ */
+export const GetAppointmentPaymentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetAppointmentPaymentResponse = zod.object({
+  "id": zod.number(),
+  "appointmentId": zod.number(),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "status": zod.enum(['pending', 'paid', 'failed', 'refunded']),
+  "transactionRef": zod.string().nullish(),
+  "paidAt": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Practitioner sets the meeting URL for a telehealth appointment
+ */
+export const SetMeetingUrlParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const SetMeetingUrlBody = zod.object({
+  "meetingUrl": zod.string()
+})
+
+export const SetMeetingUrlResponse = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "childName": zod.string().nullish(),
+  "specialistName": zod.string(),
+  "specialistType": zod.enum(['developmental_pediatrician', 'psychologist', 'psychiatrist', 'speech_therapist', 'occupational_therapist', 'behavioral_therapist']),
+  "scheduledAt": zod.string(),
+  "durationMinutes": zod.number().optional(),
+  "status": zod.enum(['scheduled', 'completed', 'cancelled', 'pending']),
+  "telehealth": zod.boolean().optional(),
+  "meetingUrl": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'waived']),
+  "feeAmount": zod.number().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Get the latest reschedule request for an appointment
+ */
+export const GetRescheduleRequestParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetRescheduleRequestResponse = zod.object({
+  "id": zod.number(),
+  "appointmentId": zod.number(),
+  "requestedByRole": zod.enum(['parent', 'practitioner']),
+  "proposedAt": zod.string(),
+  "reason": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "respondedAt": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Request to reschedule an appointment
+ */
+export const RequestRescheduleParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const RequestRescheduleBody = zod.object({
+  "requestedByRole": zod.enum(['parent', 'practitioner']),
+  "proposedAt": zod.string(),
+  "reason": zod.string().optional()
+})
+
+
+/**
+ * @summary Approve or reject a reschedule request
+ */
+export const RespondToRescheduleParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const RespondToRescheduleBody = zod.object({
+  "status": zod.enum(['approved', 'rejected'])
+})
+
+export const RespondToRescheduleResponse = zod.object({
+  "id": zod.number(),
+  "appointmentId": zod.number(),
+  "requestedByRole": zod.enum(['parent', 'practitioner']),
+  "proposedAt": zod.string(),
+  "reason": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "respondedAt": zod.string().nullish(),
   "createdAt": zod.string()
 })
 

@@ -222,6 +222,147 @@ export interface ScreeningInput {
   clinicalSummary?: string;
 }
 
+export interface Availability {
+  id: number;
+  practitionerName: string;
+  /** @nullable */
+  specialistType?: string | null;
+  /**
+     * 0=Sunday, 1=Monday, …, 6=Saturday. Null if specificDate is set.
+     * @nullable
+     */
+  dayOfWeek?: number | null;
+  /**
+     * YYYY-MM-DD. Null if dayOfWeek is set.
+     * @nullable
+     */
+  specificDate?: string | null;
+  /** HH:MM */
+  startTime: string;
+  /** HH:MM */
+  endTime: string;
+  slotDurationMinutes?: number;
+  isActive?: boolean;
+  createdAt: string;
+}
+
+export interface AvailabilityInput {
+  practitionerName: string;
+  specialistType?: string;
+  dayOfWeek?: number;
+  specificDate?: string;
+  startTime: string;
+  endTime: string;
+  slotDurationMinutes?: number;
+}
+
+export interface TimeSlot {
+  /** HH:MM */
+  time: string;
+  available: boolean;
+}
+
+export interface SpecialtyFee {
+  specialistType: string;
+  feeAmount: number;
+  currency: string;
+  updatedAt: string;
+}
+
+export interface SpecialtyFeeInput {
+  feeAmount: number;
+  currency?: string;
+}
+
+export type PaymentStatus = typeof PaymentStatus[keyof typeof PaymentStatus];
+
+
+export const PaymentStatus = {
+  pending: 'pending',
+  paid: 'paid',
+  failed: 'failed',
+  refunded: 'refunded',
+} as const;
+
+export interface Payment {
+  id: number;
+  appointmentId: number;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  /** @nullable */
+  transactionRef?: string | null;
+  /** @nullable */
+  paidAt?: string | null;
+  createdAt: string;
+}
+
+export interface PaymentInput {
+  amount: number;
+  currency?: string;
+  transactionRef?: string;
+}
+
+export interface MeetingUrlInput {
+  meetingUrl: string;
+}
+
+export type RescheduleRequestRequestedByRole = typeof RescheduleRequestRequestedByRole[keyof typeof RescheduleRequestRequestedByRole];
+
+
+export const RescheduleRequestRequestedByRole = {
+  parent: 'parent',
+  practitioner: 'practitioner',
+} as const;
+
+export type RescheduleRequestStatus = typeof RescheduleRequestStatus[keyof typeof RescheduleRequestStatus];
+
+
+export const RescheduleRequestStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface RescheduleRequest {
+  id: number;
+  appointmentId: number;
+  requestedByRole: RescheduleRequestRequestedByRole;
+  proposedAt: string;
+  /** @nullable */
+  reason?: string | null;
+  status: RescheduleRequestStatus;
+  /** @nullable */
+  respondedAt?: string | null;
+  createdAt: string;
+}
+
+export type RescheduleInputRequestedByRole = typeof RescheduleInputRequestedByRole[keyof typeof RescheduleInputRequestedByRole];
+
+
+export const RescheduleInputRequestedByRole = {
+  parent: 'parent',
+  practitioner: 'practitioner',
+} as const;
+
+export interface RescheduleInput {
+  requestedByRole: RescheduleInputRequestedByRole;
+  proposedAt: string;
+  reason?: string;
+}
+
+export type RescheduleResponseStatus = typeof RescheduleResponseStatus[keyof typeof RescheduleResponseStatus];
+
+
+export const RescheduleResponseStatus = {
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface RescheduleResponse {
+  status: RescheduleResponseStatus;
+}
+
 export type AppointmentSpecialistType = typeof AppointmentSpecialistType[keyof typeof AppointmentSpecialistType];
 
 
@@ -244,6 +385,15 @@ export const AppointmentStatus = {
   pending: 'pending',
 } as const;
 
+export type AppointmentPaymentStatus = typeof AppointmentPaymentStatus[keyof typeof AppointmentPaymentStatus];
+
+
+export const AppointmentPaymentStatus = {
+  unpaid: 'unpaid',
+  paid: 'paid',
+  waived: 'waived',
+} as const;
+
 export interface Appointment {
   id: number;
   childId: number;
@@ -259,6 +409,9 @@ export interface Appointment {
   meetingUrl?: string | null;
   /** @nullable */
   notes?: string | null;
+  paymentStatus: AppointmentPaymentStatus;
+  /** @nullable */
+  feeAmount?: number | null;
   createdAt: string;
 }
 
@@ -538,6 +691,20 @@ export const ListAppointmentsStatus = {
   cancelled: 'cancelled',
   pending: 'pending',
 } as const;
+
+export type ListAvailabilityParams = {
+practitionerName?: string;
+specialistType?: string;
+};
+
+export type GetAvailableSlotsParams = {
+practitionerName: string;
+/**
+ * Date in YYYY-MM-DD format
+ */
+date: string;
+durationMinutes?: number;
+};
 
 export type ListTherapyPlansParams = {
 childId?: number;

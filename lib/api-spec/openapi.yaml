@@ -18,6 +18,12 @@ tags:
     description: Developmental screening assessments
   - name: appointments
     description: Telehealth and therapy appointments
+  - name: availability
+    description: Practitioner availability slots
+  - name: fees
+    description: Specialty fee configuration
+  - name: payments
+    description: Appointment payments
   - name: therapyPlans
     description: Therapy plans and sessions
   - name: users
@@ -337,6 +343,277 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Appointment"
+
+  # ─── Availability ────────────────────────────────────────────────────────────
+  /availability:
+    get:
+      operationId: listAvailability
+      tags: [availability]
+      summary: List practitioner availability blocks
+      parameters:
+        - name: practitionerName
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: specialistType
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of availability blocks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Availability"
+    post:
+      operationId: createAvailability
+      tags: [availability]
+      summary: Create a practitioner availability block
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AvailabilityInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Availability"
+
+  /availability/{id}:
+    delete:
+      operationId: deleteAvailability
+      tags: [availability]
+      summary: Remove an availability block
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /availability/slots:
+    get:
+      operationId: getAvailableSlots
+      tags: [availability]
+      summary: Get computed available time slots for a practitioner on a date
+      parameters:
+        - name: practitionerName
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Date in YYYY-MM-DD format
+        - name: durationMinutes
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Available time slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimeSlot"
+
+  # ─── Specialty Fees ───────────────────────────────────────────────────────────
+  /specialty-fees:
+    get:
+      operationId: listSpecialtyFees
+      tags: [fees]
+      summary: List all specialty fees
+      responses:
+        "200":
+          description: List of specialty fees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SpecialtyFee"
+
+  /specialty-fees/{specialistType}:
+    put:
+      operationId: upsertSpecialtyFee
+      tags: [fees]
+      summary: Create or update fee for a specialist type (admin only)
+      parameters:
+        - name: specialistType
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpecialtyFeeInput"
+      responses:
+        "200":
+          description: Updated fee
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpecialtyFee"
+
+  # ─── Appointment — payment, meeting URL, reschedule ───────────────────────────
+  /appointments/{id}/pay:
+    post:
+      operationId: payAppointment
+      tags: [payments]
+      summary: Process payment for an appointment (simulated)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentInput"
+      responses:
+        "200":
+          description: Payment record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+
+  /appointments/{id}/payment:
+    get:
+      operationId: getAppointmentPayment
+      tags: [payments]
+      summary: Get payment record for an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Payment record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "404":
+          description: No payment found
+
+  /appointments/{id}/meeting-url:
+    patch:
+      operationId: setMeetingUrl
+      tags: [appointments]
+      summary: Practitioner sets the meeting URL for a telehealth appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeetingUrlInput"
+      responses:
+        "200":
+          description: Updated appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /appointments/{id}/reschedule:
+    get:
+      operationId: getRescheduleRequest
+      tags: [appointments]
+      summary: Get the latest reschedule request for an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reschedule request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RescheduleRequest"
+        "404":
+          description: No reschedule request found
+    post:
+      operationId: requestReschedule
+      tags: [appointments]
+      summary: Request to reschedule an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RescheduleInput"
+      responses:
+        "201":
+          description: Reschedule request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RescheduleRequest"
+    patch:
+      operationId: respondToReschedule
+      tags: [appointments]
+      summary: Approve or reject a reschedule request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RescheduleResponse"
+      responses:
+        "200":
+          description: Updated reschedule request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RescheduleRequest"
 
   # ─── Therapy Plans ───────────────────────────────────────────────────────────
   /therapy-plans:
@@ -698,10 +975,178 @@ components:
         clinicalSummary:
           type: string
 
+    # ─── Availability ────────────────────────────────────────────────────────
+    Availability:
+      type: object
+      required: [id, practitionerName, startTime, endTime, createdAt]
+      properties:
+        id:
+          type: integer
+        practitionerName:
+          type: string
+        specialistType:
+          type: ["string", "null"]
+        dayOfWeek:
+          type: ["integer", "null"]
+          description: "0=Sunday, 1=Monday, …, 6=Saturday. Null if specificDate is set."
+        specificDate:
+          type: ["string", "null"]
+          description: "YYYY-MM-DD. Null if dayOfWeek is set."
+        startTime:
+          type: string
+          description: "HH:MM"
+        endTime:
+          type: string
+          description: "HH:MM"
+        slotDurationMinutes:
+          type: integer
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+
+    AvailabilityInput:
+      type: object
+      required: [practitionerName, startTime, endTime]
+      properties:
+        practitionerName:
+          type: string
+        specialistType:
+          type: string
+        dayOfWeek:
+          type: integer
+        specificDate:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: string
+        slotDurationMinutes:
+          type: integer
+
+    TimeSlot:
+      type: object
+      required: [time, available]
+      properties:
+        time:
+          type: string
+          description: "HH:MM"
+        available:
+          type: boolean
+
+    # ─── Specialty Fees ───────────────────────────────────────────────────────
+    SpecialtyFee:
+      type: object
+      required: [specialistType, feeAmount, currency, updatedAt]
+      properties:
+        specialistType:
+          type: string
+        feeAmount:
+          type: number
+        currency:
+          type: string
+        updatedAt:
+          type: string
+
+    SpecialtyFeeInput:
+      type: object
+      required: [feeAmount]
+      properties:
+        feeAmount:
+          type: number
+        currency:
+          type: string
+
+    # ─── Payment ─────────────────────────────────────────────────────────────
+    Payment:
+      type: object
+      required: [id, appointmentId, amount, currency, status, createdAt]
+      properties:
+        id:
+          type: integer
+        appointmentId:
+          type: integer
+        amount:
+          type: number
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [pending, paid, failed, refunded]
+        transactionRef:
+          type: ["string", "null"]
+        paidAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    PaymentInput:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+        transactionRef:
+          type: string
+
+    # ─── Meeting URL ──────────────────────────────────────────────────────────
+    MeetingUrlInput:
+      type: object
+      required: [meetingUrl]
+      properties:
+        meetingUrl:
+          type: string
+
+    # ─── Reschedule ───────────────────────────────────────────────────────────
+    RescheduleRequest:
+      type: object
+      required: [id, appointmentId, requestedByRole, proposedAt, status, createdAt]
+      properties:
+        id:
+          type: integer
+        appointmentId:
+          type: integer
+        requestedByRole:
+          type: string
+          enum: [parent, practitioner]
+        proposedAt:
+          type: string
+        reason:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        respondedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    RescheduleInput:
+      type: object
+      required: [requestedByRole, proposedAt]
+      properties:
+        requestedByRole:
+          type: string
+          enum: [parent, practitioner]
+        proposedAt:
+          type: string
+        reason:
+          type: string
+
+    RescheduleResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected]
+
     # ─── Appointment ─────────────────────────────────────────────────────────
     Appointment:
       type: object
-      required: [id, childId, specialistName, specialistType, scheduledAt, status, createdAt]
+      required: [id, childId, specialistName, specialistType, scheduledAt, status, paymentStatus, createdAt]
       properties:
         id:
           type: integer
@@ -727,6 +1172,11 @@ components:
           type: ["string", "null"]
         notes:
           type: ["string", "null"]
+        paymentStatus:
+          type: string
+          enum: [unpaid, paid, waived]
+        feeAmount:
+          type: ["number", "null"]
         createdAt:
           type: string
 
