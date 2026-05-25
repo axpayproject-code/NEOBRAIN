@@ -2,9 +2,9 @@ import { useState } from "react";
 import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashboardLayout";
 import {
   Users, ClipboardList, Video, Stethoscope, FileText,
-  HeartPulse, History, LayoutDashboard, AlertTriangle, Clock,
-  Mic, MicOff, VideoOff, PhoneOff, MonitorUp, CheckCircle2
+  HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2
 } from "lucide-react";
+import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -331,25 +331,12 @@ function VideoReviewTab() {
   );
 }
 
-type TelehealthAppt = {
-  id: number;
-  childName: string | null;
-  scheduledAt: string;
-  durationMinutes: number | null;
-  notes: string | null;
-  meetingUrl: string | null;
-  specialistName: string;
-};
-
 function ConsultationRoomTab() {
   const { data: appointments } = useListAppointments({ status: "scheduled" }, {
     query: { queryKey: ["appointments-scheduled"] }
   });
   const scheduled = (appointments ?? []).filter(a => a.telehealth) as TelehealthAppt[];
   const [joinAppt, setJoinAppt] = useState<TelehealthAppt | null>(null);
-  const [micOn, setMicOn] = useState(true);
-  const [camOn, setCamOn] = useState(true);
-  const [inCall, setInCall] = useState(false);
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
@@ -373,14 +360,16 @@ function ConsultationRoomTab() {
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold">{a.childName}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(a.scheduledAt).toLocaleString()} · {a.durationMinutes} min</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(a.scheduledAt).toLocaleString("en-PH", { dateStyle: "medium", timeStyle: "short" })} · {a.durationMinutes} min
+                  </p>
                   {a.notes && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{a.notes}</p>}
                 </div>
                 <Button
                   size="sm"
                   className="rounded-full gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00]"
                   data-testid={`button-join-${a.id}`}
-                  onClick={() => { setJoinAppt(a); setInCall(false); setMicOn(true); setCamOn(true); }}
+                  onClick={() => setJoinAppt(a)}
                 >
                   <Video className="h-3.5 w-3.5" /> Join
                 </Button>
@@ -390,100 +379,11 @@ function ConsultationRoomTab() {
         </div>
       )}
 
-      <Dialog open={!!joinAppt} onOpenChange={() => setJoinAppt(null)}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Video className="h-5 w-5 text-blue-600" />
-              {inCall ? "In Session" : "Pre-Call Check"} — {joinAppt?.childName}
-            </DialogTitle>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              NEOBRAIN Telehealth · {joinAppt?.durationMinutes} min session
-            </p>
-          </DialogHeader>
-          {!inCall ? (
-            <div className="space-y-4 py-2">
-              <div className="rounded-xl bg-muted/50 border aspect-video flex items-center justify-center">
-                <div className="text-center space-y-2">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mx-auto">
-                    <Video className="h-8 w-8 text-primary" />
-                  </div>
-                  <p className="text-sm font-medium">Camera Preview</p>
-                  <p className="text-xs text-muted-foreground">Your video will appear here</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  onClick={() => setMicOn(m => !m)}
-                  className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-colors ${micOn ? "border-primary bg-primary/10 text-primary" : "border-red-300 bg-red-50 text-red-600"}`}
-                  data-testid="button-toggle-mic"
-                >
-                  {micOn ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
-                </button>
-                <button
-                  onClick={() => setCamOn(c => !c)}
-                  className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-colors ${camOn ? "border-primary bg-primary/10 text-primary" : "border-red-300 bg-red-50 text-red-600"}`}
-                  data-testid="button-toggle-cam"
-                >
-                  {camOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
-                </button>
-              </div>
-              <div className="rounded-xl border bg-card p-4 space-y-1.5">
-                <p className="text-sm font-semibold">Session Details</p>
-                <p className="text-xs text-muted-foreground">Patient: <span className="text-foreground font-medium">{joinAppt?.childName}</span></p>
-                <p className="text-xs text-muted-foreground">Clinician: <span className="text-foreground font-medium">{joinAppt?.specialistName}</span></p>
-                <p className="text-xs text-muted-foreground">Duration: <span className="text-foreground font-medium">{joinAppt?.durationMinutes} minutes</span></p>
-                <p className="text-xs text-muted-foreground">Scheduled: <span className="text-foreground font-medium">{joinAppt && new Date(joinAppt.scheduledAt).toLocaleString()}</span></p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4 py-2">
-              <div className="rounded-xl bg-[#163300] aspect-video flex items-center justify-center relative">
-                <div className="text-center text-white space-y-2">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 mx-auto">
-                    <Users className="h-8 w-8 text-white" />
-                  </div>
-                  <p className="font-semibold">{joinAppt?.childName}</p>
-                  <p className="text-xs text-white/70">Connected · Session in progress</p>
-                </div>
-                <div className="absolute bottom-3 right-3 rounded-lg bg-white/10 border border-white/20 p-2 text-xs text-white font-mono">
-                  00:00
-                </div>
-              </div>
-              <div className="flex items-center justify-center gap-4">
-                <button onClick={() => setMicOn(m => !m)} className={`flex h-11 w-11 items-center justify-center rounded-full border-2 transition-colors ${micOn ? "border-border bg-card" : "border-red-300 bg-red-50 text-red-600"}`}>
-                  {micOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
-                </button>
-                <button onClick={() => setCamOn(c => !c)} className={`flex h-11 w-11 items-center justify-center rounded-full border-2 transition-colors ${camOn ? "border-border bg-card" : "border-red-300 bg-red-50 text-red-600"}`}>
-                  {camOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
-                </button>
-                <button className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-border bg-card">
-                  <MonitorUp className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setJoinAppt(null)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-red-600 text-white hover:bg-red-700"
-                  data-testid="button-end-call"
-                >
-                  <PhoneOff className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          )}
-          <DialogFooter className="gap-2">
-            <Button variant="outline" className="rounded-full" onClick={() => setJoinAppt(null)}>Cancel</Button>
-            {!inCall && (
-              <Button
-                className="rounded-full bg-[#163300] text-white hover:bg-[#1e4a00] gap-1.5"
-                onClick={() => setInCall(true)}
-                data-testid="button-start-call"
-              >
-                <Video className="h-4 w-4" /> Start Session
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TelehealthCallModal
+        appt={joinAppt}
+        onClose={() => setJoinAppt(null)}
+        selfLabel="Dr. You"
+      />
     </div>
   );
 }

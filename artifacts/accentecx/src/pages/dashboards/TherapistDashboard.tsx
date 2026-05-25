@@ -3,8 +3,9 @@ import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashb
 import {
   Users, HeartPulse, ClipboardList, TrendingUp,
   BookOpen, MessageSquare, LayoutDashboard, CheckCircle,
-  Clock, AlertTriangle, Plus
+  Clock, AlertTriangle, Plus, Video
 } from "lucide-react";
+import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ const NAV: NavItem[] = [
   { id: "children", label: "Assigned Children", icon: Users },
   { id: "plans", label: "Therapy Plans", icon: HeartPulse },
   { id: "sessions", label: "Session Logs", icon: ClipboardList },
+  { id: "telehealth", label: "Telehealth", icon: Video },
   { id: "progress", label: "Progress Tracking", icon: TrendingUp },
   { id: "homework", label: "Homework & Exercises", icon: BookOpen },
   { id: "communication", label: "Parent Communication", icon: MessageSquare },
@@ -603,12 +605,87 @@ function CommunicationTab() {
   );
 }
 
+function TelehealthTab() {
+  const { data: appointments, isLoading } = useListAppointments(
+    { status: "scheduled" },
+    { query: { queryKey: ["appointments-therapist-telehealth"] } }
+  );
+  const [joinAppt, setJoinAppt] = useState<TelehealthAppt | null>(null);
+  const telehealth = (appointments ?? []).filter(a => a.telehealth) as TelehealthAppt[];
+
+  return (
+    <div className="p-6 lg:p-8 space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold">Telehealth Sessions</h1>
+        <p className="text-sm text-muted-foreground">Join your scheduled telehealth therapy sessions</p>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3">{Array(3).fill(0).map((_, i) => <div key={i} className="h-24 rounded-xl bg-muted/50 animate-pulse" />)}</div>
+      ) : telehealth.length === 0 ? (
+        <div className="rounded-xl border border-dashed p-12 text-center space-y-3" data-testid="no-telehealth">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted mx-auto">
+            <Video className="h-7 w-7 text-muted-foreground" />
+          </div>
+          <div>
+            <p className="font-semibold">No telehealth sessions scheduled</p>
+            <p className="text-xs text-muted-foreground mt-1">Sessions booked as telehealth will appear here for you to join</p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {telehealth.map(appt => (
+            <div key={appt.id} className="rounded-xl border bg-card px-5 py-4 flex items-center gap-4" data-testid={`telehealth-${appt.id}`}>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 shrink-0">
+                <Video className="h-6 w-6 text-blue-700" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">{appt.childName}</p>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(appt.scheduledAt).toLocaleString("en-PH", { dateStyle: "medium", timeStyle: "short" })}
+                  {appt.durationMinutes ? ` · ${appt.durationMinutes} min` : ""}
+                </p>
+                {appt.specialistType && (
+                  <p className="text-xs text-muted-foreground capitalize mt-0.5">
+                    {appt.specialistType.replace(/_/g, " ")}
+                  </p>
+                )}
+                {appt.notes && <p className="text-xs text-muted-foreground mt-1 line-clamp-1 italic">{appt.notes}</p>}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 rounded-full bg-blue-100 text-blue-800 px-2.5 py-0.5 text-xs font-medium">
+                  <Video className="h-3 w-3" /> Telehealth
+                </div>
+                <Button
+                  size="sm"
+                  className="rounded-full gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00]"
+                  data-testid={`button-join-${appt.id}`}
+                  onClick={() => setJoinAppt(appt)}
+                >
+                  <Video className="h-3.5 w-3.5" /> Join Session
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <TelehealthCallModal
+        appt={joinAppt}
+        onClose={() => setJoinAppt(null)}
+        selfLabel="Therapist"
+      />
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   overview: OverviewTab,
   children: AssignedChildrenTab,
   plans: TherapyPlansTab,
   sessions: SessionLogsTab,
+  telehealth: TelehealthTab,
   progress: ProgressTrackingTab,
   homework: HomeworkTab,
   communication: CommunicationTab,

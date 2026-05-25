@@ -5,6 +5,7 @@ import {
   HeartPulse, FileText, Settings, Plus, ChevronRight,
   AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play
 } from "lucide-react";
+import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -448,6 +449,7 @@ function AIResultsTab() {
 
 function AppointmentsTab() {
   const [scheduling, setScheduling] = useState(false);
+  const [joinAppt, setJoinAppt] = useState<TelehealthAppt | null>(null);
   const { data: appointments, isLoading } = useListAppointments({}, { query: { queryKey: ["appointments-parent"] } });
 
   const STATUS_ICONS: Record<string, typeof CheckCircle> = {
@@ -534,10 +536,15 @@ function AppointmentsTab() {
                       {appt.telehealth && <Badge className="text-xs bg-blue-100 text-blue-800">Telehealth</Badge>}
                       <Badge className="text-xs bg-green-100 text-green-800 capitalize">{appt.status}</Badge>
                     </div>
-                    {appt.telehealth && appt.meetingUrl && (
-                      <a href={appt.meetingUrl} target="_blank" rel="noreferrer">
-                        <Button size="sm" className="text-xs h-7 bg-[#163300] text-white hover:bg-[#1e4a00]">Join Call</Button>
-                      </a>
+                    {appt.telehealth && (
+                      <Button
+                        size="sm"
+                        className="text-xs h-7 bg-[#163300] text-white hover:bg-[#1e4a00] gap-1"
+                        data-testid={`button-join-${appt.id}`}
+                        onClick={() => setJoinAppt(appt as TelehealthAppt)}
+                      >
+                        <Video className="h-3 w-3" /> Join Call
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -566,6 +573,13 @@ function AppointmentsTab() {
           ))}
         </div>
       )}
+
+      <TelehealthCallModal
+        appt={joinAppt}
+        onClose={() => setJoinAppt(null)}
+        remoteLabel={joinAppt?.specialistName ?? undefined}
+        selfLabel="You"
+      />
     </div>
   );
 }
