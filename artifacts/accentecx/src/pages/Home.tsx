@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ContactSalesModal, { type SalesAudience } from "@/components/sales/ContactSalesModal";
+import LandingLiveDemo from "@/components/landing/LandingLiveDemo";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -669,6 +670,7 @@ export default function Home() {
           <a href="#systems" className="hover:text-foreground transition-colors">Systems</a>
           <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
           <a href="#ai" className="hover:text-foreground transition-colors">AI Engine</a>
+          <a href="#live-demo" className="hover:text-foreground transition-colors font-semibold text-[#163300]">Live Demo</a>
           <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
         </nav>
         <div className="ml-auto flex items-center gap-3">
@@ -956,6 +958,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* ── LIVE DEMO ───────────────────────────────────────────────────── */}
+        <LandingLiveDemo />
 
         {/* ── PRICING ─────────────────────────────────────────────────────── */}
         <PricingSection />

@@ -225,9 +225,12 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Lock className="h-3.5 w-3.5" />
-            Payments are simulated — no real charges will be made
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 flex items-start gap-2 text-xs text-amber-800">
+            <Lock className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            <span>
+              <strong>Demo mode:</strong> Payments are simulated — no real charges will be made.
+              Ready for <strong>PayMongo</strong> or <strong>Stripe</strong> gateway integration.
+            </span>
           </div>
 
           {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">{error}</p>}
