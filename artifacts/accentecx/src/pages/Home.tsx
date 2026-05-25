@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -208,6 +209,370 @@ const DOMAINS = [
   { name: "Motor Skills", score: 85, color: "bg-secondary" },
   { name: "Emotional Regulation", score: 59, color: "bg-chart-5" }
 ];
+
+const PRICING_TABS = [
+  { id: "families", label: "For Families", icon: Users },
+  { id: "clinics", label: "For Clinics", icon: Stethoscope },
+  { id: "schools", label: "For Schools", icon: GraduationCap },
+  { id: "government", label: "For Government", icon: Globe },
+] as const;
+
+type PricingTab = (typeof PRICING_TABS)[number]["id"];
+
+function PricingSection() {
+  const [activeTab, setActiveTab] = useState<PricingTab>("families");
+
+  return (
+    <section id="pricing" className="py-24 px-6 md:px-12">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <p className="text-secondary font-semibold text-sm uppercase tracking-wider mb-3">Pricing</p>
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-5">
+            Every family. Every clinic. Every school.
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            Transparent pricing tailored for each role — select your audience below.
+          </p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="flex justify-center mb-12">
+          <div className="inline-flex items-center gap-1 rounded-full bg-muted border border-border p-1.5">
+            {PRICING_TABS.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                data-testid={`pricing-tab-${id}`}
+                className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                  activeTab === id
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/60"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── FAMILIES TAB ─────────────────────────────────────────────── */}
+        {activeTab === "families" && (
+          <div className="space-y-10">
+            <div className="grid md:grid-cols-3 gap-6">
+              {B2C_TIERS.map((tier, i) => (
+                <motion.div
+                  key={tier.name}
+                  variants={fadeUp} initial="hidden" animate="visible"
+                  custom={i * 0.12}
+                  className={`relative rounded-2xl border p-7 flex flex-col gap-5 ${
+                    tier.highlight
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card border-border"
+                  }`}
+                  data-testid={`card-pricing-b2c-${i + 1}`}
+                >
+                  {tier.badge && (
+                    <div className={`absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-4 py-1 text-xs font-bold ${
+                      tier.highlight ? "bg-secondary text-secondary-foreground" : "bg-primary text-primary-foreground"
+                    }`}>
+                      {tier.badge}
+                    </div>
+                  )}
+                  <div>
+                    <div className={`text-sm font-semibold mb-1 ${tier.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{tier.name}</div>
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-4xl font-bold ${tier.highlight ? "text-primary-foreground" : "text-foreground"}`}>{tier.price}</span>
+                      <span className={`text-sm ${tier.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{tier.period}</span>
+                    </div>
+                    <div className={`text-sm mt-1 ${tier.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{tier.tagline}</div>
+                  </div>
+                  <ul className="space-y-2.5 flex-1">
+                    {tier.features.map(f => (
+                      <li key={f} className="flex items-center gap-2 text-sm">
+                        <Check className="h-4 w-4 shrink-0 text-secondary" />
+                        <span className={tier.highlight ? "text-primary-foreground" : "text-foreground"}>{f}</span>
+                      </li>
+                    ))}
+                    {tier.excluded.map(f => (
+                      <li key={f} className="flex items-center gap-2 text-sm opacity-35">
+                        <X className="h-4 w-4 shrink-0" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/login">
+                    <Button
+                      className={`w-full rounded-full ${tier.highlight ? "bg-secondary text-secondary-foreground hover:bg-secondary/90" : ""}`}
+                      variant={tier.highlight ? "default" : "outline"}
+                      data-testid={`button-pricing-b2c-${i + 1}`}
+                    >
+                      Get Started
+                    </Button>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Usage-Based Add-Ons — shown under Families */}
+            <div className="rounded-2xl border border-border bg-muted/30 p-8">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15 shrink-0">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-foreground">Usage-Based Add-Ons</h3>
+                  <p className="text-sm text-muted-foreground">Pay-per-use fees applied on top of any subscription plan for AI-intensive features.</p>
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-3 gap-4">
+                {USAGE_FEES.map(fee => (
+                  <div key={fee.feature} className="rounded-xl bg-background border border-border p-5" data-testid={`card-usage-fee-${fee.feature.toLowerCase().replace(/ /g, "-")}`}>
+                    <div className="text-xl font-bold text-foreground mb-1">{fee.cost}</div>
+                    <div className="text-sm font-semibold text-foreground mb-1">{fee.feature}</div>
+                    <div className="text-xs text-muted-foreground">{fee.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── CLINICS TAB ──────────────────────────────────────────────── */}
+        {activeTab === "clinics" && (
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" className="space-y-8">
+            <div className="grid lg:grid-cols-2 gap-8 items-start">
+              {/* Main plan card */}
+              <div className="rounded-2xl border border-border bg-card p-8 flex flex-col gap-6" data-testid="card-pricing-b2b-1">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/15">
+                    <Stethoscope className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground font-medium">Clinic SaaS</p>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-bold text-foreground">₱4,999 – ₱19,999</span>
+                      <span className="text-sm text-muted-foreground">/month</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-muted-foreground">For clinics and multi-doctor practices. Pricing scales with number of providers and clinic size.</p>
+                <ul className="space-y-3">
+                  {[
+                    "Multi-doctor system with role access controls",
+                    "AI clinical intake dashboard",
+                    "Patient queue management with risk triage",
+                    "Video review tools with AI behavioral flags",
+                    "Clinic-level analytics and reporting",
+                    "Integrated telehealth (unlimited sessions)",
+                    "Parent portal integration",
+                    "EHR export support",
+                  ].map(f => (
+                    <li key={f} className="flex items-center gap-3 text-sm">
+                      <Check className="h-4 w-4 text-secondary shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full rounded-full bg-primary text-primary-foreground" data-testid="button-pricing-b2b-1">
+                  Contact Sales
+                </Button>
+              </div>
+
+              {/* Right column: tiers breakdown + usage */}
+              <div className="space-y-5">
+                <div className="rounded-xl border bg-muted/30 p-6">
+                  <p className="text-sm font-semibold text-foreground mb-4">Clinic Size Tiers</p>
+                  <div className="space-y-3">
+                    {[
+                      { size: "Solo Practice", docs: "1 doctor", price: "₱4,999/mo" },
+                      { size: "Small Clinic", docs: "2–5 doctors", price: "₱9,999/mo" },
+                      { size: "Multi-Doctor Center", docs: "6–15 doctors", price: "₱14,999/mo" },
+                      { size: "Hospital / Large Network", docs: "15+ doctors", price: "₱19,999+/mo" },
+                    ].map(t => (
+                      <div key={t.size} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
+                        <div>
+                          <p className="font-medium text-foreground">{t.size}</p>
+                          <p className="text-xs text-muted-foreground">{t.docs}</p>
+                        </div>
+                        <span className="font-semibold text-primary">{t.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/30 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Clinic Usage-Based Add-Ons</p>
+                  </div>
+                  <div className="space-y-2">
+                    {USAGE_FEES.map(fee => (
+                      <div key={fee.feature} className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{fee.feature}</span>
+                        <span className="font-semibold">{fee.cost}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── SCHOOLS TAB ──────────────────────────────────────────────── */}
+        {activeTab === "schools" && (
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" className="space-y-8">
+            <div className="grid lg:grid-cols-2 gap-8 items-start">
+              <div className="rounded-2xl border border-border bg-card p-8 flex flex-col gap-6" data-testid="card-pricing-b2b-2">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/15">
+                    <GraduationCap className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground font-medium">School Licensing</p>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-bold text-foreground">₱10 – ₱50</span>
+                      <span className="text-sm text-muted-foreground">/student/year</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-muted-foreground">For schools and SPED programs. Volume pricing available for large school networks.</p>
+                <ul className="space-y-3">
+                  {[
+                    "Student developmental screening system",
+                    "Teacher behavioral observation forms",
+                    "SPED tracking and IEP alignment",
+                    "Referral engine with specialist routing",
+                    "Parent-school coordination portal",
+                    "Aggregate school analytics dashboard",
+                    "Multi-grade and multi-campus support",
+                    "DOH / DepEd report templates",
+                  ].map(f => (
+                    <li key={f} className="flex items-center gap-3 text-sm">
+                      <Check className="h-4 w-4 text-secondary shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full rounded-full bg-primary text-primary-foreground" data-testid="button-pricing-b2b-2">
+                  Contact Sales
+                </Button>
+              </div>
+
+              <div className="space-y-5">
+                <div className="rounded-xl border bg-muted/30 p-6">
+                  <p className="text-sm font-semibold text-foreground mb-4">Student Volume Tiers</p>
+                  <div className="space-y-3">
+                    {[
+                      { range: "Up to 200 students", price: "₱50/student/yr", note: "Small schools" },
+                      { range: "201 – 500 students", price: "₱35/student/yr", note: "Medium schools" },
+                      { range: "501 – 2,000 students", price: "₱20/student/yr", note: "Large schools" },
+                      { range: "2,000+ students / networks", price: "₱10/student/yr", note: "School networks" },
+                    ].map(t => (
+                      <div key={t.range} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
+                        <div>
+                          <p className="font-medium text-foreground">{t.range}</p>
+                          <p className="text-xs text-muted-foreground">{t.note}</p>
+                        </div>
+                        <span className="font-semibold text-primary">{t.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-[#163300]/20 bg-[#163300]/5 p-5">
+                  <p className="text-sm font-semibold text-[#163300] mb-2">Includes for all schools</p>
+                  <ul className="space-y-1.5 text-sm text-[#163300]/80">
+                    {["Free teacher onboarding training", "Dedicated school success manager", "DepEd-aligned report formats", "Data privacy DPA compliance tools"].map(f => (
+                      <li key={f} className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-secondary shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── GOVERNMENT TAB ───────────────────────────────────────────── */}
+        {activeTab === "government" && (
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" className="space-y-8">
+            <div className="grid lg:grid-cols-2 gap-8 items-start">
+              <div className="rounded-2xl border border-border bg-card p-8 flex flex-col gap-6" data-testid="card-pricing-b2b-3">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/15">
+                    <Globe className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground font-medium">Government / LGU</p>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-bold text-foreground">Custom</span>
+                      <span className="text-sm text-muted-foreground">pricing</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-muted-foreground">For DOH, LGUs, PhilHealth, research institutions, and DSWD programs. Contract-based with regional implementation support.</p>
+                <ul className="space-y-3">
+                  {[
+                    "Regional or province-wide deployment",
+                    "Anonymized population health analytics",
+                    "Early intervention forecasting models",
+                    "Healthcare resource mapping by barangay",
+                    "Research data access (with consent framework)",
+                    "Dedicated implementation and training team",
+                    "DOH and PhilHealth reporting integration",
+                    "Multi-province / national rollout support",
+                  ].map(f => (
+                    <li key={f} className="flex items-center gap-3 text-sm">
+                      <Check className="h-4 w-4 text-secondary shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full rounded-full bg-primary text-primary-foreground" data-testid="button-pricing-b2b-gov">
+                  Contact Government Sales
+                </Button>
+              </div>
+
+              <div className="space-y-5">
+                <div className="rounded-2xl border border-primary/20 bg-primary text-primary-foreground p-6">
+                  <p className="text-sm font-semibold text-primary-foreground/70 mb-3">Why Government & LGU?</p>
+                  <p className="text-primary-foreground/90 text-sm leading-relaxed mb-4">
+                    The Philippines has over 1 million children with undiagnosed developmental conditions. ACCENTECX AI CARE gives local government units the infrastructure to identify, triage, and refer children in their communities — even in low-connectivity areas.
+                  </p>
+                  <ul className="space-y-2">
+                    {[
+                      "Barangay-level health worker screening tools",
+                      "Offline-capable data collection",
+                      "Province-level risk dashboards for PHO",
+                      "Direct integration with RHU workflows",
+                    ].map(f => (
+                      <li key={f} className="flex items-center gap-2 text-sm text-primary-foreground/90">
+                        <Check className="h-4 w-4 text-secondary shrink-0" />{f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-xl border bg-muted/30 p-5">
+                  <p className="text-sm font-semibold mb-3">Typical Government Engagement</p>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { phase: "Discovery & Scoping", duration: "2–4 weeks" },
+                      { phase: "Pilot Deployment", duration: "1–3 months" },
+                      { phase: "Full Rollout", duration: "3–12 months" },
+                      { phase: "Ongoing Support & Analytics", duration: "Continuous" },
+                    ].map(p => (
+                      <div key={p.phase} className="flex justify-between py-1.5 border-b last:border-0">
+                        <span className="text-muted-foreground">{p.phase}</span>
+                        <span className="font-medium">{p.duration}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   return (
@@ -511,149 +876,7 @@ export default function Home() {
         </section>
 
         {/* ── PRICING ─────────────────────────────────────────────────────── */}
-        <section id="pricing" className="py-24 px-6 md:px-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-2xl mx-auto mb-14">
-              <p className="text-secondary font-semibold text-sm uppercase tracking-wider mb-3">Pricing</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-5">
-                Every family. Every clinic. Every school.
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Transparent pricing across all roles — from individual families to national government programs.
-              </p>
-            </div>
-
-            {/* B2C */}
-            <div className="mb-3">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-px flex-1 bg-border" />
-                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-3">Consumer Plans (Families)</span>
-                <div className="h-px flex-1 bg-border" />
-              </div>
-              <div className="grid md:grid-cols-3 gap-6">
-                {B2C_TIERS.map((tier, i) => (
-                  <motion.div
-                    key={tier.name}
-                    variants={fadeUp} initial="hidden" whileInView="visible"
-                    viewport={{ once: true }} custom={i * 0.4}
-                    className={`relative rounded-2xl border p-7 flex flex-col gap-5 ${
-                      tier.highlight
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card border-border"
-                    }`}
-                    data-testid={`card-pricing-b2c-${i + 1}`}
-                  >
-                    {tier.badge && (
-                      <div className={`absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-4 py-1 text-xs font-bold ${
-                        tier.highlight ? "bg-secondary text-secondary-foreground" : "bg-primary text-primary-foreground"
-                      }`}>
-                        {tier.badge}
-                      </div>
-                    )}
-                    <div>
-                      <div className={`text-sm font-semibold mb-1 ${tier.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{tier.name}</div>
-                      <div className="flex items-baseline gap-1">
-                        <span className={`text-4xl font-bold ${tier.highlight ? "text-primary-foreground" : "text-foreground"}`}>{tier.price}</span>
-                        <span className={`text-sm ${tier.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{tier.period}</span>
-                      </div>
-                      <div className={`text-sm mt-1 ${tier.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{tier.tagline}</div>
-                    </div>
-                    <ul className="space-y-2 flex-1">
-                      {tier.features.map(f => (
-                        <li key={f} className="flex items-center gap-2 text-sm">
-                          <Check className={`h-4 w-4 shrink-0 ${tier.highlight ? "text-secondary" : "text-secondary"}`} />
-                          <span className={tier.highlight ? "text-primary-foreground" : "text-foreground"}>{f}</span>
-                        </li>
-                      ))}
-                      {tier.excluded.map(f => (
-                        <li key={f} className="flex items-center gap-2 text-sm opacity-40">
-                          <X className="h-4 w-4 shrink-0" />
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link href="/login">
-                      <Button
-                        className={`w-full rounded-full ${tier.highlight ? "bg-secondary text-secondary-foreground hover:bg-secondary/90" : ""}`}
-                        variant={tier.highlight ? "default" : "outline"}
-                        data-testid={`button-pricing-b2c-${i + 1}`}
-                      >
-                        Get Started
-                      </Button>
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* B2B */}
-            <div className="mt-16">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-px flex-1 bg-border" />
-                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-3">Business Plans (Clinics, Schools, Government)</span>
-                <div className="h-px flex-1 bg-border" />
-              </div>
-              <div className="grid md:grid-cols-3 gap-6">
-                {B2B_TIERS.map((tier, i) => (
-                  <motion.div
-                    key={tier.name}
-                    variants={fadeUp} initial="hidden" whileInView="visible"
-                    viewport={{ once: true }} custom={i * 0.4}
-                    className="rounded-2xl border border-border bg-card p-7 flex flex-col gap-5"
-                    data-testid={`card-pricing-b2b-${i + 1}`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15 shrink-0">
-                        <tier.icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">{tier.name}</div>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-2xl font-bold text-foreground">{tier.price}</span>
-                          <span className="text-sm text-muted-foreground">{tier.period}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{tier.tagline}</p>
-                    <ul className="space-y-2 flex-1">
-                      {tier.features.map(f => (
-                        <li key={f} className="flex items-center gap-2 text-sm text-foreground">
-                          <Check className="h-4 w-4 text-secondary shrink-0" /> {f}
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="text-xs text-muted-foreground italic">{tier.note}</p>
-                    <Button variant="outline" className="w-full rounded-full" data-testid={`button-pricing-b2b-${i + 1}`}>
-                      Contact Sales
-                    </Button>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Usage-based pricing */}
-            <div className="mt-14 rounded-2xl border border-border bg-muted/30 p-8">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15 shrink-0">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-foreground">Usage-Based Add-Ons</h3>
-                  <p className="text-sm text-muted-foreground">Pay-per-use fees applied on top of any subscription plan for AI-intensive features.</p>
-                </div>
-              </div>
-              <div className="grid sm:grid-cols-3 gap-4">
-                {USAGE_FEES.map(fee => (
-                  <div key={fee.feature} className="rounded-xl bg-background border border-border p-5" data-testid={`card-usage-fee-${fee.feature.toLowerCase().replace(/ /g, "-")}`}>
-                    <div className="text-xl font-bold text-foreground mb-1">{fee.cost}</div>
-                    <div className="text-sm font-semibold text-foreground mb-1">{fee.feature}</div>
-                    <div className="text-xs text-muted-foreground">{fee.desc}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        <PricingSection />
 
         {/* ── SAFETY BLOCK ────────────────────────────────────────────────── */}
         <section className="bg-primary py-20 px-6 md:px-12">
