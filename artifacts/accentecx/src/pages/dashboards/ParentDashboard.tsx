@@ -21,7 +21,8 @@ import {
   useListChildren, useGetDashboardSummary, useGetDashboardActivity,
   useListAppointments, useListTherapyPlans, useListReports,
   useCreateChild, getListChildrenQueryKey, useListScreenings,
-  useGetChildDomainScores, useGetChildTimeline
+  useGetChildDomainScores, useGetChildTimeline,
+  useRequestReschedule, getListAppointmentsQueryKey
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from "recharts";

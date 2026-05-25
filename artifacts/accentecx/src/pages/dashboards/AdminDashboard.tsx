@@ -18,7 +18,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   useListChildren, useGetDashboardSummary, useGetRiskDistribution,
   useGetDashboardActivity, useListTherapyPlans, useListAppointments,
-  getListChildrenQueryKey, getGetDashboardSummaryQueryKey
+  getListChildrenQueryKey, getGetDashboardSummaryQueryKey,
+  useListSpecialtyFees, useUpsertSpecialtyFee, getListSpecialtyFeesQueryKey
 } from "@workspace/api-client-react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar,
@@ -31,6 +32,7 @@ const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "users", label: "User Management", icon: Users },
   { id: "subscriptions", label: "Subscriptions", icon: CreditCard },
+  { id: "fees", label: "Consultation Fees", icon: CreditCard },
   { id: "ai-monitoring", label: "AI Monitoring", icon: Brain },
   { id: "onboarding", label: "Clinic / School", icon: Building2 },
   { id: "analytics", label: "System Analytics", icon: BarChart3 },

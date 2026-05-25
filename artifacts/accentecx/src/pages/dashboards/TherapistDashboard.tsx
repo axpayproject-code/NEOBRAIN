@@ -3,7 +3,7 @@ import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashb
 import {
   Users, HeartPulse, ClipboardList, TrendingUp,
   BookOpen, MessageSquare, LayoutDashboard, CheckCircle,
-  Clock, AlertTriangle, Plus, Video
+  Clock, AlertTriangle, Plus, Video, CalendarDays, Link
 } from "lucide-react";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   useListChildren, useListTherapyPlans, useListAppointments,
-  useGetChildDomainScores, getListTherapyPlansQueryKey, useUpdateTherapyPlan
+  useGetChildDomainScores, getListTherapyPlansQueryKey, useUpdateTherapyPlan,
+  useSetMeetingUrl, getListAppointmentsQueryKey
 } from "@workspace/api-client-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { motion } from "framer-motion";
@@ -33,6 +34,7 @@ const NAV: NavItem[] = [
   { id: "progress", label: "Progress Tracking", icon: TrendingUp },
   { id: "homework", label: "Homework & Exercises", icon: BookOpen },
   { id: "communication", label: "Parent Communication", icon: MessageSquare },
+  { id: "availability", label: "My Availability", icon: CalendarDays },
 ];
 
 const THERAPY_COLORS: Record<string, string> = {
@@ -606,12 +608,28 @@ function CommunicationTab() {
 }
 
 function TelehealthTab() {
+  const qc = useQueryClient();
   const { data: appointments, isLoading } = useListAppointments(
     { status: "scheduled" },
-    { query: { queryKey: ["appointments-therapist-telehealth"] } }
+    { query: { queryKey: getListAppointmentsQueryKey({ status: "scheduled" }) } }
   );
   const [joinAppt, setJoinAppt] = useState<TelehealthAppt | null>(null);
+  const [meetingAppt, setMeetingAppt] = useState<TelehealthAppt | null>(null);
+  const [meetingUrl, setMeetingUrl] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const setMeetingUrlMutation = useSetMeetingUrl();
   const telehealth = (appointments ?? []).filter(a => a.telehealth) as TelehealthAppt[];
+
+  async function handleSetMeetingUrl() {
+    if (!meetingAppt || !meetingUrl.trim()) return;
+    setSaving(true);
+    await setMeetingUrlMutation.mutateAsync({ id: meetingAppt.id, data: { meetingUrl: meetingUrl.trim() } });
+    await qc.invalidateQueries({ queryKey: getListAppointmentsQueryKey({ status: "scheduled" }) });
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => { setSaved(false); setMeetingAppt(null); setMeetingUrl(""); }, 1500);
+  }
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
@@ -651,19 +669,34 @@ function TelehealthTab() {
                   </p>
                 )}
                 {appt.notes && <p className="text-xs text-muted-foreground mt-1 line-clamp-1 italic">{appt.notes}</p>}
+                {appt.meetingUrl && (
+                  <a href={appt.meetingUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline mt-0.5 block truncate max-w-xs">
+                    {appt.meetingUrl}
+                  </a>
+                )}
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
                 <div className="flex items-center gap-1 rounded-full bg-blue-100 text-blue-800 px-2.5 py-0.5 text-xs font-medium">
                   <Video className="h-3 w-3" /> Telehealth
                 </div>
-                <Button
-                  size="sm"
-                  className="rounded-full gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00]"
-                  data-testid={`button-join-${appt.id}`}
-                  onClick={() => setJoinAppt(appt)}
-                >
-                  <Video className="h-3.5 w-3.5" /> Join Session
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full gap-1 text-xs h-7"
+                    onClick={() => { setMeetingAppt(appt); setMeetingUrl(appt.meetingUrl ?? ""); }}
+                  >
+                    <Link className="h-3 w-3" /> {appt.meetingUrl ? "Update Link" : "Set Link"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="rounded-full gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00]"
+                    data-testid={`button-join-${appt.id}`}
+                    onClick={() => setJoinAppt(appt)}
+                  >
+                    <Video className="h-3.5 w-3.5" /> Join Session
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
@@ -675,6 +708,50 @@ function TelehealthTab() {
         onClose={() => setJoinAppt(null)}
         selfLabel="Therapist"
       />
+
+      <Dialog open={!!meetingAppt} onOpenChange={o => { if (!o) { setMeetingAppt(null); setMeetingUrl(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Link className="h-4 w-4" /> Set Meeting Link</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <p className="text-sm text-muted-foreground">
+              Paste your video call link for <strong>{meetingAppt?.childName}</strong>'s therapy session.
+            </p>
+            <div className="space-y-1">
+              <Label>Meeting URL</Label>
+              <Input
+                value={meetingUrl}
+                onChange={e => setMeetingUrl(e.target.value)}
+                placeholder="https://meet.google.com/xxx-yyyy-zzz"
+                type="url"
+              />
+            </div>
+            {saved && <p className="text-sm text-green-700 font-medium">✓ Meeting link saved!</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setMeetingAppt(null); setMeetingUrl(""); }}>Cancel</Button>
+            <Button
+              disabled={!meetingUrl.trim() || saving}
+              onClick={handleSetMeetingUrl}
+              className="bg-[#163300] text-white hover:bg-[#1e4a00]"
+            >
+              {saving ? "Saving…" : "Save Link"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function TherapistAvailabilityTab() {
+  const { user } = useAuth();
+  const practitionerName = user?.name ?? "Therapist";
+  const AvailabilityManager = require("@/components/appointments/AvailabilityManager").default;
+  return (
+    <div className="p-6 lg:p-8">
+      <AvailabilityManager practitionerName={practitionerName} specialistType="speech_therapist" />
     </div>
   );
 }
