@@ -52,15 +52,9 @@ const TIMELINE = [
     color: "border-[#163300]/40",
   },
   {
-    year: "2024",
-    title: "NEOBRAIN is founded",
-    desc: "ACCENTECX launches NEOBRAIN — AI-assisted infrastructure built specifically for the Philippine healthcare system. The mission: reach 10 million children by 2028, in all 17 regions, regardless of zip code or income.",
-    color: "border-[#9FE870]",
-  },
-  {
     year: "2026",
-    title: "Phase 2 — scaling nationally",
-    desc: "NEOBRAIN expands beyond Metro Manila into all 17 regions. Over 100,000 children are now actively tracked on the platform. 500+ licensed clinicians, 50 schools, and the first 5 LGU government partnerships are live. The DOH data-sharing pilot begins.",
+    title: "NEOBRAIN is founded — and scaling",
+    desc: "ACCENTECX AI launches NEOBRAIN — AI-assisted infrastructure built specifically for the Philippine healthcare system. In our founding year, we are already live in Metro Manila, Cebu, and Davao, with 500+ clinicians, 50 schools, and the first LGU partnerships underway. The DOH data-sharing pilot begins. The mission: 10 million children by 2028.",
     color: "border-[#9FE870]",
     highlight: true,
   },

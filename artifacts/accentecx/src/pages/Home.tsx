@@ -665,6 +665,7 @@ export default function Home() {
         <Link href="/" className="flex items-center gap-2 text-primary font-bold text-lg">
           <HeartPulse className="h-7 w-7 text-secondary" />
           <span className="tracking-tight" style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
+          <span className="text-xs font-normal text-muted-foreground hidden sm:inline ml-1">by ACCENTECX AI</span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 ml-10 text-sm text-muted-foreground">
           <a href="#systems" className="hover:text-foreground transition-colors">Systems</a>
@@ -1030,6 +1031,7 @@ export default function Home() {
               <div className="flex items-center gap-2 text-primary font-bold mb-3">
                 <HeartPulse className="h-6 w-6 text-secondary" />
                 <span style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
+                <span className="text-xs font-normal text-muted-foreground ml-1">by ACCENTECX AI</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
                 A national AI-assisted developmental healthcare infrastructure for the Philippines. Supporting families, clinicians, and schools with structured behavioral intelligence.
@@ -1071,7 +1073,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} ACCENTECX. All rights reserved. Built for the Philippines.</p>
+            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} NEOBRAIN by ACCENTECX AI. All rights reserved. Built for the Philippines.</p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Lock className="h-3.5 w-3.5" />
               <span>This platform does not diagnose. All AI outputs are for clinical decision support only.</span>
