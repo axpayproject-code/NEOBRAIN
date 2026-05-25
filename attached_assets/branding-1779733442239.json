@@ -1,0 +1,152 @@
+{
+  "colorScheme": "light",
+  "fonts": [
+    {
+      "family": "Syne",
+      "role": "heading"
+    },
+    {
+      "family": "Helvetica Neue",
+      "role": "body"
+    }
+  ],
+  "colors": {
+    "primary": "#163300",
+    "secondary": "#9FE870",
+    "accent": "#9FE870",
+    "background": "#FFFFFF",
+    "textPrimary": "#0F2200",
+    "link": "#0F2200"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Helvetica Neue",
+      "heading": "Syne"
+    },
+    "fontStacks": {
+      "heading": [
+        "Syne",
+        "Helvetica Neue",
+        "Helvetica",
+        "sans-serif"
+      ],
+      "body": [
+        "Syne",
+        "Helvetica Neue",
+        "Helvetica",
+        "sans-serif"
+      ],
+      "paragraph": [
+        "Syne",
+        "Helvetica Neue",
+        "Helvetica",
+        "sans-serif"
+      ]
+    },
+    "fontSizes": {
+      "h1": "36px",
+      "h2": "36px",
+      "body": "16px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 8,
+    "borderRadius": "0px"
+  },
+  "components": {
+    "input": {
+      "background": "transparent",
+      "textColor": "#193300",
+      "borderColor": null,
+      "borderRadius": "6px",
+      "borderRadiusCorners": {
+        "topLeft": "6px",
+        "topRight": "6px",
+        "bottomRight": "6px",
+        "bottomLeft": "6px"
+      },
+      "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+    },
+    "buttonPrimary": {
+      "background": "#9FE870",
+      "textColor": "#163300",
+      "borderColor": "#E5EBE0",
+      "borderRadius": "33554400px",
+      "borderRadiusCorners": {
+        "topLeft": "33554400px",
+        "topRight": "33554400px",
+        "bottomRight": "33554400px",
+        "bottomLeft": "33554400px"
+      },
+      "shadow": "none"
+    },
+    "buttonSecondary": {
+      "background": "#163300",
+      "textColor": "#FFFFFF",
+      "borderColor": "#FFFFFF",
+      "borderRadius": "33554400px",
+      "borderRadiusCorners": {
+        "topLeft": "33554400px",
+        "topRight": "33554400px",
+        "bottomRight": "33554400px",
+        "bottomLeft": "33554400px"
+      },
+      "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+    }
+  },
+  "images": {
+    "logo": "https://axpayremit.com/logo-cropped.png",
+    "favicon": "https://axpayremit.com/favicon.svg",
+    "ogImage": null,
+    "logoAlt": "AXPay Remit"
+  },
+  "__llm_logo_reasoning": {
+    "selectedIndex": 0,
+    "reasoning": "Selected #0 because it is visible, located in the header, and matches the brand name 'AXPay' with a source URL that includes 'logo'.",
+    "confidence": 0.9,
+    "source": "llm"
+  },
+  "__llm_button_reasoning": {
+    "primary": {
+      "index": 1,
+      "text": "Send money now",
+      "reasoning": "Button #1 'Send money now' is the primary CTA due to its vibrant green color (#9FE870) and action-oriented text, making it the most prominent call-to-action on the page."
+    },
+    "secondary": {
+      "index": 3,
+      "text": "Log in",
+      "reasoning": "Button #3 'Log in' is selected as the secondary button because it has a different background color (#163300) and serves a supportive function to the primary action."
+    },
+    "confidence": 0.95
+  },
+  "personality": {
+    "tone": "professional",
+    "energy": "medium",
+    "targetAudience": "Individuals sending money internationally"
+  },
+  "designSystem": {
+    "framework": "tailwind",
+    "componentLibrary": ""
+  },
+  "confidence": {
+    "buttons": 0.95,
+    "colors": 0.9,
+    "overall": 0.925
+  },
+  "__llm_metadata": {
+    "logoSelection": {
+      "llmCalled": true,
+      "llmSucceeded": true,
+      "finalSource": "llm",
+      "rawLogoSelection": {
+        "selectedLogoIndex": 0,
+        "selectedLogoReasoning": "Selected #0 because it is visible, located in the header, and matches the brand name 'AXPay' with a source URL that includes 'logo'.",
+        "confidence": 0.9
+      }
+    },
+    "buttonClassification": {
+      "llmCalled": true,
+      "llmSucceeded": true
+    }
+  }
+}

@@ -3,20 +3,34 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: ACCENTECX AI CARE Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: children
+    description: Child profiles and digital twins
+  - name: screenings
+    description: Developmental screening assessments
+  - name: appointments
+    description: Telehealth and therapy appointments
+  - name: therapyPlans
+    description: Therapy plans and sessions
+  - name: users
+    description: User management
+  - name: reports
+    description: AI-generated reports
+  - name: dashboard
+    description: Dashboard summary data
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +38,446 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Children ───────────────────────────────────────────────────────────────
+  /children:
+    get:
+      operationId: listChildren
+      tags: [children]
+      summary: List all child profiles for the current user
+      responses:
+        "200":
+          description: List of children
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Child"
+    post:
+      operationId: createChild
+      tags: [children]
+      summary: Create a new child profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChildInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+
+  /children/{id}:
+    get:
+      operationId: getChild
+      tags: [children]
+      summary: Get a child profile by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Child profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateChild
+      tags: [children]
+      summary: Update a child profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChildUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+    delete:
+      operationId: deleteChild
+      tags: [children]
+      summary: Delete a child profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /children/{id}/domain-scores:
+    get:
+      operationId: getChildDomainScores
+      tags: [children]
+      summary: Get the latest domain scores (communication, social, attention, motor, emotional) for a child
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Domain scores
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DomainScores"
+
+  /children/{id}/timeline:
+    get:
+      operationId: getChildTimeline
+      tags: [children]
+      summary: Get developmental event timeline for a child
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Timeline events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimelineEvent"
+
+  # ─── Screenings ─────────────────────────────────────────────────────────────
+  /screenings:
+    get:
+      operationId: listScreenings
+      tags: [screenings]
+      summary: List screenings (optionally filter by child)
+      parameters:
+        - name: childId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of screenings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Screening"
+    post:
+      operationId: createScreening
+      tags: [screenings]
+      summary: Submit a new developmental screening
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScreeningInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Screening"
+
+  /screenings/{id}:
+    get:
+      operationId: getScreening
+      tags: [screenings]
+      summary: Get a screening by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Screening detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Screening"
+
+  # ─── Appointments ────────────────────────────────────────────────────────────
+  /appointments:
+    get:
+      operationId: listAppointments
+      tags: [appointments]
+      summary: List appointments
+      parameters:
+        - name: childId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [scheduled, completed, cancelled, pending]
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+    post:
+      operationId: createAppointment
+      tags: [appointments]
+      summary: Schedule a new appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /appointments/{id}:
+    get:
+      operationId: getAppointment
+      tags: [appointments]
+      summary: Get an appointment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+    patch:
+      operationId: updateAppointment
+      tags: [appointments]
+      summary: Update appointment (reschedule, cancel, etc.)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  # ─── Therapy Plans ───────────────────────────────────────────────────────────
+  /therapy-plans:
+    get:
+      operationId: listTherapyPlans
+      tags: [therapyPlans]
+      summary: List therapy plans
+      parameters:
+        - name: childId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of therapy plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TherapyPlan"
+    post:
+      operationId: createTherapyPlan
+      tags: [therapyPlans]
+      summary: Create a therapy plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TherapyPlanInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TherapyPlan"
+
+  /therapy-plans/{id}:
+    get:
+      operationId: getTherapyPlan
+      tags: [therapyPlans]
+      summary: Get a therapy plan by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Therapy plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TherapyPlan"
+    patch:
+      operationId: updateTherapyPlan
+      tags: [therapyPlans]
+      summary: Update a therapy plan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TherapyPlanUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TherapyPlan"
+
+  # ─── Reports ─────────────────────────────────────────────────────────────────
+  /reports:
+    get:
+      operationId: listReports
+      tags: [reports]
+      summary: List AI-generated reports
+      parameters:
+        - name: childId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Report"
+
+  /reports/{id}:
+    get:
+      operationId: getReport
+      tags: [reports]
+      summary: Get a report by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Report detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+
+  # ─── Dashboard / Wow endpoints ───────────────────────────────────────────────
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get overall dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/activity:
+    get:
+      operationId: getDashboardActivity
+      tags: [dashboard]
+      summary: Get recent activity feed across all children
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /dashboard/risk-distribution:
+    get:
+      operationId: getRiskDistribution
+      tags: [dashboard]
+      summary: Get count of children by risk level
+      responses:
+        "200":
+          description: Risk level breakdown
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskDistribution"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +488,421 @@ components:
       required:
         - status
 
+    # ─── Child ────────────────────────────────────────────────────────────────
+    Child:
+      type: object
+      required: [id, fullName, dateOfBirth, gender, riskLevel, createdAt]
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        dateOfBirth:
+          type: string
+        gender:
+          type: string
+          enum: [male, female, other]
+        avatarUrl:
+          type: ["string", "null"]
+        parentName:
+          type: ["string", "null"]
+        parentEmail:
+          type: ["string", "null"]
+        parentPhone:
+          type: ["string", "null"]
+        schoolName:
+          type: ["string", "null"]
+        riskLevel:
+          type: string
+          enum: [low, moderate, high, critical]
+        diagnosisNotes:
+          type: ["string", "null"]
+        therapistId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: ["string", "null"]
+
+    ChildInput:
+      type: object
+      required: [fullName, dateOfBirth, gender]
+      properties:
+        fullName:
+          type: string
+        dateOfBirth:
+          type: string
+        gender:
+          type: string
+          enum: [male, female, other]
+        parentName:
+          type: string
+        parentEmail:
+          type: string
+        parentPhone:
+          type: string
+        schoolName:
+          type: string
+        diagnosisNotes:
+          type: string
+
+    ChildUpdate:
+      type: object
+      properties:
+        fullName:
+          type: string
+        dateOfBirth:
+          type: string
+        gender:
+          type: string
+          enum: [male, female, other]
+        parentName:
+          type: string
+        parentEmail:
+          type: string
+        parentPhone:
+          type: string
+        schoolName:
+          type: string
+        riskLevel:
+          type: string
+          enum: [low, moderate, high, critical]
+        diagnosisNotes:
+          type: string
+
+    DomainScores:
+      type: object
+      required: [childId, communication, socialInteraction, attention, motorSkills, emotionalRegulation, assessedAt]
+      properties:
+        childId:
+          type: integer
+        communication:
+          type: integer
+        socialInteraction:
+          type: integer
+        attention:
+          type: integer
+        motorSkills:
+          type: integer
+        emotionalRegulation:
+          type: integer
+        assessedAt:
+          type: string
+
+    TimelineEvent:
+      type: object
+      required: [id, childId, eventType, title, occurredAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        eventType:
+          type: string
+          enum: [screening, appointment, therapy, milestone, report, referral]
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        occurredAt:
+          type: string
+
+    # ─── Screening ────────────────────────────────────────────────────────────
+    Screening:
+      type: object
+      required: [id, childId, screeningType, status, riskLevel, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        childName:
+          type: ["string", "null"]
+        screeningType:
+          type: string
+          enum: [parent_questionnaire, teacher_report, clinical_intake, behavioral_observation]
+        status:
+          type: string
+          enum: [pending, in_progress, completed, reviewed]
+        riskLevel:
+          type: ["string", "null"]
+          enum: [low, moderate, high, critical, null]
+        communicationScore:
+          type: ["integer", "null"]
+        socialScore:
+          type: ["integer", "null"]
+        attentionScore:
+          type: ["integer", "null"]
+        motorScore:
+          type: ["integer", "null"]
+        emotionalScore:
+          type: ["integer", "null"]
+        behavioralClusters:
+          type: ["string", "null"]
+        referralRecommendations:
+          type: ["string", "null"]
+        clinicalSummary:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        completedAt:
+          type: ["string", "null"]
+
+    ScreeningInput:
+      type: object
+      required: [childId, screeningType]
+      properties:
+        childId:
+          type: integer
+        screeningType:
+          type: string
+          enum: [parent_questionnaire, teacher_report, clinical_intake, behavioral_observation]
+        communicationScore:
+          type: integer
+        socialScore:
+          type: integer
+        attentionScore:
+          type: integer
+        motorScore:
+          type: integer
+        emotionalScore:
+          type: integer
+        behavioralClusters:
+          type: string
+        referralRecommendations:
+          type: string
+        clinicalSummary:
+          type: string
+
+    # ─── Appointment ─────────────────────────────────────────────────────────
+    Appointment:
+      type: object
+      required: [id, childId, specialistName, specialistType, scheduledAt, status, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        childName:
+          type: ["string", "null"]
+        specialistName:
+          type: string
+        specialistType:
+          type: string
+          enum: [developmental_pediatrician, psychologist, psychiatrist, speech_therapist, occupational_therapist, behavioral_therapist]
+        scheduledAt:
+          type: string
+        durationMinutes:
+          type: integer
+        status:
+          type: string
+          enum: [scheduled, completed, cancelled, pending]
+        telehealth:
+          type: boolean
+        meetingUrl:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AppointmentInput:
+      type: object
+      required: [childId, specialistName, specialistType, scheduledAt]
+      properties:
+        childId:
+          type: integer
+        specialistName:
+          type: string
+        specialistType:
+          type: string
+          enum: [developmental_pediatrician, psychologist, psychiatrist, speech_therapist, occupational_therapist, behavioral_therapist]
+        scheduledAt:
+          type: string
+        durationMinutes:
+          type: integer
+        telehealth:
+          type: boolean
+        meetingUrl:
+          type: string
+        notes:
+          type: string
+
+    AppointmentUpdate:
+      type: object
+      properties:
+        specialistName:
+          type: string
+        scheduledAt:
+          type: string
+        durationMinutes:
+          type: integer
+        status:
+          type: string
+          enum: [scheduled, completed, cancelled, pending]
+        telehealth:
+          type: boolean
+        meetingUrl:
+          type: string
+        notes:
+          type: string
+
+    # ─── Therapy Plan ─────────────────────────────────────────────────────────
+    TherapyPlan:
+      type: object
+      required: [id, childId, title, therapyType, status, startDate, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        childName:
+          type: ["string", "null"]
+        title:
+          type: string
+        therapyType:
+          type: string
+          enum: [speech, occupational, behavioral, cognitive, physical, play]
+        status:
+          type: string
+          enum: [active, completed, paused, pending]
+        startDate:
+          type: string
+        endDate:
+          type: ["string", "null"]
+        goals:
+          type: ["string", "null"]
+        weeklyTasks:
+          type: ["string", "null"]
+        homeExercises:
+          type: ["string", "null"]
+        progressPercentage:
+          type: integer
+        therapistName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    TherapyPlanInput:
+      type: object
+      required: [childId, title, therapyType, startDate]
+      properties:
+        childId:
+          type: integer
+        title:
+          type: string
+        therapyType:
+          type: string
+          enum: [speech, occupational, behavioral, cognitive, physical, play]
+        startDate:
+          type: string
+        endDate:
+          type: string
+        goals:
+          type: string
+        weeklyTasks:
+          type: string
+        homeExercises:
+          type: string
+        therapistName:
+          type: string
+
+    TherapyPlanUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        status:
+          type: string
+          enum: [active, completed, paused, pending]
+        endDate:
+          type: string
+        goals:
+          type: string
+        weeklyTasks:
+          type: string
+        homeExercises:
+          type: string
+        progressPercentage:
+          type: integer
+        therapistName:
+          type: string
+
+    # ─── Report ───────────────────────────────────────────────────────────────
+    Report:
+      type: object
+      required: [id, childId, reportType, title, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        childName:
+          type: ["string", "null"]
+        reportType:
+          type: string
+          enum: [weekly_progress, monthly_assessment, clinical_summary, school_report, telehealth_note]
+        title:
+          type: string
+        summary:
+          type: ["string", "null"]
+        findings:
+          type: ["string", "null"]
+        recommendations:
+          type: ["string", "null"]
+        urgencyLevel:
+          type: string
+          enum: [routine, moderate, urgent, critical]
+        createdAt:
+          type: string
+
+    # ─── Dashboard ────────────────────────────────────────────────────────────
+    DashboardSummary:
+      type: object
+      required: [totalChildren, activeTherapyPlans, upcomingAppointments, pendingScreenings, completedScreeningsThisMonth, averageRiskScore]
+      properties:
+        totalChildren:
+          type: integer
+        activeTherapyPlans:
+          type: integer
+        upcomingAppointments:
+          type: integer
+        pendingScreenings:
+          type: integer
+        completedScreeningsThisMonth:
+          type: integer
+        averageRiskScore:
+          type: number
+
+    ActivityItem:
+      type: object
+      required: [id, activityType, title, description, occurredAt]
+      properties:
+        id:
+          type: integer
+        activityType:
+          type: string
+          enum: [screening_completed, appointment_scheduled, therapy_updated, report_generated, child_added, milestone_reached]
+        title:
+          type: string
+        description:
+          type: string
+        childName:
+          type: ["string", "null"]
+        childId:
+          type: ["integer", "null"]
+        occurredAt:
+          type: string
+
+    RiskDistribution:
+      type: object
+      required: [low, moderate, high, critical]
+      properties:
+        low:
+          type: integer
+        moderate:
+          type: integer
+        high:
+          type: integer
+        critical:
+          type: integer

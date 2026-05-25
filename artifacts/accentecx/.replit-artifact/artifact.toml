@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "ACCENTECX AI CARE"
+version = "1.0.0"
+id = "artifacts/accentecx"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25614
+
+[services.development]
+run = "pnpm --filter @workspace/accentecx run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/accentecx", "run", "build" ]
+publicDir = "artifacts/accentecx/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25614"
+BASE_PATH = "/"
