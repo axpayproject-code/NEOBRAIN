@@ -658,6 +658,8 @@ function PricingSection() {
 }
 
 export default function Home() {
+  const [demoModal, setDemoModal] = useState<{ open: boolean; audience: SalesAudience }>({ open: false, audience: "clinics" });
+
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
       {/* ── NAV ─────────────────────────────────────────────────────────── */}
@@ -718,7 +720,12 @@ export default function Home() {
                   Join the Ecosystem <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="rounded-full px-8 h-13 text-base w-full sm:w-auto border-primary/20" data-testid="button-clinic-demo">
+              <Button
+                size="lg" variant="outline"
+                className="rounded-full px-8 h-13 text-base w-full sm:w-auto border-primary/20"
+                data-testid="button-clinic-demo"
+                onClick={() => setDemoModal({ open: true, audience: "clinics" })}
+              >
                 Request Clinic Demo
               </Button>
             </motion.div>
@@ -1014,7 +1021,12 @@ export default function Home() {
                     Start for Free <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Button size="lg" variant="outline" className="rounded-full px-10 h-13 text-base border-primary/20" data-testid="button-cta-demo">
+                <Button
+                  size="lg" variant="outline"
+                  className="rounded-full px-10 h-13 text-base border-primary/20"
+                  data-testid="button-cta-demo"
+                  onClick={() => setDemoModal({ open: true, audience: "clinics" })}
+                >
                   Schedule a Demo
                 </Button>
               </div>
@@ -1022,6 +1034,12 @@ export default function Home() {
           </div>
         </section>
       </main>
+
+      <ContactSalesModal
+        open={demoModal.open}
+        audience={demoModal.audience}
+        onClose={() => setDemoModal(m => ({ ...m, open: false }))}
+      />
 
       {/* ── FOOTER ──────────────────────────────────────────────────────── */}
       <footer className="border-t bg-muted/20 py-12 px-6 md:px-12">
