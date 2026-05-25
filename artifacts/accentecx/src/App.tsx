@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
+import Onboarding from "@/pages/Onboarding";
 
 // Role-based dashboard pages
 import ParentDashboard from "@/pages/dashboards/ParentDashboard";
@@ -44,6 +45,7 @@ function AppRoutes() {
       <Route path="/login">
         {user ? <Redirect to={`/${user.role}`} /> : <Login />}
       </Route>
+      <Route path="/onboarding" component={Onboarding} />
 
       {/* ── Role-based dashboards ── */}
       <Route path="/parent">

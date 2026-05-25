@@ -9,6 +9,7 @@ import {
   ChevronRight, Zap, Star
 } from "lucide-react";
 import { motion } from "framer-motion";
+import ContactSalesModal, { type SalesAudience } from "@/components/sales/ContactSalesModal";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -219,8 +220,21 @@ const PRICING_TABS = [
 
 type PricingTab = (typeof PRICING_TABS)[number]["id"];
 
+const PLAN_SLUGS: Record<string, string> = {
+  "Starter Care": "starter-care",
+  "Care Plus": "care-plus",
+  "Care Family Pro": "care-family-pro",
+};
+
 function PricingSection() {
   const [activeTab, setActiveTab] = useState<PricingTab>("families");
+  const [salesModal, setSalesModal] = useState<{ open: boolean; audience: SalesAudience }>({
+    open: false, audience: "clinics",
+  });
+
+  function openSales(audience: SalesAudience) {
+    setSalesModal({ open: true, audience });
+  }
 
   return (
     <section id="pricing" className="py-24 px-6 md:px-12">
@@ -302,17 +316,67 @@ function PricingSection() {
                       </li>
                     ))}
                   </ul>
-                  <Link href="/login">
+                  <Link href={`/onboarding?plan=${PLAN_SLUGS[tier.name] ?? "care-plus"}`}>
                     <Button
                       className={`w-full rounded-full ${tier.highlight ? "bg-secondary text-secondary-foreground hover:bg-secondary/90" : ""}`}
                       variant={tier.highlight ? "default" : "outline"}
                       data-testid={`button-pricing-b2c-${i + 1}`}
                     >
-                      Get Started
+                      Get Started — {tier.price}/mo
                     </Button>
                   </Link>
                 </motion.div>
               ))}
+            </div>
+
+            {/* Feature Comparison Table */}
+            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+              <div className="px-6 py-4 border-b border-border bg-muted/30">
+                <p className="text-sm font-semibold text-foreground">Feature Comparison</p>
+                <p className="text-xs text-muted-foreground">See exactly what's included in each plan</p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-1/3">Feature</th>
+                      <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Starter ₱200</th>
+                      <th className="text-center px-4 py-3 text-xs font-semibold text-primary uppercase tracking-wider bg-primary/5">Care Plus ₱799</th>
+                      <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Family Pro ₱1,999</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { feature: "Child profiles", starter: "1 child", plus: "Up to 4", pro: "Unlimited" },
+                      { feature: "Developmental screenings", starter: "Basic (2×/yr)", plus: "Full (unlimited)", pro: "Full (unlimited)" },
+                      { feature: "AI developmental report", starter: "Text summary", plus: "Full + risk score", pro: "Full + risk score" },
+                      { feature: "Video behavioral analysis", starter: false, plus: "Up to 3/month", pro: "Unlimited" },
+                      { feature: "Therapy plan tracking", starter: false, plus: true, pro: true },
+                      { feature: "School input system", starter: false, plus: true, pro: true },
+                      { feature: "Specialist messaging", starter: false, plus: "Standard queue", pro: "Priority queue" },
+                      { feature: "Priority AI processing", starter: false, plus: false, pro: true },
+                      { feature: "Advanced clinical reports", starter: false, plus: false, pro: true },
+                      { feature: "Therapy automation", starter: false, plus: false, pro: true },
+                      { feature: "Dedicated support manager", starter: false, plus: false, pro: true },
+                    ].map((row, i) => (
+                      <tr key={row.feature} className={`border-b border-border last:border-0 ${i % 2 === 0 ? "" : "bg-muted/20"}`}>
+                        <td className="px-6 py-3 text-foreground font-medium">{row.feature}</td>
+                        {[row.starter, row.plus, row.pro].map((val, j) => (
+                          <td key={j} className={`text-center px-4 py-3 ${j === 1 ? "bg-primary/5" : ""}`}>
+                            {val === false ? (
+                              <X className="h-4 w-4 text-muted-foreground/40 mx-auto" />
+                            ) : val === true ? (
+                              <Check className="h-4 w-4 text-secondary mx-auto" />
+                            ) : (
+                              <span className="text-xs font-medium text-foreground">{val as string}</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Usage-Based Add-Ons — shown under Families */}
@@ -374,8 +438,12 @@ function PricingSection() {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full rounded-full bg-primary text-primary-foreground" data-testid="button-pricing-b2b-1">
-                  Contact Sales
+                <Button
+                  onClick={() => openSales("clinics")}
+                  className="w-full rounded-full bg-primary text-primary-foreground"
+                  data-testid="button-pricing-b2b-1"
+                >
+                  Request a Demo &amp; Proposal
                 </Button>
               </div>
 
@@ -453,8 +521,12 @@ function PricingSection() {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full rounded-full bg-primary text-primary-foreground" data-testid="button-pricing-b2b-2">
-                  Contact Sales
+                <Button
+                  onClick={() => openSales("schools")}
+                  className="w-full rounded-full bg-primary text-primary-foreground"
+                  data-testid="button-pricing-b2b-2"
+                >
+                  Request a Demo &amp; Proposal
                 </Button>
               </div>
 
@@ -525,7 +597,11 @@ function PricingSection() {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full rounded-full bg-primary text-primary-foreground" data-testid="button-pricing-b2b-gov">
+                <Button
+                  onClick={() => openSales("government")}
+                  className="w-full rounded-full bg-primary text-primary-foreground"
+                  data-testid="button-pricing-b2b-gov"
+                >
                   Contact Government Sales
                 </Button>
               </div>
@@ -570,6 +646,12 @@ function PricingSection() {
           </motion.div>
         )}
       </div>
+
+      <ContactSalesModal
+        open={salesModal.open}
+        audience={salesModal.audience}
+        onClose={() => setSalesModal(m => ({ ...m, open: false }))}
+      />
     </section>
   );
 }
