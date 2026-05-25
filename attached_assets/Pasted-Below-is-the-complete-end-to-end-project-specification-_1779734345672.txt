@@ -1,0 +1,610 @@
+Below is the **complete end-to-end project specification** of ACCENTECX AI CARE, including **product, UX, AI system, dashboards, database structure, and full pricing tiers**. This is a **full production blueprint**, not an MVP or concept.
+
+---
+
+# ACCENTECX AI CARE
+
+## FULL PRODUCT SPECIFICATION (END-TO-END SYSTEM)
+
+---
+
+# 1. PRODUCT DEFINITION
+
+## Name
+
+ACCENTECX AI CARE
+
+## Type
+
+Multi-tenant SaaS + AI clinical decision-support + developmental care coordination system
+
+## Core Mission
+
+To detect, structure, and manage child developmental concerns through:
+
+* standardized screening
+* behavioral video analysis
+* AI-assisted clinical structuring
+* specialist coordination
+* long-term developmental tracking
+
+---
+
+## Target Conditions Supported (NOT DIAGNOSED)
+
+* Autism Spectrum Disorder (ASD)
+* ADHD
+* Speech Delay
+* Learning Disabilities
+* Developmental Delay
+* Behavioral Regulation Issues
+
+---
+
+## Critical Rule
+
+The system NEVER diagnoses.
+It only produces:
+
+> structured developmental risk indicators + referral recommendations
+
+---
+
+# 2. SYSTEM ARCHITECTURE (FULL ECOSYSTEM)
+
+The platform is composed of 6 integrated systems:
+
+---
+
+## SYSTEM 1 — FAMILY CARE SYSTEM (B2C CORE)
+
+Used by parents daily.
+
+### Features:
+
+* child profiles
+* screening engine
+* AI reports
+* video assessments
+* progress tracking
+* therapy tasks
+* appointment booking
+
+---
+
+## SYSTEM 2 — CLINICAL SYSTEM (DOCTORS)
+
+Used by professionals.
+
+### Features:
+
+* AI intake summaries
+* structured behavioral reports
+* video analysis review
+* patient queue system
+* consultation tools
+* therapy planning
+
+---
+
+## SYSTEM 3 — THERAPY SYSTEM
+
+Used by therapists.
+
+### Features:
+
+* therapy plan creation
+* session tracking
+* goal monitoring
+* parent assignments
+* progress analytics
+
+---
+
+## SYSTEM 4 — SCHOOL SYSTEM
+
+Used by educators.
+
+### Features:
+
+* teacher observation forms
+* classroom behavioral scoring
+* referral triggers
+* SPED tracking
+* parent-school coordination
+
+---
+
+## SYSTEM 5 — TELEHEALTH SYSTEM
+
+Used for consultations.
+
+### Features:
+
+* video calls
+* scheduling
+* session notes
+* follow-ups
+* secure communication
+
+---
+
+## SYSTEM 6 — NATIONAL ANALYTICS SYSTEM
+
+Used by institutions.
+
+### Features:
+
+* anonymized population insights
+* developmental trend mapping
+* regional risk detection
+* intervention planning
+
+---
+
+# 3. USER ROLES
+
+| Role               | Function                          |
+| ------------------ | --------------------------------- |
+| Parent             | Caregiver                         |
+| Child              | Data subject                      |
+| Doctor             | Diagnosis authority (manual only) |
+| Therapist          | Intervention provider             |
+| Teacher            | Behavioral observer               |
+| Clinic Admin       | Organization management           |
+| Government Analyst | Population insights               |
+
+---
+
+# 4. CORE USER JOURNEY (FULL SYSTEM FLOW)
+
+## STEP 1 — Account Creation
+
+Parent registers account
+
+---
+
+## STEP 2 — Child Profile Creation
+
+Inputs:
+
+* age
+* language
+* developmental concerns
+* medical history
+
+---
+
+## STEP 3 — Structured Screening
+
+Adaptive questionnaire system:
+
+* communication
+* social behavior
+* attention
+* motor skills
+* emotional regulation
+* sensory behavior
+
+---
+
+## STEP 4 — VIDEO ASSESSMENT
+
+Guided structured tasks:
+
+1. Name response test
+2. Joint attention test
+3. Social interaction play
+4. Communication prompts
+5. Free behavior observation
+
+---
+
+## STEP 5 — AI PROCESSING
+
+System generates:
+
+### 1. Domain Scores
+
+* Communication (0–100)
+* Social Interaction (0–100)
+* Attention (0–100)
+* Motor Skills (0–100)
+* Emotional Regulation (0–100)
+
+---
+
+### 2. Behavioral Pattern Clusters
+
+* speech delay patterns
+* ADHD-like behavior patterns
+* ASD behavioral indicators
+* sensory processing patterns
+
+---
+
+### 3. Risk Classification
+
+* Low
+* Moderate
+* High
+* Critical
+
+---
+
+## STEP 6 — REPORT GENERATION
+
+Outputs:
+
+* structured clinical summary
+* parent-friendly explanation
+* risk matrix
+* referral suggestions
+
+---
+
+## STEP 7 — SPECIALIST MATCHING
+
+System assigns:
+
+* developmental pediatrician
+* speech therapist
+* occupational therapist
+* psychologist
+
+---
+
+## STEP 8 — CONSULTATION
+
+Doctor sees:
+
+* full AI intake
+* structured video analysis
+* scoring breakdown
+* history timeline
+
+---
+
+## STEP 9 — THERAPY PLAN
+
+Therapist assigns:
+
+* goals
+* exercises
+* schedule
+* progress tracking
+
+---
+
+## STEP 10 — LONG-TERM TRACKING
+
+Monthly:
+
+* updated AI report
+* milestone tracking
+* therapy performance
+
+---
+
+# 5. AI SYSTEM (FULL STACK)
+
+---
+
+## LAYER 1 — DATA COLLECTION ENGINE
+
+* questionnaires
+* video uploads
+* teacher input
+* therapist input
+
+---
+
+## LAYER 2 — FEATURE EXTRACTION ENGINE
+
+From video:
+
+* gaze tracking
+* motion detection
+* gesture frequency
+* speech detection
+* interaction analysis
+
+---
+
+## LAYER 3 — RULE-BASED CLINICAL ENGINE
+
+* DSM-aligned logic
+* validated scoring systems
+* threshold detection
+
+---
+
+## LAYER 4 — MACHINE LEARNING PATTERN ENGINE
+
+* clustering behavioral patterns
+* trajectory prediction
+* anomaly detection
+
+---
+
+## LAYER 5 — REPORT GENERATION ENGINE
+
+* structured clinical reports
+* simplified parent summaries
+* doctor-ready documentation
+
+---
+
+# 6. DASHBOARD SYSTEM (FULL)
+
+---
+
+## 1. PARENT DASHBOARD
+
+* child overview
+* progress tracking
+* AI reports
+* therapy tasks
+* appointments
+
+---
+
+## 2. DOCTOR DASHBOARD
+
+* patient queue
+* AI summaries
+* video review tools
+* clinical notes
+* diagnosis entry (manual)
+
+---
+
+## 3. THERAPIST DASHBOARD
+
+* therapy plans
+* session logs
+* progress charts
+* assignments
+
+---
+
+## 4. SCHOOL DASHBOARD
+
+* student screening
+* teacher reports
+* referral system
+* SPED tracking
+
+---
+
+## 5. ADMIN DASHBOARD
+
+* subscriptions
+* billing
+* user management
+* system analytics
+* AI monitoring
+
+---
+
+## 6. GOVERNMENT DASHBOARD (FUTURE)
+
+* regional analytics
+* population risk mapping
+* intervention planning
+
+---
+
+# 7. PRICING SYSTEM (FULL STRUCTURE)
+
+---
+
+## CONSUMER (B2C)
+
+---
+
+### TIER 1 — STARTER CARE
+
+### ₱200/month
+
+Includes:
+
+* 1 child profile
+* basic screening
+* AI summary (text only)
+* appointment booking
+* milestone tracking
+
+---
+
+### TIER 2 — CARE PLUS
+
+### ₱799/month
+
+Includes:
+
+* up to 4 children
+* full screening engine
+* video behavioral analysis
+* therapy tracking
+* school input system
+* specialist messaging
+
+---
+
+### TIER 3 — CARE FAMILY PRO
+
+### ₱1,999/month
+
+Includes:
+
+* unlimited children
+* priority AI processing
+* full video analytics
+* advanced reports
+* therapy automation
+* priority specialist access
+
+---
+
+# BUSINESS (B2B)
+
+---
+
+### TIER 4 — CLINIC SaaS
+
+### ₱4,999 – ₱19,999/month
+
+Includes:
+
+* multi-doctor system
+* AI intake dashboard
+* patient queue system
+* video review tools
+* clinic analytics
+* telehealth system
+
+Pricing depends on:
+
+* number of providers
+* clinic size
+
+---
+
+### TIER 5 — SCHOOL LICENSING
+
+### ₱10–₱50 per student/year
+
+Includes:
+
+* student screening system
+* teacher reporting tools
+* behavioral monitoring
+* referral engine
+
+---
+
+### TIER 6 — GOVERNMENT / LGU CONTRACTS
+
+Custom pricing:
+
+* regional deployment
+* population analytics
+* early intervention programs
+
+---
+
+# USAGE-BASED PRICING (IMPORTANT LAYER)
+
+| Feature                   | Cost    |
+| ------------------------- | ------- |
+| Video AI analysis         | ₱20–₱50 |
+| AI clinical report        | ₱10–₱20 |
+| Advanced behavioral model | ₱15     |
+
+---
+
+# 8. DATA STRUCTURE (FULL DATABASE)
+
+Core tables:
+
+* users
+* roles
+* children
+* child_profiles
+* assessments
+* assessment_answers
+* video_sessions
+* video_analysis_results
+* risk_scores
+* clinical_reports
+* appointments
+* providers
+* therapy_plans
+* therapy_tasks
+* progress_logs
+* school_reports
+* subscriptions
+* payments
+* organizations
+
+---
+
+# 9. UX DESIGN SYSTEM
+
+## Style:
+
+* pastel colors
+* soft gradients
+* rounded cards
+* friendly icons
+* character assistant
+
+---
+
+## Emotional Design Goal:
+
+* reduce parental anxiety
+* increase clarity
+* make screening feel simple
+* make progress feel positive
+
+---
+
+# 10. CHARACTER SYSTEM (UI CORE FEATURE)
+
+AI assistant character:
+
+* guides parents
+* explains results
+* reduces fear
+* simplifies complex data
+
+Appears in:
+
+* onboarding
+* screening
+* reports
+* progress dashboard
+
+---
+
+# 11. SAFETY + MEDICAL RULES
+
+The system MUST:
+
+* never diagnose
+* never prescribe
+* always use risk language
+* always defer to professionals
+
+---
+
+# 12. CORE VALUE PROPOSITION
+
+ACCENTECX AI CARE is:
+
+> A national-scale AI-assisted developmental healthcare infrastructure that transforms fragmented child development care into a structured, continuous, and accessible system across families, schools, clinics, and government institutions.
+
+---
+
+# 13. FINAL STRUCTURE SUMMARY
+
+| Layer      | System              |
+| ---------- | ------------------- |
+| B2C        | Parents app         |
+| Clinical   | Doctor system       |
+| Therapy    | Intervention system |
+| Education  | School system       |
+| Business   | SaaS platform       |
+| Government | National analytics  |
+
+---
+
+If you want next, I can turn this into:
+
+* full technical architecture diagram (system design)
+* full UI screens (Figma-level wireframe map)
+* or investor pitch deck (15 slides, ready to present)
+
+Just tell me.
