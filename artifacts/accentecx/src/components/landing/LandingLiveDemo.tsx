@@ -69,6 +69,18 @@ export default function LandingLiveDemo() {
     };
   }, []);
 
+  // Assign stream to video element after AnimatePresence mounts the recording panel
+  useEffect(() => {
+    if (step !== "recording" || !streamRef.current) return;
+    const timeout = setTimeout(() => {
+      if (videoRef.current && streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+        videoRef.current.play().catch(() => {});
+      }
+    }, 80);
+    return () => clearTimeout(timeout);
+  }, [step]);
+
   function stopStream() {
     streamRef.current?.getTracks().forEach(t => t.stop());
     streamRef.current = null;
@@ -82,11 +94,7 @@ export default function LandingLiveDemo() {
         audio: false,
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(() => {});
-      }
-      setStep("recording");
+      setStep("recording"); // useEffect will assign stream once panel mounts
       setCountdown(RECORD_DURATION);
       capturedFrames.current = [];
       setIsRecording(true);

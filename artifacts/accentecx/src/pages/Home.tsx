@@ -6,7 +6,7 @@ import {
   ArrowRight, HeartPulse, Activity, ShieldCheck, Users, GraduationCap,
   Building2, Stethoscope, Brain, Video, BarChart3, Check, X,
   MessageSquare, ClipboardList, Calendar, LineChart, Globe, Lock,
-  ChevronRight, Zap, Star
+  ChevronRight, Zap, Star, Menu
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ContactSalesModal, { type SalesAudience } from "@/components/sales/ContactSalesModal";
@@ -659,36 +659,81 @@ function PricingSection() {
 
 export default function Home() {
   const [demoModal, setDemoModal] = useState<{ open: boolean; audience: SalesAudience }>({ open: false, audience: "clinics" });
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
       {/* ── NAV ─────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 flex h-16 items-center px-6 md:px-12 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <Link href="/" className="flex items-center gap-2 text-primary font-bold text-lg">
-          <HeartPulse className="h-7 w-7 text-secondary" />
-          <span className="tracking-tight" style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
-          <span className="text-xs font-normal text-muted-foreground hidden sm:inline ml-1">by ACCENTECX AI</span>
-        </Link>
-        <nav className="hidden md:flex items-center gap-6 ml-10 text-sm text-muted-foreground">
-          <a href="#systems" className="hover:text-foreground transition-colors">Systems</a>
-          <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
-          <a href="#ai" className="hover:text-foreground transition-colors">AI Engine</a>
-          <a href="#live-demo" className="hover:text-foreground transition-colors font-semibold text-[#163300]">Live Demo</a>
-          <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
-          <Link href="/about" className="hover:text-foreground transition-colors">Our Story</Link>
-        </nav>
-        <div className="ml-auto flex items-center gap-3">
-          <Link href="/login">
-            <Button variant="ghost" className="hidden sm:flex rounded-full px-5 text-sm" data-testid="link-login-nav">
-              Log in
-            </Button>
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex h-16 items-center px-4 md:px-12">
+          <Link href="/" className="flex items-center gap-2 text-primary font-bold text-base md:text-lg shrink-0" onClick={() => setMenuOpen(false)}>
+            <HeartPulse className="h-6 w-6 md:h-7 md:w-7 text-secondary" />
+            <span className="tracking-tight" style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
+            <span className="text-xs font-normal text-muted-foreground hidden sm:inline ml-1">by ACCENTECX AI</span>
           </Link>
-          <Link href="/login">
-            <Button className="rounded-full px-5 gap-2 text-sm" data-testid="link-get-started">
-              Get Started <ArrowRight className="h-3.5 w-3.5" />
+          <nav className="hidden md:flex items-center gap-5 ml-8 text-sm text-muted-foreground">
+            <a href="#systems" className="hover:text-foreground transition-colors">Systems</a>
+            <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
+            <a href="#ai" className="hover:text-foreground transition-colors">AI Engine</a>
+            <a href="#live-demo" className="hover:text-foreground transition-colors font-semibold text-[#163300]">Live Demo</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+            <Link href="/about" className="hover:text-foreground transition-colors">Our Story</Link>
+          </nav>
+          <div className="ml-auto flex items-center gap-2 md:gap-3">
+            <Link href="/login">
+              <Button variant="ghost" className="hidden sm:flex rounded-full px-4 text-sm" data-testid="link-login-nav">
+                Log in
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button className="rounded-full px-4 md:px-5 gap-1.5 text-sm h-9 md:h-10" data-testid="link-get-started">
+                Get Started <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden h-9 w-9 p-0 rounded-full"
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
-          </Link>
+          </div>
         </div>
+
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="md:hidden border-t bg-background px-4 py-4 flex flex-col gap-1">
+            {[
+              { label: "Systems", href: "#systems" },
+              { label: "How It Works", href: "#how-it-works" },
+              { label: "AI Engine", href: "#ai" },
+              { label: "Live Demo ✦", href: "#live-demo" },
+              { label: "Pricing", href: "#pricing" },
+            ].map(item => (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                {item.label}
+              </a>
+            ))}
+            <Link href="/about" onClick={() => setMenuOpen(false)}>
+              <span className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors w-full">Our Story</span>
+            </Link>
+            <div className="border-t mt-2 pt-3 flex flex-col gap-2">
+              <Link href="/login" onClick={() => setMenuOpen(false)}>
+                <Button variant="outline" className="w-full rounded-full" data-testid="link-login-mobile">Log in</Button>
+              </Link>
+              <Link href="/login" onClick={() => setMenuOpen(false)}>
+                <Button className="w-full rounded-full gap-2">Get Started <ArrowRight className="h-3.5 w-3.5" /></Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="flex-1">
