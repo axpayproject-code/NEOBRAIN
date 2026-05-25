@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: videoAnalysis
+    description: AI video behavioral analysis
   - name: children
     description: Child profiles and digital twins
   - name: screenings
@@ -38,6 +40,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Video Analysis ──────────────────────────────────────────────────────────
+  /video-analysis:
+    post:
+      operationId: analyzeVideo
+      tags: [videoAnalysis]
+      summary: Analyze video frames with Gemini AI for behavioral assessment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VideoAnalysisRequest"
+      responses:
+        "200":
+          description: AI analysis results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoAnalysisResult"
+        "500":
+          description: Analysis failed
 
   # ─── Children ───────────────────────────────────────────────────────────────
   /children:
@@ -906,3 +930,44 @@ components:
           type: integer
         critical:
           type: integer
+
+    VideoAnalysisRequest:
+      type: object
+      required: [protocolId, frames]
+      properties:
+        protocolId:
+          type: string
+          enum: [name_response, joint_play, communication_sample, sensory_motor]
+        frames:
+          type: array
+          items:
+            type: string
+          description: Base64-encoded JPEG frames extracted from the uploaded video
+
+    VideoAnalysisFinding:
+      type: object
+      required: [label, score, severity]
+      properties:
+        label:
+          type: string
+        score:
+          type: integer
+        severity:
+          type: string
+          enum: [normal, moderate, high]
+
+    VideoAnalysisResult:
+      type: object
+      required: [findings, summary, recommendation, riskLevel]
+      properties:
+        findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoAnalysisFinding"
+        summary:
+          type: string
+        recommendation:
+          type: string
+        riskLevel:
+          type: string
+          enum: [low, moderate, high]

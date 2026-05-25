@@ -473,6 +473,53 @@ export interface RiskDistribution {
   critical: number;
 }
 
+export type VideoAnalysisRequestProtocolId = typeof VideoAnalysisRequestProtocolId[keyof typeof VideoAnalysisRequestProtocolId];
+
+
+export const VideoAnalysisRequestProtocolId = {
+  name_response: 'name_response',
+  joint_play: 'joint_play',
+  communication_sample: 'communication_sample',
+  sensory_motor: 'sensory_motor',
+} as const;
+
+export interface VideoAnalysisRequest {
+  protocolId: VideoAnalysisRequestProtocolId;
+  /** Base64-encoded JPEG frames extracted from the uploaded video */
+  frames: string[];
+}
+
+export type VideoAnalysisFindingSeverity = typeof VideoAnalysisFindingSeverity[keyof typeof VideoAnalysisFindingSeverity];
+
+
+export const VideoAnalysisFindingSeverity = {
+  normal: 'normal',
+  moderate: 'moderate',
+  high: 'high',
+} as const;
+
+export interface VideoAnalysisFinding {
+  label: string;
+  score: number;
+  severity: VideoAnalysisFindingSeverity;
+}
+
+export type VideoAnalysisResultRiskLevel = typeof VideoAnalysisResultRiskLevel[keyof typeof VideoAnalysisResultRiskLevel];
+
+
+export const VideoAnalysisResultRiskLevel = {
+  low: 'low',
+  moderate: 'moderate',
+  high: 'high',
+} as const;
+
+export interface VideoAnalysisResult {
+  findings: VideoAnalysisFinding[];
+  summary: string;
+  recommendation: string;
+  riskLevel: VideoAnalysisResultRiskLevel;
+}
+
 export type ListScreeningsParams = {
 childId?: number;
 };

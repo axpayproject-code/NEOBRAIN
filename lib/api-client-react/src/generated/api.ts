@@ -41,7 +41,9 @@ import type {
   TherapyPlan,
   TherapyPlanInput,
   TherapyPlanUpdate,
-  TimelineEvent
+  TimelineEvent,
+  VideoAnalysisRequest,
+  VideoAnalysisResult
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -132,6 +134,77 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
+
+export const getAnalyzeVideoUrl = () => {
+
+
+
+
+  return `/api/video-analysis`
+}
+
+/**
+ * @summary Analyze video frames with Gemini AI for behavioral assessment
+ */
+export const analyzeVideo = async (videoAnalysisRequest: VideoAnalysisRequest, options?: RequestInit): Promise<VideoAnalysisResult> => {
+
+  return customFetch<VideoAnalysisResult>(getAnalyzeVideoUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      videoAnalysisRequest,)
+  }
+);}
+
+
+
+
+export const getAnalyzeVideoMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeVideo>>, TError,{data: BodyType<VideoAnalysisRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof analyzeVideo>>, TError,{data: BodyType<VideoAnalysisRequest>}, TContext> => {
+
+const mutationKey = ['analyzeVideo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof analyzeVideo>>, {data: BodyType<VideoAnalysisRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  analyzeVideo(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AnalyzeVideoMutationResult = NonNullable<Awaited<ReturnType<typeof analyzeVideo>>>
+    export type AnalyzeVideoMutationBody = BodyType<VideoAnalysisRequest>
+    export type AnalyzeVideoMutationError = ErrorType<void>
+
+    /**
+ * @summary Analyze video frames with Gemini AI for behavioral assessment
+ */
+export const useAnalyzeVideo = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeVideo>>, TError,{data: BodyType<VideoAnalysisRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof analyzeVideo>>,
+        TError,
+        {data: BodyType<VideoAnalysisRequest>},
+        TContext
+      > => {
+      return useMutation(getAnalyzeVideoMutationOptions(options));
+    }
 
 export const getListChildrenUrl = () => {
 

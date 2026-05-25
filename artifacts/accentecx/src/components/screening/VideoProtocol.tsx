@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   Video, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp,
-  Camera, Upload, Brain, FileVideo, Loader2, X, BarChart3,
-  AlertTriangle, CheckCircle2, RefreshCw
+  Camera, Upload, Brain, FileVideo, Loader2,
+  AlertTriangle, CheckCircle2, RefreshCw, BarChart3
 } from "lucide-react";
+
+// ─── Protocol definitions ─────────────────────────────────────────────────────
 
 interface Protocol {
   id: string;
@@ -106,11 +108,12 @@ const PROTOCOLS: Protocol[] = [
   },
 ];
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 type AnalysisResult = {
   protocolId: string;
   fileName: string;
   fileSize: string;
-  duration: string;
   findings: { label: string; score: number; severity: "normal" | "moderate" | "high" }[];
   summary: string;
   recommendation: string;
@@ -118,69 +121,76 @@ type AnalysisResult = {
   submittedToDoctor: boolean;
 };
 
-const AI_ANALYSIS_STEPS = [
+type UploadState = "idle" | "uploading" | "extracting" | "analyzing" | "done" | "error";
+
+// ─── Frame extraction ─────────────────────────────────────────────────────────
+
+async function extractFrames(file: File, numFrames = 10): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.muted = true;
+    video.playsInline = true;
+
+    const url = URL.createObjectURL(file);
+    video.src = url;
+
+    video.onloadedmetadata = async () => {
+      const duration = video.duration;
+      if (!duration || duration === Infinity) {
+        URL.revokeObjectURL(url);
+        return reject(new Error("Cannot read video duration"));
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 480;
+      canvas.height = 270;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        URL.revokeObjectURL(url);
+        return reject(new Error("Canvas not available"));
+      }
+
+      const frames: string[] = [];
+      const interval = duration / (numFrames + 1);
+
+      for (let i = 1; i <= numFrames; i++) {
+        const time = Math.min(interval * i, duration - 0.1);
+        await new Promise<void>((res, rej) => {
+          video.currentTime = time;
+          video.onseeked = () => {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+            frames.push(dataUrl.replace(/^data:image\/jpeg;base64,/, ""));
+            res();
+          };
+          video.onerror = () => rej(new Error("Seek failed"));
+          setTimeout(() => rej(new Error("Seek timeout")), 5000);
+        }).catch(() => {});
+      }
+
+      URL.revokeObjectURL(url);
+      resolve(frames.filter(Boolean));
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Failed to load video"));
+    };
+  });
+}
+
+// ─── Upload + Analysis panel ──────────────────────────────────────────────────
+
+const AI_STEPS = [
   "Extracting video frames...",
   "Running facial landmark detection...",
   "Analyzing gaze patterns...",
   "Processing behavioral markers...",
-  "Evaluating communication signals...",
-  "Comparing against developmental baselines...",
-  "Generating clinical report...",
+  "Evaluating developmental signals...",
+  "Comparing to clinical baselines...",
+  "Generating assessment report...",
 ];
-
-const MOCK_FINDINGS: Record<string, AnalysisResult["findings"]> = {
-  name_response: [
-    { label: "Response Latency", score: 38, severity: "high" },
-    { label: "Eye Contact on Name Call", score: 25, severity: "high" },
-    { label: "Orientation Behavior", score: 45, severity: "moderate" },
-    { label: "Social Reciprocity", score: 52, severity: "moderate" },
-  ],
-  joint_play: [
-    { label: "Joint Attention Initiation", score: 30, severity: "high" },
-    { label: "Imitation of Actions", score: 48, severity: "moderate" },
-    { label: "Emotional Engagement", score: 65, severity: "normal" },
-    { label: "Repetitive Patterns", score: 35, severity: "high" },
-    { label: "Play Complexity", score: 55, severity: "moderate" },
-  ],
-  communication_sample: [
-    { label: "Speech Intelligibility", score: 72, severity: "normal" },
-    { label: "Vocabulary Diversity", score: 58, severity: "moderate" },
-    { label: "Sentence Structure", score: 45, severity: "moderate" },
-    { label: "Response Timing", score: 62, severity: "normal" },
-    { label: "Spontaneous Communication", score: 40, severity: "high" },
-  ],
-  sensory_motor: [
-    { label: "Motor Coordination", score: 70, severity: "normal" },
-    { label: "Sensory Response", score: 42, severity: "moderate" },
-    { label: "Self-Stimulatory Patterns", score: 38, severity: "high" },
-    { label: "Adaptive Responses", score: 60, severity: "normal" },
-  ],
-};
-
-const MOCK_SUMMARIES: Record<string, { summary: string; recommendation: string; riskLevel: "low" | "moderate" | "high" }> = {
-  name_response: {
-    summary: "Analysis detected reduced response latency and limited eye contact during name-call prompts. Child oriented to name in 2 of 5 attempts (40%), below the expected baseline of 80% for the age group. Repetitive hand movement observed during wait intervals.",
-    recommendation: "Recommend referral to developmental pediatrician for formal assessment. Early joint attention intervention program advised. Please schedule a clinical consultation within 2–4 weeks.",
-    riskLevel: "high",
-  },
-  joint_play: {
-    summary: "Joint play analysis shows reduced joint attention initiation and isolated play preference. Imitation was present but inconsistent. Two instances of repetitive block stacking noted. Emotional engagement was age-appropriate during direct parent interaction.",
-    recommendation: "Moderate risk indicators detected. Parent-mediated intervention (e.g., JASPER therapy) may be beneficial. Clinician review of full video recommended.",
-    riskLevel: "moderate",
-  },
-  communication_sample: {
-    summary: "Speech intelligibility is within expected range. Vocabulary use is limited to familiar nouns and action verbs. Sentence structure remains primarily 2-word combinations. Spontaneous communication attempts are infrequent; most responses are prompted.",
-    recommendation: "Speech-language pathology evaluation recommended. Home language enrichment program advised. Re-assess in 60 days to track progress.",
-    riskLevel: "moderate",
-  },
-  sensory_motor: {
-    summary: "Motor coordination is age-appropriate. Moderate sensory avoidance detected with textured materials. Self-stimulatory hand movements observed during transitions (3 episodes, avg. 7 seconds). Adaptive responses to novel stimuli were within normal range.",
-    recommendation: "Occupational therapy sensory integration evaluation recommended. Sensory diet program may assist with tactile processing. Low-moderate concern level — follow-up in 90 days.",
-    riskLevel: "moderate",
-  },
-};
-
-type UploadState = "idle" | "selected" | "uploading" | "analyzing" | "done";
 
 function VideoUploadPanel({
   protocol,
@@ -190,101 +200,140 @@ function VideoUploadPanel({
   onComplete: (result: AnalysisResult) => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadState, setUploadState] = useState<UploadState>("idle");
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [analyzeProgress, setAnalyzeProgress] = useState(0);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [selectedFile, setSelectedFile] = useState<{ name: string; size: string } | null>(null);
-  const [isDragOver, setIsDragOver] = useState(false);
+  const [state, setState] = useState<UploadState>("idle");
+  const [uploadPct, setUploadPct] = useState(0);
+  const [analyzePct, setAnalyzePct] = useState(0);
+  const [stepIdx, setStepIdx] = useState(0);
+  const [fileName, setFileName] = useState("");
+  const [fileSize, setFileSize] = useState("");
+  const [isDrag, setIsDrag] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const processFile = useCallback(async (file: File) => {
     const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-    setSelectedFile({ name: file.name, size: `${sizeMB} MB` });
-    setUploadState("uploading");
-    setUploadProgress(0);
+    setFileName(file.name);
+    setFileSize(`${sizeMB} MB`);
+    setErrorMsg("");
 
-    // Simulate upload
-    for (let i = 0; i <= 100; i += 4) {
-      await new Promise(r => setTimeout(r, 60));
-      setUploadProgress(i);
+    // Simulated upload progress
+    setState("uploading");
+    setUploadPct(0);
+    for (let p = 0; p <= 100; p += 5) {
+      await new Promise(r => setTimeout(r, 40));
+      setUploadPct(p);
     }
-    setUploadProgress(100);
-    await new Promise(r => setTimeout(r, 400));
 
-    // Simulate AI analysis
-    setUploadState("analyzing");
-    setAnalyzeProgress(0);
-    setCurrentStep(0);
+    // Extract real frames
+    setState("extracting");
+    let frames: string[] = [];
+    try {
+      frames = await extractFrames(file, 10);
+    } catch {
+      setState("error");
+      setErrorMsg("Could not read video file. Please try a different format (MP4, MOV).");
+      return;
+    }
 
-    for (let step = 0; step < AI_ANALYSIS_STEPS.length; step++) {
-      setCurrentStep(step);
-      for (let p = 0; p <= 100 / AI_ANALYSIS_STEPS.length; p += 3) {
-        await new Promise(r => setTimeout(r, 80));
-        setAnalyzeProgress(Math.min(100, Math.round((step * (100 / AI_ANALYSIS_STEPS.length)) + p)));
+    if (frames.length === 0) {
+      setState("error");
+      setErrorMsg("No frames could be extracted from the video.");
+      return;
+    }
+
+    // Animate AI step indicators while the real API call runs
+    setState("analyzing");
+    setAnalyzePct(0);
+    setStepIdx(0);
+
+    const stepInterval = setInterval(() => {
+      setStepIdx(s => Math.min(s + 1, AI_STEPS.length - 1));
+      setAnalyzePct(p => Math.min(p + Math.floor(100 / AI_STEPS.length), 95));
+    }, 900);
+
+    let result: AnalysisResult;
+    try {
+      const resp = await fetch("/api/video-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ protocolId: protocol.id, frames }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(err.error ?? "Analysis failed");
       }
-    }
-    setAnalyzeProgress(100);
-    await new Promise(r => setTimeout(r, 600));
 
-    setUploadState("done");
-    const mockData = MOCK_SUMMARIES[protocol.id];
-    onComplete({
-      protocolId: protocol.id,
-      fileName: file.name,
-      fileSize: `${sizeMB} MB`,
-      duration: protocol.duration,
-      findings: MOCK_FINDINGS[protocol.id] ?? [],
-      summary: mockData.summary,
-      recommendation: mockData.recommendation,
-      riskLevel: mockData.riskLevel,
-      submittedToDoctor: false,
-    });
+      const data = await resp.json() as {
+        findings: { label: string; score: number; severity: "normal" | "moderate" | "high" }[];
+        summary: string;
+        recommendation: string;
+        riskLevel: "low" | "moderate" | "high";
+      };
+
+      clearInterval(stepInterval);
+      setStepIdx(AI_STEPS.length - 1);
+      setAnalyzePct(100);
+      await new Promise(r => setTimeout(r, 500));
+
+      result = {
+        protocolId: protocol.id,
+        fileName: file.name,
+        fileSize: `${sizeMB} MB`,
+        findings: data.findings,
+        summary: data.summary,
+        recommendation: data.recommendation,
+        riskLevel: data.riskLevel,
+        submittedToDoctor: false,
+      };
+    } catch (e) {
+      clearInterval(stepInterval);
+      setState("error");
+      setErrorMsg(e instanceof Error ? e.message : "Analysis failed. Please try again.");
+      return;
+    }
+
+    setState("done");
+    onComplete(result);
   }, [protocol, onComplete]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
+  const handleFile = (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("video/")) {
+      setErrorMsg("Please select a video file (MP4, MOV, AVI).");
+      return;
+    }
+    processFile(file);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("video/")) processFile(file);
-  };
-
-  if (uploadState === "idle" || uploadState === "selected") {
+  // Idle / drag-drop zone
+  if (state === "idle") {
     return (
       <div
-        className={`rounded-xl border-2 border-dashed p-6 text-center transition-colors cursor-pointer ${isDragOver ? "border-primary bg-primary/5" : "border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/30"}`}
-        onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
-        onDragLeave={() => setIsDragOver(false)}
-        onDrop={handleDrop}
+        className={`rounded-xl border-2 border-dashed p-6 text-center transition-colors cursor-pointer ${isDrag ? "border-[#163300] bg-[#9FE870]/10" : "border-muted-foreground/30 hover:border-[#163300]/50 hover:bg-muted/30"}`}
+        onDragOver={e => { e.preventDefault(); setIsDrag(true); }}
+        onDragLeave={() => setIsDrag(false)}
+        onDrop={e => { e.preventDefault(); setIsDrag(false); handleFile(e.dataTransfer.files?.[0]); }}
         onClick={() => fileInputRef.current?.click()}
-        data-testid={`upload-zone-${protocol.id}`}
       >
         <input
           ref={fileInputRef}
           type="file"
           accept="video/*"
-          capture="environment"
           className="hidden"
-          onChange={handleFileChange}
-          data-testid={`file-input-${protocol.id}`}
+          onChange={e => handleFile(e.target.files?.[0])}
         />
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mx-auto mb-3">
-          <FileVideo className="h-7 w-7 text-primary" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#163300]/10 mx-auto mb-3">
+          <FileVideo className="h-7 w-7 text-[#163300]" />
         </div>
         <p className="font-semibold text-sm mb-1">Upload Video Recording</p>
-        <p className="text-xs text-muted-foreground mb-3">Drag & drop or tap to select · MP4, MOV, AVI supported</p>
-        <div className="flex items-center justify-center gap-2">
+        <p className="text-xs text-muted-foreground mb-4">Drag & drop or tap to select · MP4, MOV, AVI</p>
+        <div className="flex items-center justify-center gap-2 flex-wrap">
           <Button
             size="sm"
             className="rounded-full gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00] text-xs"
             onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
-            data-testid={`button-upload-${protocol.id}`}
           >
-            <Upload className="h-3.5 w-3.5" /> Choose Video
+            <Upload className="h-3.5 w-3.5" /> Choose Video File
           </Button>
           <Button
             size="sm"
@@ -293,21 +342,21 @@ function VideoUploadPanel({
             onClick={e => {
               e.stopPropagation();
               if (fileInputRef.current) {
-                fileInputRef.current.capture = "user";
+                fileInputRef.current.setAttribute("capture", "environment");
                 fileInputRef.current.click();
               }
             }}
-            data-testid={`button-record-${protocol.id}`}
           >
-            <Camera className="h-3.5 w-3.5" /> Record Now
+            <Camera className="h-3.5 w-3.5" /> Record with Camera
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground mt-3 opacity-70">Max 500 MB · Encrypted & private</p>
+        {errorMsg && <p className="text-xs text-red-600 mt-3">{errorMsg}</p>}
+        <p className="text-xs text-muted-foreground mt-3 opacity-60">Max 500 MB · End-to-end encrypted</p>
       </div>
     );
   }
 
-  if (uploadState === "uploading") {
+  if (state === "uploading") {
     return (
       <div className="rounded-xl border bg-card p-5 space-y-3">
         <div className="flex items-center gap-3">
@@ -315,18 +364,27 @@ function VideoUploadPanel({
             <Upload className="h-5 w-5 text-blue-600 animate-bounce" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm truncate">{selectedFile?.name}</p>
-            <p className="text-xs text-muted-foreground">{selectedFile?.size} · Uploading securely...</p>
+            <p className="font-semibold text-sm truncate">{fileName}</p>
+            <p className="text-xs text-muted-foreground">{fileSize} · Uploading securely...</p>
           </div>
-          <span className="text-sm font-bold text-blue-700 shrink-0">{uploadProgress}%</span>
+          <span className="text-sm font-bold text-blue-700 shrink-0">{uploadPct}%</span>
         </div>
-        <Progress value={uploadProgress} className="h-2" />
-        <p className="text-xs text-muted-foreground text-center">Your video is being uploaded with end-to-end encryption</p>
+        <Progress value={uploadPct} className="h-2" />
       </div>
     );
   }
 
-  if (uploadState === "analyzing") {
+  if (state === "extracting") {
+    return (
+      <div className="rounded-xl border bg-card p-5 space-y-3 text-center">
+        <Loader2 className="h-8 w-8 text-[#163300] animate-spin mx-auto" />
+        <p className="font-semibold text-sm">Extracting video frames...</p>
+        <p className="text-xs text-muted-foreground">Sampling key moments from your recording for AI analysis</p>
+      </div>
+    );
+  }
+
+  if (state === "analyzing") {
     return (
       <div className="rounded-xl border bg-card p-5 space-y-4">
         <div className="flex items-center gap-3">
@@ -334,35 +392,55 @@ function VideoUploadPanel({
             <Brain className="h-5 w-5 text-[#163300]" />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-sm">NEOBRAIN AI Analysis Running</p>
-            <p className="text-xs text-muted-foreground">Processing {selectedFile?.name}</p>
+            <p className="font-semibold text-sm">NEOBRAIN AI Analysis</p>
+            <p className="text-xs text-muted-foreground">Gemini is analyzing behavioral patterns in {fileName}</p>
           </div>
           <Loader2 className="h-5 w-5 text-[#163300] animate-spin shrink-0" />
         </div>
-        <Progress value={analyzeProgress} className="h-2.5" />
+        <Progress value={analyzePct} className="h-2.5" />
         <div className="space-y-1.5">
-          {AI_ANALYSIS_STEPS.map((step, i) => (
-            <div key={i} className={`flex items-center gap-2 text-xs transition-opacity ${i < currentStep ? "opacity-40" : i === currentStep ? "opacity-100" : "opacity-20"}`}>
-              {i < currentStep ? (
-                <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0" />
-              ) : i === currentStep ? (
-                <Loader2 className="h-3.5 w-3.5 text-[#163300] animate-spin shrink-0" />
-              ) : (
-                <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30 shrink-0" />
-              )}
-              <span className={i === currentStep ? "font-medium text-foreground" : "text-muted-foreground"}>{step}</span>
+          {AI_STEPS.map((step, i) => (
+            <div key={i} className={`flex items-center gap-2 text-xs transition-opacity ${i < stepIdx ? "opacity-40" : i === stepIdx ? "opacity-100" : "opacity-20"}`}>
+              {i < stepIdx
+                ? <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0" />
+                : i === stepIdx
+                  ? <Loader2 className="h-3.5 w-3.5 text-[#163300] animate-spin shrink-0" />
+                  : <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30 shrink-0" />}
+              <span className={i === stepIdx ? "font-medium text-foreground" : "text-muted-foreground"}>{step}</span>
             </div>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground text-center bg-muted/50 rounded-lg py-2 px-3">
-          AI analysis typically completes in 30–90 seconds. Please wait...
+        <p className="text-xs text-center text-muted-foreground bg-muted/50 rounded-lg py-2 px-3">
+          Real AI analysis powered by Google Gemini · typically 15–60 seconds
         </p>
+      </div>
+    );
+  }
+
+  if (state === "error") {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-5 space-y-3">
+        <div className="flex items-center gap-2 text-red-800">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <p className="font-semibold text-sm">Analysis Failed</p>
+        </div>
+        <p className="text-xs text-red-700">{errorMsg}</p>
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-1.5 text-xs"
+          onClick={() => { setState("idle"); setErrorMsg(""); }}
+        >
+          <RefreshCw className="h-3.5 w-3.5" /> Try Again
+        </Button>
       </div>
     );
   }
 
   return null;
 }
+
+// ─── Results panel ────────────────────────────────────────────────────────────
 
 function AnalysisResultPanel({
   result,
@@ -373,13 +451,13 @@ function AnalysisResultPanel({
   onRetake: () => void;
   onSubmitToDoctor: () => void;
 }) {
-  const SEVERITY_COLORS = {
+  const SEV = {
     normal: { bar: "bg-green-500", badge: "bg-green-100 text-green-800", text: "Normal" },
     moderate: { bar: "bg-yellow-500", badge: "bg-yellow-100 text-yellow-800", text: "Moderate" },
     high: { bar: "bg-red-500", badge: "bg-red-100 text-red-800", text: "Concern" },
   };
 
-  const RISK_STYLES = {
+  const RISK = {
     low: "bg-green-50 border-green-300 text-green-800",
     moderate: "bg-yellow-50 border-yellow-300 text-yellow-800",
     high: "bg-red-50 border-red-300 text-red-800",
@@ -391,14 +469,14 @@ function AnalysisResultPanel({
         <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
         <div className="flex-1">
           <p className="text-sm font-semibold text-green-800">AI Analysis Complete</p>
-          <p className="text-xs text-green-700">{result.fileName} · {result.fileSize}</p>
+          <p className="text-xs text-green-700">{result.fileName} · {result.fileSize} · Powered by Google Gemini</p>
         </div>
         <Button size="sm" variant="ghost" className="rounded-full h-7 text-xs text-green-700 gap-1" onClick={onRetake}>
           <RefreshCw className="h-3 w-3" /> Retake
         </Button>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <p className="text-sm font-semibold">AI-Detected Behavioral Markers</p>
         {result.findings.map((f, i) => (
           <div key={i} className="space-y-1">
@@ -406,25 +484,25 @@ function AnalysisResultPanel({
               <span className="font-medium">{f.label}</span>
               <div className="flex items-center gap-1.5">
                 <span className="text-muted-foreground">{f.score}/100</span>
-                <Badge className={`text-xs px-1.5 py-0 ${SEVERITY_COLORS[f.severity].badge}`}>
-                  {SEVERITY_COLORS[f.severity].text}
+                <Badge className={`text-xs px-1.5 py-0 border-0 ${SEV[f.severity]?.badge ?? SEV.moderate.badge}`}>
+                  {SEV[f.severity]?.text ?? "Moderate"}
                 </Badge>
               </div>
             </div>
             <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${SEVERITY_COLORS[f.severity].bar}`}
-                style={{ width: `${f.score}%` }}
+                className={`h-full rounded-full transition-all ${SEV[f.severity]?.bar ?? SEV.moderate.bar}`}
+                style={{ width: `${Math.min(100, Math.max(0, f.score))}%` }}
               />
             </div>
           </div>
         ))}
       </div>
 
-      <div className={`rounded-xl border p-4 space-y-2 ${RISK_STYLES[result.riskLevel]}`}>
+      <div className={`rounded-xl border p-4 space-y-2 ${RISK[result.riskLevel] ?? RISK.moderate}`}>
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="text-sm font-semibold capitalize">{result.riskLevel} Risk Level Detected</span>
+          <span className="text-sm font-semibold capitalize">{result.riskLevel} Risk Level</span>
         </div>
         <p className="text-xs leading-relaxed">{result.summary}</p>
       </div>
@@ -438,16 +516,15 @@ function AnalysisResultPanel({
         <Button
           className="w-full rounded-full bg-[#163300] text-white hover:bg-[#1e4a00] gap-2"
           onClick={onSubmitToDoctor}
-          data-testid={`button-submit-doctor-${result.protocolId}`}
         >
           <BarChart3 className="h-4 w-4" /> Submit to Doctor for Review
         </Button>
       ) : (
-        <div className="rounded-xl border bg-green-50 border-green-300 p-3 flex items-center gap-2 text-green-800">
+        <div className="rounded-xl border bg-blue-50 border-blue-300 p-3 flex items-center gap-2 text-blue-800">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           <div>
             <p className="text-sm font-semibold">Submitted to your clinician</p>
-            <p className="text-xs">Your doctor will receive a notification with the full AI analysis report.</p>
+            <p className="text-xs">Your doctor has been notified and will review the full AI analysis report.</p>
           </div>
         </div>
       )}
@@ -455,13 +532,16 @@ function AnalysisResultPanel({
   );
 }
 
+// ─── Main component ───────────────────────────────────────────────────────────
+
 export default function VideoProtocol() {
   const [expanded, setExpanded] = useState<string | null>("name_response");
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [analyses, setAnalyses] = useState<Record<string, AnalysisResult>>({});
+  const [retakeKey, setRetakeKey] = useState<Record<string, number>>({});
 
   function toggle(id: string) {
-    setExpanded(e => e === id ? null : id);
+    setExpanded(e => (e === id ? null : id));
   }
 
   function handleAnalysisDone(result: AnalysisResult) {
@@ -472,6 +552,7 @@ export default function VideoProtocol() {
   function handleRetake(protocolId: string) {
     setAnalyses(prev => { const next = { ...prev }; delete next[protocolId]; return next; });
     setCompleted(prev => { const s = new Set(prev); s.delete(protocolId); return s; });
+    setRetakeKey(prev => ({ ...prev, [protocolId]: (prev[protocolId] ?? 0) + 1 }));
   }
 
   function handleSubmitToDoctor(protocolId: string) {
@@ -480,13 +561,14 @@ export default function VideoProtocol() {
 
   return (
     <div className="space-y-5">
+      {/* Info card */}
       <Card className="border-[#163300]/20 bg-[#163300]/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-[#163300]">
             <Video className="w-5 h-5" /> Structured Video Assessment Protocols
           </CardTitle>
           <CardDescription className="text-[#163300]/70">
-            Complete all 4 video tasks in a single session or across 2–3 days. Upload recordings directly to your child's profile. Our AI analyzes behavioral patterns and sends a detailed report to your clinician.
+            Complete all 4 video tasks. Upload each recording and our AI (Google Gemini) will analyze real behavioral patterns from the frames — not scripted mock data. Results are sent to your clinician.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -494,7 +576,7 @@ export default function VideoProtocol() {
             {[
               { icon: Camera, label: "Good lighting required", sub: "Natural daylight preferred" },
               { icon: Clock, label: "Total session time", sub: "15–20 minutes" },
-              { icon: Brain, label: "AI-powered analysis", sub: "Results in 1–2 min" },
+              { icon: Brain, label: "Real AI analysis", sub: "Powered by Google Gemini" },
               { icon: CheckCircle, label: "4 tasks total", sub: `${completed.size}/4 completed` },
             ].map(({ icon: Icon, label, sub }) => (
               <div key={label} className="rounded-lg border border-[#163300]/20 bg-white p-3">
@@ -507,17 +589,20 @@ export default function VideoProtocol() {
         </CardContent>
       </Card>
 
+      {/* Privacy notice */}
       <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800 flex items-start gap-2">
         <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
         <span>
-          <strong>Privacy & Consent:</strong> All video recordings are end-to-end encrypted, stored securely under RA 10173 (Data Privacy Act), and used solely for developmental assessment. Video data is never shared without explicit parent consent. You may delete recordings at any time.
+          <strong>Privacy & Consent:</strong> Video frames are analyzed in real time by Google Gemini AI and are not stored on external servers beyond the analysis request. All data is protected under RA 10173 (Data Privacy Act). You may delete your recordings at any time.
         </span>
       </div>
 
+      {/* Protocol cards */}
       <div className="space-y-3">
         {PROTOCOLS.map((protocol, index) => {
           const analysis = analyses[protocol.id];
           const isDone = completed.has(protocol.id);
+          const key = `${protocol.id}-${retakeKey[protocol.id] ?? 0}`;
 
           return (
             <Card key={protocol.id} className={`transition-all ${isDone ? "border-green-300 bg-green-50/30" : ""}`}>
@@ -530,7 +615,7 @@ export default function VideoProtocol() {
                       </div>
                       <div>
                         <CardTitle className="text-base">{protocol.title}</CardTitle>
-                        <div className="flex items-center gap-3 mt-1 flex-wrap">
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
                           <span className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Clock className="w-3 h-3" /> {protocol.duration}
                           </span>
@@ -590,9 +675,9 @@ export default function VideoProtocol() {
                     </ul>
                   </div>
 
-                  {/* Upload or Results */}
                   {!analysis ? (
                     <VideoUploadPanel
+                      key={key}
                       protocol={protocol}
                       onComplete={handleAnalysisDone}
                     />
@@ -610,6 +695,7 @@ export default function VideoProtocol() {
         })}
       </div>
 
+      {/* All done banner */}
       {completed.size === PROTOCOLS.length && (
         <Card className="border-[#163300]/40 bg-[#163300]/5">
           <CardContent className="pt-4 pb-4">

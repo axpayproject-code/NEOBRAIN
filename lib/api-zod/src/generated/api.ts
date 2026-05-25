@@ -17,6 +17,26 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary Analyze video frames with Gemini AI for behavioral assessment
+ */
+export const AnalyzeVideoBody = zod.object({
+  "protocolId": zod.enum(['name_response', 'joint_play', 'communication_sample', 'sensory_motor']),
+  "frames": zod.array(zod.string()).describe('Base64-encoded JPEG frames extracted from the uploaded video')
+})
+
+export const AnalyzeVideoResponse = zod.object({
+  "findings": zod.array(zod.object({
+  "label": zod.string(),
+  "score": zod.number(),
+  "severity": zod.enum(['normal', 'moderate', 'high'])
+})),
+  "summary": zod.string(),
+  "recommendation": zod.string(),
+  "riskLevel": zod.enum(['low', 'moderate', 'high'])
+})
+
+
+/**
  * @summary List all child profiles for the current user
  */
 export const ListChildrenResponseItem = zod.object({
