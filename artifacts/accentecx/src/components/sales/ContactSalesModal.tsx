@@ -159,7 +159,7 @@ export default function ContactSalesModal({ open, audience, onClose }: Props) {
               className="p-6 space-y-4"
             >
               <p className="text-sm text-muted-foreground">
-                Fill in your details and a dedicated ACCENTECX sales consultant will reach out within <strong>1 business day</strong> with a custom demo and pricing proposal.
+                Fill in your details and a dedicated ACCENTECX AI sales consultant will reach out within <strong>1 business day</strong> with a custom demo and pricing proposal.
               </p>
 
               <div className="grid grid-cols-2 gap-3">

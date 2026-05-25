@@ -39,7 +39,7 @@ export default function About() {
               A healthcare infrastructure<br />built for the Philippines.
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              ACCENTECX AI CARE was founded with a single mission: make developmental pediatric care as accessible in Davao and Iloilo as it is in Makati — through technology designed specifically for Filipino families, clinicians, and institutions.
+              NEOBRAIN was founded with a single mission: make developmental pediatric care as accessible in Davao and Iloilo as it is in Makati — through technology designed specifically for Filipino families, clinicians, and institutions.
             </p>
           </motion.div>
         </div>

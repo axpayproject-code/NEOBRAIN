@@ -250,7 +250,7 @@ function ParentOnboarding({ planKey, onComplete }: { planKey: PlanKey; onComplet
         <motion.div key="p3" variants={fadeUp} initial="hidden" animate="visible" exit="exit" className="space-y-7">
           <div className="text-center">
             <div className="flex justify-center mb-5"><div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary/20"><CheckCircle2 className="h-10 w-10 text-secondary" /></div></div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Welcome to ACCENTECX AI CARE!</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Welcome to NEOBRAIN!</h1>
             <p className="text-muted-foreground">Your <strong className="text-foreground">{plan.name}</strong> account is ready, <strong className="text-foreground">{form.name || "Parent"}</strong>!</p>
           </div>
           <div className="rounded-2xl border border-secondary/30 bg-secondary/10 p-5 flex items-center gap-4">
@@ -439,7 +439,7 @@ function DoctorOnboarding({ onComplete }: { onComplete: (name: string, email: st
           <div className="text-center">
             <div className="flex justify-center mb-5"><div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary/20"><CheckCircle2 className="h-10 w-10 text-secondary" /></div></div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Your clinic is ready!</h1>
-            <p className="text-muted-foreground"><strong className="text-foreground">{clinic.name}</strong> has been set up on ACCENTECX AI CARE.</p>
+            <p className="text-muted-foreground"><strong className="text-foreground">{clinic.name}</strong> has been set up on NEOBRAIN.</p>
           </div>
           <div className="rounded-2xl border border-secondary/30 bg-secondary/10 p-5 flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/20"><Building2 className="h-6 w-6 text-primary" /></div>
@@ -720,7 +720,7 @@ function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: str
               <span className="text-xs font-semibold text-slate-700">Platform Admin Setup</span>
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Verify platform access</h1>
-            <p className="text-muted-foreground">Admin access requires an invite code from ACCENTECX or your organization's system administrator.</p>
+            <p className="text-muted-foreground">Admin access requires an invite code from ACCENTECX AI or your organization's system administrator.</p>
           </div>
 
           <form onSubmit={submitAccess} className="space-y-5">
@@ -740,7 +740,7 @@ function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: str
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold">Organization Name <span className="text-red-500">*</span></Label>
-                    <Input name="orgName" placeholder="ACCENTECX Health Systems" value={access.orgName} onChange={handleAccessChange}
+                    <Input name="orgName" placeholder="ACCENTECX AI" value={access.orgName} onChange={handleAccessChange}
                       className={`h-11 ${accessErrors.orgName ? "border-red-400" : ""}`} />
                     {accessErrors.orgName && <p className="text-red-500 text-xs">{accessErrors.orgName}</p>}
                   </div>
@@ -750,7 +750,7 @@ function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: str
                       className={`w-full h-11 rounded-md border px-3 text-sm bg-background ${accessErrors.orgType ? "border-red-400" : "border-input"}`}>
                       <option value="">Select type…</option>
                       <option>Clinic Network</option><option>School System</option>
-                      <option>Government / LGU</option><option>Healthcare Provider Network</option><option>ACCENTECX Internal</option>
+                      <option>Government / LGU</option><option>Healthcare Provider Network</option><option>ACCENTECX AI Internal</option>
                     </select>
                     {accessErrors.orgType && <p className="text-red-500 text-xs">{accessErrors.orgType}</p>}
                   </div>
@@ -893,7 +893,7 @@ export default function Onboarding() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Heart className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-bold text-foreground text-sm tracking-tight">ACCENTECX AI CARE</span>
+          <span className="font-bold text-foreground text-sm tracking-tight">NEOBRAIN</span>
         </div>
         <div className="flex items-center gap-3">
           <div className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${meta.badgeColor}`}>

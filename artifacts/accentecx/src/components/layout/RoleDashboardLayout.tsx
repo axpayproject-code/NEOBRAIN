@@ -51,7 +51,10 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-sidebar-border px-5">
           <Link href="/" className="flex items-center gap-2 font-bold text-sidebar-foreground text-sm">
             <HeartPulse className="h-5 w-5 text-sidebar-primary" />
-            <span>ACCENTECX</span>
+            <div className="flex flex-col leading-none">
+              <span>NEOBRAIN</span>
+              <span className="text-[9px] font-normal opacity-40 tracking-wide">by ACCENTECX AI</span>
+            </div>
           </Link>
         </div>
 

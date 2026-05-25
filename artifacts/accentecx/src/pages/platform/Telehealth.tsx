@@ -38,7 +38,7 @@ export default function Telehealth() {
               Expert care, anywhere<br />in the Philippines.
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              ACCENTECX Telehealth brings developmental pediatricians, therapists, and behavioral specialists to families in Mindanao, the Visayas, and beyond — no travel required.
+              NEOBRAIN Telehealth brings developmental pediatricians, therapists, and behavioral specialists to families in Mindanao, the Visayas, and beyond — no travel required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/onboarding?role=parent&plan=care-plus">
@@ -119,7 +119,7 @@ export default function Telehealth() {
             </div>
           </div>
           <h2 className="text-3xl font-bold text-primary-foreground mb-3">Works on low-bandwidth connections</h2>
-          <p className="text-primary-foreground/70 mb-7">Designed for Philippine internet realities — ACCENTECX telehealth is optimized for 4G and even 3G connections, with adaptive video quality.</p>
+          <p className="text-primary-foreground/70 mb-7">Designed for Philippine internet realities — NEOBRAIN telehealth is optimized for 4G and even 3G connections, with adaptive video quality.</p>
           <Link href="/onboarding?role=parent&plan=care-plus">
             <Button className="rounded-full bg-secondary text-secondary-foreground px-8 h-12 font-bold">
               Try it Free <ArrowRight className="h-4 w-4 ml-1" />

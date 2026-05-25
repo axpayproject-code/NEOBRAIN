@@ -21,7 +21,7 @@ const FOOTER_PLATFORM = [
 ];
 
 const FOOTER_COMPANY = [
-  { label: "About ACCENTECX", href: "/about" },
+  { label: "About NEOBRAIN", href: "/about" },
   { label: "Clinical Partners", href: "/clinical-partners" },
   { label: "For Government", href: "/for-government" },
   { label: "Privacy Policy", href: "/privacy" },
@@ -40,7 +40,10 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-bold text-primary">
             <HeartPulse className="h-6 w-6 text-secondary" />
-            <span className="text-sm tracking-tight hidden sm:block" style={{ fontFamily: "var(--font-display)" }}>ACCENTECX AI CARE</span>
+            <div className="hidden sm:flex flex-col leading-none">
+              <span className="text-sm tracking-tight" style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
+              <span className="text-[9px] text-muted-foreground font-normal tracking-wide">by ACCENTECX AI</span>
+            </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
@@ -84,11 +87,14 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-10">
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 text-primary font-bold mb-3">
+              <div className="flex items-center gap-2 text-primary font-bold mb-1">
                 <HeartPulse className="h-6 w-6 text-secondary" />
-                <span style={{ fontFamily: "var(--font-display)" }}>ACCENTECX AI CARE</span>
+                <div className="flex flex-col leading-none">
+                  <span style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
+                  <span className="text-[9px] text-muted-foreground font-normal tracking-wide mt-0.5">by ACCENTECX AI</span>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mt-3">
                 A national AI-assisted developmental healthcare infrastructure for the Philippines. Supporting families, clinicians, and schools with structured behavioral intelligence.
               </p>
             </div>
@@ -114,7 +120,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} ACCENTECX. All rights reserved. Built for the Philippines.</p>
+            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} ACCENTECX AI. All rights reserved. NEOBRAIN is a product of ACCENTECX AI.</p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Lock className="h-3.5 w-3.5" />
               <span>This platform does not diagnose. All AI outputs are for clinical decision support only.</span>

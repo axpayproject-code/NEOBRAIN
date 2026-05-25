@@ -4,7 +4,7 @@ import { Shield, Lock, Eye, Database, Mail } from "lucide-react";
 const SECTIONS = [
   {
     title: "1. Who We Are",
-    content: `ACCENTECX AI CARE is a healthcare technology platform operated by ACCENTECX Health Systems, Inc., a Philippine corporation registered under the Securities and Exchange Commission (SEC). We are a personal information controller as defined under Republic Act No. 10173 (Data Privacy Act of 2012) and its Implementing Rules and Regulations.
+    content: `NEOBRAIN is a healthcare technology platform operated by ACCENTECX AI, Inc., a Philippine corporation registered under the Securities and Exchange Commission (SEC). We are a personal information controller as defined under Republic Act No. 10173 (Data Privacy Act of 2012) and its Implementing Rules and Regulations.
 
 Registered address: Manila, Philippines
 Data Protection Officer: dpo@accentecx.ph
@@ -68,7 +68,7 @@ We do not sell, rent, or trade personal information.`,
   },
   {
     title: "6. Data Security",
-    content: `ACCENTECX implements industry-standard security controls including:
+    content: `ACCENTECX AI implements industry-standard security controls including:
 
 - AES-256 encryption for all stored health records and video files
 - TLS 1.3 for all data in transit
@@ -98,7 +98,7 @@ To exercise any of these rights, contact our Data Protection Officer at dpo@acce
   },
   {
     title: "8. Cookies and Tracking",
-    content: `ACCENTECX uses essential session cookies required for platform authentication and security. We do not use third-party advertising cookies, behavioral tracking pixels, or cross-site tracking technologies. Analytics cookies used for platform performance monitoring are first-party only and anonymized.`,
+    content: `ACCENTECX AI uses essential session cookies required for platform authentication and security. We do not use third-party advertising cookies, behavioral tracking pixels, or cross-site tracking technologies. Analytics cookies used for platform performance monitoring are first-party only and anonymized.`,
   },
   {
     title: "9. Changes to This Policy",
@@ -110,7 +110,7 @@ To exercise any of these rights, contact our Data Protection Officer at dpo@acce
 General inquiries: hello@accentecx.ph
 National Privacy Commission: privacy.gov.ph | 02-8234-2228
 
-ACCENTECX Health Systems, Inc.
+ACCENTECX AI, Inc.
 Manila, Philippines`,
   },
 ];
@@ -132,7 +132,7 @@ export default function Privacy() {
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 flex items-start gap-3">
             <Lock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
             <p className="text-sm text-foreground leading-relaxed">
-              This Privacy Policy governs the collection, processing, storage, and use of personal information by ACCENTECX AI CARE in compliance with the <strong>Republic Act No. 10173 (Data Privacy Act of 2012)</strong> and its Implementing Rules and Regulations. We are registered with the National Privacy Commission (NPC).
+              This Privacy Policy governs the collection, processing, storage, and use of personal information by NEOBRAIN in compliance with the <strong>Republic Act No. 10173 (Data Privacy Act of 2012)</strong> and its Implementing Rules and Regulations. We are registered with the National Privacy Commission (NPC).
             </p>
           </div>
         </div>

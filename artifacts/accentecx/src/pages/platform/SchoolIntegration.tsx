@@ -32,7 +32,7 @@ export default function SchoolIntegration() {
               Classroom intelligence<br />meets clinical care.
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              ACCENTECX connects teacher observations directly to clinical records — so developmental concerns spotted in the classroom automatically reach the right care team.
+              NEOBRAIN connects teacher observations directly to clinical records — so developmental concerns spotted in the classroom automatically reach the right care team.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact">

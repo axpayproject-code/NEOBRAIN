@@ -610,7 +610,7 @@ function PricingSection() {
                 <div className="rounded-2xl border border-primary/20 bg-primary text-primary-foreground p-6">
                   <p className="text-sm font-semibold text-primary-foreground/70 mb-3">Why Government & LGU?</p>
                   <p className="text-primary-foreground/90 text-sm leading-relaxed mb-4">
-                    The Philippines has over 1 million children with undiagnosed developmental conditions. ACCENTECX AI CARE gives local government units the infrastructure to identify, triage, and refer children in their communities — even in low-connectivity areas.
+                    The Philippines has over 1 million children with undiagnosed developmental conditions. NEOBRAIN gives local government units the infrastructure to identify, triage, and refer children in their communities — even in low-connectivity areas.
                   </p>
                   <ul className="space-y-2">
                     {[
@@ -663,7 +663,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 flex h-16 items-center px-6 md:px-12 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <Link href="/" className="flex items-center gap-2 text-primary font-bold text-lg">
           <HeartPulse className="h-7 w-7 text-secondary" />
-          <span className="tracking-tight" style={{ fontFamily: "var(--font-display)" }}>ACCENTECX AI CARE</span>
+          <span className="tracking-tight" style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 ml-10 text-sm text-muted-foreground">
           <a href="#systems" className="hover:text-foreground transition-colors">Systems</a>
@@ -999,7 +999,7 @@ export default function Home() {
                 Every child deserves early, structured, expert support.
               </h2>
               <p className="text-lg text-muted-foreground max-w-xl">
-                Join clinics, families, and schools across the Philippines already using ACCENTECX AI CARE to transform developmental healthcare.
+                Join clinics, families, and schools across the Philippines already using NEOBRAIN to transform developmental healthcare.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
                 <Link href="/login">
@@ -1023,7 +1023,7 @@ export default function Home() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 text-primary font-bold mb-3">
                 <HeartPulse className="h-6 w-6 text-secondary" />
-                <span style={{ fontFamily: "var(--font-display)" }}>ACCENTECX AI CARE</span>
+                <span style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
                 A national AI-assisted developmental healthcare infrastructure for the Philippines. Supporting families, clinicians, and schools with structured behavioral intelligence.
@@ -1050,7 +1050,7 @@ export default function Home() {
               <div className="text-sm font-semibold text-foreground mb-3">Company</div>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 {[
-                  { label: "About ACCENTECX", href: "/about" },
+                  { label: "About NEOBRAIN", href: "/about" },
                   { label: "Clinical Partners", href: "/clinical-partners" },
                   { label: "For Government", href: "/for-government" },
                   { label: "Privacy Policy", href: "/privacy" },

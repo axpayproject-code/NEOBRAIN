@@ -48,7 +48,7 @@ const NETWORK_BENEFITS = [
   { icon: Users, title: "Cross-referral Network", desc: "Partner clinics and therapists appear in the family portal — parents can book directly into your calendar from any region." },
   { icon: BarChart3, title: "Shared Patient Intelligence", desc: "When a patient has both a clinic and a therapy partner, both see the same developmental timeline, screening results, and AI reports." },
   { icon: Globe, title: "National Reach", desc: "Telehealth partnerships allow your clinic to serve patients across the Philippines — not just your barangay." },
-  { icon: Star, title: "Preferred Partner Listing", desc: "Verified clinical partners are listed as Preferred Providers in the ACCENTECX family portal, increasing patient discovery." },
+  { icon: Star, title: "Preferred Partner Listing", desc: "Verified clinical partners are listed as Preferred Providers in the NEOBRAIN family portal, increasing patient discovery." },
   { icon: Shield, title: "Compliance Support", desc: "We provide PhilHealth coordination guidance, DOH compliance templates, and data governance documentation for all partners." },
 ];
 
@@ -66,7 +66,7 @@ export default function ClinicalPartners() {
               Join the national network<br />of developmental care.
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              Clinics, therapy centers, schools, and hospitals across the Philippines are building a coordinated developmental healthcare system on ACCENTECX. Here's how to join.
+              Clinics, therapy centers, schools, and hospitals across the Philippines are building a coordinated developmental healthcare system on NEOBRAIN. Here's how to join.
             </p>
             <Link href="/contact">
               <Button size="lg" className="rounded-full px-10 h-13 text-base bg-primary text-primary-foreground">
@@ -122,7 +122,7 @@ export default function ClinicalPartners() {
       <section className="py-20 px-6 md:px-12 bg-muted/20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-foreground mb-4">Why join the ACCENTECX partner network?</h2>
+            <h2 className="text-4xl font-bold text-foreground mb-4">Why join the NEOBRAIN partner network?</h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {NETWORK_BENEFITS.map((b, i) => {

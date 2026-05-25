@@ -44,7 +44,7 @@ export default function TherapySystem() {
               End-to-end therapy<br />management, simplified.
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              ACCENTECX gives therapists a complete workspace — from structured care plans and session documentation to parent home programs and AI progress reporting.
+              NEOBRAIN gives therapists a complete workspace — from structured care plans and session documentation to parent home programs and AI progress reporting.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/onboarding?role=therapist">
@@ -107,7 +107,7 @@ export default function TherapySystem() {
             <div className="rounded-2xl border bg-card p-7">
               <p className="text-sm font-semibold text-primary mb-2 uppercase tracking-wider">Join a Clinic</p>
               <h3 className="text-xl font-bold text-foreground mb-3">Enter your clinic's access code</h3>
-              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">If your clinic is already on ACCENTECX, ask your admin for the access code. Your account connects automatically, giving you access to shared patients and clinic tools.</p>
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">If your clinic is already on NEOBRAIN, ask your admin for the access code. Your account connects automatically, giving you access to shared patients and clinic tools.</p>
               <ul className="space-y-2 mb-6">
                 {["Shared patient caseload", "Clinic-managed scheduling", "Admin oversight & reporting", "Clinic-level analytics access"].map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm text-foreground"><CheckCircle2 className="h-4 w-4 text-secondary shrink-0" />{f}</li>

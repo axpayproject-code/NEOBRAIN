@@ -4,13 +4,13 @@ import { FileText, AlertTriangle, Mail } from "lucide-react";
 const SECTIONS = [
   {
     title: "1. Acceptance of Terms",
-    content: `By creating an account, accessing, or using ACCENTECX AI CARE (the "Platform"), you agree to be bound by these Terms of Service ("Terms"), our Privacy Policy, and any additional terms applicable to specific features or services. If you do not agree to these Terms, do not use the Platform.
+    content: `By creating an account, accessing, or using NEOBRAIN (the "Platform"), you agree to be bound by these Terms of Service ("Terms"), our Privacy Policy, and any additional terms applicable to specific features or services. If you do not agree to these Terms, do not use the Platform.
 
-These Terms constitute a legally binding agreement between you and ACCENTECX Health Systems, Inc., a company incorporated under Philippine law.`,
+These Terms constitute a legally binding agreement between you and ACCENTECX AI, Inc., a company incorporated under Philippine law.`,
   },
   {
     title: "2. Platform Description",
-    content: `ACCENTECX AI CARE is a healthcare technology platform providing developmental health tools including:
+    content: `NEOBRAIN is a healthcare technology platform providing developmental health tools including:
 - AI-assisted developmental screenings and behavioral assessments
 - Child developmental profile management
 - Clinical decision support tools for healthcare professionals
@@ -23,7 +23,7 @@ The Platform is designed for use in the Philippines and is optimized for Philipp
   },
   {
     title: "3. Important Medical Disclaimer",
-    content: `CRITICAL: ACCENTECX AI CARE DOES NOT PROVIDE MEDICAL DIAGNOSES.
+    content: `CRITICAL: NEOBRAIN DOES NOT PROVIDE MEDICAL DIAGNOSES.
 
 All AI-generated outputs — including developmental risk scores, domain assessments, behavioral flags, and clinical reports — are intended solely as clinical decision support tools for use by licensed healthcare professionals. They do not constitute, and must not be interpreted as, medical diagnoses.
 
@@ -39,7 +39,7 @@ Healthcare professionals: You remain solely responsible for all clinical decisio
 
 Parent/Guardian Accounts: If you are creating an account on behalf of a minor child, you represent that you are the child's legal parent or guardian.
 
-Professional Accounts: Clinicians, therapists, and educators registering for professional access represent that their professional credentials are valid and current. ACCENTECX reserves the right to verify professional credentials.
+Professional Accounts: Clinicians, therapists, and educators registering for professional access represent that their professional credentials are valid and current. ACCENTECX AI reserves the right to verify professional credentials.
 
 Account Security: You are responsible for maintaining the confidentiality of your login credentials and for all activity that occurs under your account. Notify us immediately at hello@accentecx.ph if you suspect unauthorized access.
 
@@ -51,7 +51,7 @@ One Account Per User: You may not create multiple accounts. Sharing account cred
 
 Billing: Subscriptions are billed monthly or annually in Philippine Pesos (₱). Prices are listed inclusive of applicable taxes.
 
-Payment Processing: Payments are processed by third-party PCI-compliant payment processors. ACCENTECX does not store credit card or payment credentials.
+Payment Processing: Payments are processed by third-party PCI-compliant payment processors. ACCENTECX AI does not store credit card or payment credentials.
 
 Cancellation: You may cancel your subscription at any time from your account settings. Your access continues until the end of the current billing period. No refunds are issued for partial periods.
 
@@ -83,9 +83,9 @@ Healthcare professionals using the Platform represent that they have obtained al
   },
   {
     title: "8. Intellectual Property",
-    content: `ACCENTECX owns all intellectual property rights in the Platform, including all software, AI models, algorithms, interfaces, branding, and documentation. These Terms do not grant you any ownership interest.
+    content: `ACCENTECX AI owns all intellectual property rights in the Platform, including all software, AI models, algorithms, interfaces, branding, and documentation. These Terms do not grant you any ownership interest.
 
-You retain ownership of health data you submit to the Platform. By submitting data, you grant ACCENTECX a limited license to process that data to provide the services described in these Terms and our Privacy Policy.
+You retain ownership of health data you submit to the Platform. By submitting data, you grant ACCENTECX AI a limited license to process that data to provide the services described in these Terms and our Privacy Policy.
 
 AI-generated reports, summaries, and clinical documents produced by the Platform based on your data may be used, downloaded, and shared by you for healthcare purposes. You may not resell or commercially exploit AI-generated outputs.`,
   },
@@ -93,17 +93,17 @@ AI-generated reports, summaries, and clinical documents produced by the Platform
     title: "9. Limitation of Liability",
     content: `TO THE MAXIMUM EXTENT PERMITTED BY PHILIPPINE LAW:
 
-ACCENTECX provides the Platform "as is" and "as available" without warranty of any kind. We do not warrant that AI outputs are error-free, complete, or suitable for any specific clinical purpose.
+ACCENTECX AI provides the Platform "as is" and "as available" without warranty of any kind. We do not warrant that AI outputs are error-free, complete, or suitable for any specific clinical purpose.
 
-ACCENTECX SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO HARM ARISING FROM CLINICAL DECISIONS MADE IN RELIANCE ON AI-GENERATED OUTPUTS.
+ACCENTECX AI SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO HARM ARISING FROM CLINICAL DECISIONS MADE IN RELIANCE ON AI-GENERATED OUTPUTS.
 
 Healthcare professionals remain solely responsible for all clinical decisions. Parents and guardians are responsible for seeking licensed professional care for their children.
 
-ACCENTECX's maximum aggregate liability to you for any claim under these Terms shall not exceed the total subscription fees you paid in the 12 months preceding the claim.`,
+ACCENTECX AI's maximum aggregate liability to you for any claim under these Terms shall not exceed the total subscription fees you paid in the 12 months preceding the claim.`,
   },
   {
     title: "10. Termination",
-    content: `ACCENTECX may suspend or terminate your account if you violate these Terms, engage in fraudulent activity, or abuse the Platform.
+    content: `ACCENTECX AI may suspend or terminate your account if you violate these Terms, engage in fraudulent activity, or abuse the Platform.
 
 Upon termination, your access to the Platform ceases. Health data is retained per our Privacy Policy and subject to your right to erasure under RA 10173.
 
@@ -113,7 +113,7 @@ You may terminate your account at any time via account settings.`,
     title: "11. Governing Law and Dispute Resolution",
     content: `These Terms are governed by the laws of the Republic of the Philippines. Any disputes arising from or relating to these Terms shall be subject to the exclusive jurisdiction of the courts of Manila, Philippines.
 
-Before initiating legal proceedings, you agree to notify ACCENTECX in writing of your dispute and allow 30 days for good-faith resolution.`,
+Before initiating legal proceedings, you agree to notify ACCENTECX AI in writing of your dispute and allow 30 days for good-faith resolution.`,
   },
   {
     title: "12. Changes to Terms",
@@ -125,7 +125,7 @@ Before initiating legal proceedings, you agree to notify ACCENTECX in writing of
 Legal: legal@accentecx.ph
 General: hello@accentecx.ph
 
-ACCENTECX Health Systems, Inc.
+ACCENTECX AI, Inc.
 Manila, Philippines`,
   },
 ];
@@ -147,7 +147,7 @@ export default function Terms() {
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
             <p className="text-sm text-amber-800 leading-relaxed">
-              <strong>Important:</strong> ACCENTECX AI CARE provides AI-assisted clinical decision support — not medical diagnoses. All AI outputs must be reviewed and interpreted by a licensed healthcare professional. See Section 3 for the full medical disclaimer.
+              <strong>Important:</strong> NEOBRAIN provides AI-assisted clinical decision support — not medical diagnoses. All AI outputs must be reviewed and interpreted by a licensed healthcare professional. See Section 3 for the full medical disclaimer.
             </p>
           </div>
         </div>

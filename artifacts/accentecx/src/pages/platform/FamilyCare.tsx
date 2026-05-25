@@ -158,7 +158,7 @@ export default function FamilyCare() {
           </div>
           <div>
             <p className="font-bold text-foreground text-lg mb-1">Works on any device</p>
-            <p className="text-muted-foreground text-sm">Access ACCENTECX AI CARE from your phone, tablet, or desktop — no app download required. Designed for Filipino families, wherever you are.</p>
+            <p className="text-muted-foreground text-sm">Access NEOBRAIN from your phone, tablet, or desktop — no app download required. Designed for Filipino families, wherever you are.</p>
           </div>
           <div className="shrink-0">
             <div className="flex items-center gap-1.5 rounded-full bg-secondary/15 px-4 py-2">

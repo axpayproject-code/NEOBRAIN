@@ -88,7 +88,7 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-between p-12">
         <div className="flex items-center gap-2 text-background font-bold text-lg">
           <HeartPulse className="h-7 w-7 text-secondary" />
-          <span>ACCENTECX AI CARE</span>
+          <span>NEOBRAIN</span>
         </div>
         <div className="space-y-6 max-w-sm">
           <div className="text-4xl font-bold text-background leading-tight">
@@ -139,7 +139,7 @@ export default function Login() {
         >
           <div className="lg:hidden flex items-center gap-2 text-primary font-bold text-lg mb-8">
             <HeartPulse className="h-6 w-6 text-secondary" />
-            <span>ACCENTECX AI CARE</span>
+            <span>NEOBRAIN</span>
           </div>
 
           {/* Mode toggle */}

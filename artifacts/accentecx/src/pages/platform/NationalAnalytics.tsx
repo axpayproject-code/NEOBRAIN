@@ -40,7 +40,7 @@ export default function NationalAnalytics() {
               Population-level intelligence<br />for national health planning.
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              The ACCENTECX National Analytics Layer gives the DOH, LGUs, and research institutions anonymized, real-time developmental health data across the Philippines — without accessing individual patient records.
+              The NEOBRAIN National Analytics Layer gives the DOH, LGUs, and research institutions anonymized, real-time developmental health data across the Philippines — without accessing individual patient records.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/for-government">

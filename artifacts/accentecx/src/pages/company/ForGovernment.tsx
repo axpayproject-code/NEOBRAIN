@@ -60,7 +60,7 @@ export default function ForGovernment() {
               National developmental<br />intelligence infrastructure.
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              ACCENTECX gives the DOH, LGUs, and regional health offices the tools to understand, plan for, and respond to developmental health needs across every region of the Philippines.
+              NEOBRAIN gives the DOH, LGUs, and regional health offices the tools to understand, plan for, and respond to developmental health needs across every region of the Philippines.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact">
@@ -150,7 +150,7 @@ export default function ForGovernment() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-foreground mb-2">Data sovereignty and privacy commitment</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-3">All government-facing analytics are fully anonymized. No individual child or family data is ever exposed through the government analytics layer. The Philippine government retains full ownership of aggregated health data generated within its jurisdiction. ACCENTECX operates as a data processor, not a data controller, under RA 10173.</p>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-3">All government-facing analytics are fully anonymized. No individual child or family data is ever exposed through the government analytics layer. The Philippine government retains full ownership of aggregated health data generated within its jurisdiction. ACCENTECX AI operates as a data processor, not a data controller, under RA 10173.</p>
             <Link href="/privacy" className="text-primary text-sm font-medium hover:underline">Read our full Privacy Policy →</Link>
           </div>
         </div>
