@@ -976,7 +976,7 @@ export default function Home() {
                   Join the Ecosystem <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/demo">
+              <a href="#live-demo">
                 <Button size="lg" variant="outline"
                   className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto border-primary/30 text-primary hover:bg-primary/5 gap-2"
                   data-testid="button-try-demo"
@@ -984,7 +984,7 @@ export default function Home() {
                   <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
                   Try Live Demo
                 </Button>
-              </Link>
+              </a>
             </motion.div>
 
             {/* ── Switchable trust cards ──────────────────────────────── */}
@@ -1089,7 +1089,7 @@ export default function Home() {
 
             {/* ── Switchable demo card ──────────────────────────────────────── */}
             <motion.div
-              id="demo"
+              id="live-demo"
               initial={{ opacity: 0, y: 36, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.7, delay: 0.42, ease: "easeOut" }}
