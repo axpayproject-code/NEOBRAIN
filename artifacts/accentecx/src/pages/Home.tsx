@@ -238,34 +238,34 @@ function PricingSection() {
   }
 
   return (
-    <section id="pricing" className="py-24 px-6 md:px-12">
+    <section id="pricing" className="py-12 md:py-24 px-4 md:px-12">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="text-secondary font-semibold text-sm uppercase tracking-wider mb-3">Pricing</p>
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-5">
+        <div className="text-center max-w-2xl mx-auto mb-8 md:mb-10">
+          <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">Pricing</p>
+          <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-3 md:mb-5">
             Every family. Every clinic. Every school.
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-base md:text-lg text-muted-foreground">
             Transparent pricing tailored for each role — select your audience below.
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex justify-center mb-12">
-          <div className="inline-flex items-center gap-1 rounded-full bg-muted border border-border p-1.5">
+        <div className="flex justify-center mb-8 md:mb-12 overflow-x-auto pb-1">
+          <div className="inline-flex items-center gap-1 rounded-full bg-muted border border-border p-1.5 shrink-0">
             {PRICING_TABS.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
                 data-testid={`pricing-tab-${id}`}
-                className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                className={`flex items-center gap-1.5 rounded-full px-3 md:px-5 py-2 md:py-2.5 text-xs md:text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
                   activeTab === id
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-background/60"
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 {label}
               </button>
             ))}
@@ -738,36 +738,36 @@ export default function Home() {
 
       <main className="flex-1">
         {/* ── HERO ────────────────────────────────────────────────────────── */}
-        <section className="px-6 py-20 md:py-28 md:px-12 max-w-7xl mx-auto grid gap-12 lg:grid-cols-2 items-center">
+        <section className="px-4 pt-10 pb-8 md:pt-20 md:pb-16 md:px-12 max-w-7xl mx-auto grid gap-8 lg:grid-cols-2 items-center">
           <motion.div
             initial="hidden" animate="visible"
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-5"
           >
             <motion.div variants={fadeUp} custom={0}>
-              <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-semibold text-primary w-fit bg-primary/5 border-primary/10">
+              <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs md:text-sm font-semibold text-primary w-fit bg-primary/5 border-primary/10">
                 <span className="flex h-2 w-2 rounded-full bg-secondary mr-2 animate-pulse"></span>
                 The Philippines' National AI Developmental Health Platform
               </div>
             </motion.div>
             <motion.h1 variants={fadeUp} custom={1}
-              className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tighter text-foreground"
+              className="text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.05] tracking-tighter text-foreground"
             >
               Intelligent care for every developmental journey.
             </motion.h1>
             <motion.p variants={fadeUp} custom={2}
-              className="text-lg text-muted-foreground leading-relaxed max-w-xl"
+              className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl"
             >
               A national-scale AI-assisted infrastructure connecting parents, clinicians, therapists, schools, and government into one continuous developmental intelligence system.
             </motion.p>
-            <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row gap-3 mt-2">
+            <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row gap-3 mt-1">
               <Link href="/login">
-                <Button size="lg" className="rounded-full px-8 h-13 text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
+                <Button size="lg" className="rounded-full px-6 md:px-8 h-11 md:h-13 text-sm md:text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
                   Join the Ecosystem <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Button
                 size="lg" variant="outline"
-                className="rounded-full px-8 h-13 text-base w-full sm:w-auto border-primary/20"
+                className="rounded-full px-6 md:px-8 h-11 md:h-13 text-sm md:text-base w-full sm:w-auto border-primary/20"
                 data-testid="button-clinic-demo"
                 onClick={() => setDemoModal({ open: true, audience: "clinics" })}
               >
@@ -775,21 +775,21 @@ export default function Home() {
               </Button>
             </motion.div>
             <motion.div variants={fadeUp} custom={4}
-              className="flex items-center gap-6 mt-2 text-sm text-muted-foreground"
+              className="flex flex-wrap items-center gap-3 md:gap-6 mt-1 text-xs md:text-sm text-muted-foreground"
             >
               {["Never diagnoses", "HIPAA-aligned", "Philippine DOH-ready"].map(t => (
                 <span key={t} className="flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-secondary" /> {t}
+                  <ShieldCheck className="h-3 w-3 md:h-3.5 md:w-3.5 text-secondary" /> {t}
                 </span>
               ))}
             </motion.div>
           </motion.div>
 
-          {/* Hero visual */}
+          {/* Hero visual — hidden on mobile to save space */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="relative h-[480px] rounded-2xl overflow-hidden bg-primary/4 border border-primary/10"
+            className="hidden lg:block relative h-[420px] rounded-2xl overflow-hidden bg-primary/4 border border-primary/10"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-transparent to-primary/10" />
             <div className="absolute inset-5 rounded-xl border border-border bg-card shadow-lg p-5 flex flex-col gap-4">
@@ -827,25 +827,25 @@ export default function Home() {
         </section>
 
         {/* ── TRUST BAR ──────────────────────────────────────────────────── */}
-        <div className="border-y bg-muted/30 py-5 px-6">
-          <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            {["Multi-tenant SaaS", "Contract-first AI (NOT diagnosis)", "6 Integrated Ecosystems", "National Scale Ready", "Philippines DOH Aligned"].map(t => (
-              <span key={t} className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-secondary" /> {t}
+        <div className="border-y bg-muted/30 py-4 px-4 md:px-6">
+          <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-3 md:gap-8 text-xs md:text-sm text-muted-foreground">
+            {["Multi-tenant SaaS", "AI — NOT diagnosis", "6 Integrated Ecosystems", "National Scale Ready", "Philippines DOH Aligned"].map(t => (
+              <span key={t} className="flex items-center gap-1.5">
+                <Check className="h-3.5 w-3.5 text-secondary" /> {t}
               </span>
             ))}
           </div>
         </div>
 
         {/* ── 6 SYSTEMS ──────────────────────────────────────────────────── */}
-        <section id="systems" className="py-24 px-6 md:px-12">
+        <section id="systems" className="py-12 md:py-24 px-4 md:px-12">
           <div className="max-w-7xl mx-auto">
-            <div className="max-w-2xl mb-14">
-              <p className="text-secondary font-semibold text-sm uppercase tracking-wider mb-3">Platform Architecture</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-5">
+            <div className="max-w-2xl mb-8 md:mb-14">
+              <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">Platform Architecture</p>
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-3 md:mb-5">
                 Six integrated ecosystems. One continuous system.
               </h2>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-base md:text-lg text-muted-foreground">
                 Every stakeholder in a child's developmental journey operates within a purpose-built system — all sharing a unified data layer.
               </p>
             </div>
@@ -886,19 +886,19 @@ export default function Home() {
         </section>
 
         {/* ── USER JOURNEY ────────────────────────────────────────────────── */}
-        <section id="how-it-works" className="bg-primary py-24 px-6 md:px-12">
+        <section id="how-it-works" className="bg-primary py-12 md:py-24 px-4 md:px-12">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-2xl mx-auto mb-14">
-              <p className="text-secondary font-semibold text-sm uppercase tracking-wider mb-3">Care Journey</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-background mb-5">
+            <div className="text-center max-w-2xl mx-auto mb-8 md:mb-14">
+              <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">Care Journey</p>
+              <h2 className="text-3xl md:text-5xl font-bold text-background mb-3 md:mb-5">
                 From first concern to long-term outcomes.
               </h2>
-              <p className="text-lg text-background/70">
+              <p className="text-base md:text-lg text-background/70">
                 A structured 10-step system that transforms a parent's worry into a coordinated, professionally guided care program.
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
               {JOURNEY_STEPS.map((s, i) => (
                 <motion.div
                   key={s.step}
@@ -924,15 +924,15 @@ export default function Home() {
         </section>
 
         {/* ── AI ENGINE ───────────────────────────────────────────────────── */}
-        <section id="ai" className="py-24 px-6 md:px-12">
+        <section id="ai" className="py-12 md:py-24 px-4 md:px-12">
           <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="grid lg:grid-cols-2 gap-8 md:gap-16 items-center">
               <div>
-                <p className="text-secondary font-semibold text-sm uppercase tracking-wider mb-3">AI Architecture</p>
-                <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-5">
+                <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">AI Architecture</p>
+                <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-3 md:mb-5">
                   Five-layer behavioral intelligence engine.
                 </h2>
-                <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 leading-relaxed">
                   The AI system processes structured questionnaires, video behavioral signals, teacher inputs, and historical data through a pipeline of specialized engines — each designed for one job.
                 </p>
                 <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5">
@@ -976,14 +976,14 @@ export default function Home() {
         </section>
 
         {/* ── DOMAIN SCORING VISUAL ────────────────────────────────────── */}
-        <section className="bg-muted/30 border-y py-20 px-6 md:px-12">
+        <section className="bg-muted/30 border-y py-10 md:py-20 px-4 md:px-12">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-xl mx-auto mb-12">
-              <p className="text-secondary font-semibold text-sm uppercase tracking-wider mb-3">Assessment Output</p>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Five developmental domains. One risk score.</h2>
-              <p className="text-muted-foreground">Each screening generates quantified scores across 5 domains — surfacing exactly where intervention is needed.</p>
+            <div className="text-center max-w-xl mx-auto mb-8 md:mb-12">
+              <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">Assessment Output</p>
+              <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-3">Five developmental domains. One risk score.</h2>
+              <p className="text-sm md:text-base text-muted-foreground">Each screening generates quantified scores across 5 domains — surfacing exactly where intervention is needed.</p>
             </div>
-            <div className="grid sm:grid-cols-5 gap-4 max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 max-w-4xl mx-auto">
               {[
                 { domain: "Communication", score: "0–100", icon: MessageSquare, color: "border-chart-1/30 bg-chart-1/5" },
                 { domain: "Social Interaction", score: "0–100", icon: Users, color: "border-chart-3/30 bg-chart-3/5" },
@@ -1020,13 +1020,13 @@ export default function Home() {
         <PricingSection />
 
         {/* ── SAFETY BLOCK ────────────────────────────────────────────────── */}
-        <section className="bg-primary py-20 px-6 md:px-12">
+        <section className="bg-primary py-10 md:py-20 px-4 md:px-12">
           <div className="max-w-4xl mx-auto text-center">
-            <ShieldCheck className="h-12 w-12 text-secondary mx-auto mb-6" />
-            <h2 className="text-3xl md:text-4xl font-bold text-background mb-5">
+            <ShieldCheck className="h-10 w-10 md:h-12 md:w-12 text-secondary mx-auto mb-4 md:mb-6" />
+            <h2 className="text-2xl md:text-4xl font-bold text-background mb-3 md:mb-5">
               Built with clinical responsibility at its core.
             </h2>
-            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mt-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6 md:mt-10">
               {[
                 { icon: X, label: "Never diagnoses", color: "text-red-400" },
                 { icon: X, label: "Never prescribes", color: "text-red-400" },
@@ -1046,29 +1046,29 @@ export default function Home() {
         </section>
 
         {/* ── CTA ─────────────────────────────────────────────────────────── */}
-        <section className="py-24 px-6 md:px-12 bg-background">
+        <section className="py-12 md:py-24 px-4 md:px-12 bg-background">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div
               variants={fadeUp} initial="hidden" whileInView="visible"
               viewport={{ once: true }}
-              className="flex flex-col items-center gap-6"
+              className="flex flex-col items-center gap-4 md:gap-6"
             >
-              <HeartPulse className="h-12 w-12 text-secondary" />
-              <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+              <HeartPulse className="h-10 w-10 md:h-12 md:w-12 text-secondary" />
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground">
                 Every child deserves early, structured, expert support.
               </h2>
               <p className="text-lg text-muted-foreground max-w-xl">
                 Join clinics, families, and schools across the Philippines already using NEOBRAIN to transform developmental healthcare.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                <Link href="/login">
-                  <Button size="lg" className="rounded-full px-10 h-13 text-base gap-2" data-testid="button-cta-start">
+              <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full sm:w-auto">
+                <Link href="/login" className="w-full sm:w-auto">
+                  <Button size="lg" className="rounded-full px-8 h-11 md:h-13 text-sm md:text-base gap-2 w-full" data-testid="button-cta-start">
                     Start for Free <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Button
                   size="lg" variant="outline"
-                  className="rounded-full px-10 h-13 text-base border-primary/20"
+                  className="rounded-full px-8 h-11 md:h-13 text-sm md:text-base border-primary/20 w-full sm:w-auto"
                   data-testid="button-cta-demo"
                   onClick={() => setDemoModal({ open: true, audience: "clinics" })}
                 >
@@ -1087,10 +1087,10 @@ export default function Home() {
       />
 
       {/* ── FOOTER ──────────────────────────────────────────────────────── */}
-      <footer className="border-t bg-muted/20 py-12 px-6 md:px-12">
+      <footer className="border-t bg-muted/20 py-8 md:py-12 px-4 md:px-12">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-10">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-8 md:mb-10">
+            <div className="sm:col-span-2">
               <div className="flex items-center gap-2 text-primary font-bold mb-3">
                 <HeartPulse className="h-6 w-6 text-secondary" />
                 <span style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>

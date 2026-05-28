@@ -4,6 +4,14 @@ import { ai } from "@workspace/integrations-gemini-ai";
 const router = Router();
 
 const PROTOCOL_META: Record<string, { name: string; markers: string[] }> = {
+  "social-reciprocity": {
+    name: "Social Reciprocity Protocol",
+    markers: ["Gaze & joint attention", "Social engagement", "Facial affect responsiveness", "Behavioral regulation", "Communication initiation"],
+  },
+  social_reciprocity: {
+    name: "Social Reciprocity Protocol",
+    markers: ["Gaze & joint attention", "Social engagement", "Facial affect responsiveness", "Behavioral regulation", "Communication initiation"],
+  },
   name_response: {
     name: "Name Response Protocol",
     markers: ["Response latency", "Eye contact upon name call", "Orientation behavior", "Social reciprocity"],
