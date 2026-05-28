@@ -28,7 +28,7 @@ export default function NeoBrainLogo({ size = "md", showTagline = false, variant
   if (variant === "light") {
     return (
       <img
-        src="/neobrain-logo-transparent.png"
+        src="/neobrain-logo-new.png"
         alt="NEOBRAIN by ACCENTECX AI"
         className={`${IMG_HEIGHT[size]} w-auto object-contain select-none ${className}`}
         draggable={false}

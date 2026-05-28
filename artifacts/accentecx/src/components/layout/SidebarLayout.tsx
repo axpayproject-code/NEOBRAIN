@@ -62,10 +62,6 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-[100dvh] overflow-hidden">
         <div className="flex-1 overflow-auto bg-background p-6 lg:p-8 relative">
-          {/* Watermark */}
-          <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
-            className="pointer-events-none select-none fixed bottom-6 right-6 h-44 w-auto opacity-[0.12] z-0 object-contain"
-            draggable={false} />
           {children}
         </div>
       </main>
