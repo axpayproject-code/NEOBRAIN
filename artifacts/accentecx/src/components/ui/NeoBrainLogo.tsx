@@ -1,54 +1,61 @@
 interface Props {
-  size?: "xs" | "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   showTagline?: boolean;
   variant?: "light" | "dark" | "sidebar";
   className?: string;
 }
 
-const IMG_HEIGHT: Record<string, string> = {
-  xs: "h-7",
-  sm: "h-8",
-  md: "h-9",
-  lg: "h-11",
+const CIRCLE: Record<string, string> = {
+  xs: "h-4 w-4",
+  sm: "h-5 w-5",
+  md: "h-6 w-6",
+  lg: "h-7 w-7",
+  xl: "h-10 w-10",
+};
+const NAME_TEXT: Record<string, string> = {
+  xs: "text-[11px]",
+  sm: "text-sm",
+  md: "text-base",
+  lg: "text-lg",
+  xl: "text-2xl",
+};
+const TAG_TEXT: Record<string, string> = {
+  xs: "text-[7px]",
+  sm: "text-[8px]",
+  md: "text-[9px]",
+  lg: "text-[10px]",
+  xl: "text-xs",
+};
+const GAP: Record<string, string> = {
+  xs: "gap-0.5",
+  sm: "gap-1",
+  md: "gap-1",
+  lg: "gap-1.5",
+  xl: "gap-2",
 };
 
-const SIZE = {
-  xs: { box: "h-6 w-6 rounded-lg",   icon: "h-3.5 w-3.5", text: "text-xs",   tag: "text-[8px]",  gap: "gap-1.5" },
-  sm: { box: "h-7 w-7 rounded-lg",   icon: "h-4 w-4",     text: "text-sm",   tag: "text-[9px]",  gap: "gap-2"   },
-  md: { box: "h-8 w-8 rounded-xl",   icon: "h-4.5 w-4.5", text: "text-base", tag: "text-[10px]", gap: "gap-2.5" },
-  lg: { box: "h-10 w-10 rounded-xl", icon: "h-5.5 w-5.5", text: "text-lg",   tag: "text-xs",     gap: "gap-3"   },
-};
-
-const VARIANT = {
-  dark:    { box: "bg-secondary/25", icon: "text-secondary",             name: "text-background",         tag: "text-background/50"         },
-  sidebar: { box: "bg-sidebar-primary/20", icon: "text-sidebar-primary", name: "text-sidebar-foreground", tag: "text-sidebar-foreground/40" },
+const COLOR = {
+  light:   { circle: "bg-primary",                  name: "text-primary",                tag: "text-primary/70"            },
+  dark:    { circle: "bg-secondary",                 name: "text-background",             tag: "text-background/60"         },
+  sidebar: { circle: "bg-sidebar-primary",           name: "text-sidebar-foreground",     tag: "text-sidebar-foreground/50" },
 };
 
 export default function NeoBrainLogo({ size = "md", showTagline = false, variant = "light", className = "" }: Props) {
-  if (variant === "light") {
-    return (
-      <img
-        src="/neobrain-logo-new.png"
-        alt="NEOBRAIN by ACCENTECX AI"
-        className={`${IMG_HEIGHT[size]} w-auto object-contain select-none ${className}`}
-        draggable={false}
-      />
-    );
-  }
-
-  const s = SIZE[size];
-  const v = VARIANT[variant];
+  const c = COLOR[variant];
   return (
-    <div className={`flex items-center ${s.gap} ${className}`}>
-      <div className={`${s.box} ${v.box} flex items-center justify-center shrink-0`}>
-        <BrainSvg className={`${s.icon} ${v.icon}`} />
-      </div>
-      <div className="flex flex-col leading-none">
-        <span className={`font-bold tracking-tight ${s.text} ${v.name}`} style={{ fontFamily: "var(--font-display, 'Syne', sans-serif)" }}>
+    <div className={`flex flex-col items-center ${GAP[size]} ${className}`}>
+      <div className={`${CIRCLE[size]} ${c.circle} rounded-full shrink-0`} />
+      <div className="flex flex-col items-center leading-none">
+        <span
+          className={`font-extrabold tracking-widest ${NAME_TEXT[size]} ${c.name}`}
+          style={{ fontFamily: "var(--font-display, 'Syne', sans-serif)", letterSpacing: "0.12em" }}
+        >
           NEOBRAIN
         </span>
         {showTagline && (
-          <span className={`font-normal tracking-wide mt-0.5 ${s.tag} ${v.tag}`}>by ACCENTECX AI</span>
+          <span className={`font-semibold tracking-[0.18em] uppercase mt-0.5 ${TAG_TEXT[size]} ${c.tag}`}>
+            by AccentecxAI
+          </span>
         )}
       </div>
     </div>
