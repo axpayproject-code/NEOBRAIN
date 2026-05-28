@@ -967,20 +967,32 @@ export default function Home() {
 
             {/* CTAs */}
             <motion.div variants={fadeUp} custom={3} initial="hidden" animate="visible"
-              className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center"
+              className="flex flex-col items-center gap-3 w-full sm:w-auto"
             >
-              <Link href="/login">
-                <Button size="lg" className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
-                  Join the Ecosystem <ArrowRight className="h-4 w-4" />
+              {/* Primary pair */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center">
+                <Link href="/login">
+                  <Button size="lg" className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
+                    Join the Ecosystem <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Button size="lg" variant="outline"
+                  className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto border-primary/30 text-primary hover:bg-primary/5 gap-2"
+                  data-testid="button-try-demo"
+                  onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
+                  Try Live Demo
                 </Button>
-              </Link>
-              <Button size="lg" variant="outline"
-                className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto border-primary/20"
+              </div>
+              {/* Secondary link */}
+              <button
+                className="text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-muted-foreground/30 hover:decoration-primary/50"
                 data-testid="button-clinic-demo"
                 onClick={() => setDemoModal({ open: true, audience: "clinics" })}
               >
                 Request Clinic Demo
-              </Button>
+              </button>
             </motion.div>
 
             {/* Trust badges */}
@@ -1023,6 +1035,7 @@ export default function Home() {
 
             {/* ── Centered product visual ──────────────────────────────────── */}
             <motion.div
+              id="demo"
               initial={{ opacity: 0, y: 36, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.7, delay: 0.42, ease: "easeOut" }}
