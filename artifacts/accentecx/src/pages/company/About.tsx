@@ -7,6 +7,7 @@ import {
   Target, Globe, Brain, School, Building2, Stethoscope, Heart,
   CheckCircle, Flag, Zap, Shield, ChevronRight, BarChart3
 } from "lucide-react";
+import { BrainSvg } from "@/components/ui/NeoBrainLogo";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -442,7 +443,7 @@ export default function About() {
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
             className="text-center"
           >
-            <HeartPulse className="h-14 w-14 text-[#9FE870] mx-auto mb-8" />
+            <BrainSvg className="h-14 w-14 text-[#9FE870] mx-auto mb-8" />
             <blockquote className="text-3xl md:text-4xl font-bold text-foreground leading-snug mb-8 tracking-tight">
               "Every week we do not build this, 10,000 more Filipino children miss the window that changes everything."
             </blockquote>

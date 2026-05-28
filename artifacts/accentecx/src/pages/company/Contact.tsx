@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Mail, Phone, MapPin, Clock, CheckCircle2, Loader2,
-  Stethoscope, GraduationCap, Globe, Users, Building2, HeartPulse
+  Stethoscope, GraduationCap, Globe, Users, Building2
 } from "lucide-react";
+import { BrainSvg } from "@/components/ui/NeoBrainLogo";
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 
@@ -68,7 +69,7 @@ export default function Contact() {
           <motion.div variants={fadeUp} initial="hidden" animate="visible">
             <div className="flex justify-center mb-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
-                <HeartPulse className="h-7 w-7 text-primary-foreground" />
+                <BrainSvg className="h-7 w-7 text-primary-foreground" />
               </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Get in touch</h1>
