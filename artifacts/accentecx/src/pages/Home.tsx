@@ -838,6 +838,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [govModal, setGovModal] = useState(false);
   const [activeDemo, setActiveDemo] = useState<"behavior" | "screening" | "therapy">("behavior");
+  const [activeTrust, setActiveTrust] = useState<"diagnoses" | "hipaa" | "doh" | "legislation" | null>(null);
   const [systemsIdx, setSystemsIdx] = useState(0);
   const [journeyIdx, setJourneyIdx] = useState(0);
   const systemsRef = useRef<HTMLDivElement>(null);
@@ -975,52 +976,115 @@ export default function Home() {
                   Join the Ecosystem <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline"
-                className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto border-primary/30 text-primary hover:bg-primary/5 gap-2"
-                data-testid="button-try-demo"
-                onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth", block: "center" })}
-              >
-                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
-                Try Live Demo
-              </Button>
+              <Link href="/demo">
+                <Button size="lg" variant="outline"
+                  className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto border-primary/30 text-primary hover:bg-primary/5 gap-2"
+                  data-testid="button-try-demo"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
+                  Try Live Demo
+                </Button>
+              </Link>
             </motion.div>
 
-            {/* Trust badges */}
+            {/* ── Switchable trust cards ──────────────────────────────── */}
             <motion.div variants={fadeUp} custom={4} initial="hidden" animate="visible"
-              className="flex flex-wrap items-center justify-center gap-4 text-xs md:text-sm text-muted-foreground"
+              className="flex flex-col items-center gap-3 w-full max-w-2xl"
             >
-              {["Never diagnoses", "HIPAA-aligned", "Philippine DOH-ready"].map(t => (
-                <span key={t} className="flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-secondary" /> {t}
-                </span>
-              ))}
-              <button
-                onClick={() => setGovModal(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-[#0038A8]/30 bg-[#0038A8]/5 px-3 py-1 hover:bg-[#0038A8]/10 transition-colors cursor-pointer"
-                title="View Philippine legislation & partnerships"
-              >
-                {/* Philippine flag inline SVG */}
-                <svg viewBox="0 0 36 24" className="h-4 w-6 rounded-[2px] shadow-sm shrink-0" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="36" height="12" fill="#0038A8"/>
-                  <rect y="12" width="36" height="12" fill="#CE1126"/>
-                  <polygon points="0,0 18,12 0,24" fill="white"/>
-                  {/* Sun rays */}
-                  <circle cx="7.5" cy="12" r="2.6" fill="#FCD116"/>
-                  <line x1="7.5" y1="8.4" x2="7.5" y2="9.8" stroke="#FCD116" strokeWidth="1.2"/>
-                  <line x1="7.5" y1="14.2" x2="7.5" y2="15.6" stroke="#FCD116" strokeWidth="1.2"/>
-                  <line x1="3.9" y1="12" x2="5.3" y2="12" stroke="#FCD116" strokeWidth="1.2"/>
-                  <line x1="9.7" y1="12" x2="11.1" y2="12" stroke="#FCD116" strokeWidth="1.2"/>
-                  <line x1="5.0" y1="9.1" x2="6.0" y2="10.1" stroke="#FCD116" strokeWidth="1.2"/>
-                  <line x1="9.0" y1="13.9" x2="10.0" y2="14.9" stroke="#FCD116" strokeWidth="1.2"/>
-                  <line x1="9.0" y1="9.1" x2="10.0" y2="10.1" stroke="#FCD116" strokeWidth="1.2" transform="scale(-1,1) translate(-15,0)"/>
-                  <line x1="5.0" y1="13.9" x2="6.0" y2="14.9" stroke="#FCD116" strokeWidth="1.2" transform="scale(-1,1) translate(-15,0)"/>
-                  {/* 3 Stars */}
-                  <polygon points="3,4.2 3.4,5.4 4.6,5.4 3.6,6.1 4,7.3 3,6.6 2,7.3 2.4,6.1 1.4,5.4 2.6,5.4" fill="#FCD116"/>
-                  <polygon points="3,16.7 3.4,17.9 4.6,17.9 3.6,18.6 4,19.8 3,19.1 2,19.8 2.4,18.6 1.4,17.9 2.6,17.9" fill="#FCD116"/>
-                  <polygon points="14,11.5 14.4,12.7 15.6,12.7 14.6,13.4 15,14.6 14,13.9 13,14.6 13.4,13.4 12.4,12.7 13.6,12.7" fill="#FCD116"/>
-                </svg>
-                <span className="text-[#0038A8] font-semibold text-xs">PH Legislation & Partnerships</span>
-              </button>
+              {/* Pills row */}
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {([
+                  { key: "diagnoses",   label: "Never diagnoses" },
+                  { key: "hipaa",       label: "HIPAA-aligned" },
+                  { key: "doh",         label: "Philippine DOH-ready" },
+                  { key: "legislation", label: "PH Legislation & Partnerships" },
+                ] as const).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setActiveTrust(activeTrust === key ? null : key)}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-all ${
+                      activeTrust === key
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-primary/20 bg-primary/5 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}
+                  >
+                    <ShieldCheck className={`h-3.5 w-3.5 ${activeTrust === key ? "text-primary-foreground" : "text-primary"}`} />
+                    {key === "legislation" && activeTrust !== "legislation" && (
+                      <svg viewBox="0 0 36 24" className="h-3.5 w-5 rounded-[2px] shrink-0" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="36" height="12" fill="#0038A8"/><rect y="12" width="36" height="12" fill="#CE1126"/>
+                        <polygon points="0,0 18,12 0,24" fill="white"/>
+                        <circle cx="7.5" cy="12" r="2.6" fill="#FCD116"/>
+                      </svg>
+                    )}
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Expandable detail card */}
+              <AnimatePresence>
+                {activeTrust && (
+                  <motion.div
+                    key={activeTrust}
+                    initial={{ opacity: 0, height: 0, y: -6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className="overflow-hidden w-full"
+                  >
+                    <div className="rounded-xl border border-primary/20 bg-primary/5 px-5 py-4 text-sm text-left">
+                      {activeTrust === "diagnoses" && (
+                        <p className="text-foreground/85 leading-relaxed">
+                          <span className="font-semibold text-primary">NEOBRAIN AI never diagnoses.</span>{" "}
+                          Our system surfaces behavioral patterns, domain scores, and risk signals to support clinical decision-making.
+                          All formal diagnoses are made exclusively by licensed developmental pediatricians, psychologists, and allied health professionals.
+                          AI provides evidence — clinicians provide conclusions.
+                        </p>
+                      )}
+                      {activeTrust === "hipaa" && (
+                        <p className="text-foreground/85 leading-relaxed">
+                          <span className="font-semibold text-primary">End-to-end encrypted.</span>{" "}
+                          All patient data is encrypted in transit (TLS 1.3) and at rest (AES-256). Role-based access controls, full audit logging,
+                          and consent-driven data sharing ensure compliance with HIPAA standards and the Philippine Data Privacy Act of 2012 (RA 10173).
+                          No data is sold or shared with third parties.
+                        </p>
+                      )}
+                      {activeTrust === "doh" && (
+                        <p className="text-foreground/85 leading-relaxed">
+                          <span className="font-semibold text-primary">Built for the Philippine healthcare system.</span>{" "}
+                          NEOBRAIN is structured for DOH clinical documentation standards, PhilHealth claims support,
+                          and DepEd RA 11650 inclusive education compliance. Unlike foreign platforms retrofitted for the Philippines,
+                          NEOBRAIN was designed ground-up for Filipino families, clinicians, and government workflows.
+                        </p>
+                      )}
+                      {activeTrust === "legislation" && (
+                        <div className="flex flex-col gap-3">
+                          <p className="text-foreground/85 leading-relaxed">
+                            <span className="font-semibold text-primary">Aligned with 4 Philippine laws</span> and targeting 10 government agencies.
+                          </p>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { law: "RA 11650", label: "Inclusive Education Act" },
+                              { law: "RA 11036", label: "Philippine Mental Health Act" },
+                              { law: "RA 8980",  label: "ECCD Act" },
+                              { law: "RA 7277",  label: "Magna Carta for PWDs" },
+                            ].map(({ law, label }) => (
+                              <div key={law} className="flex items-start gap-2 text-xs">
+                                <span className="font-mono text-primary font-bold shrink-0">{law}</span>
+                                <span className="text-muted-foreground">{label}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <button onClick={() => setGovModal(true)}
+                            className="text-xs text-primary font-semibold underline underline-offset-2 text-left hover:text-primary/80 transition-colors">
+                            View all 10 agencies & 12 partner organizations →
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {/* ── Switchable demo card ──────────────────────────────────────── */}

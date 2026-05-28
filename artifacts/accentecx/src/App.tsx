@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
 import Home from "@/pages/Home";
+import Demo from "@/pages/Demo";
 import Login from "@/pages/Login";
 import Onboarding from "@/pages/Onboarding";
 
@@ -60,6 +61,7 @@ function AppRoutes() {
     <Switch>
       {/* ── Landing ── */}
       <Route path="/" component={Home} />
+      <Route path="/demo" component={Demo} />
       <Route path="/login">
         {user ? <Redirect to={`/${user.role}`} /> : <Login />}
       </Route>
