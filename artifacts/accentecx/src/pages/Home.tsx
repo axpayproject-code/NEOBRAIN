@@ -9,7 +9,7 @@ import {
   MessageSquare, ClipboardList, Calendar, LineChart, Globe, Lock,
   ChevronRight, Zap, Star, Menu, FileText, Landmark, Heart
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import ContactSalesModal, { type SalesAudience } from "@/components/sales/ContactSalesModal";
 import LandingLiveDemo from "@/components/landing/LandingLiveDemo";
 import PhilippinesMap from "@/components/landing/PhilippinesMap";
@@ -837,6 +837,7 @@ export default function Home() {
   }, []);
   const [menuOpen, setMenuOpen] = useState(false);
   const [govModal, setGovModal] = useState(false);
+  const [activeDemo, setActiveDemo] = useState<"behavior" | "screening" | "therapy">("behavior");
   const [systemsIdx, setSystemsIdx] = useState(0);
   const [journeyIdx, setJourneyIdx] = useState(0);
   const systemsRef = useRef<HTMLDivElement>(null);
@@ -967,32 +968,21 @@ export default function Home() {
 
             {/* CTAs */}
             <motion.div variants={fadeUp} custom={3} initial="hidden" animate="visible"
-              className="flex flex-col items-center gap-3 w-full sm:w-auto"
+              className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center"
             >
-              {/* Primary pair */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center">
-                <Link href="/login">
-                  <Button size="lg" className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
-                    Join the Ecosystem <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <Button size="lg" variant="outline"
-                  className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto border-primary/30 text-primary hover:bg-primary/5 gap-2"
-                  data-testid="button-try-demo"
-                  onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth", block: "center" })}
-                >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
-                  Try Live Demo
+              <Link href="/login">
+                <Button size="lg" className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
+                  Join the Ecosystem <ArrowRight className="h-4 w-4" />
                 </Button>
-              </div>
-              {/* Secondary link */}
-              <button
-                className="text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-muted-foreground/30 hover:decoration-primary/50"
-                data-testid="button-clinic-demo"
-                onClick={() => setDemoModal({ open: true, audience: "clinics" })}
+              </Link>
+              <Button size="lg" variant="outline"
+                className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto border-primary/30 text-primary hover:bg-primary/5 gap-2"
+                data-testid="button-try-demo"
+                onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth", block: "center" })}
               >
-                Request Clinic Demo
-              </button>
+                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
+                Try Live Demo
+              </Button>
             </motion.div>
 
             {/* Trust badges */}
@@ -1033,134 +1023,270 @@ export default function Home() {
               </button>
             </motion.div>
 
-            {/* ── Centered product visual ──────────────────────────────────── */}
+            {/* ── Switchable demo card ──────────────────────────────────────── */}
             <motion.div
               id="demo"
               initial={{ opacity: 0, y: 36, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.7, delay: 0.42, ease: "easeOut" }}
-              className="relative w-full max-w-2xl mt-4 px-6 sm:px-10"
+              className="relative w-full max-w-2xl mt-4 px-2 sm:px-0"
             >
               {/* Glow halo */}
               <div className="absolute -inset-6 bg-gradient-to-br from-primary/15 via-transparent to-primary/8 rounded-3xl blur-2xl pointer-events-none" />
 
-              {/* AI Camera Behavior Tracking Card */}
               <div className="relative rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
-                {/* Card header */}
-                <div className="flex items-center gap-3 border-b px-5 py-3 bg-primary/5">
-                  <div className="flex items-center gap-1.5">
-                    <motion.div
-                      animate={{ opacity: [1, 0.2, 1] }}
-                      transition={{ duration: 1.2, repeat: Infinity }}
-                      className="h-2 w-2 rounded-full bg-red-500"
-                    />
+
+                {/* ── Tab switcher header ── */}
+                <div className="flex items-center gap-1 border-b px-3 py-2 bg-muted/40 flex-wrap">
+                  {([
+                    { key: "behavior", label: "Behavior Tracking", icon: Video },
+                    { key: "screening", label: "Screening",         icon: ClipboardList },
+                    { key: "therapy",  label: "Therapy Plan",       icon: Activity },
+                  ] as const).map(({ key, label, icon: Icon }) => (
+                    <button
+                      key={key}
+                      onClick={() => setActiveDemo(key)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        activeDemo === key
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="h-3 w-3" />
+                      {label}
+                    </button>
+                  ))}
+                  <div className="ml-auto flex items-center gap-2 shrink-0">
+                    <motion.div animate={{ opacity: [1, 0.2, 1] }} transition={{ duration: 1.2, repeat: Infinity }}
+                      className="h-1.5 w-1.5 rounded-full bg-red-500" />
                     <span className="text-xs font-semibold text-red-600 uppercase tracking-wider">Live</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 ml-1">
-                    <Video className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">NEOBRAIN AI · Behavior Tracking</span>
-                  </div>
-                  <div className="ml-auto flex items-center gap-2">
-                    <Badge className="bg-secondary/20 text-primary border-secondary/30 text-xs">AI Active</Badge>
+                    <Badge className="bg-secondary/20 text-primary border-secondary/30 text-xs hidden sm:flex">AI Active</Badge>
                   </div>
                 </div>
 
-                {/* Camera viewport */}
-                <div className="relative bg-slate-900 aspect-video overflow-hidden">
-                  {/* Live camera feed */}
-                  {cameraError ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900">
-                      <Video className="h-8 w-8 text-muted-foreground/40" />
-                      <span className="text-xs text-muted-foreground/60">Camera access required for live tracking</span>
-                    </div>
-                  ) : (
-                    <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover scale-x-[-1]" />
-                  )}
-                  {/* Scanline overlay */}
-                  <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.015) 3px,rgba(255,255,255,0.015) 4px)" }} />
-                  {/* Grid lines */}
-                  <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(159,232,112,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(159,232,112,0.06) 1px,transparent 1px)", backgroundSize: "25% 25%" }} />
+                {/* ── Animated card body ── */}
+                <AnimatePresence mode="wait">
 
-                  {/* Face tracking circle */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative">
-                      {/* Head outline */}
-                      <motion.div
-                        animate={{ scale: [1, 1.02, 1], opacity: [0.7, 1, 0.7] }}
-                        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                        className="w-28 h-36 rounded-full border-2 border-secondary/70"
-                        style={{ boxShadow: "0 0 20px rgba(159,232,112,0.2)" }}
-                      />
-                      {/* Tracking corner brackets */}
-                      {["-top-3 -left-3", "-top-3 -right-3", "-bottom-3 -left-3", "-bottom-3 -right-3"].map((pos, i) => (
-                        <div key={i} className={`absolute ${pos} w-4 h-4`}>
-                          <div className={`absolute ${i < 2 ? "top-0" : "bottom-0"} ${i % 2 === 0 ? "left-0" : "right-0"} w-3 h-0.5 bg-secondary`} />
-                          <div className={`absolute ${i < 2 ? "top-0" : "bottom-0"} ${i % 2 === 0 ? "left-0" : "right-0"} w-0.5 h-3 bg-secondary`} />
+                  {/* ── TAB 1: Behavior Tracking ── */}
+                  {activeDemo === "behavior" && (
+                    <motion.div key="behavior"
+                      initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 12 }}
+                      transition={{ duration: 0.22 }}
+                    >
+                      <div className="relative bg-slate-900 aspect-video overflow-hidden">
+                        {cameraError ? (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900">
+                            <Video className="h-8 w-8 text-muted-foreground/40" />
+                            <span className="text-xs text-muted-foreground/60">Camera access required for live tracking</span>
+                          </div>
+                        ) : (
+                          <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover scale-x-[-1]" />
+                        )}
+                        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.015) 3px,rgba(255,255,255,0.015) 4px)" }} />
+                        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(0,56,168,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,56,168,0.06) 1px,transparent 1px)", backgroundSize: "25% 25%" }} />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="relative">
+                            <motion.div animate={{ scale: [1, 1.02, 1], opacity: [0.7, 1, 0.7] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                              className="w-28 h-36 rounded-full border-2 border-[#FCD116]/70" style={{ boxShadow: "0 0 20px rgba(252,209,22,0.2)" }} />
+                            {["-top-3 -left-3", "-top-3 -right-3", "-bottom-3 -left-3", "-bottom-3 -right-3"].map((pos, i) => (
+                              <div key={i} className={`absolute ${pos} w-4 h-4`}>
+                                <div className={`absolute ${i < 2 ? "top-0" : "bottom-0"} ${i % 2 === 0 ? "left-0" : "right-0"} w-3 h-0.5 bg-[#FCD116]`} />
+                                <div className={`absolute ${i < 2 ? "top-0" : "bottom-0"} ${i % 2 === 0 ? "left-0" : "right-0"} w-0.5 h-3 bg-[#FCD116]`} />
+                              </div>
+                            ))}
+                            {[
+                              { x: "-translate-x-6", y: "-translate-y-8", delay: 0 },
+                              { x: "translate-x-6",  y: "-translate-y-8", delay: 0.2 },
+                              { x: "translate-x-0",  y: "-translate-y-2", delay: 0.4 },
+                              { x: "-translate-x-4", y: "translate-y-6",  delay: 0.6 },
+                              { x: "translate-x-4",  y: "translate-y-6",  delay: 0.7 },
+                            ].map((dot, i) => (
+                              <motion.div key={i} animate={{ scale: [1, 1.6, 1], opacity: [0.8, 1, 0.8] }}
+                                transition={{ duration: 1.8, repeat: Infinity, delay: dot.delay, ease: "easeInOut" }}
+                                className={`absolute top-1/2 left-1/2 ${dot.x} ${dot.y} w-2 h-2 -mt-1 -ml-1 rounded-full bg-[#FCD116]`}
+                                style={{ boxShadow: "0 0 6px rgba(252,209,22,0.8)" }}
+                              />
+                            ))}
+                          </div>
                         </div>
-                      ))}
-                      {/* Facial landmark dots */}
-                      {[
-                        { x: "-translate-x-6", y: "-translate-y-8", label: "L-Eye", delay: 0 },
-                        { x: "translate-x-6",  y: "-translate-y-8", label: "R-Eye", delay: 0.2 },
-                        { x: "translate-x-0",  y: "-translate-y-2", label: "Nose",  delay: 0.4 },
-                        { x: "-translate-x-4", y: "translate-y-6",  label: "Mouth", delay: 0.6 },
-                        { x: "translate-x-4",  y: "translate-y-6",  label: "",      delay: 0.7 },
-                      ].map((dot, i) => (
-                        <motion.div key={i}
-                          animate={{ scale: [1, 1.6, 1], opacity: [0.8, 1, 0.8] }}
-                          transition={{ duration: 1.8, repeat: Infinity, delay: dot.delay, ease: "easeInOut" }}
-                          className={`absolute top-1/2 left-1/2 ${dot.x} ${dot.y} w-2 h-2 -mt-1 -ml-1 rounded-full bg-secondary`}
-                          style={{ boxShadow: "0 0 6px rgba(159,232,112,0.8)" }}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                        <motion.div animate={{ opacity: [0, 1, 1, 0], x: [8, 0, 0, -4] }} transition={{ duration: 3, repeat: Infinity, delay: 0, repeatDelay: 1 }}
+                          className="absolute top-4 right-4 bg-black/70 border border-[#FCD116]/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
+                          <div className="text-xs text-[#FCD116] font-mono">Eye Contact</div>
+                          <div className="text-sm font-bold text-white">72%</div>
+                        </motion.div>
+                        <motion.div animate={{ opacity: [0, 1, 1, 0], x: [-8, 0, 0, 4] }} transition={{ duration: 3, repeat: Infinity, delay: 1, repeatDelay: 1 }}
+                          className="absolute top-4 left-4 bg-black/70 border border-blue-400/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
+                          <div className="text-xs text-blue-300 font-mono">Gesture Freq</div>
+                          <div className="text-sm font-bold text-white">4.2/min</div>
+                        </motion.div>
+                        <motion.div animate={{ opacity: [0, 1, 1, 0], y: [-6, 0, 0, 4] }} transition={{ duration: 3, repeat: Infinity, delay: 2, repeatDelay: 1 }}
+                          className="absolute bottom-4 left-4 bg-black/70 border border-amber-400/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
+                          <div className="text-xs text-amber-300 font-mono">Attention Span</div>
+                          <div className="text-sm font-bold text-white">38 sec</div>
+                        </motion.div>
+                        <motion.div animate={{ opacity: [0, 1, 1, 0], y: [6, 0, 0, -4] }} transition={{ duration: 3, repeat: Infinity, delay: 0.5, repeatDelay: 2 }}
+                          className="absolute bottom-4 right-4 bg-black/70 border border-purple-400/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
+                          <div className="text-xs text-purple-300 font-mono">Vocal Pattern</div>
+                          <div className="text-sm font-bold text-white">Typical</div>
+                        </motion.div>
+                        <motion.div animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                          className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#FCD116]/50 to-transparent pointer-events-none"
+                          style={{ position: "absolute" }} />
+                      </div>
+                      <div className="px-5 py-3 border-t flex items-center justify-between gap-3 bg-primary/3">
+                        <div className="flex items-center gap-2">
+                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            className="h-4 w-4 rounded-full border-2 border-[#FCD116] border-t-transparent" />
+                          <span className="text-xs text-muted-foreground">Analyzing behavioral markers…</span>
+                        </div>
+                        <div className="text-xs font-mono text-primary font-semibold">5 domains · 12 indicators</div>
+                      </div>
+                    </motion.div>
+                  )}
 
-                  {/* Floating behavior tags */}
-                  <motion.div animate={{ opacity: [0, 1, 1, 0], x: [8, 0, 0, -4] }} transition={{ duration: 3, repeat: Infinity, delay: 0, repeatDelay: 1 }}
-                    className="absolute top-4 right-4 bg-black/70 border border-secondary/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
-                    <div className="text-xs text-secondary font-mono">Eye Contact</div>
-                    <div className="text-sm font-bold text-white">72%</div>
-                  </motion.div>
+                  {/* ── TAB 2: Screening ── */}
+                  {activeDemo === "screening" && (
+                    <motion.div key="screening"
+                      initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 12 }}
+                      transition={{ duration: 0.22 }}
+                      className="p-5 flex flex-col gap-4"
+                    >
+                      {/* Child + progress */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Patient</p>
+                          <p className="font-bold text-sm text-foreground">Maria Santos · 4 yrs</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">Progress</p>
+                          <p className="font-bold text-sm text-primary">8 / 15 questions</p>
+                        </div>
+                        <div className="shrink-0">
+                          <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">In Progress</Badge>
+                        </div>
+                      </div>
+                      {/* Progress bar */}
+                      <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                        <motion.div className="h-full bg-primary rounded-full" initial={{ width: "0%" }} animate={{ width: "53%" }} transition={{ duration: 0.8, ease: "easeOut" }} />
+                      </div>
+                      {/* Current question */}
+                      <div className="rounded-xl border border-border bg-muted/30 p-4 flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono text-primary bg-primary/10 rounded px-1.5 py-0.5">Q8</span>
+                          <span className="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Social Communication</span>
+                        </div>
+                        <p className="text-sm font-medium text-foreground leading-snug">"Does your child maintain eye contact during a conversation or play?"</p>
+                        <div className="flex gap-2 flex-wrap">
+                          {["Always", "Sometimes", "Rarely", "Never"].map((opt, i) => (
+                            <motion.button key={opt} whileHover={{ scale: 1.03 }}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${i === 1 ? "bg-primary text-white border-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                              {opt}
+                            </motion.button>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Domain scores so far */}
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { label: "Communication", score: 68, color: "bg-blue-500" },
+                          { label: "Motor Skills",  score: 82, color: "bg-emerald-500" },
+                          { label: "Adaptive",      score: 74, color: "bg-amber-500" },
+                        ].map(({ label, score, color }) => (
+                          <div key={label} className="flex flex-col gap-1.5">
+                            <div className="flex justify-between text-[10px] text-muted-foreground">
+                              <span>{label}</span><span className="font-semibold">{score}%</span>
+                            </div>
+                            <div className="w-full bg-muted rounded-full h-1 overflow-hidden">
+                              <motion.div className={`h-full rounded-full ${color}`} initial={{ width: "0%" }} animate={{ width: `${score}%` }} transition={{ duration: 0.9, delay: 0.2, ease: "easeOut" }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between border-t pt-3 gap-3">
+                        <div className="flex items-center gap-2">
+                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            className="h-3.5 w-3.5 rounded-full border-2 border-primary border-t-transparent" />
+                          <span className="text-xs text-muted-foreground">AI scoring in real-time…</span>
+                        </div>
+                        <span className="text-xs font-mono text-primary font-semibold">Domain: Social · Q8/15</span>
+                      </div>
+                    </motion.div>
+                  )}
 
-                  <motion.div animate={{ opacity: [0, 1, 1, 0], x: [-8, 0, 0, 4] }} transition={{ duration: 3, repeat: Infinity, delay: 1, repeatDelay: 1 }}
-                    className="absolute top-4 left-4 bg-black/70 border border-blue-400/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
-                    <div className="text-xs text-blue-300 font-mono">Gesture Freq</div>
-                    <div className="text-sm font-bold text-white">4.2/min</div>
-                  </motion.div>
+                  {/* ── TAB 3: Therapy Plan ── */}
+                  {activeDemo === "therapy" && (
+                    <motion.div key="therapy"
+                      initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 12 }}
+                      transition={{ duration: 0.22 }}
+                      className="p-5 flex flex-col gap-4"
+                    >
+                      {/* Patient + plan type */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Child</p>
+                          <p className="font-bold text-sm text-foreground">Miguel Reyes · 6 yrs</p>
+                          <p className="text-xs text-muted-foreground">Speech Delay · Mild ASD</p>
+                        </div>
+                        <Badge className="bg-primary/10 text-primary border-primary/20 text-xs shrink-0">Speech Therapy</Badge>
+                      </div>
+                      {/* Session progress */}
+                      <div className="rounded-xl border border-border bg-muted/30 p-4 flex flex-col gap-3">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span className="font-semibold">Session Progress</span>
+                          <span className="font-mono text-primary font-bold">9 / 12 completed</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                          <motion.div className="h-full bg-primary rounded-full" initial={{ width: "0%" }} animate={{ width: "75%" }} transition={{ duration: 0.9, ease: "easeOut" }} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div>
+                            <p className="text-muted-foreground">Next Session</p>
+                            <p className="font-semibold text-foreground">Tue, Jun 3 · 10:00 AM</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Therapist</p>
+                            <p className="font-semibold text-foreground">Ma. Cruz, SLP</p>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Therapy targets */}
+                      <div className="flex flex-col gap-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Active Targets</p>
+                        {[
+                          { target: "2-word spontaneous phrases", pct: 80, done: true },
+                          { target: "Answering yes/no questions",  pct: 65, done: false },
+                          { target: "Requesting objects verbally", pct: 55, done: false },
+                        ].map(({ target, pct, done }) => (
+                          <div key={target} className="flex items-center gap-3">
+                            <div className={`h-4 w-4 rounded-full shrink-0 flex items-center justify-center ${done ? "bg-emerald-500" : "border-2 border-primary/40"}`}>
+                              {done && <Check className="h-2.5 w-2.5 text-white" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between text-xs mb-0.5">
+                                <span className="text-foreground truncate pr-2">{target}</span>
+                                <span className="text-muted-foreground shrink-0">{pct}%</span>
+                              </div>
+                              <div className="w-full bg-muted rounded-full h-1 overflow-hidden">
+                                <motion.div className={`h-full rounded-full ${done ? "bg-emerald-500" : "bg-primary"}`}
+                                  initial={{ width: "0%" }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }} />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between border-t pt-3">
+                        <div className="flex items-center gap-2">
+                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            className="h-3.5 w-3.5 rounded-full border-2 border-primary border-t-transparent" />
+                          <span className="text-xs text-muted-foreground">AI updating progress…</span>
+                        </div>
+                        <span className="text-xs font-mono text-primary font-semibold">75% plan complete</span>
+                      </div>
+                    </motion.div>
+                  )}
 
-                  <motion.div animate={{ opacity: [0, 1, 1, 0], y: [-6, 0, 0, 4] }} transition={{ duration: 3, repeat: Infinity, delay: 2, repeatDelay: 1 }}
-                    className="absolute bottom-4 left-4 bg-black/70 border border-amber-400/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
-                    <div className="text-xs text-amber-300 font-mono">Attention Span</div>
-                    <div className="text-sm font-bold text-white">38 sec</div>
-                  </motion.div>
-
-                  <motion.div animate={{ opacity: [0, 1, 1, 0], y: [6, 0, 0, -4] }} transition={{ duration: 3, repeat: Infinity, delay: 0.5, repeatDelay: 2 }}
-                    className="absolute bottom-4 right-4 bg-black/70 border border-purple-400/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
-                    <div className="text-xs text-purple-300 font-mono">Vocal Pattern</div>
-                    <div className="text-sm font-bold text-white">Typical</div>
-                  </motion.div>
-
-                  {/* Scanning sweep line */}
-                  <motion.div
-                    animate={{ top: ["0%", "100%", "0%"] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                    className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-secondary/60 to-transparent pointer-events-none"
-                    style={{ position: "absolute" }}
-                  />
-                </div>
-
-                {/* AI analysis bar */}
-                <div className="px-5 py-3 border-t flex items-center justify-between gap-3 bg-primary/3">
-                  <div className="flex items-center gap-2">
-                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      className="h-4 w-4 rounded-full border-2 border-secondary border-t-transparent" />
-                    <span className="text-xs text-muted-foreground">Analyzing behavioral markers…</span>
-                  </div>
-                  <div className="text-xs font-mono text-secondary font-semibold">5 domains · 12 indicators</div>
-                </div>
+                </AnimatePresence>
               </div>
-
             </motion.div>
           </div>
         </section>
