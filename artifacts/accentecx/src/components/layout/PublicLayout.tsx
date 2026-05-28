@@ -46,8 +46,8 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Global watermark */}
-      <img src="/neobrain-logo.png" alt="" aria-hidden="true"
-        className="pointer-events-none select-none fixed bottom-6 right-6 h-36 w-auto opacity-[0.04] z-0 object-contain"
+      <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
+        className="pointer-events-none select-none fixed bottom-6 right-6 h-36 w-auto opacity-[0.12] z-0 object-contain"
         draggable={false} />
       {/* ── Nav ─────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">

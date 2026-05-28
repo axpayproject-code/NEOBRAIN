@@ -781,6 +781,10 @@ export default function Home() {
       <main className="flex-1">
         {/* ── HERO ────────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden px-4 pt-10 pb-8 md:pt-20 md:pb-16 md:px-12">
+          {/* Hero watermark */}
+          <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-auto opacity-[0.04] object-contain z-0"
+            draggable={false} />
           {/* Animated background blobs */}
           <motion.div
             animate={{ scale: [1, 1.25, 1], x: [0, 30, 0] }}
@@ -985,8 +989,8 @@ export default function Home() {
 
         {/* ── STATS BAR ──────────────────────────────────────────────────── */}
         <div className="border-y bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 py-10 px-4 md:px-12 relative overflow-hidden">
-          <img src="/neobrain-logo.png" alt="" aria-hidden="true"
-            className="pointer-events-none select-none absolute right-8 top-1/2 -translate-y-1/2 h-20 w-auto opacity-[0.06] object-contain"
+          <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute right-8 top-1/2 -translate-y-1/2 h-20 w-auto opacity-[0.14] object-contain"
             draggable={false} />
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 place-items-center relative z-10">
             {[
@@ -1016,8 +1020,11 @@ export default function Home() {
         </div>
 
         {/* ── 6 SYSTEMS ──────────────────────────────────────────────────── */}
-        <section id="systems" className="py-12 md:py-24 px-4 md:px-12">
-          <div className="max-w-7xl mx-auto">
+        <section id="systems" className="py-12 md:py-24 px-4 md:px-12 relative overflow-hidden">
+          <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute top-8 right-6 h-28 w-auto opacity-[0.07] object-contain"
+            draggable={false} />
+          <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col items-center text-center mb-10 md:mb-16">
               <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-3 text-center w-full">Platform Architecture</p>
               <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 md:mb-6 text-center max-w-3xl">
@@ -1124,8 +1131,11 @@ export default function Home() {
 
         {/* ── USER JOURNEY ────────────────────────────────────────────────── */}
         <section id="how-it-works" className="bg-primary py-12 md:py-24 px-4 md:px-12 relative overflow-hidden">
-          <img src="/neobrain-logo.png" alt="" aria-hidden="true"
-            className="pointer-events-none select-none absolute -bottom-6 -right-6 h-64 w-auto opacity-[0.07] object-contain"
+          <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute -bottom-6 -right-6 h-72 w-auto opacity-[0.15] object-contain"
+            draggable={false} />
+          <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute -top-4 -left-8 h-48 w-auto opacity-[0.06] object-contain rotate-12"
             draggable={false} />
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="text-center max-w-2xl mx-auto mb-8 md:mb-14">
@@ -1221,8 +1231,11 @@ export default function Home() {
         <PhilippinesMap />
 
         {/* ── AI ENGINE ───────────────────────────────────────────────────── */}
-        <section id="ai" className="py-12 md:py-24 px-4 md:px-12">
-          <div className="max-w-7xl mx-auto">
+        <section id="ai" className="py-12 md:py-24 px-4 md:px-12 relative overflow-hidden">
+          <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute bottom-8 left-6 h-28 w-auto opacity-[0.07] object-contain"
+            draggable={false} />
+          <div className="max-w-7xl mx-auto relative z-10">
             <div className="grid lg:grid-cols-2 gap-8 md:gap-16 items-center">
               <div>
                 <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">AI Architecture</p>
@@ -1273,8 +1286,11 @@ export default function Home() {
         </section>
 
         {/* ── DOMAIN SCORING VISUAL ────────────────────────────────────── */}
-        <section className="bg-muted/30 border-y py-10 md:py-20 px-4 md:px-12">
-          <div className="max-w-7xl mx-auto">
+        <section className="bg-muted/30 border-y py-10 md:py-20 px-4 md:px-12 relative overflow-hidden">
+          <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute top-1/2 -translate-y-1/2 right-8 h-32 w-auto opacity-[0.08] object-contain"
+            draggable={false} />
+          <div className="max-w-7xl mx-auto relative z-10">
             <div className="text-center max-w-xl mx-auto mb-8 md:mb-12">
               <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">Assessment Output</p>
               <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-3">Five developmental domains. One risk score.</h2>
@@ -1318,8 +1334,8 @@ export default function Home() {
 
         {/* ── SAFETY BLOCK ────────────────────────────────────────────────── */}
         <section className="bg-primary py-10 md:py-20 px-4 md:px-12 relative overflow-hidden">
-          <img src="/neobrain-logo.png" alt="" aria-hidden="true"
-            className="pointer-events-none select-none absolute -top-4 left-1/2 -translate-x-1/2 h-48 w-auto opacity-[0.06] object-contain"
+          <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute -top-4 left-1/2 -translate-x-1/2 h-56 w-auto opacity-[0.12] object-contain"
             draggable={false} />
           <div className="max-w-4xl mx-auto text-center relative z-10">
             <ShieldCheck className="h-10 w-10 md:h-12 md:w-12 text-secondary mx-auto mb-4 md:mb-6" />
@@ -1346,8 +1362,11 @@ export default function Home() {
         </section>
 
         {/* ── CTA ─────────────────────────────────────────────────────────── */}
-        <section className="py-12 md:py-24 px-4 md:px-12 bg-background">
-          <div className="max-w-3xl mx-auto text-center">
+        <section className="py-12 md:py-24 px-4 md:px-12 bg-background relative overflow-hidden">
+          <img src="/neobrain-logo-transparent.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-auto opacity-[0.05] object-contain z-0"
+            draggable={false} />
+          <div className="max-w-3xl mx-auto text-center relative z-10">
             <motion.div
               variants={fadeUp} initial="hidden" whileInView="visible"
               viewport={{ once: true }}
