@@ -921,7 +921,7 @@ export default function Home() {
 
         {/* ── STATS BAR ──────────────────────────────────────────────────── */}
         <div className="border-y bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 py-10 px-4 md:px-12">
-          <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 place-items-center">
             {[
               { stat: "1M+", label: "Children undiagnosed in PH", icon: Brain,     iconBg: "bg-primary/10",   iconColor: "text-primary",   statColor: "text-primary" },
               { stat: "6",   label: "Integrated care ecosystems",  icon: Activity,  iconBg: "bg-secondary/20", iconColor: "text-secondary", statColor: "text-secondary" },
@@ -951,12 +951,12 @@ export default function Home() {
         {/* ── 6 SYSTEMS ──────────────────────────────────────────────────── */}
         <section id="systems" className="py-12 md:py-24 px-4 md:px-12">
           <div className="max-w-7xl mx-auto">
-            <div className="max-w-2xl mb-8 md:mb-14">
-              <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">Platform Architecture</p>
-              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-3 md:mb-5">
-                Six integrated ecosystems. One continuous system.
+            <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
+              <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-3">Platform Architecture</p>
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 md:mb-6">
+                Six integrated ecosystems.<br className="hidden md:block" /> One continuous system.
               </h2>
-              <p className="text-base md:text-lg text-muted-foreground">
+              <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
                 Every stakeholder in a child's developmental journey operates within a purpose-built system — all sharing a unified data layer.
               </p>
             </div>
