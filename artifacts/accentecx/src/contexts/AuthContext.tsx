@@ -1,8 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
 
 export type UserRole = "parent" | "doctor" | "therapist" | "admin";
 
 export interface AuthUser {
+  id: string;
   role: UserRole;
   name: string;
   email: string;
@@ -32,6 +34,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null;
     }
   });
+
+  useEffect(() => {
+    if (user?.id) {
+      setAuthTokenGetter(() => user.id);
+    } else {
+      setAuthTokenGetter(null);
+    }
+  }, [user?.id]);
 
   const login = (newUser: AuthUser) => {
     localStorage.setItem("accentecx_user", JSON.stringify(newUser));
@@ -63,9 +73,9 @@ export function roleDefaultRoute(role: UserRole): string {
   }
 }
 
-export const ROLE_DEMO_USERS: Record<UserRole, AuthUser> = {
-  parent: { role: "parent", name: "Maria Santos", email: "maria@example.com", tier: "Care Plus" },
-  doctor: { role: "doctor", name: "Dr. Patricia Lim", email: "patricia.lim@clinic.com", tier: "Clinic SaaS Pro" },
-  therapist: { role: "therapist", name: "Ma. Teresa Valdez", email: "teresa@therapy.com", tier: "Clinic SaaS" },
-  admin: { role: "admin", name: "System Administrator", email: "admin@accentecx.com", tier: "Platform Admin" },
+export const ROLE_TIERS: Record<UserRole, string> = {
+  parent: "Care Plus",
+  doctor: "Clinic SaaS Pro",
+  therapist: "Clinic SaaS",
+  admin: "Platform Admin",
 };

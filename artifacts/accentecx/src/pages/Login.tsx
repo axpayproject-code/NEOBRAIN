@@ -5,10 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   HeartPulse, User, Stethoscope, ActivitySquare, Settings,
-  ChevronRight, Shield, ArrowRight, Check
+  ChevronRight, Shield, ArrowRight, Check, AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth, type UserRole, ROLE_DEMO_USERS, roleDefaultRoute } from "@/contexts/AuthContext";
+import { useAuth, type UserRole, ROLE_TIERS, roleDefaultRoute } from "@/contexts/AuthContext";
 
 const ROLES: {
   id: UserRole;
@@ -17,7 +17,6 @@ const ROLES: {
   icon: typeof User;
   tier: string;
   description: string;
-  onboardingPath: string;
 }[] = [
   {
     id: "parent",
@@ -26,7 +25,6 @@ const ROLES: {
     icon: User,
     tier: "B2C Subscription",
     description: "Track your child's developmental journey, complete screenings, book specialists, and follow AI-guided therapy plans.",
-    onboardingPath: "/onboarding?role=parent&plan=care-plus",
   },
   {
     id: "doctor",
@@ -35,7 +33,6 @@ const ROLES: {
     icon: Stethoscope,
     tier: "Clinic SaaS",
     description: "Manage your practice with AI-assisted intake, patient risk triage, telehealth tools, and clinical reporting.",
-    onboardingPath: "/onboarding?role=doctor",
   },
   {
     id: "therapist",
@@ -44,7 +41,6 @@ const ROLES: {
     icon: ActivitySquare,
     tier: "Clinic SaaS",
     description: "Manage your caseload, create therapy plans, track progress, and collaborate with clinics and families.",
-    onboardingPath: "/onboarding?role=therapist",
   },
   {
     id: "admin",
@@ -53,7 +49,6 @@ const ROLES: {
     icon: Settings,
     tier: "Admin Access",
     description: "Monitor platform health, manage clinics and schools, view population-level risk analytics, and control access.",
-    onboardingPath: "/onboarding?role=admin",
   },
 ];
 
@@ -66,20 +61,55 @@ export default function Login() {
   const [mode, setMode] = useState<Mode>("signin");
   const [selectedRole, setSelectedRole] = useState<UserRole>("parent");
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSignIn = (e: React.FormEvent) => {
+  // ── Sign In ──────────────────────────────────────────────────────────────
+  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      const demoUser = ROLE_DEMO_USERS[selectedRole];
-      login(demoUser);
-      setLocation(roleDefaultRoute(selectedRole));
-    }, 700);
+    setErrorMsg("");
+    const form = e.currentTarget;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, role: selectedRole }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Login failed");
+      login({ id: data.id, email: data.email, name: data.name, role: data.role, tier: ROLE_TIERS[data.role as UserRole] });
+      setLocation(roleDefaultRoute(data.role));
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Login failed. Please try again.");
+      setLoading(false);
+    }
   };
 
-  const handleContinueSignup = () => {
-    const role = ROLES.find(r => r.id === selectedRole);
-    if (role) setLocation(role.onboardingPath);
+  // ── Sign Up ──────────────────────────────────────────────────────────────
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg("");
+    const form = e.currentTarget;
+    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, role: selectedRole }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Signup failed");
+      login({ id: data.id, email: data.email, name: data.name, role: data.role, tier: ROLE_TIERS[data.role as UserRole] });
+      setLocation(roleDefaultRoute(data.role));
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Signup failed. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -145,13 +175,13 @@ export default function Login() {
           {/* Mode toggle */}
           <div className="flex items-center gap-1 rounded-full bg-muted border border-border p-1 mb-8 w-fit">
             <button
-              onClick={() => setMode("signin")}
+              onClick={() => { setMode("signin"); setErrorMsg(""); }}
               className={`rounded-full px-5 py-2 text-sm font-semibold transition-all ${mode === "signin" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
             >
               Sign In
             </button>
             <button
-              onClick={() => setMode("signup")}
+              onClick={() => { setMode("signup"); setErrorMsg(""); }}
               className={`rounded-full px-5 py-2 text-sm font-semibold transition-all ${mode === "signup" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
               data-testid="mode-switch-signup"
             >
@@ -171,7 +201,7 @@ export default function Login() {
               >
                 <div className="mb-6">
                   <h1 className="text-2xl font-bold text-foreground mb-1">Sign in to your workspace</h1>
-                  <p className="text-muted-foreground text-sm">Select your role to access the correct dashboard</p>
+                  <p className="text-muted-foreground text-sm">Enter your credentials to access your dashboard</p>
                 </div>
 
                 <form onSubmit={handleSignIn} className="space-y-5">
@@ -206,22 +236,27 @@ export default function Login() {
                     <div className="space-y-1.5">
                       <Label htmlFor="email" className="text-sm">Email</Label>
                       <Input
-                        id="email" type="email" placeholder="name@example.com" required
-                        defaultValue="demo@accentecx.com" data-testid="input-email"
-                        className="h-11 rounded-xl"
+                        id="email" name="email" type="email" placeholder="name@example.com" required
+                        data-testid="input-email" className="h-11 rounded-xl"
                       />
                     </div>
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="password" className="text-sm">Password</Label>
-                        <span className="text-xs text-primary hover:underline cursor-pointer">Forgot password?</span>
                       </div>
                       <Input
-                        id="password" type="password" required defaultValue="password"
+                        id="password" name="password" type="password" required placeholder="Your password"
                         data-testid="input-password" className="h-11 rounded-xl"
                       />
                     </div>
                   </div>
+
+                  {errorMsg && (
+                    <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      {errorMsg}
+                    </div>
+                  )}
 
                   <Button
                     type="submit"
@@ -235,13 +270,9 @@ export default function Login() {
                   </Button>
                 </form>
 
-                <div className="mt-5 rounded-xl bg-secondary/10 border border-secondary/20 p-4 text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">Demo mode:</span> Use any email/password. Select a role above to access that dashboard. All data is real from the database.
-                </div>
-
                 <p className="text-center text-sm text-muted-foreground mt-5">
                   Don't have an account?{" "}
-                  <button onClick={() => setMode("signup")} className="text-primary font-medium hover:underline">
+                  <button onClick={() => { setMode("signup"); setErrorMsg(""); }} className="text-primary font-medium hover:underline">
                     Create account
                   </button>
                 </p>
@@ -259,75 +290,83 @@ export default function Login() {
               >
                 <div className="mb-6">
                   <h1 className="text-2xl font-bold text-foreground mb-1">Create your account</h1>
-                  <p className="text-muted-foreground text-sm">Select your role — each has its own onboarding and workspace</p>
+                  <p className="text-muted-foreground text-sm">Select your role — each has its own workspace and onboarding</p>
                 </div>
 
-                <div className="space-y-3 mb-6">
-                  {ROLES.map((role) => {
-                    const Icon = role.icon;
-                    const active = selectedRole === role.id;
-                    return (
-                      <button
-                        key={role.id}
-                        type="button"
-                        onClick={() => setSelectedRole(role.id)}
-                        data-testid={`signup-role-${role.id}`}
-                        className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                          active
-                            ? "border-primary bg-primary/5"
-                            : "border-border bg-background hover:border-primary/30"
-                        }`}
-                      >
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ${active ? "bg-primary" : "bg-muted"}`}>
-                          <Icon className={`h-5 w-5 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className={`text-sm font-bold ${active ? "text-primary" : "text-foreground"}`}>{role.label}</p>
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
-                              {role.tier}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground leading-snug mt-0.5 truncate">{role.description.slice(0, 70)}…</p>
-                        </div>
-                        <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${active ? "border-primary bg-primary" : "border-border"}`}>
-                          {active && <Check className="h-3 w-3 text-primary-foreground" />}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                <form onSubmit={handleSignUp} className="space-y-5">
+                  {/* Role selection */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Your role</Label>
+                    <div className="space-y-2">
+                      {ROLES.map((role) => {
+                        const Icon = role.icon;
+                        const active = selectedRole === role.id;
+                        return (
+                          <button
+                            key={role.id}
+                            type="button"
+                            onClick={() => setSelectedRole(role.id)}
+                            data-testid={`signup-role-${role.id}`}
+                            className={`w-full flex items-center gap-4 p-3 rounded-xl border-2 text-left transition-all ${
+                              active
+                                ? "border-primary bg-primary/5"
+                                : "border-border bg-background hover:border-primary/30"
+                            }`}
+                          >
+                            <div className={`flex h-9 w-9 items-center justify-center rounded-xl shrink-0 ${active ? "bg-primary" : "bg-muted"}`}>
+                              <Icon className={`h-4 w-4 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm font-bold ${active ? "text-primary" : "text-foreground"}`}>{role.label}</p>
+                              <p className="text-xs text-muted-foreground">{role.tier}</p>
+                            </div>
+                            <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${active ? "border-primary bg-primary" : "border-border"}`}>
+                              {active && <Check className="h-3 w-3 text-primary-foreground" />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-                {/* Role description */}
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={selectedRole}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    className="rounded-xl bg-muted/50 border border-border p-4 mb-5"
+                  {/* Account details */}
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="name" className="text-sm">Full Name</Label>
+                      <Input id="name" name="name" type="text" placeholder="Your full name" required className="h-11 rounded-xl" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="signup-email" className="text-sm">Email</Label>
+                      <Input id="signup-email" name="email" type="email" placeholder="name@example.com" required className="h-11 rounded-xl" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="signup-password" className="text-sm">Password</Label>
+                      <Input id="signup-password" name="password" type="password" placeholder="Min 6 characters" required minLength={6} className="h-11 rounded-xl" />
+                    </div>
+                  </div>
+
+                  {errorMsg && (
+                    <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      {errorMsg}
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    className="w-full h-12 rounded-full text-base font-bold bg-primary text-primary-foreground"
+                    disabled={loading}
+                    data-testid="button-continue-signup"
                   >
-                    <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
-                      {ROLES.find(r => r.id === selectedRole)?.subLabel} Setup
-                    </p>
-                    <p className="text-sm text-foreground">
-                      {ROLES.find(r => r.id === selectedRole)?.description}
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
-
-                <Button
-                  onClick={handleContinueSignup}
-                  className="w-full h-12 rounded-full text-base font-bold bg-primary text-primary-foreground"
-                  data-testid="button-continue-signup"
-                >
-                  Continue as {ROLES.find(r => r.id === selectedRole)?.label}
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
+                    {loading ? "Creating account…" : (
+                      <>Create Account as {ROLES.find(r => r.id === selectedRole)?.label} <ArrowRight className="h-4 w-4 ml-1" /></>
+                    )}
+                  </Button>
+                </form>
 
                 <p className="text-center text-sm text-muted-foreground mt-5">
                   Already have an account?{" "}
-                  <button onClick={() => setMode("signin")} className="text-primary font-medium hover:underline">
+                  <button onClick={() => { setMode("signin"); setErrorMsg(""); }} className="text-primary font-medium hover:underline">
                     Sign in
                   </button>
                 </p>

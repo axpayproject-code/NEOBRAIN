@@ -1,15 +1,27 @@
 import { Router } from "express";
 import { db, childrenTable, screeningsTable, appointmentsTable, therapyPlansTable, reportsTable, timelineEventsTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, isNull, or } from "drizzle-orm";
 import { CreateChildBody, UpdateChildBody, GetChildParams, DeleteChildParams, GetChildDomainScoresParams, GetChildTimelineParams } from "@workspace/api-zod";
 
 const router = Router();
 
-// List all children
+function getUserId(req: { headers: Record<string, string | string[] | undefined> }): string | null {
+  const auth = req.headers.authorization;
+  if (typeof auth === "string" && auth.startsWith("Bearer ")) {
+    const token = auth.slice(7).trim();
+    return token || null;
+  }
+  return null;
+}
+
+// List all children (scoped to the authenticated user)
 router.get("/children", async (req, res) => {
-  const children = await db.select().from(childrenTable).orderBy(desc(childrenTable.createdAt));
+  const userId = getUserId(req);
+  const rows = userId
+    ? await db.select().from(childrenTable).where(eq(childrenTable.userId, userId)).orderBy(desc(childrenTable.createdAt))
+    : await db.select().from(childrenTable).where(isNull(childrenTable.userId)).orderBy(desc(childrenTable.createdAt));
   return res.json(
-    children.map((c) => ({
+    rows.map((c) => ({
       ...c,
       createdAt: c.createdAt.toISOString(),
       updatedAt: c.updatedAt?.toISOString() ?? null,
@@ -23,7 +35,8 @@ router.post("/children", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid input", details: parsed.error.issues });
   }
-  const [child] = await db.insert(childrenTable).values(parsed.data).returning();
+  const userId = getUserId(req);
+  const [child] = await db.insert(childrenTable).values({ ...parsed.data, userId }).returning();
   // Add timeline event
   await db.insert(timelineEventsTable).values({
     childId: child.id,

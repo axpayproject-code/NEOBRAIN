@@ -881,7 +881,7 @@ export default function Onboarding() {
     const ROLE_DEFAULT_ROUTES: Record<UserRole, string> = {
       parent: "/parent", doctor: "/doctor", therapist: "/therapist", admin: "/admin",
     };
-    login({ name: name || `${meta.label} User`, email: email || `user@accentecx.ph`, role, tier });
+    login({ id: crypto.randomUUID(), name: name || `${meta.label} User`, email: email || `user@accentecx.ph`, role, tier });
     setLocation(ROLE_DEFAULT_ROUTES[role]);
   }
 

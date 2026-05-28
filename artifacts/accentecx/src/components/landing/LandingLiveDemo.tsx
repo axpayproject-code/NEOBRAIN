@@ -1,11 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Link } from "wouter";
 import {
   Camera, Brain, CheckCircle, ArrowRight, Loader2, StopCircle,
   RefreshCw, Lock, Sparkles, ShieldCheck, Clock, Upload,
-  FileVideo, AlertTriangle, ExternalLink
+  FileVideo, AlertTriangle, ExternalLink, Volume2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -32,16 +30,23 @@ const AI_STEPS = [
   "Generating risk indicators...",
 ];
 
+const INSTRUCTIONS = [
+  { at: 0,  text: "Position your child's face in the oval. Keep camera steady.",    voice: "Position your child's face in the oval and keep the camera steady." },
+  { at: 3,  text: "Have your child look directly at the camera.",                    voice: "Have your child look directly at the camera." },
+  { at: 6,  text: "Call your child's name softly. Watch for eye contact.",           voice: "Call your child's name softly and watch for eye contact." },
+  { at: 9,  text: "Ask your child to point to something nearby.",                    voice: "Ask your child to point to something nearby." },
+];
+
 const SEV = {
-  normal: { bar: "bg-[#9FE870]", badge: "bg-green-100 text-green-800", label: "Normal" },
-  moderate: { bar: "bg-yellow-400", badge: "bg-yellow-100 text-yellow-800", label: "Monitor" },
-  high: { bar: "bg-orange-500", badge: "bg-orange-100 text-orange-800", label: "Concern" },
+  normal:   { bar: "bg-[#9FE870]",   badge: "bg-green-100 text-green-800",  label: "Normal"  },
+  moderate: { bar: "bg-yellow-400",  badge: "bg-yellow-100 text-yellow-800", label: "Monitor" },
+  high:     { bar: "bg-orange-500",  badge: "bg-orange-100 text-orange-800", label: "Concern" },
 };
 
 const RISK_STYLE = {
-  low: { ring: "border-green-400/50 bg-green-900/20", badge: "bg-green-100 text-green-800", label: "Low Risk" },
-  moderate: { ring: "border-yellow-400/50 bg-yellow-900/20", badge: "bg-yellow-100 text-yellow-800", label: "Moderate Risk" },
-  high: { ring: "border-orange-400/50 bg-orange-900/20", badge: "bg-orange-100 text-orange-800", label: "Elevated Concern" },
+  low:      { ring: "border-green-400/50 bg-green-900/20",   badge: "bg-green-100 text-green-800",   label: "Low Risk"         },
+  moderate: { ring: "border-yellow-400/50 bg-yellow-900/20", badge: "bg-yellow-100 text-yellow-800", label: "Moderate Risk"    },
+  high:     { ring: "border-orange-400/50 bg-orange-900/20", badge: "bg-orange-100 text-orange-800", label: "Elevated Concern" },
 };
 
 const RECORD_DURATION = 12;
@@ -69,7 +74,11 @@ async function extractFramesFromFile(file: File, numFrames = 10): Promise<string
         const t = Math.min(interval * i, duration - 0.1);
         await new Promise<void>((res, rej) => {
           video.currentTime = t;
-          video.onseeked = () => { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); frames.push(canvas.toDataURL("image/jpeg", 0.7).replace(/^data:image\/jpeg;base64,/, "")); res(); };
+          video.onseeked = () => {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            frames.push(canvas.toDataURL("image/jpeg", 0.7).replace(/^data:image\/jpeg;base64,/, ""));
+            res();
+          };
           video.onerror = () => rej(new Error("Seek failed"));
           setTimeout(() => rej(new Error("Seek timeout")), 5000);
         }).catch(() => {});
@@ -81,12 +90,23 @@ async function extractFramesFromFile(file: File, numFrames = 10): Promise<string
   });
 }
 
+function speak(text: string) {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.88;
+  u.pitch = 1;
+  u.lang = "en-US";
+  window.speechSynthesis.speak(u);
+}
+
 // ─── Main component ─────────────────────────────────────────────────────────
 
 export default function LandingLiveDemo() {
   const [mode, setMode] = useState<DemoMode>("choose");
   const [step, setStep] = useState<DemoStep>("intro");
   const [countdown, setCountdown] = useState(RECORD_DURATION);
+  const [instruction, setInstruction] = useState(INSTRUCTIONS[0].text);
   const [stepIdx, setStepIdx] = useState(0);
   const [analyzePct, setAnalyzePct] = useState(0);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -101,61 +121,89 @@ export default function LandingLiveDemo() {
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const captureRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const instructionTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const capturedFrames = useRef<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Detect iframe context — getUserMedia blocked in iframes without allow="camera"
   const inIframe = typeof window !== "undefined" && window.self !== window.top;
 
   useEffect(() => {
     return () => {
       stopStream();
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (captureRef.current) clearInterval(captureRef.current);
+      clearAllTimers();
+      window.speechSynthesis?.cancel();
     };
   }, []);
 
-  // Wire stream to video element after AnimatePresence mounts it
-  useEffect(() => {
-    if (step !== "recording" || !streamRef.current) return;
-    const t = setTimeout(() => {
-      if (videoRef.current && streamRef.current) {
-        videoRef.current.srcObject = streamRef.current;
-        videoRef.current.play().catch(() => {});
-      }
-    }, 100);
-    return () => clearTimeout(t);
-  }, [step]);
+  function clearAllTimers() {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    if (captureRef.current) { clearInterval(captureRef.current); captureRef.current = null; }
+    instructionTimers.current.forEach(clearTimeout);
+    instructionTimers.current = [];
+  }
 
   function stopStream() {
     streamRef.current?.getTracks().forEach(t => t.stop());
     streamRef.current = null;
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
   }
 
   function reset() {
     stopStream();
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (captureRef.current) clearInterval(captureRef.current);
+    clearAllTimers();
+    window.speechSynthesis?.cancel();
     setMode("choose"); setStep("intro"); setResult(null);
     setErrorMsg(""); setFrameCount(0); setCountdown(RECORD_DURATION);
+    setInstruction(INSTRUCTIONS[0].text);
     capturedFrames.current = [];
+  }
+
+  function scheduleInstructions() {
+    window.speechSynthesis?.cancel();
+    // Fire first instruction immediately
+    setInstruction(INSTRUCTIONS[0].text);
+    speak(INSTRUCTIONS[0].voice);
+    // Schedule the rest
+    INSTRUCTIONS.slice(1).forEach(({ at, text, voice }) => {
+      const t = setTimeout(() => {
+        setInstruction(text);
+        speak(voice);
+      }, at * 1000);
+      instructionTimers.current.push(t);
+    });
   }
 
   // ── Camera flow ──────────────────────────────────────────────────────────
 
   async function startCamera() {
     setMode("camera");
+    setErrorMsg("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
         audio: false,
       });
       streamRef.current = stream;
+
+      // Assign srcObject IMMEDIATELY — video element is always in the DOM,
+      // never unmounted by AnimatePresence. This is the key fix for black screen.
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(() => {});
+      }
+
       capturedFrames.current = [];
       setFrameCount(0);
       setCountdown(RECORD_DURATION);
+      setInstruction(INSTRUCTIONS[0].text);
       setStep("recording");
 
+      // Start voiced instruction sequence
+      scheduleInstructions();
+
+      // Capture frames every 1.4 s
       captureRef.current = setInterval(() => {
         const video = videoRef.current;
         const canvas = canvasRef.current;
@@ -167,9 +215,10 @@ export default function LandingLiveDemo() {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           const b64 = canvas.toDataURL("image/jpeg", 0.7).replace(/^data:image\/jpeg;base64,/, "");
           if (b64.length > 200) { capturedFrames.current.push(b64); setFrameCount(capturedFrames.current.length); }
-        } catch { /* ignore cross-origin draw errors */ }
+        } catch { /* ignore */ }
       }, 1400);
 
+      // Countdown timer
       timerRef.current = setInterval(() => {
         setCountdown(c => {
           if (c <= 1) { stopRecording(); return 0; }
@@ -179,18 +228,14 @@ export default function LandingLiveDemo() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       const isBlocked = msg.includes("insecure") || msg.includes("not allowed") || msg.includes("Permission") || msg.includes("denied") || msg.includes("SecurityError");
-      setErrorMsg(
-        isBlocked
-          ? "IFRAME_BLOCKED"
-          : "DEVICE_ERROR"
-      );
+      setErrorMsg(isBlocked ? "IFRAME_BLOCKED" : "DEVICE_ERROR");
       setStep("error");
     }
   }
 
   const stopRecording = useCallback(() => {
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-    if (captureRef.current) { clearInterval(captureRef.current); captureRef.current = null; }
+    clearAllTimers();
+    window.speechSynthesis?.cancel();
     stopStream();
     const captured = [...capturedFrames.current];
     if (captured.length < 2) {
@@ -199,6 +244,7 @@ export default function LandingLiveDemo() {
       return;
     }
     runAnalysis(captured);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Upload flow ──────────────────────────────────────────────────────────
@@ -211,7 +257,6 @@ export default function LandingLiveDemo() {
     setStep("uploading");
     setUploadPct(0);
 
-    // Animate upload progress
     for (let p = 0; p <= 100; p += 8) {
       await new Promise(r => setTimeout(r, 35));
       setUploadPct(p);
@@ -270,11 +315,21 @@ export default function LandingLiveDemo() {
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
+  const elapsed = RECORD_DURATION - countdown;
+
   return (
     <section id="live-demo" className="py-16 md:py-24 px-4 md:px-12 bg-gradient-to-br from-[#163300] to-[#1a3d00] relative overflow-hidden">
       <div className="absolute inset-0 opacity-5 pointer-events-none" style={{
         backgroundImage: "radial-gradient(circle at 30% 50%, #9FE870 0%, transparent 50%), radial-gradient(circle at 70% 30%, #9FE870 0%, transparent 40%)"
       }} />
+
+      {/*
+        CRITICAL: The <video> element is ALWAYS in the DOM (hidden when not recording).
+        It must never be inside AnimatePresence — that would unmount/remount it, losing
+        the srcObject assignment and causing a black screen.
+      */}
+      <video ref={videoRef} autoPlay playsInline muted className="hidden" />
+      <canvas ref={canvasRef} className="hidden" />
 
       <div className="max-w-7xl mx-auto relative">
         {/* Header */}
@@ -291,6 +346,71 @@ export default function LandingLiveDemo() {
         <div className="grid lg:grid-cols-2 gap-8 md:gap-10 items-start">
           {/* Left panel — interactive */}
           <div>
+            {/* ── Recording panel (always mounted, camera element persistent) ── */}
+            <div className={step === "recording" ? "block" : "hidden"}>
+              <div className="rounded-2xl border border-white/10 bg-black/40 overflow-hidden">
+                {/* Video viewport */}
+                <div className="relative bg-black" style={{ aspectRatio: "4/3" }}>
+                  {/* Live camera feed - we mirror the hidden global video into this visible one */}
+                  <LiveVideoMirror videoRef={videoRef} />
+
+                  {/* Overlay: REC badge */}
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-red-600/90 px-2.5 py-1 z-10">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                    <span className="text-xs font-bold text-white">REC</span>
+                  </div>
+
+                  {/* Overlay: countdown */}
+                  <div className="absolute top-3 right-3 rounded-full bg-black/60 px-3 py-1 text-white font-bold text-base z-10">
+                    {countdown}s
+                  </div>
+
+                  {/* Overlay: frame count */}
+                  <div className="absolute bottom-16 left-3 rounded-full bg-black/60 px-2.5 py-1 text-xs text-white/70 z-10">
+                    {frameCount} frames
+                  </div>
+
+                  {/* Overlay: face guide oval */}
+                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+                    <div className="w-36 h-48 md:w-44 md:h-56 rounded-full border-2 border-[#9FE870]/60 border-dashed opacity-60" />
+                  </div>
+
+                  {/* Instruction overlay at bottom of video */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent pt-8 pb-3 px-4 z-10">
+                    <div className="flex items-start gap-2">
+                      <Volume2 className="h-4 w-4 text-[#9FE870] shrink-0 mt-0.5" />
+                      <p className="text-sm text-white font-medium leading-snug">{instruction}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Controls bar */}
+                <div className="p-3 flex items-center justify-between gap-3 bg-black/30">
+                  <div className="flex-1 min-w-0">
+                    {/* Instruction progress dots */}
+                    <div className="flex items-center gap-1.5 mb-1">
+                      {INSTRUCTIONS.map((ins, i) => (
+                        <div
+                          key={i}
+                          className={`h-1.5 rounded-full transition-all duration-500 ${elapsed >= ins.at ? "bg-[#9FE870] w-6" : "bg-white/20 w-2"}`}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-white/40">Step {Math.min(Math.floor(elapsed / 3) + 1, 4)} of 4</p>
+                  </div>
+                  <Button onClick={stopRecording} size="sm" className="rounded-full gap-1 bg-red-600 hover:bg-red-700 text-white text-xs shrink-0">
+                    <StopCircle className="h-3.5 w-3.5" /> Stop
+                  </Button>
+                </div>
+
+                {/* Progress bar */}
+                <div className="h-1 bg-white/10">
+                  <div className="h-full bg-[#9FE870] transition-all duration-1000" style={{ width: `${(elapsed / RECORD_DURATION) * 100}%` }} />
+                </div>
+              </div>
+            </div>
+
+            {/* ── All other panels inside AnimatePresence ── */}
             <AnimatePresence mode="wait">
 
               {/* CHOOSE mode */}
@@ -310,7 +430,6 @@ export default function LandingLiveDemo() {
                     <p className="text-sm text-white/55">Both options run the same real Gemini AI analysis</p>
                   </div>
 
-                  {/* Two options */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Camera option */}
                     <div className={`rounded-xl border p-4 space-y-3 ${inIframe ? "border-white/10 opacity-60" : "border-[#9FE870]/30 bg-[#9FE870]/5 cursor-pointer hover:bg-[#9FE870]/10 transition-colors"}`}>
@@ -320,7 +439,7 @@ export default function LandingLiveDemo() {
                         </div>
                         <div>
                           <p className="text-sm font-bold text-white">Live Camera</p>
-                          <p className="text-xs text-white/50">12-second recording</p>
+                          <p className="text-xs text-white/50">12-second guided recording</p>
                         </div>
                       </div>
                       {inIframe ? (
@@ -379,36 +498,6 @@ export default function LandingLiveDemo() {
                 </motion.div>
               )}
 
-              {/* RECORDING */}
-              {step === "recording" && (
-                <motion.div key="recording" initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                  className="rounded-2xl border border-white/10 bg-black/40 overflow-hidden"
-                >
-                  <div className="relative bg-black" style={{ aspectRatio: "4/3" }}>
-                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-x-[-1]" />
-                    <canvas ref={canvasRef} className="hidden" />
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-red-600/90 px-2.5 py-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                      <span className="text-xs font-bold text-white">REC</span>
-                    </div>
-                    <div className="absolute top-3 right-3 rounded-full bg-black/60 px-3 py-1 text-white font-bold text-base">{countdown}s</div>
-                    <div className="absolute bottom-3 left-3 rounded-full bg-black/60 px-2.5 py-1 text-xs text-white/70">{frameCount} frames</div>
-                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                      <div className="w-40 h-52 md:w-48 md:h-60 rounded-full border-2 border-[#9FE870]/60 border-dashed opacity-60" />
-                    </div>
-                  </div>
-                  <div className="p-3 flex items-center justify-between gap-3 bg-black/30">
-                    <p className="text-xs text-white/60">Look at camera naturally. Keep face in the oval.</p>
-                    <Button onClick={stopRecording} size="sm" className="rounded-full gap-1 bg-red-600 hover:bg-red-700 text-white text-xs shrink-0">
-                      <StopCircle className="h-3.5 w-3.5" /> Stop
-                    </Button>
-                  </div>
-                  <div className="h-1 bg-white/10">
-                    <div className="h-full bg-[#9FE870] transition-all duration-1000" style={{ width: `${((RECORD_DURATION - countdown) / RECORD_DURATION) * 100}%` }} />
-                  </div>
-                </motion.div>
-              )}
-
               {/* UPLOADING */}
               {step === "uploading" && (
                 <motion.div key="uploading" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -462,188 +551,204 @@ export default function LandingLiveDemo() {
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs text-center text-white/35 border border-white/10 rounded-lg py-2">Powered by Google Gemini · 15–45 seconds</p>
                 </motion.div>
               )}
 
               {/* RESULT */}
               {step === "result" && result && (
-                <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                  className={`rounded-2xl border overflow-hidden ${RISK_STYLE[result.riskLevel].ring}`}
+                <motion.div key="result" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  className={`rounded-2xl border p-5 space-y-4 ${RISK_STYLE[result.riskLevel].ring}`}
                 >
-                  <div className="flex items-center gap-3 px-5 py-3 border-b border-white/10 bg-black/20">
-                    <CheckCircle className="h-4 w-4 text-[#9FE870] shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white">AI Assessment Complete</p>
-                      <p className="text-xs text-white/55">{frameCount} frames · Social Reciprocity Protocol</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-[#9FE870]" />
+                      <span className="font-bold text-white text-sm">Analysis Complete</span>
                     </div>
-                    <Badge className={`text-xs font-bold border-0 shrink-0 ${RISK_STYLE[result.riskLevel].badge}`}>
+                    <span className={`text-xs font-semibold rounded-full px-2.5 py-1 ${RISK_STYLE[result.riskLevel].badge}`}>
                       {RISK_STYLE[result.riskLevel].label}
-                    </Badge>
+                    </span>
                   </div>
-                  <div className="p-5 space-y-4">
-                    <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Behavioral Markers</p>
-                    <div className="space-y-3">
-                      {result.findings.slice(0, 2).map((f, i) => (
-                        <div key={i} className="space-y-1">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-medium text-white">{f.label}</span>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-white/45">{f.score}/100</span>
-                              <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${SEV[f.severity]?.badge}`}>{SEV[f.severity]?.label}</span>
-                            </div>
-                          </div>
-                          <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                            <div className={`h-full rounded-full ${SEV[f.severity]?.bar}`} style={{ width: `${Math.max(4, Math.min(100, f.score))}%` }} />
+
+                  <div className="space-y-2">
+                    {result.findings.map((f) => (
+                      <div key={f.label}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-white/70">{f.label}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-white/50">{f.score}%</span>
+                            <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${SEV[f.severity].badge}`}>{SEV[f.severity].label}</span>
                           </div>
                         </div>
-                      ))}
-                      {result.findings.slice(2).map((_, i) => (
-                        <div key={`locked-${i}`} className="relative space-y-1">
-                          <div className="blur-sm opacity-30 select-none pointer-events-none space-y-1">
-                            <div className="flex justify-between text-xs"><span className="text-white">██████████████</span><span className="text-white">██/100</span></div>
-                            <div className="h-1.5 w-full rounded-full bg-white/10"><div className="h-full rounded-full bg-white/30 w-1/2" /></div>
-                          </div>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="flex items-center gap-1 rounded-full bg-[#9FE870]/20 border border-[#9FE870]/40 px-2 py-0.5 text-xs text-[#9FE870]"><Lock className="h-3 w-3" />Unlock</span>
-                          </div>
+                        <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                          <div className={`h-full rounded-full transition-all duration-700 ${SEV[f.severity].bar}`} style={{ width: `${f.score}%` }} />
                         </div>
-                      ))}
-                    </div>
-                    <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-                      <p className="text-xs text-white/50 font-semibold uppercase tracking-wider mb-1">AI Summary</p>
-                      <p className="text-sm text-white/80 leading-relaxed line-clamp-3">{result.summary}</p>
-                    </div>
-                    <div className="rounded-xl bg-white/5 border border-white/10 p-3 relative">
-                      <p className="text-xs text-white/50 font-semibold uppercase tracking-wider mb-1">Clinical Recommendation</p>
-                      <p className="text-sm text-white/80 blur-sm select-none">{result.recommendation}</p>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="flex items-center gap-1 rounded-full bg-[#9FE870]/20 border border-[#9FE870]/40 px-3 py-1 text-xs text-[#9FE870]"><Lock className="h-3 w-3" />Create account to view</span>
                       </div>
-                    </div>
+                    ))}
+                  </div>
+
+                  <div className="rounded-xl bg-white/5 border border-white/10 p-3.5 space-y-1.5">
+                    <p className="text-xs text-white/50 font-semibold uppercase tracking-wider">AI Summary</p>
+                    <p className="text-sm text-white/85 leading-relaxed">{result.summary}</p>
+                  </div>
+
+                  <div className="rounded-xl bg-[#9FE870]/10 border border-[#9FE870]/20 p-3.5 space-y-1">
+                    <p className="text-xs text-[#9FE870] font-semibold uppercase tracking-wider">Recommendation</p>
+                    <p className="text-sm text-white/80 leading-relaxed">{result.recommendation}</p>
+                  </div>
+
+                  <div className="flex items-start gap-2 rounded-xl bg-white/5 p-3 text-xs text-white/40 border border-white/10">
+                    <Lock className="h-3 w-3 shrink-0 mt-0.5" />
+                    <span>This is a screening indicator only — not a clinical diagnosis. See a licensed professional for a full assessment.</span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={reset} variant="outline" className="flex-1 rounded-full border-white/20 text-white hover:bg-white/10 gap-1.5">
+                      <RefreshCw className="h-3.5 w-3.5" /> Try Again
+                    </Button>
+                    <Button size="sm" className="flex-1 rounded-full bg-[#9FE870] text-[#163300] hover:bg-[#8ed660] font-bold gap-1.5" asChild>
+                      <a href="/login">
+                        Full Assessment <ArrowRight className="h-3.5 w-3.5" />
+                      </a>
+                    </Button>
                   </div>
                 </motion.div>
               )}
 
               {/* ERROR */}
               {step === "error" && (
-                <motion.div key="error" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-5"
+                <motion.div key="error" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  className="rounded-2xl border border-orange-500/30 bg-orange-900/20 p-6 space-y-4"
                 >
-                  {errorMsg === "IFRAME_BLOCKED" ? (
-                    <>
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20 shrink-0">
-                          <AlertTriangle className="h-5 w-5 text-amber-400" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-white mb-1">Camera blocked in preview</p>
-                          <p className="text-sm text-white/60 leading-relaxed">Camera access is restricted inside embedded previews. Open the app directly in your browser to use live camera.</p>
-                        </div>
-                      </div>
-                      <a href={window.location.origin} target="_blank" rel="noopener noreferrer">
-                        <Button className="w-full rounded-full gap-2 bg-[#9FE870] text-[#163300] hover:bg-[#8ed660] font-bold">
-                          <ExternalLink className="h-4 w-4" /> Open NEOBRAIN Directly
-                        </Button>
-                      </a>
-                      <div className="border-t border-white/10 pt-4">
-                        <p className="text-sm font-semibold text-white mb-3">Or try the demo with a video upload:</p>
-                        <div
-                          className={`rounded-xl border-2 border-dashed p-5 text-center cursor-pointer transition-colors ${isDrag ? "border-[#9FE870] bg-[#9FE870]/10" : "border-white/20 hover:border-white/40"}`}
-                          onDragOver={e => { e.preventDefault(); setIsDrag(true); }}
-                          onDragLeave={() => setIsDrag(false)}
-                          onDrop={e => { e.preventDefault(); setIsDrag(false); handleFile(e.dataTransfer.files?.[0]); }}
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          <input ref={fileInputRef} type="file" accept="video/*" className="hidden" onChange={e => handleFile(e.target.files?.[0])} />
-                          <Upload className="h-6 w-6 text-white/50 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-white">Drop a video or tap to upload</p>
-                          <p className="text-xs text-white/40 mt-1">MP4, MOV, AVI, WebM</p>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/20 shrink-0">
-                          <AlertTriangle className="h-5 w-5 text-red-400" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-white mb-1">Something went wrong</p>
-                          <p className="text-sm text-white/60">{errorMsg || "An error occurred. Please try again."}</p>
-                        </div>
-                      </div>
-                      <Button onClick={reset} variant="outline" className="w-full rounded-full gap-2 border-white/20 text-white hover:bg-white/10">
-                        <RefreshCw className="h-4 w-4" /> Try Again
-                      </Button>
-                    </>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500/20 shrink-0">
+                      <AlertTriangle className="h-5 w-5 text-orange-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-sm">
+                        {errorMsg === "IFRAME_BLOCKED"
+                          ? "Camera blocked in preview"
+                          : errorMsg === "DEVICE_ERROR"
+                            ? "Camera or capture issue"
+                            : "Something went wrong"}
+                      </p>
+                      <p className="text-xs text-white/55">
+                        {errorMsg === "IFRAME_BLOCKED"
+                          ? "Open NEOBRAIN directly in your browser to use the live camera."
+                          : errorMsg === "DEVICE_ERROR"
+                            ? "Try uploading a video instead — it uses the same AI."
+                            : errorMsg}
+                      </p>
+                    </div>
+                  </div>
+                  {errorMsg === "IFRAME_BLOCKED" && (
+                    <a href={window.location.origin} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-sm font-semibold text-[#9FE870] hover:underline">
+                      Open in browser <ExternalLink className="h-4 w-4" />
+                    </a>
                   )}
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={reset} variant="outline" className="flex-1 rounded-full border-white/20 text-white hover:bg-white/10 gap-1.5">
+                      <RefreshCw className="h-3.5 w-3.5" /> Try Again
+                    </Button>
+                    {errorMsg !== "IFRAME_BLOCKED" && (
+                      <Button size="sm" className="flex-1 rounded-full bg-white/10 text-white hover:bg-white/20 gap-1.5"
+                        onClick={() => fileInputRef.current?.click()}>
+                        <Upload className="h-3.5 w-3.5" /> Upload Video
+                      </Button>
+                    )}
+                  </div>
+                  <input ref={fileInputRef} type="file" accept="video/*" className="hidden" onChange={e => handleFile(e.target.files?.[0])} />
                 </motion.div>
               )}
 
             </AnimatePresence>
           </div>
 
-          {/* Right panel */}
-          <div className="space-y-6 md:space-y-8">
-            {step !== "result" ? (
-              <>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white mb-4">What NEOBRAIN detects</h3>
-                  <div className="space-y-3">
-                    {[
-                      { e: "👁️", label: "Gaze & Joint Attention", desc: "Eye contact quality, shared attention, gaze following patterns" },
-                      { e: "🧠", label: "Behavioral Markers", desc: "Repetitive behaviors, self-regulation, response latency" },
-                      { e: "🗣️", label: "Social Reciprocity", desc: "Turn-taking, facial affect, engagement and responsiveness" },
-                      { e: "⚡", label: "Motor Coordination", desc: "Fine and gross motor response patterns from video" },
-                    ].map(({ e, label, desc }) => (
-                      <div key={label} className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-3.5">
-                        <span className="text-xl leading-none mt-0.5 shrink-0">{e}</span>
-                        <div>
-                          <p className="font-semibold text-white text-sm">{label}</p>
-                          <p className="text-xs text-white/50 leading-relaxed">{desc}</p>
-                        </div>
-                      </div>
-                    ))}
+          {/* Right panel — info */}
+          <div className="space-y-5 lg:pt-2">
+            <div className="rounded-2xl bg-white/5 border border-white/10 p-5 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="h-4 w-4 text-[#9FE870]" />
+                <span className="text-sm font-bold text-white">What NEOBRAIN AI measures</span>
+              </div>
+              {[
+                { label: "Gaze & Eye Contact", detail: "Tracks eye direction, fixation, and response to social stimuli" },
+                { label: "Joint Attention", detail: "Assesses shared focus behaviors and pointing responses" },
+                { label: "Facial Expression", detail: "Reads micro-expressions and affective responses" },
+                { label: "Motor Coordination", detail: "Evaluates movement fluency and postural control" },
+                { label: "Social Reciprocity", detail: "Measures turn-taking, imitation, and interaction patterns" },
+              ].map((item, i) => (
+                <div key={i} className="flex gap-3">
+                  <div className="h-2 w-2 rounded-full bg-[#9FE870] mt-1.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-white">{item.label}</p>
+                    <p className="text-xs text-white/50 leading-relaxed">{item.detail}</p>
                   </div>
                 </div>
-                <div className="rounded-xl border border-[#9FE870]/20 bg-[#9FE870]/5 p-4">
-                  <p className="text-xs font-semibold text-[#9FE870] uppercase tracking-wider mb-2">Clinical Note</p>
-                  <p className="text-sm text-white/65 leading-relaxed">Results use the <strong className="text-white">Social Reciprocity Protocol</strong> — the same AI model used by licensed developmental pediatricians on NEOBRAIN. For demonstration purposes only, not a clinical diagnosis.</p>
+              ))}
+            </div>
+
+            <div className="rounded-2xl bg-white/5 border border-white/10 p-5 space-y-3">
+              <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">How the demo works</p>
+              {[
+                { n: "1", text: "Camera records a 12-second guided clip with voice instructions" },
+                { n: "2", text: "10 frames are extracted and sent to Gemini AI" },
+                { n: "3", text: "AI scores 5 developmental domains in ~30 seconds" },
+                { n: "4", text: "You receive a risk-level summary with recommendations" },
+              ].map(({ n, text }) => (
+                <div key={n} className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#9FE870]/20 text-[#9FE870] text-xs font-bold shrink-0">{n}</div>
+                  <p className="text-sm text-white/70 leading-relaxed">{text}</p>
                 </div>
-              </>
-            ) : (
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                <div>
-                  <Badge className="mb-3 bg-[#9FE870]/20 text-[#9FE870] border-0 text-sm px-3 py-1">Your results are ready</Badge>
-                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Unlock your full report.</h3>
-                  <p className="text-white/60 leading-relaxed text-sm md:text-base">Create a free account to access all behavioral markers, the full clinical recommendation, risk trajectory, and next steps.</p>
-                </div>
-                <div className="space-y-2.5">
-                  {["Full behavioral marker scores", "AI-generated clinical recommendation", "Risk trajectory & developmental timeline", "Specialist referral suggestions", "Track progress with repeat assessments"].map(item => (
-                    <div key={item} className="flex items-center gap-2.5 text-sm text-white/80">
-                      <CheckCircle className="h-4 w-4 text-[#9FE870] shrink-0" />{item}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex flex-col gap-3">
-                  <Link href="/login">
-                    <Button size="lg" className="w-full rounded-full gap-2 bg-[#9FE870] text-[#163300] hover:bg-[#8ed660] font-bold">
-                      Create Free Account <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Button size="sm" variant="ghost" onClick={reset} className="rounded-full gap-2 text-white/50 hover:text-white">
-                    <RefreshCw className="h-3.5 w-3.5" /> Run another assessment
-                  </Button>
-                </div>
-                <p className="text-xs text-white/35 flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5" /> Free · No credit card · Video not stored
-                </p>
-              </motion.div>
-            )}
+              ))}
+            </div>
+
+            <div className="rounded-2xl border border-[#9FE870]/20 bg-[#9FE870]/5 p-5">
+              <p className="text-sm font-bold text-white mb-1">Want the full clinical suite?</p>
+              <p className="text-xs text-white/60 mb-3 leading-relaxed">The full platform includes multi-session tracking, therapist collaboration, school reporting, and government risk mapping.</p>
+              <Button size="sm" className="rounded-full bg-[#9FE870] text-[#163300] hover:bg-[#8ed660] font-bold gap-1.5 w-full" asChild>
+                <a href="/login">
+                  Start Free Trial <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+// ─── Helper: shows the persistent camera stream in a styled viewport ──────────
+
+function LiveVideoMirror({ videoRef }: { videoRef: React.RefObject<HTMLVideoElement | null> }) {
+  const mirrorRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const src = videoRef.current;
+    const dst = mirrorRef.current;
+    if (!src || !dst) return;
+
+    function sync() {
+      if (src && dst && src.srcObject !== dst.srcObject) {
+        dst.srcObject = src.srcObject;
+        dst.play().catch(() => {});
+      }
+    }
+
+    // Sync immediately and on any srcObject change via polling
+    sync();
+    const t = setInterval(sync, 200);
+    return () => clearInterval(t);
+  }, [videoRef]);
+
+  return (
+    <video
+      ref={mirrorRef}
+      autoPlay
+      playsInline
+      muted
+      className="w-full h-full object-cover scale-x-[-1]"
+    />
   );
 }
