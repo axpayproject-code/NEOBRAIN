@@ -1345,15 +1345,21 @@ export default function Home() {
                 ))}
               </div>
               {/* ACCENTECX AI brand block */}
-              <div className="flex items-center gap-2.5 mt-1">
-                <span className="text-xs text-muted-foreground">Powered by</span>
-                <a href="https://accentecx.ai" target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-background hover:border-primary/40 hover:bg-primary/5 transition-colors group">
-                  <div className="h-4 w-4 rounded bg-primary flex items-center justify-center shrink-0">
-                    <svg viewBox="0 0 16 16" fill="none" className="h-2.5 w-2.5 text-secondary"><path d="M8 2L2 5.5V10.5L8 14L14 10.5V5.5L8 2Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><path d="M8 2V14M2 5.5L14 10.5M14 5.5L2 10.5" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.5"/></svg>
-                  </div>
-                  <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors" style={{ fontFamily: "var(--font-display,'Syne',sans-serif)" }}>ACCENTECX AI</span>
-                </a>
+              <div className="flex items-start gap-4 mt-1">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-muted-foreground">Powered by</span>
+                  <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
+                    className="flex items-center px-3 py-1.5 rounded-lg border border-border bg-background hover:border-primary/30 hover:bg-primary/5 transition-colors group">
+                    <img src="/accentecx-logo.png" alt="ACCENTECX AI" className="h-6 w-auto object-contain" />
+                  </a>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-muted-foreground">Scan to visit</span>
+                  <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-center p-1 rounded-lg border border-border bg-white hover:border-primary/30 transition-colors">
+                    <img src="/accentecx-qr.png" alt="ACCENTECX AI QR Code" className="h-14 w-14 object-contain" />
+                  </a>
+                </div>
               </div>
             </div>
             <div>
