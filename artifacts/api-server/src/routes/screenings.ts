@@ -1,36 +1,37 @@
 import { Router } from "express";
 import { db, screeningsTable, childrenTable, timelineEventsTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { CreateScreeningBody, GetScreeningParams, ListScreeningsQueryParams } from "@workspace/api-zod";
 
 const router = Router();
 
-// List screenings (optionally filter by childId)
+function getUserId(req: { headers: Record<string, string | string[] | undefined> }): string | null {
+  const auth = req.headers.authorization;
+  if (typeof auth === "string" && auth.startsWith("Bearer ")) {
+    return auth.slice(7).trim() || null;
+  }
+  return null;
+}
+
+// List screenings — scoped to authenticated user
 router.get("/screenings", async (req, res) => {
+  const userId = getUserId(req);
   const parsed = ListScreeningsQueryParams.safeParse(req.query);
   const childId = parsed.success && parsed.data.childId ? Number(parsed.data.childId) : undefined;
 
-  let screenings;
-  if (childId) {
-    screenings = await db
-      .select({
-        screening: screeningsTable,
-        childName: childrenTable.fullName,
-      })
-      .from(screeningsTable)
-      .leftJoin(childrenTable, eq(screeningsTable.childId, childrenTable.id))
-      .where(eq(screeningsTable.childId, childId))
-      .orderBy(desc(screeningsTable.createdAt));
-  } else {
-    screenings = await db
-      .select({
-        screening: screeningsTable,
-        childName: childrenTable.fullName,
-      })
-      .from(screeningsTable)
-      .leftJoin(childrenTable, eq(screeningsTable.childId, childrenTable.id))
-      .orderBy(desc(screeningsTable.createdAt));
-  }
+  const conditions = [];
+  if (userId) conditions.push(eq(childrenTable.userId, userId));
+  if (childId) conditions.push(eq(screeningsTable.childId, childId));
+
+  const query = db
+    .select({ screening: screeningsTable, childName: childrenTable.fullName })
+    .from(screeningsTable)
+    .leftJoin(childrenTable, eq(screeningsTable.childId, childrenTable.id))
+    .orderBy(desc(screeningsTable.createdAt));
+
+  const screenings = conditions.length > 0
+    ? await query.where(and(...conditions))
+    : await query;
 
   return res.json(
     screenings.map(({ screening, childName }) => ({
@@ -49,7 +50,6 @@ router.post("/screenings", async (req, res) => {
     return res.status(400).json({ error: "Invalid input", details: parsed.error.issues });
   }
 
-  // Determine risk level based on scores
   const scores = [
     parsed.data.communicationScore,
     parsed.data.socialScore,
@@ -71,23 +71,13 @@ router.post("/screenings", async (req, res) => {
 
   const [screening] = await db
     .insert(screeningsTable)
-    .values({
-      ...parsed.data,
-      riskLevel,
-      status,
-      completedAt: status === "completed" ? new Date() : undefined,
-    })
+    .values({ ...parsed.data, riskLevel, status, completedAt: status === "completed" ? new Date() : undefined })
     .returning();
 
-  // Update child risk level if screening has risk
   if (riskLevel) {
-    await db
-      .update(childrenTable)
-      .set({ riskLevel })
-      .where(eq(childrenTable.id, parsed.data.childId));
+    await db.update(childrenTable).set({ riskLevel }).where(eq(childrenTable.id, parsed.data.childId));
   }
 
-  // Add timeline event
   await db.insert(timelineEventsTable).values({
     childId: parsed.data.childId,
     eventType: "screening",
@@ -110,10 +100,7 @@ router.get("/screenings/:id", async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
 
   const [result] = await db
-    .select({
-      screening: screeningsTable,
-      childName: childrenTable.fullName,
-    })
+    .select({ screening: screeningsTable, childName: childrenTable.fullName })
     .from(screeningsTable)
     .leftJoin(childrenTable, eq(screeningsTable.childId, childrenTable.id))
     .where(eq(screeningsTable.id, parsed.data.id));

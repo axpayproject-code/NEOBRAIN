@@ -1,30 +1,37 @@
 import { Router } from "express";
 import { db, therapyPlansTable, childrenTable, timelineEventsTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { CreateTherapyPlanBody, GetTherapyPlanParams, ListTherapyPlansQueryParams, UpdateTherapyPlanBody, UpdateTherapyPlanParams } from "@workspace/api-zod";
 
 const router = Router();
 
-// List therapy plans
+function getUserId(req: { headers: Record<string, string | string[] | undefined> }): string | null {
+  const auth = req.headers.authorization;
+  if (typeof auth === "string" && auth.startsWith("Bearer ")) {
+    return auth.slice(7).trim() || null;
+  }
+  return null;
+}
+
+// List therapy plans — scoped to authenticated user
 router.get("/therapy-plans", async (req, res) => {
+  const userId = getUserId(req);
   const parsed = ListTherapyPlansQueryParams.safeParse(req.query);
   const childId = parsed.success && parsed.data.childId ? Number(parsed.data.childId) : undefined;
 
-  let results;
-  if (childId) {
-    results = await db
-      .select({ plan: therapyPlansTable, childName: childrenTable.fullName })
-      .from(therapyPlansTable)
-      .leftJoin(childrenTable, eq(therapyPlansTable.childId, childrenTable.id))
-      .where(eq(therapyPlansTable.childId, childId))
-      .orderBy(desc(therapyPlansTable.createdAt));
-  } else {
-    results = await db
-      .select({ plan: therapyPlansTable, childName: childrenTable.fullName })
-      .from(therapyPlansTable)
-      .leftJoin(childrenTable, eq(therapyPlansTable.childId, childrenTable.id))
-      .orderBy(desc(therapyPlansTable.createdAt));
-  }
+  const conditions = [];
+  if (userId) conditions.push(eq(childrenTable.userId, userId));
+  if (childId) conditions.push(eq(therapyPlansTable.childId, childId));
+
+  const query = db
+    .select({ plan: therapyPlansTable, childName: childrenTable.fullName })
+    .from(therapyPlansTable)
+    .leftJoin(childrenTable, eq(therapyPlansTable.childId, childrenTable.id))
+    .orderBy(desc(therapyPlansTable.createdAt));
+
+  const results = conditions.length > 0
+    ? await query.where(and(...conditions))
+    : await query;
 
   return res.json(
     results.map(({ plan, childName }) => ({
@@ -44,7 +51,6 @@ router.post("/therapy-plans", async (req, res) => {
 
   const [plan] = await db.insert(therapyPlansTable).values(parsed.data).returning();
 
-  // Add timeline event
   await db.insert(timelineEventsTable).values({
     childId: parsed.data.childId,
     eventType: "therapy",

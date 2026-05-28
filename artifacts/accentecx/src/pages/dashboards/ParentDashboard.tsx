@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashboardLayout";
 import {
   LayoutDashboard, Users, ClipboardList, Brain, Calendar,
   HeartPulse, FileText, Settings, Plus, ChevronRight,
-  AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star
+  AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star, CreditCard
 } from "lucide-react";
 import { getPlanFeatures } from "@/lib/planFeatures";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
@@ -35,6 +35,7 @@ import ScreeningWizard from "@/components/screening/ScreeningWizard";
 import ScreeningResultDisplay, { type ScreeningResult } from "@/components/screening/ScreeningResult";
 import VideoProtocol from "@/components/screening/VideoProtocol";
 import AppointmentScheduler from "@/components/appointments/AppointmentScheduler";
+import BillingPage from "@/pages/Billing";
 
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -45,6 +46,7 @@ const NAV: NavItem[] = [
   { id: "appointments", label: "Appointments", icon: Calendar },
   { id: "therapy", label: "Therapy Tracking", icon: HeartPulse },
   { id: "reports", label: "Reports", icon: FileText },
+  { id: "billing", label: "Billing", icon: CreditCard },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -963,6 +965,17 @@ function ReportsTab() {
 
 function SettingsTab() {
   const { user } = useAuth();
+  const [billingStatus, setBillingStatus] = useState<{ planName: string; status: string; paidUntil: string | null } | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const base = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
+    fetch(`${base}/api/billing/status`, { headers: { Authorization: `Bearer ${user.id}` } })
+      .then(r => r.json())
+      .then(d => setBillingStatus({ planName: d.planName, status: d.status, paidUntil: d.paidUntil }))
+      .catch(() => {});
+  }, [user]);
+
   return (
     <div className="p-6 lg:p-8 space-y-5">
       <h1 className="text-2xl font-bold">Account Settings</h1>
@@ -981,12 +994,25 @@ function SettingsTab() {
       <Card>
         <CardHeader><CardTitle className="text-base">Subscription</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <p className="font-medium">{user?.tier ?? "Care Plus"}</p>
-              <p className="text-sm text-muted-foreground">Active subscription · Renews monthly</p>
+              <p className="font-medium">{billingStatus?.planName ?? "Free"}</p>
+              <p className="text-sm text-muted-foreground">
+                {billingStatus?.status === "pending_verification"
+                  ? "Payment pending verification"
+                  : billingStatus?.paidUntil
+                  ? `Valid until ${new Date(billingStatus.paidUntil).toLocaleDateString("en-PH")}`
+                  : "Free plan — upgrade anytime"}
+              </p>
             </div>
-            <Button variant="outline" className="rounded-full" data-testid="button-manage-subscription">Manage Plan</Button>
+            <Button
+              variant="outline"
+              className="rounded-full gap-1.5"
+              data-testid="button-manage-subscription"
+              onClick={() => document.dispatchEvent(new CustomEvent("neobrain-navigate-tab", { detail: "billing" }))}
+            >
+              <CreditCard className="h-3.5 w-3.5" /> Manage Plan
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -1028,6 +1054,7 @@ const TABS: Record<string, TabComponent> = {
   appointments: AppointmentsTab,
   therapy: TherapyTab,
   reports: ReportsTab,
+  billing: BillingPage,
   settings: SettingsTab,
 };
 
@@ -1035,6 +1062,12 @@ export default function ParentDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const { data: children } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const { data: summary } = useGetDashboardSummary({ query: { queryKey: ["dashboard-summary"] } });
+
+  useEffect(() => {
+    const handler = (e: Event) => setActiveTab((e as CustomEvent).detail as string);
+    document.addEventListener("neobrain-navigate-tab", handler);
+    return () => document.removeEventListener("neobrain-navigate-tab", handler);
+  }, []);
 
   const nav: NavItem[] = NAV.map(n => {
     if (n.id === "children") return { ...n, badge: children?.length };

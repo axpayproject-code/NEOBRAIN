@@ -12,6 +12,7 @@ import availabilityRouter from "./availability";
 import specialtyFeesRouter from "./specialty_fees";
 import paymentsRouter from "./payments";
 import rescheduleRouter from "./reschedule";
+import billingRouter from "./billing";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(therapyPlansRouter);
 router.use(reportsRouter);
 router.use(dashboardRouter);
 router.use(videoAnalysisRouter);
+router.use(billingRouter);
 
 export default router;

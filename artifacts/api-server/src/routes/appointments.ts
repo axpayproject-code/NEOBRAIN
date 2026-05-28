@@ -5,13 +5,23 @@ import { CreateAppointmentBody, GetAppointmentParams, ListAppointmentsQueryParam
 
 const router = Router();
 
-// List appointments
+function getUserId(req: { headers: Record<string, string | string[] | undefined> }): string | null {
+  const auth = req.headers.authorization;
+  if (typeof auth === "string" && auth.startsWith("Bearer ")) {
+    return auth.slice(7).trim() || null;
+  }
+  return null;
+}
+
+// List appointments — scoped to the authenticated user via their children
 router.get("/appointments", async (req, res) => {
+  const userId = getUserId(req);
   const parsed = ListAppointmentsQueryParams.safeParse(req.query);
   const childId = parsed.success && parsed.data.childId ? Number(parsed.data.childId) : undefined;
   const status = parsed.success ? parsed.data.status : undefined;
 
   const conditions = [];
+  if (userId) conditions.push(eq(childrenTable.userId, userId));
   if (childId) conditions.push(eq(appointmentsTable.childId, childId));
   if (status) conditions.push(eq(appointmentsTable.status, status));
 
@@ -48,7 +58,6 @@ router.post("/appointments", async (req, res) => {
     .values({ ...rest, scheduledAt: new Date(scheduledAt) })
     .returning();
 
-  // Add timeline event
   await db.insert(timelineEventsTable).values({
     childId: parsed.data.childId,
     eventType: "appointment",

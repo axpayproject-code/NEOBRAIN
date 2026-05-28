@@ -1,30 +1,37 @@
 import { Router } from "express";
 import { db, reportsTable, childrenTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { GetReportParams, ListReportsQueryParams } from "@workspace/api-zod";
 
 const router = Router();
 
-// List reports
+function getUserId(req: { headers: Record<string, string | string[] | undefined> }): string | null {
+  const auth = req.headers.authorization;
+  if (typeof auth === "string" && auth.startsWith("Bearer ")) {
+    return auth.slice(7).trim() || null;
+  }
+  return null;
+}
+
+// List reports — scoped to authenticated user
 router.get("/reports", async (req, res) => {
+  const userId = getUserId(req);
   const parsed = ListReportsQueryParams.safeParse(req.query);
   const childId = parsed.success && parsed.data.childId ? Number(parsed.data.childId) : undefined;
 
-  let results;
-  if (childId) {
-    results = await db
-      .select({ report: reportsTable, childName: childrenTable.fullName })
-      .from(reportsTable)
-      .leftJoin(childrenTable, eq(reportsTable.childId, childrenTable.id))
-      .where(eq(reportsTable.childId, childId))
-      .orderBy(desc(reportsTable.createdAt));
-  } else {
-    results = await db
-      .select({ report: reportsTable, childName: childrenTable.fullName })
-      .from(reportsTable)
-      .leftJoin(childrenTable, eq(reportsTable.childId, childrenTable.id))
-      .orderBy(desc(reportsTable.createdAt));
-  }
+  const conditions = [];
+  if (userId) conditions.push(eq(childrenTable.userId, userId));
+  if (childId) conditions.push(eq(reportsTable.childId, childId));
+
+  const query = db
+    .select({ report: reportsTable, childName: childrenTable.fullName })
+    .from(reportsTable)
+    .leftJoin(childrenTable, eq(reportsTable.childId, childrenTable.id))
+    .orderBy(desc(reportsTable.createdAt));
+
+  const results = conditions.length > 0
+    ? await query.where(and(...conditions))
+    : await query;
 
   return res.json(
     results.map(({ report, childName }) => ({
