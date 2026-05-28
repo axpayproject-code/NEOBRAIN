@@ -24,6 +24,8 @@ const SYSTEMS = [
     badge: "B2C Core",
     icon: Users,
     color: "bg-secondary/15 border-secondary/30",
+    iconBg: "bg-blue-100",
+    iconColor: "text-blue-700",
     desc: "Daily parental engagement through child tracking, behavioral monitoring, therapy tasks, and AI-generated progress reports accessible from any device.",
     features: ["Child developmental profiles", "Daily activity guidance", "Therapy compliance tracking", "Appointment booking", "Progress visualization"]
   },
@@ -33,6 +35,8 @@ const SYSTEMS = [
     badge: "Doctors",
     icon: Stethoscope,
     color: "bg-primary/5 border-primary/15",
+    iconBg: "bg-green-100",
+    iconColor: "text-green-700",
     desc: "Structured clinical tools that give practitioners AI-generated summaries, behavioral video reviews, and longitudinal tracking — not replacing judgment, enhancing it.",
     features: ["AI intake summaries", "Structured behavioral reports", "Video analysis review", "Patient queue system", "Therapy planning tools"]
   },
@@ -42,6 +46,8 @@ const SYSTEMS = [
     badge: "Therapists",
     icon: Activity,
     color: "bg-secondary/15 border-secondary/30",
+    iconBg: "bg-purple-100",
+    iconColor: "text-purple-700",
     desc: "End-to-end therapy management — from goal-setting and session tracking to home exercise assignments and real-time progress analytics.",
     features: ["Therapy plan creation", "Session tracking", "Goal monitoring", "Parent assignments", "Progress analytics"]
   },
@@ -51,6 +57,8 @@ const SYSTEMS = [
     badge: "Educators",
     icon: GraduationCap,
     color: "bg-primary/5 border-primary/15",
+    iconBg: "bg-amber-100",
+    iconColor: "text-amber-700",
     desc: "Teacher observation tools integrated directly with clinical records — enabling coordinated behavioral monitoring across classroom and clinic.",
     features: ["Teacher observation forms", "Classroom behavioral scoring", "Referral triggers", "SPED tracking", "Parent-school coordination"]
   },
@@ -60,6 +68,8 @@ const SYSTEMS = [
     badge: "Remote Care",
     icon: Video,
     color: "bg-secondary/15 border-secondary/30",
+    iconBg: "bg-rose-100",
+    iconColor: "text-rose-700",
     desc: "Secure video consultations, asynchronous specialist messaging, and follow-up management — making expert care accessible beyond Metro Manila.",
     features: ["Video consultations", "Secure scheduling", "Session notes", "Follow-up automation", "Specialist messaging"]
   },
@@ -69,6 +79,8 @@ const SYSTEMS = [
     badge: "DOH / LGUs",
     icon: Globe,
     color: "bg-primary/5 border-primary/15",
+    iconBg: "bg-primary/15",
+    iconColor: "text-primary",
     desc: "Anonymized population-level intelligence enabling government health units to map regional risk clusters and allocate early intervention resources.",
     features: ["Anonymized population data", "Regional risk mapping", "Developmental trend analysis", "Intervention forecasting", "Healthcare resource planning"]
   }
@@ -738,101 +750,166 @@ export default function Home() {
 
       <main className="flex-1">
         {/* ── HERO ────────────────────────────────────────────────────────── */}
-        <section className="px-4 pt-10 pb-8 md:pt-20 md:pb-16 md:px-12 max-w-7xl mx-auto grid gap-8 lg:grid-cols-2 items-center">
+        <section className="relative overflow-hidden px-4 pt-10 pb-8 md:pt-20 md:pb-16 md:px-12">
+          {/* Animated background blobs */}
           <motion.div
-            initial="hidden" animate="visible"
-            className="flex flex-col gap-5"
-          >
-            <motion.div variants={fadeUp} custom={0}>
-              <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs md:text-sm font-semibold text-primary w-fit bg-primary/5 border-primary/10">
-                <span className="flex h-2 w-2 rounded-full bg-secondary mr-2 animate-pulse"></span>
-                The Philippines' National AI Developmental Health Platform
-              </div>
-            </motion.div>
-            <motion.h1 variants={fadeUp} custom={1}
-              className="text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.05] tracking-tighter text-foreground"
-            >
-              Intelligent care for every developmental journey.
-            </motion.h1>
-            <motion.p variants={fadeUp} custom={2}
-              className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl"
-            >
-              A national-scale AI-assisted infrastructure connecting parents, clinicians, therapists, schools, and government into one continuous developmental intelligence system.
-            </motion.p>
-            <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row gap-3 mt-1">
-              <Link href="/login">
-                <Button size="lg" className="rounded-full px-6 md:px-8 h-11 md:h-13 text-sm md:text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
-                  Join the Ecosystem <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Button
-                size="lg" variant="outline"
-                className="rounded-full px-6 md:px-8 h-11 md:h-13 text-sm md:text-base w-full sm:w-auto border-primary/20"
-                data-testid="button-clinic-demo"
-                onClick={() => setDemoModal({ open: true, audience: "clinics" })}
-              >
-                Request Clinic Demo
-              </Button>
-            </motion.div>
-            <motion.div variants={fadeUp} custom={4}
-              className="flex flex-wrap items-center gap-3 md:gap-6 mt-1 text-xs md:text-sm text-muted-foreground"
-            >
-              {["Never diagnoses", "HIPAA-aligned", "Philippine DOH-ready"].map(t => (
-                <span key={t} className="flex items-center gap-1.5">
-                  <ShieldCheck className="h-3 w-3 md:h-3.5 md:w-3.5 text-secondary" /> {t}
-                </span>
-              ))}
-            </motion.div>
-          </motion.div>
+            animate={{ scale: [1, 1.25, 1], x: [0, 30, 0] }}
+            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-40 -right-32 w-[480px] h-[480px] bg-secondary/20 rounded-full blur-3xl pointer-events-none"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.18, 1], y: [0, -25, 0] }}
+            transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute top-32 -left-28 w-80 h-80 bg-primary/8 rounded-full blur-3xl pointer-events-none"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.12, 1] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+            className="absolute -bottom-16 right-1/3 w-64 h-64 bg-secondary/12 rounded-full blur-3xl pointer-events-none"
+          />
 
-          {/* Hero visual — hidden on mobile to save space */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="hidden lg:block relative h-[420px] rounded-2xl overflow-hidden bg-primary/4 border border-primary/10"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-transparent to-primary/10" />
-            <div className="absolute inset-5 rounded-xl border border-border bg-card shadow-lg p-5 flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-secondary/25 flex items-center justify-center">
-                  <HeartPulse className="h-5 w-5 text-primary" />
+          <div className="max-w-7xl mx-auto grid gap-8 lg:grid-cols-2 items-center relative z-10">
+            <motion.div
+              initial="hidden" animate="visible"
+              className="flex flex-col gap-5"
+            >
+              <motion.div variants={fadeUp} custom={0}>
+                <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs md:text-sm font-semibold text-primary w-fit bg-primary/5 border-primary/10">
+                  <span className="flex h-2 w-2 rounded-full bg-secondary mr-2 animate-pulse"></span>
+                  The Philippines' National AI Developmental Health Platform
                 </div>
-                <div>
-                  <div className="text-sm font-semibold text-foreground">Isabella Tan, 6 yrs</div>
-                  <div className="text-xs text-muted-foreground">Developmental Digital Twin</div>
-                </div>
-                <Badge className="ml-auto bg-red-100 text-red-700 border-red-200 text-xs">Critical</Badge>
-              </div>
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Domain Scores</div>
-              <div className="flex flex-col gap-2.5 flex-1">
-                {DOMAINS.map(d => (
-                  <div key={d.name} className="flex items-center gap-3">
-                    <div className="text-xs text-muted-foreground w-32 shrink-0">{d.name}</div>
-                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }} animate={{ width: `${d.score}%` }}
-                        transition={{ duration: 1, delay: 0.8 }}
-                        className={`h-full rounded-full ${d.color}`}
-                      />
-                    </div>
-                    <div className="text-xs font-mono text-foreground w-6 text-right">{d.score}</div>
-                  </div>
+              </motion.div>
+              <motion.h1 variants={fadeUp} custom={1}
+                className="text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.05] tracking-tighter text-foreground"
+              >
+                Intelligent care for every developmental journey.
+              </motion.h1>
+              <motion.p variants={fadeUp} custom={2}
+                className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl"
+              >
+                A national-scale AI-assisted infrastructure connecting parents, clinicians, therapists, schools, and government into one continuous developmental intelligence system.
+              </motion.p>
+              <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row gap-3 mt-1">
+                <Link href="/login">
+                  <Button size="lg" className="rounded-full px-6 md:px-8 h-11 md:h-13 text-sm md:text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
+                    Join the Ecosystem <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Button
+                  size="lg" variant="outline"
+                  className="rounded-full px-6 md:px-8 h-11 md:h-13 text-sm md:text-base w-full sm:w-auto border-primary/20"
+                  data-testid="button-clinic-demo"
+                  onClick={() => setDemoModal({ open: true, audience: "clinics" })}
+                >
+                  Request Clinic Demo
+                </Button>
+              </motion.div>
+              <motion.div variants={fadeUp} custom={4}
+                className="flex flex-wrap items-center gap-3 md:gap-6 mt-1 text-xs md:text-sm text-muted-foreground"
+              >
+                {["Never diagnoses", "HIPAA-aligned", "Philippine DOH-ready"].map(t => (
+                  <span key={t} className="flex items-center gap-1.5">
+                    <ShieldCheck className="h-3 w-3 md:h-3.5 md:w-3.5 text-secondary" /> {t}
+                  </span>
                 ))}
+              </motion.div>
+
+              {/* Role ecosystem chips — visible on mobile */}
+              <motion.div variants={fadeUp} custom={5} className="flex flex-wrap gap-2 mt-1 lg:hidden">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-800"><Users className="h-3.5 w-3.5" />Parents</span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800"><Stethoscope className="h-3.5 w-3.5" />Doctors</span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-800"><Activity className="h-3.5 w-3.5" />Therapists</span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800"><GraduationCap className="h-3.5 w-3.5" />Schools</span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary"><Globe className="h-3.5 w-3.5" />Government</span>
+              </motion.div>
+            </motion.div>
+
+            {/* Hero visual — desktop */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              className="hidden lg:block relative h-[480px]"
+            >
+              {/* Floating role chips */}
+              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute z-20 top-6 left-0 flex items-center gap-2 rounded-xl border border-blue-200 bg-white shadow-md px-3 py-2">
+                <div className="h-7 w-7 rounded-full bg-blue-50 flex items-center justify-center"><Users className="h-3.5 w-3.5 text-blue-700" /></div>
+                <span className="text-xs font-semibold text-foreground">Parent</span>
+              </motion.div>
+              <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute z-20 top-14 right-0 flex items-center gap-2 rounded-xl border border-green-200 bg-white shadow-md px-3 py-2">
+                <div className="h-7 w-7 rounded-full bg-green-50 flex items-center justify-center"><Stethoscope className="h-3.5 w-3.5 text-green-700" /></div>
+                <span className="text-xs font-semibold text-foreground">Doctor</span>
+              </motion.div>
+              <motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                className="absolute z-20 bottom-24 left-0 flex items-center gap-2 rounded-xl border border-purple-200 bg-white shadow-md px-3 py-2">
+                <div className="h-7 w-7 rounded-full bg-purple-50 flex items-center justify-center"><Activity className="h-3.5 w-3.5 text-purple-700" /></div>
+                <span className="text-xs font-semibold text-foreground">Therapist</span>
+              </motion.div>
+              <motion.div animate={{ y: [0, -9, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+                className="absolute z-20 bottom-6 right-6 flex items-center gap-2 rounded-xl border border-amber-200 bg-white shadow-md px-3 py-2">
+                <div className="h-7 w-7 rounded-full bg-amber-50 flex items-center justify-center"><GraduationCap className="h-3.5 w-3.5 text-amber-700" /></div>
+                <span className="text-xs font-semibold text-foreground">School</span>
+              </motion.div>
+
+              {/* Main card */}
+              <div className="absolute inset-x-12 inset-y-0 rounded-2xl overflow-hidden border border-primary/10 bg-primary/4">
+                <div className="absolute inset-0 bg-gradient-to-br from-secondary/15 via-transparent to-primary/10" />
+                <div className="absolute inset-5 rounded-xl border border-border bg-card shadow-lg p-5 flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-secondary/25 flex items-center justify-center">
+                      <HeartPulse className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-foreground">Isabella Tan, 6 yrs</div>
+                      <div className="text-xs text-muted-foreground">Developmental Digital Twin</div>
+                    </div>
+                    <Badge className="ml-auto bg-red-100 text-red-700 border-red-200 text-xs">Critical</Badge>
+                  </div>
+                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Domain Scores</div>
+                  <div className="flex flex-col gap-2.5 flex-1">
+                    {DOMAINS.map(d => (
+                      <div key={d.name} className="flex items-center gap-3">
+                        <div className="text-xs text-muted-foreground w-32 shrink-0">{d.name}</div>
+                        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }} animate={{ width: `${d.score}%` }}
+                            transition={{ duration: 1, delay: 0.8 }}
+                            className={`h-full rounded-full ${d.color}`}
+                          />
+                        </div>
+                        <div className="text-xs font-mono text-foreground w-6 text-right">{d.score}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">
+                    <span className="font-semibold">AI Assessment Note:</span> Clinical indicators consistent with developmental concerns requiring professional evaluation. Referral recommended.
+                  </div>
+                </div>
               </div>
-              <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">
-                <span className="font-semibold">AI Assessment Note:</span> Clinical indicators consistent with developmental concerns requiring professional evaluation. Referral recommended.
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </section>
 
-        {/* ── TRUST BAR ──────────────────────────────────────────────────── */}
-        <div className="border-y bg-muted/30 py-4 px-4 md:px-6">
-          <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-3 md:gap-8 text-xs md:text-sm text-muted-foreground">
-            {["Multi-tenant SaaS", "AI — NOT diagnosis", "6 Integrated Ecosystems", "National Scale Ready", "Philippines DOH Aligned"].map(t => (
-              <span key={t} className="flex items-center gap-1.5">
-                <Check className="h-3.5 w-3.5 text-secondary" /> {t}
-              </span>
+        {/* ── STATS BAR ──────────────────────────────────────────────────── */}
+        <div className="border-y bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 py-8 px-4 md:px-12">
+          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 md:divide-x divide-border">
+            {[
+              { stat: "1M+", label: "Children undiagnosed in PH", icon: Brain, color: "text-primary" },
+              { stat: "6", label: "Integrated care ecosystems", icon: Activity, color: "text-secondary" },
+              { stat: "5", label: "AI behavioral engine layers", icon: Zap, color: "text-primary" },
+              { stat: "∞", label: "Scalable to every barangay", icon: Globe, color: "text-secondary" },
+            ].map(({ stat, label, icon: Icon, color }) => (
+              <motion.div
+                key={label}
+                initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="flex flex-col items-center text-center gap-1.5 px-4"
+              >
+                <Icon className={`h-5 w-5 ${color} mb-0.5`} />
+                <div className={`text-3xl md:text-4xl font-bold ${color}`}>{stat}</div>
+                <div className="text-xs text-muted-foreground leading-snug max-w-[120px]">{label}</div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -856,12 +933,12 @@ export default function Home() {
                   key={sys.num}
                   variants={fadeUp} initial="hidden" whileInView="visible"
                   viewport={{ once: true }} custom={i * 0.5}
-                  className={`border rounded-2xl p-6 ${sys.color} flex flex-col gap-4`}
+                  className={`border rounded-2xl p-6 ${sys.color} flex flex-col gap-4 hover:shadow-md transition-shadow`}
                   data-testid={`card-system-${i + 1}`}
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-background border border-border">
-                      <sys.icon className="h-5 w-5 text-primary" />
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${sys.iconBg}`}>
+                      <sys.icon className={`h-6 w-6 ${sys.iconColor}`} />
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono text-muted-foreground">{sys.num}</span>
@@ -904,14 +981,22 @@ export default function Home() {
                   key={s.step}
                   variants={fadeUp} initial="hidden" whileInView="visible"
                   viewport={{ once: true }} custom={i * 0.3}
-                  className="bg-background/8 border border-background/15 rounded-2xl p-5 flex flex-col gap-3"
+                  className="relative bg-background/10 border border-background/20 rounded-2xl p-5 flex flex-col gap-3 hover:bg-background/15 transition-colors"
                   data-testid={`card-journey-step-${s.step}`}
                 >
+                  {/* Connector arrow (not on last two per row) */}
+                  {i % 5 < 4 && (
+                    <div className="hidden lg:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10">
+                      <ChevronRight className="h-5 w-5 text-secondary/60" />
+                    </div>
+                  )}
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-primary text-xs font-bold">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-primary text-sm font-bold shrink-0 shadow-sm">
                       {s.step}
                     </div>
-                    <s.icon className="h-4 w-4 text-background/60" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background/15">
+                      <s.icon className="h-4 w-4 text-background/80" />
+                    </div>
                   </div>
                   <div>
                     <div className="text-sm font-bold text-background mb-1">{s.title}</div>
