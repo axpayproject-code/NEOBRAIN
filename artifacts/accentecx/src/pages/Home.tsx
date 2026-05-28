@@ -951,12 +951,12 @@ export default function Home() {
         {/* ── 6 SYSTEMS ──────────────────────────────────────────────────── */}
         <section id="systems" className="py-12 md:py-24 px-4 md:px-12">
           <div className="max-w-7xl mx-auto">
-            <div className="max-w-3xl mx-auto text-center mb-10 md:mb-16">
-              <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-3">Platform Architecture</p>
-              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 md:mb-6">
+            <div className="flex flex-col items-center text-center mb-10 md:mb-16">
+              <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-3 text-center w-full">Platform Architecture</p>
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 md:mb-6 text-center max-w-3xl">
                 Six integrated ecosystems.<br className="hidden md:block" /> One continuous system.
               </h2>
-              <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-base md:text-lg text-muted-foreground text-center max-w-2xl">
                 Every stakeholder in a child's developmental journey operates within a purpose-built system — all sharing a unified data layer.
               </p>
             </div>

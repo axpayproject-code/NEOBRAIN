@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import NeoBrainLogo from "@/components/ui/NeoBrainLogo";
 
 const NAV_LINKS = [
+  { label: "Home", href: "/" },
   { label: "Platform", href: "/family-care" },
   { label: "For Clinics", href: "/clinical-system" },
   { label: "For Schools", href: "/school-integration" },
   { label: "For Government", href: "/for-government" },
-  { label: "Pricing", href: "/#pricing" },
 ];
 
 const FOOTER_PLATFORM = [
