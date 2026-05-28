@@ -111,6 +111,21 @@ const AI_LAYERS = [
 
 const B2C_TIERS = [
   {
+    name: "Free",
+    price: "Free",
+    period: "",
+    tagline: "Try NEOBRAIN, no commitment",
+    highlight: false,
+    badge: "No credit card",
+    features: [
+      "1 child profile",
+      "1 developmental screening",
+      "Appointment booking",
+      "Milestone tracking"
+    ],
+    excluded: ["Full screening engine", "Video behavioral analysis", "Therapy tracking", "AI reports", "Specialist messaging"]
+  },
+  {
     name: "Starter Care",
     price: "₱200",
     period: "/month",
@@ -118,7 +133,7 @@ const B2C_TIERS = [
     highlight: false,
     features: [
       "1 child profile",
-      "Basic developmental screening",
+      "Basic developmental screening (2×/yr)",
       "AI summary report (text only)",
       "Appointment booking",
       "Milestone tracking"
@@ -236,6 +251,7 @@ const PRICING_TABS = [
 type PricingTab = (typeof PRICING_TABS)[number]["id"];
 
 const PLAN_SLUGS: Record<string, string> = {
+  "Free": "free",
   "Starter Care": "starter-care",
   "Care Plus": "care-plus",
   "Care Family Pro": "care-family-pro",
@@ -337,7 +353,7 @@ function PricingSection() {
                       variant={tier.highlight ? "default" : "outline"}
                       data-testid={`button-pricing-b2c-${i + 1}`}
                     >
-                      Get Started — {tier.price}/mo
+                      {tier.price === "Free" ? "Start for Free" : `Get Started — ${tier.price}/mo`}
                     </Button>
                   </Link>
                 </motion.div>
@@ -355,6 +371,7 @@ function PricingSection() {
                   <thead>
                     <tr className="border-b border-border">
                       <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-1/3">Feature</th>
+                      <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Free</th>
                       <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Starter ₱200</th>
                       <th className="text-center px-4 py-3 text-xs font-semibold text-primary uppercase tracking-wider bg-primary/5">Care Plus ₱799</th>
                       <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Family Pro ₱1,999</th>
@@ -362,22 +379,22 @@ function PricingSection() {
                   </thead>
                   <tbody>
                     {[
-                      { feature: "Child profiles", starter: "1 child", plus: "Up to 4", pro: "Unlimited" },
-                      { feature: "Developmental screenings", starter: "Basic (2×/yr)", plus: "Full (unlimited)", pro: "Full (unlimited)" },
-                      { feature: "AI developmental report", starter: "Text summary", plus: "Full + risk score", pro: "Full + risk score" },
-                      { feature: "Video behavioral analysis", starter: false, plus: "Up to 3/month", pro: "Unlimited" },
-                      { feature: "Therapy plan tracking", starter: false, plus: true, pro: true },
-                      { feature: "School input system", starter: false, plus: true, pro: true },
-                      { feature: "Specialist messaging", starter: false, plus: "Standard queue", pro: "Priority queue" },
-                      { feature: "Priority AI processing", starter: false, plus: false, pro: true },
-                      { feature: "Advanced clinical reports", starter: false, plus: false, pro: true },
-                      { feature: "Therapy automation", starter: false, plus: false, pro: true },
-                      { feature: "Dedicated support manager", starter: false, plus: false, pro: true },
+                      { feature: "Child profiles", free: "1 child", starter: "1 child", plus: "Up to 4", pro: "Unlimited" },
+                      { feature: "Developmental screenings", free: "1 screening", starter: "Basic (2×/yr)", plus: "Full (unlimited)", pro: "Full (unlimited)" },
+                      { feature: "AI developmental report", free: false, starter: "Text summary", plus: "Full + risk score", pro: "Full + risk score" },
+                      { feature: "Video behavioral analysis", free: false, starter: false, plus: "Up to 3/month", pro: "Unlimited" },
+                      { feature: "Therapy plan tracking", free: false, starter: false, plus: true, pro: true },
+                      { feature: "School input system", free: false, starter: false, plus: true, pro: true },
+                      { feature: "Specialist messaging", free: false, starter: false, plus: "Standard queue", pro: "Priority queue" },
+                      { feature: "Priority AI processing", free: false, starter: false, plus: false, pro: true },
+                      { feature: "Advanced clinical reports", free: false, starter: false, plus: false, pro: true },
+                      { feature: "Therapy automation", free: false, starter: false, plus: false, pro: true },
+                      { feature: "Dedicated support manager", free: false, starter: false, plus: false, pro: true },
                     ].map((row, i) => (
                       <tr key={row.feature} className={`border-b border-border last:border-0 ${i % 2 === 0 ? "" : "bg-muted/20"}`}>
                         <td className="px-6 py-3 text-foreground font-medium">{row.feature}</td>
-                        {[row.starter, row.plus, row.pro].map((val, j) => (
-                          <td key={j} className={`text-center px-4 py-3 ${j === 1 ? "bg-primary/5" : ""}`}>
+                        {[row.free, row.starter, row.plus, row.pro].map((val, j) => (
+                          <td key={j} className={`text-center px-4 py-3 ${j === 2 ? "bg-primary/5" : ""}`}>
                             {val === false ? (
                               <X className="h-4 w-4 text-muted-foreground/40 mx-auto" />
                             ) : val === true ? (
