@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -690,6 +690,15 @@ function PricingSection() {
 
 export default function Home() {
   const [demoModal, setDemoModal] = useState<{ open: boolean; audience: SalesAudience }>({ open: false, audience: "clinics" });
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [cameraError, setCameraError] = useState(false);
+  useEffect(() => {
+    let stream: MediaStream | null = null;
+    navigator.mediaDevices?.getUserMedia({ video: { facingMode: "user" } })
+      .then(s => { stream = s; if (videoRef.current) { videoRef.current.srcObject = s; } })
+      .catch(() => setCameraError(true));
+    return () => { stream?.getTracks().forEach(t => t.stop()); };
+  }, []);
   const [menuOpen, setMenuOpen] = useState(false);
   const [systemsIdx, setSystemsIdx] = useState(0);
   const [journeyIdx, setJourneyIdx] = useState(0);
@@ -876,6 +885,15 @@ export default function Home() {
 
                 {/* Camera viewport */}
                 <div className="relative bg-slate-900 aspect-video overflow-hidden">
+                  {/* Live camera feed */}
+                  {cameraError ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900">
+                      <Video className="h-8 w-8 text-muted-foreground/40" />
+                      <span className="text-xs text-muted-foreground/60">Camera access required for live tracking</span>
+                    </div>
+                  ) : (
+                    <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover scale-x-[-1]" />
+                  )}
                   {/* Scanline overlay */}
                   <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.015) 3px,rgba(255,255,255,0.015) 4px)" }} />
                   {/* Grid lines */}
@@ -961,30 +979,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Floating role chips — corners */}
-              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute z-10 -top-5 -left-2 sm:-left-6 flex items-center gap-2 rounded-xl border border-blue-200 bg-white shadow-lg px-3 py-2">
-                <div className="h-7 w-7 rounded-full bg-blue-50 flex items-center justify-center shrink-0"><Users className="h-3.5 w-3.5 text-blue-700" /></div>
-                <span className="text-xs font-semibold text-foreground">Parent</span>
-              </motion.div>
-
-              <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute z-10 -top-5 -right-2 sm:-right-6 flex items-center gap-2 rounded-xl border border-green-200 bg-white shadow-lg px-3 py-2">
-                <div className="h-7 w-7 rounded-full bg-green-50 flex items-center justify-center shrink-0"><Stethoscope className="h-3.5 w-3.5 text-green-700" /></div>
-                <span className="text-xs font-semibold text-foreground">Doctor</span>
-              </motion.div>
-
-              <motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute z-10 -bottom-5 -left-2 sm:-left-6 flex items-center gap-2 rounded-xl border border-purple-200 bg-white shadow-lg px-3 py-2">
-                <div className="h-7 w-7 rounded-full bg-purple-50 flex items-center justify-center shrink-0"><Activity className="h-3.5 w-3.5 text-purple-700" /></div>
-                <span className="text-xs font-semibold text-foreground">Therapist</span>
-              </motion.div>
-
-              <motion.div animate={{ y: [0, -9, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-                className="absolute z-10 -bottom-5 -right-2 sm:-right-6 flex items-center gap-2 rounded-xl border border-amber-200 bg-white shadow-lg px-3 py-2">
-                <div className="h-7 w-7 rounded-full bg-amber-50 flex items-center justify-center shrink-0"><GraduationCap className="h-3.5 w-3.5 text-amber-700" /></div>
-                <span className="text-xs font-semibold text-foreground">School</span>
-              </motion.div>
             </motion.div>
           </div>
         </section>
