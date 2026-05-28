@@ -763,9 +763,9 @@ function AppointmentsTab() {
 
   const token = user?.id ? `Bearer ${user.id}` : "";
 
-  const pending = (appointments ?? []).filter(a => a.paymentStatus === "submitted");
-  const needsSetup = (appointments ?? []).filter(a => a.status === "pending_setup");
-  const scheduled = (appointments ?? []).filter(a => a.status === "scheduled");
+  const pending = (appointments ?? []).filter(a => (a.paymentStatus as string) === "submitted");
+  const needsSetup = (appointments ?? []).filter(a => (a.status as string) === "pending_setup");
+  const scheduled = (appointments ?? []).filter(a => (a.status as string) === "scheduled");
 
   async function handleViewProof(apptId: number) {
     setProofApptId(apptId);
@@ -1008,7 +1008,7 @@ function AppointmentsTab() {
             </div>
           )}
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowRejectFor(proofApptId!); setProofApptId(null)}>
+            <Button variant="outline" onClick={() => { setShowRejectFor(proofApptId!); setProofApptId(null); }}>
               Reject
             </Button>
             <Button

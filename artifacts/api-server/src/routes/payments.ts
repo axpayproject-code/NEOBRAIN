@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, appointmentPaymentsTable, appointmentsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { PayAppointmentParams, GetAppointmentPaymentParams } from "@workspace/api-zod";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const router = Router();
 
