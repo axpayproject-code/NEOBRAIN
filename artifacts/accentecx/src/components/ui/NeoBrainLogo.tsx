@@ -25,12 +25,13 @@ const VARIANT = {
 };
 
 export default function NeoBrainLogo({ size = "md", showTagline = false, variant = "light", className = "" }: Props) {
-  if (variant === "light") {
+  if (variant === "light" || variant === "dark") {
     return (
       <img
         src="/neobrain-logo-transparent.png"
         alt="NEOBRAIN by ACCENTECX AI"
         className={`${IMG_HEIGHT[size]} w-auto object-contain select-none ${className}`}
+        style={variant === "dark" ? { filter: "brightness(0) invert(1)" } : undefined}
         draggable={false}
       />
     );

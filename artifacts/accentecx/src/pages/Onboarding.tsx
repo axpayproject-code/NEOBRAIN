@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth, type UserRole } from "@/contexts/AuthContext";
+import NeoBrainLogo from "@/components/ui/NeoBrainLogo";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -986,12 +987,7 @@ export default function Onboarding() {
     <div className="min-h-screen bg-background">
       {/* Top bar */}
       <header className="border-b border-border px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Heart className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="font-bold text-foreground text-sm tracking-tight">NEOBRAIN</span>
-        </div>
+        <NeoBrainLogo size="sm" showTagline variant="light" />
         <div className="flex items-center gap-3">
           <div className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${meta.badgeColor}`}>
             <Icon className="h-3.5 w-3.5" />
