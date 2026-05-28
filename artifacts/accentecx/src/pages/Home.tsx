@@ -2,11 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ArrowRight, HeartPulse, Activity, ShieldCheck, Users, GraduationCap,
   Building2, Stethoscope, Brain, Video, BarChart3, Check, X,
   MessageSquare, ClipboardList, Calendar, LineChart, Globe, Lock,
-  ChevronRight, Zap, Star, Menu
+  ChevronRight, Zap, Star, Menu, FileText, Landmark, Heart
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ContactSalesModal, { type SalesAudience } from "@/components/sales/ContactSalesModal";
@@ -835,6 +836,7 @@ export default function Home() {
     return () => { stream?.getTracks().forEach(t => t.stop()); };
   }, []);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [govModal, setGovModal] = useState(false);
   const [systemsIdx, setSystemsIdx] = useState(0);
   const [journeyIdx, setJourneyIdx] = useState(0);
   const systemsRef = useRef<HTMLDivElement>(null);
@@ -926,21 +928,16 @@ export default function Home() {
       <main className="flex-1">
         {/* ── HERO ────────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden px-4 pt-10 pb-8 md:pt-20 md:pb-16 md:px-12">
-          {/* Animated background blobs */}
+          {/* Animated background blobs — blue only */}
           <motion.div
             animate={{ scale: [1, 1.25, 1], x: [0, 30, 0] }}
             transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-40 -right-32 w-[480px] h-[480px] bg-secondary/20 rounded-full blur-3xl pointer-events-none"
+            className="absolute -top-40 -right-32 w-[480px] h-[480px] bg-primary/8 rounded-full blur-3xl pointer-events-none"
           />
           <motion.div
             animate={{ scale: [1, 1.18, 1], y: [0, -25, 0] }}
             transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute top-32 -left-28 w-80 h-80 bg-primary/8 rounded-full blur-3xl pointer-events-none"
-          />
-          <motion.div
-            animate={{ scale: [1, 1.12, 1] }}
-            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 4 }}
-            className="absolute -bottom-16 right-1/3 w-64 h-64 bg-secondary/12 rounded-full blur-3xl pointer-events-none"
+            className="absolute top-32 -left-28 w-80 h-80 bg-primary/6 rounded-full blur-3xl pointer-events-none"
           />
 
           {/* ── Centered hero content ─────────────────────────────────── */}
@@ -995,6 +992,33 @@ export default function Home() {
                   <ShieldCheck className="h-3.5 w-3.5 text-secondary" /> {t}
                 </span>
               ))}
+              <button
+                onClick={() => setGovModal(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-[#0038A8]/30 bg-[#0038A8]/5 px-3 py-1 hover:bg-[#0038A8]/10 transition-colors cursor-pointer"
+                title="View Philippine legislation & partnerships"
+              >
+                {/* Philippine flag inline SVG */}
+                <svg viewBox="0 0 36 24" className="h-4 w-6 rounded-[2px] shadow-sm shrink-0" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="36" height="12" fill="#0038A8"/>
+                  <rect y="12" width="36" height="12" fill="#CE1126"/>
+                  <polygon points="0,0 18,12 0,24" fill="white"/>
+                  {/* Sun rays */}
+                  <circle cx="7.5" cy="12" r="2.6" fill="#FCD116"/>
+                  <line x1="7.5" y1="8.4" x2="7.5" y2="9.8" stroke="#FCD116" strokeWidth="1.2"/>
+                  <line x1="7.5" y1="14.2" x2="7.5" y2="15.6" stroke="#FCD116" strokeWidth="1.2"/>
+                  <line x1="3.9" y1="12" x2="5.3" y2="12" stroke="#FCD116" strokeWidth="1.2"/>
+                  <line x1="9.7" y1="12" x2="11.1" y2="12" stroke="#FCD116" strokeWidth="1.2"/>
+                  <line x1="5.0" y1="9.1" x2="6.0" y2="10.1" stroke="#FCD116" strokeWidth="1.2"/>
+                  <line x1="9.0" y1="13.9" x2="10.0" y2="14.9" stroke="#FCD116" strokeWidth="1.2"/>
+                  <line x1="9.0" y1="9.1" x2="10.0" y2="10.1" stroke="#FCD116" strokeWidth="1.2" transform="scale(-1,1) translate(-15,0)"/>
+                  <line x1="5.0" y1="13.9" x2="6.0" y2="14.9" stroke="#FCD116" strokeWidth="1.2" transform="scale(-1,1) translate(-15,0)"/>
+                  {/* 3 Stars */}
+                  <polygon points="3,4.2 3.4,5.4 4.6,5.4 3.6,6.1 4,7.3 3,6.6 2,7.3 2.4,6.1 1.4,5.4 2.6,5.4" fill="#FCD116"/>
+                  <polygon points="3,16.7 3.4,17.9 4.6,17.9 3.6,18.6 4,19.8 3,19.1 2,19.8 2.4,18.6 1.4,17.9 2.6,17.9" fill="#FCD116"/>
+                  <polygon points="14,11.5 14.4,12.7 15.6,12.7 14.6,13.4 15,14.6 14,13.9 13,14.6 13.4,13.4 12.4,12.7 13.6,12.7" fill="#FCD116"/>
+                </svg>
+                <span className="text-[#0038A8] font-semibold text-xs">PH Legislation & Partnerships</span>
+              </button>
             </motion.div>
 
             {/* ── Centered product visual ──────────────────────────────────── */}
@@ -1005,7 +1029,7 @@ export default function Home() {
               className="relative w-full max-w-2xl mt-4 px-6 sm:px-10"
             >
               {/* Glow halo */}
-              <div className="absolute -inset-6 bg-gradient-to-br from-secondary/25 via-transparent to-primary/12 rounded-3xl blur-2xl pointer-events-none" />
+              <div className="absolute -inset-6 bg-gradient-to-br from-primary/15 via-transparent to-primary/8 rounded-3xl blur-2xl pointer-events-none" />
 
               {/* AI Camera Behavior Tracking Card */}
               <div className="relative rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
@@ -1553,6 +1577,181 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* ── Philippine Legislation & Partnerships Modal ─────────────── */}
+      <Dialog open={govModal} onOpenChange={setGovModal}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0">
+          {/* Hero header */}
+          <div className="bg-[#0038A8] px-6 pt-6 pb-5 rounded-t-lg">
+            <div className="flex items-center gap-3 mb-3">
+              <svg viewBox="0 0 36 24" className="h-7 w-10 rounded shadow" xmlns="http://www.w3.org/2000/svg">
+                <rect width="36" height="12" fill="#0038A8"/>
+                <rect y="12" width="36" height="12" fill="#CE1126"/>
+                <polygon points="0,0 18,12 0,24" fill="white"/>
+                <circle cx="7.5" cy="12" r="2.6" fill="#FCD116"/>
+                <line x1="7.5" y1="8.4" x2="7.5" y2="9.8" stroke="#FCD116" strokeWidth="1.2"/>
+                <line x1="7.5" y1="14.2" x2="7.5" y2="15.6" stroke="#FCD116" strokeWidth="1.2"/>
+                <line x1="3.9" y1="12" x2="5.3" y2="12" stroke="#FCD116" strokeWidth="1.2"/>
+                <line x1="9.7" y1="12" x2="11.1" y2="12" stroke="#FCD116" strokeWidth="1.2"/>
+                <line x1="5.0" y1="9.1" x2="6.0" y2="10.1" stroke="#FCD116" strokeWidth="1.2"/>
+                <line x1="9.0" y1="13.9" x2="10.0" y2="14.9" stroke="#FCD116" strokeWidth="1.2"/>
+                <line x1="9.0" y1="9.1" x2="10.0" y2="10.1" stroke="#FCD116" strokeWidth="1.2" transform="scale(-1,1) translate(-15,0)"/>
+                <line x1="5.0" y1="13.9" x2="6.0" y2="14.9" stroke="#FCD116" strokeWidth="1.2" transform="scale(-1,1) translate(-15,0)"/>
+                <polygon points="3,4.2 3.4,5.4 4.6,5.4 3.6,6.1 4,7.3 3,6.6 2,7.3 2.4,6.1 1.4,5.4 2.6,5.4" fill="#FCD116"/>
+                <polygon points="3,16.7 3.4,17.9 4.6,17.9 3.6,18.6 4,19.8 3,19.1 2,19.8 2.4,18.6 1.4,17.9 2.6,17.9" fill="#FCD116"/>
+                <polygon points="14,11.5 14.4,12.7 15.6,12.7 14.6,13.4 15,14.6 14,13.9 13,14.6 13.4,13.4 12.4,12.7 13.6,12.7" fill="#FCD116"/>
+              </svg>
+              <div>
+                <DialogHeader>
+                  <DialogTitle className="text-white text-lg font-bold leading-tight">Philippine Legislation & NEOBRAIN Partnerships</DialogTitle>
+                </DialogHeader>
+                <p className="text-white/70 text-xs mt-0.5">How we align with national law and collaborate across government and civil society</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-6 py-5 space-y-6">
+
+            {/* ── Key Legislation ── */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="h-4 w-4 text-[#0038A8]" />
+                <h3 className="font-bold text-foreground text-sm uppercase tracking-wide">Key Legislation</h3>
+              </div>
+              <div className="space-y-3">
+                {[
+                  {
+                    ra: "Republic Act 11650",
+                    title: "Institutionalizing Inclusive Education Act",
+                    signed: "Signed March 11, 2022",
+                    desc: "Mandates all public and private schools to provide inclusive education for learners with disabilities — including autism spectrum disorder, ADHD, intellectual and developmental disabilities. NEOBRAIN directly supports DepEd compliance by providing structured behavioral intelligence and digital IEP-aligned records for every enrolled child.",
+                    url: "https://lawphil.net/statutes/repacts/ra2022/ra_11650_2022.html",
+                    highlight: true,
+                  },
+                  {
+                    ra: "Republic Act 11036",
+                    title: "Philippine Mental Health Act",
+                    signed: "Signed June 20, 2018",
+                    desc: "Establishes a national mental health policy, integrating mental health services into the primary health care system and mandating coverage of neurodevelopmental conditions through PhilHealth. NEOBRAIN's screening and therapy plan modules support implementation at the barangay and community level.",
+                    url: "https://lawphil.net/statutes/repacts/ra2018/ra_11036_2018.html",
+                    highlight: false,
+                  },
+                  {
+                    ra: "Republic Act 8980",
+                    title: "Early Childhood Care and Development (ECCD) Act",
+                    signed: "Signed December 5, 2000 · Enforced & expanded 2023",
+                    desc: "Governs the delivery of integrated developmental care for children 0–6 years. NEOBRAIN's parent-facing Family Care System and developmental milestone tracking tools are designed to meet ECCD Council reporting standards.",
+                    url: "https://lawphil.net/statutes/repacts/ra2000/ra_8980_2000.html",
+                    highlight: false,
+                  },
+                  {
+                    ra: "Republic Act 9442",
+                    title: "Magna Carta for Disabled Persons (as amended)",
+                    signed: "Signed April 30, 2007",
+                    desc: "Guarantees equal rights, privileges, and opportunities for persons with disabilities. NEOBRAIN's platform is designed to be fully accessible and to produce documentation that supports PWD ID applications, school accommodations, and PhilHealth benefit claims.",
+                    url: "https://lawphil.net/statutes/repacts/ra2007/ra_9442_2007.html",
+                    highlight: false,
+                  },
+                ].map(law => (
+                  <div key={law.ra} className={`rounded-xl border p-4 ${law.highlight ? "border-[#0038A8]/30 bg-[#0038A8]/5" : "border-border bg-card"}`}>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${law.highlight ? "bg-[#0038A8] text-white" : "bg-muted text-muted-foreground"}`}>{law.ra}</span>
+                        <p className="font-semibold text-foreground text-sm mt-1.5">{law.title}</p>
+                        <p className="text-xs text-muted-foreground">{law.signed}</p>
+                      </div>
+                      <a href={law.url} target="_blank" rel="noopener noreferrer"
+                        className="shrink-0 text-xs text-[#0038A8] hover:underline font-medium flex items-center gap-0.5 mt-0.5">
+                        View <ArrowRight className="h-3 w-3" />
+                      </a>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed mt-2">{law.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Government Partners ── */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Landmark className="h-4 w-4 text-[#0038A8]" />
+                <h3 className="font-bold text-foreground text-sm uppercase tracking-wide">Government Agencies — Collaboration Targets</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {[
+                  { name: "Department of Health (DOH)", role: "Bureau of Child Health — national screening data integration" },
+                  { name: "Department of Education (DepEd)", role: "SPED Division — RA 11650 IEP digital compliance" },
+                  { name: "DSWD", role: "Listahanan beneficiary identification & PDAO coordination" },
+                  { name: "PhilHealth", role: "Z-Benefit coverage for neurodevelopmental therapy claims" },
+                  { name: "ECCD Council", role: "0–6 developmental milestone reporting standards" },
+                  { name: "National Council on Disability Affairs (NCDA)", role: "PWD data linkage and policy alignment" },
+                  { name: "Philippine Children's Medical Center (PCMC)", role: "Clinical partner for telehealth and specialist network" },
+                  { name: "Commission on Higher Education (CHED)", role: "Allied health curricula integration for OT, SLP, PT" },
+                  { name: "DILG / LGUs", role: "City/Municipal Health Offices — barangay-level deployment" },
+                  { name: "Senate & House Committees", role: "Committee on Health & Committee on Education — legislative briefings" },
+                ].map(g => (
+                  <div key={g.name} className="flex gap-2.5 rounded-lg border border-border bg-card p-3">
+                    <div className="h-7 w-7 rounded-full bg-[#0038A8]/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Landmark className="h-3.5 w-3.5 text-[#0038A8]" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">{g.name}</p>
+                      <p className="text-xs text-muted-foreground leading-snug">{g.role}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── NGO Partners ── */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Heart className="h-4 w-4 text-[#CE1126]" />
+                <h3 className="font-bold text-foreground text-sm uppercase tracking-wide">NGOs & Professional Organizations</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {[
+                  { name: "Autism Society Philippines (ASP)", role: "National autism advocacy — family outreach network" },
+                  { name: "Down Syndrome Association of the Philippines (DSAPI)", role: "Early intervention and family support programs" },
+                  { name: "Philippine Society for Developmental & Behavioral Pediatrics (PSDBP)", role: "Clinical protocol validation and training" },
+                  { name: "Philippine Pediatric Society (PPS)", role: "Referral pathways and clinical guidelines alignment" },
+                  { name: "Philippine Association of Speech Pathologists (PASP)", role: "SLP therapist onboarding and telehealth sessions" },
+                  { name: "Occupational Therapy Association of the Philippines (OTAP)", role: "OT therapy plan modules and assessments" },
+                  { name: "Philippine Physical Therapy Association (PPTA)", role: "Motor domain scoring and PT plan integration" },
+                  { name: "Kythe Foundation", role: "Pediatric chronic illness — co-care coordination" },
+                  { name: "Child Rights Network (CRN)", role: "Advocacy, child data protection, rights-based approach" },
+                  { name: "Consuelo Foundation", role: "Community-based child development programs in Cebu & Luzon" },
+                  { name: "Plan International Philippines", role: "Rural and underserved community reach programs" },
+                  { name: "UNICEF Philippines", role: "Early childhood development data and country-level alignment" },
+                ].map(n => (
+                  <div key={n.name} className="flex gap-2.5 rounded-lg border border-border bg-card p-3">
+                    <div className="h-7 w-7 rounded-full bg-[#CE1126]/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Heart className="h-3.5 w-3.5 text-[#CE1126]" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">{n.name}</p>
+                      <p className="text-xs text-muted-foreground leading-snug">{n.role}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="rounded-xl bg-[#0038A8]/5 border border-[#0038A8]/20 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Interested in a government or NGO partnership?</p>
+                <p className="text-xs text-muted-foreground mt-0.5">We welcome MOU discussions with any agency or organization aligned with child developmental health in the Philippines.</p>
+              </div>
+              <Button size="sm" className="rounded-full shrink-0 bg-[#0038A8] text-white hover:bg-[#002990] gap-1.5"
+                onClick={() => { setGovModal(false); }}>
+                Contact Us <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
