@@ -1,7 +1,8 @@
 import { Link, useLocation } from "wouter";
-import { HeartPulse, Lock, Menu, X } from "lucide-react";
+import { Lock, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import NeoBrainLogo from "@/components/ui/NeoBrainLogo";
 
 const NAV_LINKS = [
   { label: "Platform", href: "/family-care" },
@@ -38,12 +39,8 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
       {/* ── Nav ─────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-bold text-primary">
-            <HeartPulse className="h-6 w-6 text-secondary" />
-            <div className="hidden sm:flex flex-col leading-none">
-              <span className="text-sm tracking-tight" style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
-              <span className="text-[9px] text-muted-foreground font-normal tracking-wide">by ACCENTECX AI</span>
-            </div>
+          <Link href="/">
+            <NeoBrainLogo size="sm" showTagline variant="light" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
@@ -87,13 +84,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-10">
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 text-primary font-bold mb-1">
-                <HeartPulse className="h-6 w-6 text-secondary" />
-                <div className="flex flex-col leading-none">
-                  <span style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
-                  <span className="text-[9px] text-muted-foreground font-normal tracking-wide mt-0.5">by ACCENTECX AI</span>
-                </div>
-              </div>
+              <NeoBrainLogo size="sm" showTagline variant="light" className="mb-1" />
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mt-3">
                 A national AI-assisted developmental healthcare infrastructure for the Philippines. Supporting families, clinicians, and schools with structured behavioral intelligence.
               </p>

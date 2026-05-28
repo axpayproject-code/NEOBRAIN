@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  HeartPulse, User, Stethoscope, ActivitySquare, Settings,
+  User, Stethoscope, ActivitySquare, Settings,
   ChevronRight, Shield, ArrowRight, Check, AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, type UserRole, ROLE_TIERS, roleDefaultRoute } from "@/contexts/AuthContext";
+import NeoBrainLogo from "@/components/ui/NeoBrainLogo";
 
 const ROLES: {
   id: UserRole;
@@ -116,10 +117,7 @@ export default function Login() {
     <div className="min-h-[100dvh] flex bg-background">
       {/* ── Left panel ─────────────────────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-between p-12">
-        <div className="flex items-center gap-2 text-background font-bold text-lg">
-          <HeartPulse className="h-7 w-7 text-secondary" />
-          <span>NEOBRAIN</span>
-        </div>
+        <NeoBrainLogo size="md" showTagline variant="dark" />
         <div className="space-y-6 max-w-sm">
           <div className="text-4xl font-bold text-background leading-tight">
             {mode === "signin" ? "Every role. One platform. One mission." : "Choose your role to get started."}
@@ -167,9 +165,8 @@ export default function Login() {
           transition={{ duration: 0.4 }}
           className="w-full max-w-md"
         >
-          <div className="lg:hidden flex items-center gap-2 text-primary font-bold text-lg mb-8">
-            <HeartPulse className="h-6 w-6 text-secondary" />
-            <span>NEOBRAIN</span>
+          <div className="lg:hidden mb-8">
+            <NeoBrainLogo size="md" variant="light" />
           </div>
 
           {/* Mode toggle */}

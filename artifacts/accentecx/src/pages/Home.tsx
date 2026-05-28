@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import ContactSalesModal, { type SalesAudience } from "@/components/sales/ContactSalesModal";
 import LandingLiveDemo from "@/components/landing/LandingLiveDemo";
 import PhilippinesMap from "@/components/landing/PhilippinesMap";
+import NeoBrainLogo from "@/components/ui/NeoBrainLogo";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -683,10 +684,8 @@ export default function Home() {
       {/* ── NAV ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center px-4 md:px-12">
-          <Link href="/" className="flex items-center gap-2 text-primary font-bold text-base md:text-lg shrink-0" onClick={() => setMenuOpen(false)}>
-            <HeartPulse className="h-6 w-6 md:h-7 md:w-7 text-secondary" />
-            <span className="tracking-tight" style={{ fontFamily: "var(--font-display)" }}>NEOBRAIN</span>
-            <span className="text-xs font-normal text-muted-foreground hidden sm:inline ml-1">by ACCENTECX AI</span>
+          <Link href="/" onClick={() => setMenuOpen(false)}>
+            <NeoBrainLogo size="sm" showTagline variant="light" />
           </Link>
           <nav className="hidden md:flex items-center gap-5 ml-8 text-sm text-muted-foreground">
             <a href="#systems" className="hover:text-foreground transition-colors">Systems</a>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { HeartPulse, LogOut, X, ChevronRight, type LucideIcon } from "lucide-react";
+import { LogOut, X, ChevronRight, type LucideIcon } from "lucide-react";
+import NeoBrainLogo from "@/components/ui/NeoBrainLogo";
 import { Badge } from "@/components/ui/badge";
 import { useAuth, type UserRole } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -64,12 +65,8 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
       {/* ── Desktop sidebar ───────────────────────────────────────────────── */}
       <aside className="hidden md:flex w-64 flex-col border-r bg-sidebar shrink-0">
         <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-5">
-          <Link href="/" className="flex items-center gap-2 font-bold text-sidebar-foreground text-sm">
-            <HeartPulse className="h-5 w-5 text-sidebar-primary" />
-            <div className="flex flex-col leading-none">
-              <span>NEOBRAIN</span>
-              <span className="text-[9px] font-normal opacity-40 tracking-wide">by ACCENTECX AI</span>
-            </div>
+          <Link href="/">
+            <NeoBrainLogo size="sm" showTagline variant="sidebar" />
           </Link>
         </div>
 
@@ -144,9 +141,8 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
 
         {/* Top bar */}
         <header className="flex items-center justify-between h-14 border-b bg-sidebar px-4 shrink-0 sticky top-0 z-30">
-          <Link href="/" className="flex items-center gap-2 font-bold text-sidebar-foreground">
-            <HeartPulse className="h-5 w-5 text-sidebar-primary" />
-            <span className="text-sm">NEOBRAIN</span>
+          <Link href="/">
+            <NeoBrainLogo size="xs" variant="sidebar" />
           </Link>
           <button
             onClick={() => setDrawerOpen(true)}

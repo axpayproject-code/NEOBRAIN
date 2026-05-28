@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, FileText, Calendar, Activity, FileStack, Settings, LogOut, HeartPulse } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Calendar, Activity, FileStack, Settings, LogOut } from "lucide-react";
+import NeoBrainLogo from "@/components/ui/NeoBrainLogo";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
@@ -21,12 +22,8 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className="hidden w-64 flex-col border-r bg-sidebar md:flex">
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-sidebar-border px-6">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-sidebar-foreground">
-            <HeartPulse className="h-6 w-6 text-sidebar-primary" />
-            <div className="flex flex-col leading-none">
-              <span>NEOBRAIN</span>
-              <span className="text-[9px] font-normal opacity-50 tracking-wide">by ACCENTECX AI</span>
-            </div>
+          <Link href="/dashboard">
+            <NeoBrainLogo size="sm" showTagline variant="sidebar" />
           </Link>
         </div>
         <div className="flex-1 overflow-auto py-6">
