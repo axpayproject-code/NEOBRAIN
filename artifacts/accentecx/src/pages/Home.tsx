@@ -814,13 +814,28 @@ export default function Home() {
                 ))}
               </motion.div>
 
-              {/* Role ecosystem chips — visible on mobile */}
-              <motion.div variants={fadeUp} custom={5} className="flex flex-wrap gap-2 mt-1 lg:hidden">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-800"><Users className="h-3.5 w-3.5" />Parents</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800"><Stethoscope className="h-3.5 w-3.5" />Doctors</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-800"><Activity className="h-3.5 w-3.5" />Therapists</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800"><GraduationCap className="h-3.5 w-3.5" />Schools</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary"><Globe className="h-3.5 w-3.5" />Government</span>
+              {/* Role ecosystem chips — visible on mobile, centered */}
+              <motion.div variants={fadeUp} custom={5} className="flex flex-wrap justify-center gap-2.5 mt-2 lg:hidden">
+                {[
+                  { label: "Parents",    Icon: Users,        border: "border-blue-200",   bg: "bg-blue-50",   text: "text-blue-800",   iconCls: "text-blue-600" },
+                  { label: "Doctors",    Icon: Stethoscope,  border: "border-green-200",  bg: "bg-green-50",  text: "text-green-800",  iconCls: "text-green-600" },
+                  { label: "Therapists", Icon: Activity,     border: "border-purple-200", bg: "bg-purple-50", text: "text-purple-800", iconCls: "text-purple-600" },
+                  { label: "Schools",    Icon: GraduationCap,border: "border-amber-200",  bg: "bg-amber-50",  text: "text-amber-800",  iconCls: "text-amber-600" },
+                  { label: "Government", Icon: Globe,         border: "border-primary/20", bg: "bg-primary/5", text: "text-primary",    iconCls: "text-primary" },
+                ].map(({ label, Icon, border, bg, text, iconCls }, i) => (
+                  <motion.span
+                    key={label}
+                    initial={{ opacity: 0, scale: 0.8, y: 12 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.35, delay: 0.55 + i * 0.07, ease: "easeOut" }}
+                    whileHover={{ scale: 1.08, y: -3, boxShadow: "0 6px 20px rgba(0,0,0,0.10)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`inline-flex items-center gap-2 rounded-full border ${border} ${bg} px-4 py-2 text-sm font-semibold ${text} cursor-pointer select-none shadow-sm`}
+                  >
+                    <Icon className={`h-4 w-4 ${iconCls}`} />
+                    {label}
+                  </motion.span>
+                ))}
               </motion.div>
             </motion.div>
 
@@ -892,23 +907,29 @@ export default function Home() {
         </section>
 
         {/* ── STATS BAR ──────────────────────────────────────────────────── */}
-        <div className="border-y bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 py-8 px-4 md:px-12">
-          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 md:divide-x divide-border">
+        <div className="border-y bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 py-10 px-4 md:px-12">
+          <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { stat: "1M+", label: "Children undiagnosed in PH", icon: Brain, color: "text-primary" },
-              { stat: "6", label: "Integrated care ecosystems", icon: Activity, color: "text-secondary" },
-              { stat: "5", label: "AI behavioral engine layers", icon: Zap, color: "text-primary" },
-              { stat: "∞", label: "Scalable to every barangay", icon: Globe, color: "text-secondary" },
-            ].map(({ stat, label, icon: Icon, color }) => (
+              { stat: "1M+", label: "Children undiagnosed in PH", icon: Brain,     iconBg: "bg-primary/10",   iconColor: "text-primary",   statColor: "text-primary" },
+              { stat: "6",   label: "Integrated care ecosystems",  icon: Activity,  iconBg: "bg-secondary/20", iconColor: "text-secondary", statColor: "text-secondary" },
+              { stat: "5",   label: "AI behavioral engine layers", icon: Zap,       iconBg: "bg-primary/10",   iconColor: "text-primary",   statColor: "text-primary" },
+              { stat: "∞",   label: "Scalable to every barangay",  icon: Globe,     iconBg: "bg-secondary/20", iconColor: "text-secondary", statColor: "text-secondary" },
+            ].map(({ stat, label, icon: Icon, iconBg, iconColor, statColor }, i) => (
               <motion.div
                 key={label}
-                initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 20, scale: 0.92 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
-                className="flex flex-col items-center text-center gap-1.5 px-4"
+                transition={{ duration: 0.45, delay: i * 0.1, ease: "easeOut" }}
+                whileHover={{ y: -6, scale: 1.04, boxShadow: "0 12px 32px rgba(0,0,0,0.10)" }}
+                whileTap={{ scale: 0.97 }}
+                className="flex flex-col items-center text-center gap-2 rounded-2xl border border-border bg-background/80 backdrop-blur px-4 py-6 cursor-default shadow-sm"
               >
-                <Icon className={`h-5 w-5 ${color} mb-0.5`} />
-                <div className={`text-3xl md:text-4xl font-bold ${color}`}>{stat}</div>
-                <div className="text-xs text-muted-foreground leading-snug max-w-[120px]">{label}</div>
+                <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${iconBg}`}>
+                  <Icon className={`h-5 w-5 ${iconColor}`} />
+                </div>
+                <div className={`text-3xl md:text-4xl font-bold tracking-tight ${statColor}`}>{stat}</div>
+                <div className="text-xs text-muted-foreground leading-snug max-w-[110px]">{label}</div>
               </motion.div>
             ))}
           </div>
