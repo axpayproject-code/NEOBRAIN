@@ -9,12 +9,14 @@ export interface AuthUser {
   name: string;
   email: string;
   tier?: string;
+  profilePhoto?: string;
 }
 
 interface AuthContextValue {
   user: AuthUser | null;
   login: (user: AuthUser) => void;
   logout: () => void;
+  updateProfile: (data: Partial<Pick<AuthUser, "name" | "email" | "profilePhoto" | "tier">>) => void;
   isAuthenticated: boolean;
   refreshTier: () => Promise<void>;
 }
@@ -23,6 +25,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   login: () => {},
   logout: () => {},
+  updateProfile: () => {},
   isAuthenticated: false,
   refreshTier: async () => {},
 });
@@ -45,7 +48,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user?.id]);
 
-  // Refresh the subscription tier from the billing API on mount/login
   const refreshTier = useCallback(async (currentUser?: AuthUser | null) => {
     const u = currentUser ?? user;
     if (!u?.id || u.role !== "parent") return;
@@ -62,11 +64,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(updated);
       }
     } catch {
-      // silently ignore — stale tier is acceptable
+      // silently ignore
     }
   }, [user]);
 
-  // Refresh tier on initial load
   useEffect(() => {
     if (user?.id && user.role === "parent") {
       refreshTier(user);
@@ -77,7 +78,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = (newUser: AuthUser) => {
     localStorage.setItem("accentecx_user", JSON.stringify(newUser));
     setUser(newUser);
-    // Refresh tier after login (async, non-blocking)
     if (newUser.role === "parent") {
       setTimeout(() => refreshTier(newUser), 500);
     }
@@ -88,8 +88,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
+  const updateProfile = (data: Partial<Pick<AuthUser, "name" | "email" | "profilePhoto" | "tier">>) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...data };
+      localStorage.setItem("accentecx_user", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, refreshTier }}>
+    <AuthContext.Provider value={{ user, login, logout, updateProfile, isAuthenticated: !!user, refreshTier }}>
       {children}
     </AuthContext.Provider>
   );

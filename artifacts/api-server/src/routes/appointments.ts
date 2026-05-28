@@ -95,6 +95,15 @@ router.get("/appointments/:id", async (req, res) => {
   });
 });
 
+// Delete an appointment
+router.delete("/appointments/:id", async (req, res) => {
+  const parsed = GetAppointmentParams.safeParse({ id: Number(req.params.id) });
+  if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+  const [deleted] = await db.delete(appointmentsTable).where(eq(appointmentsTable.id, parsed.data.id)).returning({ id: appointmentsTable.id });
+  if (!deleted) return res.status(404).json({ error: "Not found" });
+  return res.status(204).end();
+});
+
 // Update an appointment
 router.patch("/appointments/:id", async (req, res) => {
   const paramsParsed = UpdateAppointmentParams.safeParse({ id: Number(req.params.id) });

@@ -42,6 +42,15 @@ router.get("/reports", async (req, res) => {
   );
 });
 
+// Delete a report
+router.delete("/reports/:id", async (req, res) => {
+  const parsed = GetReportParams.safeParse({ id: Number(req.params.id) });
+  if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+  const [deleted] = await db.delete(reportsTable).where(eq(reportsTable.id, parsed.data.id)).returning({ id: reportsTable.id });
+  if (!deleted) return res.status(404).json({ error: "Not found" });
+  return res.status(204).end();
+});
+
 // Get a report
 router.get("/reports/:id", async (req, res) => {
   const parsed = GetReportParams.safeParse({ id: Number(req.params.id) });

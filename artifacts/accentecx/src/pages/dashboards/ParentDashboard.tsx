@@ -3,7 +3,8 @@ import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashb
 import {
   LayoutDashboard, Users, ClipboardList, Brain, Calendar,
   HeartPulse, FileText, Settings, Plus, ChevronRight,
-  AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star, CreditCard
+  AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star, CreditCard,
+  Trash2, Download, Pencil
 } from "lucide-react";
 import { getPlanFeatures } from "@/lib/planFeatures";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
@@ -36,6 +37,28 @@ import ScreeningResultDisplay, { type ScreeningResult } from "@/components/scree
 import VideoProtocol from "@/components/screening/VideoProtocol";
 import AppointmentScheduler from "@/components/appointments/AppointmentScheduler";
 import BillingPage from "@/pages/Billing";
+
+const BASE = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
+
+async function deleteRecord(url: string, userId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${BASE}${url}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${userId}` },
+    });
+    return res.status === 204 || res.ok;
+  } catch {
+    return false;
+  }
+}
+
+function downloadText(filename: string, content: string) {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
 
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -365,6 +388,77 @@ function OverviewTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   );
 }
 
+function EditChildDialog({ child, onSuccess }: {
+  child: { id: number; fullName: string; dateOfBirth: string; gender: string; parentName?: string | null; schoolName?: string | null };
+  onSuccess: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm({
+    defaultValues: {
+      fullName: child.fullName,
+      dateOfBirth: child.dateOfBirth.split("T")[0],
+      gender: child.gender,
+      parentName: child.parentName ?? "",
+      schoolName: child.schoolName ?? "",
+    },
+  });
+
+  const onSubmit = async (data: { fullName: string; dateOfBirth: string; gender: string; parentName: string; schoolName: string }) => {
+    const res = await fetch(`${BASE}/api/children/${child.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${user?.id ?? ""}` },
+      body: JSON.stringify(data),
+    });
+    if (res.ok) { setOpen(false); onSuccess(); }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) reset(); }}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="Edit child"><Pencil className="h-3.5 w-3.5" /></Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>Edit Child Profile</DialogTitle></DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
+          <div className="space-y-1.5">
+            <Label>Full Name</Label>
+            <Input {...register("fullName", { required: true })} placeholder="Child's full name" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Date of Birth</Label>
+              <Input type="date" {...register("dateOfBirth", { required: true })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Gender</Label>
+              <select {...register("gender")} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Parent / Guardian Name</Label>
+            <Input {...register("parentName")} placeholder="Your name" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>School (optional)</Label>
+            <Input {...register("schoolName")} placeholder="School name" />
+          </div>
+          <div className="flex gap-3">
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="submit" className="flex-1 bg-[#163300] text-white hover:bg-[#1e4a00]" disabled={isSubmitting}>
+              {isSubmitting ? "Saving…" : "Save Changes"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function ChildrenTab() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -372,6 +466,12 @@ function ChildrenTab() {
   const { data: children, isLoading } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const currentCount = children?.length ?? 0;
   const maxChildren = features.maxChildren;
+
+  const handleDeleteChild = async (childId: number) => {
+    if (!window.confirm("Delete this child profile? This will also remove all related records.")) return;
+    await deleteRecord(`/api/children/${childId}`, user?.id ?? "");
+    queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() });
+  };
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
@@ -412,7 +512,13 @@ function ChildrenTab() {
                       </p>
                     </div>
                   </div>
-                  <Badge className={`text-xs capitalize ${RISK_COLORS[child.riskLevel]}`}>{child.riskLevel}</Badge>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Badge className={`text-xs capitalize ${RISK_COLORS[child.riskLevel]}`}>{child.riskLevel}</Badge>
+                    <EditChildDialog child={child} onSuccess={() => queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() })} />
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10" title="Delete child" onClick={() => handleDeleteChild(child.id)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
                 {child.schoolName && <p className="text-xs text-muted-foreground">School: {child.schoolName}</p>}
                 {child.diagnosisNotes && (
@@ -433,6 +539,37 @@ function ScreeningTab() {
   const [result, setResult] = useState<ScreeningResult | null>(null);
   const [scheduleAfter, setScheduleAfter] = useState(false);
   const { data: screenings, isLoading } = useListScreenings({}, { query: { queryKey: ["screenings-list"] } });
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const handleDeleteScreening = async (id: number) => {
+    if (!window.confirm("Delete this screening record? This cannot be undone.")) return;
+    await deleteRecord(`/api/screenings/${id}`, user?.id ?? "");
+    queryClient.invalidateQueries({ queryKey: ["screenings-list"] });
+  };
+
+  const handleDownloadScreening = (s: (typeof screenings extends (infer T)[] | undefined ? T : never)) => {
+    if (!s) return;
+    const lines = [
+      `NEOBRAIN — Screening Report`,
+      `Generated: ${new Date().toLocaleString("en-PH")}`,
+      ``,
+      `Child: ${s.childName ?? "Unknown"}`,
+      `Type: ${s.screeningType}`,
+      `Status: ${s.status}`,
+      `Risk Level: ${s.riskLevel ?? "N/A"}`,
+      `Date: ${new Date(s.createdAt).toLocaleDateString("en-PH")}`,
+      ``,
+      `Domain Scores:`,
+      `  Communication: ${s.communicationScore ?? "N/A"}`,
+      `  Social: ${s.socialScore ?? "N/A"}`,
+      `  Attention: ${s.attentionScore ?? "N/A"}`,
+      `  Motor: ${s.motorScore ?? "N/A"}`,
+      `  Emotional: ${s.emotionalScore ?? "N/A"}`,
+      ``,
+    ].filter(Boolean).join("\n");
+    downloadText(`screening-${s.id}-${s.childName ?? "report"}.txt`, lines);
+  };
 
   const TYPE_LABELS: Record<string, string> = {
     parent_questionnaire: "Parent Questionnaire",
@@ -517,7 +654,7 @@ function ScreeningTab() {
           <table className="w-full text-sm" data-testid="screenings-table">
             <thead className="bg-muted/50">
               <tr>
-                {["Child", "Type", "Status", "Risk Level", "Domain Scores", "Date"].map(h => (
+                {["Child", "Type", "Status", "Risk Level", "Domain Scores", "Date", "Actions"].map(h => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">{h}</th>
                 ))}
               </tr>
@@ -547,6 +684,16 @@ function ScreeningTab() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(s.createdAt).toLocaleDateString("en-PH")}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1">
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground" title="Download" onClick={() => handleDownloadScreening(s)}>
+                        <Download className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10" title="Delete" onClick={() => handleDeleteScreening(s.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -603,12 +750,13 @@ function AIResultsTab() {
 type AppointmentItem = Appointment;
 
 function RescheduleSection({
-  upcoming, isLoading, STATUS_ICONS, SPECIALIST_LABELS, onJoin,
+  upcoming, isLoading, STATUS_ICONS, SPECIALIST_LABELS, onJoin, onDelete,
 }: {
   upcoming: AppointmentItem[];
   isLoading: boolean;
   STATUS_ICONS: Record<string, React.ElementType>;
   SPECIALIST_LABELS: Record<string, string>;
+  onDelete: (id: number) => void;
   onJoin: (a: TelehealthAppt) => void;
 }) {
   const qc = useQueryClient();
@@ -687,6 +835,15 @@ function RescheduleSection({
                   >
                     <AlertTriangle className="h-3 w-3" /> Reschedule
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-xs h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
+                    title="Cancel appointment"
+                    onClick={() => onDelete(appt.id)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -757,6 +914,14 @@ function AppointmentsTab() {
   const [scheduling, setScheduling] = useState(false);
   const [joinAppt, setJoinAppt] = useState<TelehealthAppt | null>(null);
   const { data: appointments, isLoading } = useListAppointments({}, { query: { queryKey: ["appointments-parent"] } });
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const handleDeleteAppointment = async (id: number) => {
+    if (!window.confirm("Cancel and remove this appointment? This cannot be undone.")) return;
+    await deleteRecord(`/api/appointments/${id}`, user?.id ?? "");
+    queryClient.invalidateQueries({ queryKey: ["appointments-parent"] });
+  };
 
   const STATUS_ICONS: Record<string, typeof CheckCircle> = {
     scheduled: Clock,
@@ -820,7 +985,7 @@ function AppointmentsTab() {
       )}
 
       {upcoming.length > 0 && (
-        <RescheduleSection upcoming={upcoming} isLoading={isLoading} STATUS_ICONS={STATUS_ICONS} SPECIALIST_LABELS={SPECIALIST_LABELS} onJoin={setJoinAppt} />
+        <RescheduleSection upcoming={upcoming} isLoading={isLoading} STATUS_ICONS={STATUS_ICONS} SPECIALIST_LABELS={SPECIALIST_LABELS} onJoin={setJoinAppt} onDelete={handleDeleteAppointment} />
       )}
 
       {past.length > 0 && (
@@ -858,6 +1023,13 @@ function TherapyTab() {
   const { user } = useAuth();
   const features = getPlanFeatures(user?.tier);
   const { data: plans, isLoading } = useListTherapyPlans({}, { query: { queryKey: ["therapy-parent"] } });
+  const queryClient = useQueryClient();
+
+  const handleDeletePlan = async (id: number) => {
+    if (!window.confirm("Delete this therapy plan? This cannot be undone.")) return;
+    await deleteRecord(`/api/therapy-plans/${id}`, user?.id ?? "");
+    queryClient.invalidateQueries({ queryKey: ["therapy-parent"] });
+  };
 
   return (
     <UpgradeGate
@@ -885,6 +1057,9 @@ function TherapyTab() {
                   <div className="flex items-center gap-2 shrink-0">
                     <Badge className={`text-xs capitalize ${THERAPY_COLORS[plan.therapyType] ?? "bg-muted text-muted-foreground"}`}>{plan.therapyType}</Badge>
                     <Badge className={`text-xs capitalize ${plan.status === "active" ? "bg-green-100 text-green-800" : "bg-muted text-muted-foreground"}`}>{plan.status}</Badge>
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10" title="Delete plan" onClick={() => handleDeletePlan(plan.id)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
                 <div className="space-y-1.5">
@@ -911,6 +1086,31 @@ function TherapyTab() {
 
 function ReportsTab() {
   const { data: reports, isLoading } = useListReports({}, { query: { queryKey: ["reports-parent"] } });
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const handleDeleteReport = async (id: number) => {
+    if (!window.confirm("Delete this report? This cannot be undone.")) return;
+    await deleteRecord(`/api/reports/${id}`, user?.id ?? "");
+    queryClient.invalidateQueries({ queryKey: ["reports-parent"] });
+  };
+
+  const handleDownloadReport = (report: { id: number; title: string; childName?: string | null; reportType: string; summary?: string | null; recommendations?: string | null; urgencyLevel?: string | null; createdAt: string }) => {
+    const lines = [
+      `NEOBRAIN — ${report.title}`,
+      `Generated: ${new Date().toLocaleString("en-PH")}`,
+      ``,
+      `Child: ${report.childName ?? "Unknown"}`,
+      `Report Type: ${report.reportType}`,
+      `Urgency: ${report.urgencyLevel ?? "routine"}`,
+      `Date: ${new Date(report.createdAt).toLocaleDateString("en-PH")}`,
+      ``,
+      report.summary ? `Summary:\n${report.summary}` : "",
+      ``,
+      report.recommendations ? `Recommendations:\n${report.recommendations}` : "",
+    ].filter(l => l !== undefined).join("\n");
+    downloadText(`report-${report.id}-${report.title.replace(/\s+/g, "-")}.txt`, lines);
+  };
 
   const URGENCY_COLORS: Record<string, string> = {
     routine: "bg-green-100 text-green-800",
@@ -946,6 +1146,12 @@ function ReportsTab() {
                   <div className="flex items-center gap-2 shrink-0">
                     {report.urgencyLevel && <Badge className={`text-xs ${URGENCY_COLORS[report.urgencyLevel] ?? ""}`}>{report.urgencyLevel}</Badge>}
                     <Badge variant="outline" className="text-xs">{TYPE_LABELS[report.reportType] ?? report.reportType}</Badge>
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground" title="Download report" onClick={() => handleDownloadReport(report)}>
+                      <Download className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10" title="Delete report" onClick={() => handleDeleteReport(report.id)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
                 {report.summary && <p className="text-sm text-muted-foreground leading-relaxed">{report.summary}</p>}

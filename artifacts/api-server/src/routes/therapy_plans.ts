@@ -86,6 +86,15 @@ router.get("/therapy-plans/:id", async (req, res) => {
   });
 });
 
+// Delete a therapy plan
+router.delete("/therapy-plans/:id", async (req, res) => {
+  const parsed = UpdateTherapyPlanParams.safeParse({ id: Number(req.params.id) });
+  if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+  const [deleted] = await db.delete(therapyPlansTable).where(eq(therapyPlansTable.id, parsed.data.id)).returning({ id: therapyPlansTable.id });
+  if (!deleted) return res.status(404).json({ error: "Not found" });
+  return res.status(204).end();
+});
+
 // Update a therapy plan
 router.patch("/therapy-plans/:id", async (req, res) => {
   const paramsParsed = UpdateTherapyPlanParams.safeParse({ id: Number(req.params.id) });
