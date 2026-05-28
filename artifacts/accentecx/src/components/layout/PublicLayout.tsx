@@ -45,8 +45,19 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* ── Nav ─────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
+      {/* ── Announcement bar + Nav (single sticky block) ─────────────── */}
+      <div className="sticky top-0 z-50">
+        <div className="w-full bg-[#0038A8] text-white text-xs font-semibold py-2 px-4 flex items-center justify-center gap-3">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block w-2 h-2 rounded-full bg-[#FCD116] animate-pulse" />
+            <span className="tracking-wide uppercase">2026 National Impact</span>
+          </span>
+          <span className="hidden sm:inline text-white/60">·</span>
+          <span className="hidden sm:inline text-white/80 font-normal">NEOBRAIN is now expanding to all 17 regions of the Philippines</span>
+        </div>
+
+        {/* ── Nav ───────────────────────────────────────────────────── */}
+        <header className="border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-16 flex items-center justify-between">
           <Link href="/">
             <NeoBrainLogo size="sm" showTagline variant="light" />
@@ -83,7 +94,8 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         )}
-      </header>
+        </header>
+      </div>{/* end sticky wrapper */}
 
       {/* ── Content ──────────────────────────────────────────────────── */}
       <main className="flex-1">{children}</main>

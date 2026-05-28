@@ -842,8 +842,17 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
-      {/* ── NAV ─────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* ── ANNOUNCEMENT BAR + NAV ───────────────────────────────────────── */}
+      <div className="sticky top-0 z-50">
+        <div className="w-full bg-[#0038A8] text-white text-xs font-semibold py-2 px-4 flex items-center justify-center gap-3">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block w-2 h-2 rounded-full bg-[#FCD116] animate-pulse" />
+            <span className="tracking-wide uppercase">2026 National Impact</span>
+          </span>
+          <span className="hidden sm:inline text-white/60">·</span>
+          <span className="hidden sm:inline text-white/80 font-normal">NEOBRAIN is now expanding to all 17 regions of the Philippines</span>
+        </div>
+        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center px-4 md:px-12">
           <Link href="/" onClick={() => setMenuOpen(false)}>
             <NeoBrainLogo size="sm" showTagline variant="light" />
@@ -911,7 +920,8 @@ export default function Home() {
             </div>
           </div>
         )}
-      </header>
+        </header>
+      </div>
 
       <main className="flex-1">
         {/* ── HERO ────────────────────────────────────────────────────────── */}
