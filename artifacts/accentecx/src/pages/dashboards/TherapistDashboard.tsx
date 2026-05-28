@@ -255,12 +255,7 @@ type SessionLog = {
   outcome: string;
 };
 
-const INITIAL_SESSIONS: SessionLog[] = [
-  { child: "Isabella Tan", type: "Speech Therapy", date: "May 24, 2026", duration: "45 min", notes: "Practiced vowel sounds, 2-word combinations. Parent reported improvement in morning routines.", outcome: "Positive" },
-  { child: "Lucas Dela Cruz", type: "Behavioral Therapy", date: "May 23, 2026", duration: "60 min", notes: "Token economy system introduced. 3 of 5 target behaviors achieved in session.", outcome: "Positive" },
-  { child: "Miguel Santos", type: "Speech Therapy", date: "May 22, 2026", duration: "45 min", notes: "Articulation exercises. Vocabulary expansion cards completed. First 3-word sentence milestone!", outcome: "Milestone" },
-  { child: "Isabella Tan", type: "Occupational Therapy", date: "May 21, 2026", duration: "45 min", notes: "Sensory bin play, playdough fine motor exercises. Reduced tactile aversion noted.", outcome: "Positive" },
-];
+const INITIAL_SESSIONS: SessionLog[] = [];
 
 const THERAPY_TYPES = ["Speech Therapy", "Occupational Therapy", "Behavioral Therapy", "Cognitive Therapy", "Physical Therapy", "Play Therapy"];
 const OUTCOMES = ["Positive", "Milestone", "Neutral", "Needs Review", "Challenging"];
@@ -304,6 +299,17 @@ function SessionLogsTab() {
           <ClipboardList className="h-4 w-4" /> Log Session
         </Button>
       </div>
+      {sessions.length === 0 && (
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center space-y-3">
+            <ClipboardList className="h-12 w-12 text-muted-foreground mx-auto" />
+            <div>
+              <p className="font-semibold text-lg">No sessions logged yet</p>
+              <p className="text-sm text-muted-foreground mt-1">Use the "Log Session" button to record your first therapy session note.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <div className="space-y-3">
         {sessions.map((s, i) => (
           <Card key={i} data-testid={`session-log-${i}`}>

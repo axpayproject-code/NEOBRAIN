@@ -49,16 +49,7 @@ const RISK_COLORS: Record<string, string> = {
 
 type DemoUser = { name: string; email: string; role: string; tier: string; status: string; joined: string };
 
-const INITIAL_USERS: DemoUser[] = [
-  { name: "Maria Santos", email: "maria@example.com", role: "parent", tier: "Care Plus", status: "active", joined: "Jan 2025" },
-  { name: "Dr. Patricia Lim", email: "patricia@clinic.com", role: "doctor", tier: "Clinic Pro", status: "active", joined: "Feb 2025" },
-  { name: "Ma. Teresa Valdez", email: "teresa@therapy.com", role: "therapist", tier: "Clinic SaaS", status: "active", joined: "Mar 2025" },
-  { name: "Jose Reyes", email: "jose@example.com", role: "parent", tier: "Starter Care", status: "active", joined: "Apr 2025" },
-  { name: "Dr. Ramon Castro", email: "ramon@clinic.com", role: "doctor", tier: "Clinic Pro", status: "active", joined: "Jan 2025" },
-  { name: "Ana Dela Cruz", email: "ana@example.com", role: "parent", tier: "Care Plus", status: "active", joined: "Mar 2025" },
-  { name: "David Tan", email: "david@example.com", role: "parent", tier: "Care Family Pro", status: "active", joined: "Dec 2024" },
-  { name: "Malabon Elem. School", email: "admin@malabon.edu.ph", role: "school", tier: "School License", status: "active", joined: "Aug 2024" },
-];
+const INITIAL_USERS: DemoUser[] = [];
 
 const ROLE_COLORS: Record<string, string> = {
   parent: "bg-blue-100 text-blue-800",
@@ -78,23 +69,11 @@ const SUBSCRIPTIONS = [
 
 type SupportTicket = { id: string; user: string; issue: string; priority: string; status: string; created: string };
 
-const INITIAL_TICKETS: SupportTicket[] = [
-  { id: "TKT-001", user: "Maria Santos", issue: "Video assessment not loading on mobile Safari", priority: "high", status: "open", created: "May 24, 2026" },
-  { id: "TKT-002", user: "Dr. Patricia Lim", issue: "AI summary not generating for new patient intake", priority: "critical", status: "in_progress", created: "May 24, 2026" },
-  { id: "TKT-003", user: "Malabon Elem. School", issue: "Teacher report form showing validation error", priority: "medium", status: "open", created: "May 23, 2026" },
-  { id: "TKT-004", user: "Jose Reyes", issue: "Appointment confirmation email not received", priority: "low", status: "resolved", created: "May 22, 2026" },
-  { id: "TKT-005", user: "Ana Dela Cruz", issue: "Unable to upload video for behavioral assessment", priority: "high", status: "in_progress", created: "May 23, 2026" },
-];
+const INITIAL_TICKETS: SupportTicket[] = [];
 
 type OrgEntry = { name: string; type: string; doctors?: number; patients?: number; students?: number; tier: string; status: string };
 
-const INITIAL_CLINICS: OrgEntry[] = [
-  { name: "Lim Developmental Pediatrics", type: "Clinic", doctors: 3, patients: 142, tier: "Clinic Pro", status: "active" },
-  { name: "BGC Child Wellness Center", type: "Clinic", doctors: 5, patients: 287, tier: "Clinic Pro", status: "active" },
-  { name: "Malabon Elementary School", type: "School", students: 840, tier: "School License", status: "active" },
-  { name: "Quezon City SPED Center", type: "School", students: 320, tier: "School License", status: "pending" },
-  { name: "Marikina Child Health Hub", type: "Clinic", doctors: 2, patients: 76, tier: "Clinic Starter", status: "active" },
-];
+const INITIAL_CLINICS: OrgEntry[] = [];
 
 function PlatformOverviewTab() {
   const { data: summary, isLoading } = useGetDashboardSummary({ query: { queryKey: getGetDashboardSummaryQueryKey() } });
@@ -259,6 +238,13 @@ function UserManagementTab() {
             </tr>
           </thead>
           <tbody>
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={7} className="text-center py-12 text-muted-foreground text-sm">
+                  No users registered yet. Use the "Add User" button to invite the first user.
+                </td>
+              </tr>
+            )}
             {filtered.map((u, i) => {
               const origIdx = users.findIndex(x => x === u);
               return (
@@ -884,6 +870,17 @@ function SupportTab() {
           </div>
         ))}
       </div>
+      {tickets.length === 0 && (
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center space-y-3">
+            <LifeBuoy className="h-12 w-12 text-muted-foreground mx-auto" />
+            <div>
+              <p className="font-semibold text-lg">No support tickets</p>
+              <p className="text-sm text-muted-foreground mt-1">Support requests submitted by users will appear here.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <div className="space-y-3">
         {tickets.map((t, i) => (
           <Card key={i} data-testid={`ticket-${t.id}`}>

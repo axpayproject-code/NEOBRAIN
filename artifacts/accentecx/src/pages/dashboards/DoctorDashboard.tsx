@@ -189,50 +189,7 @@ type VideoSession = {
   recommendation: string;
 };
 
-const VIDEO_SESSIONS: VideoSession[] = [
-  {
-    child: "Isabella Tan",
-    task: "Joint Attention Test",
-    duration: "4:32",
-    status: "Pending Review",
-    features: "Gaze tracking anomalies, limited reciprocal communication, repetitive movement",
-    aiFindings: [
-      { label: "Gaze Tracking", detail: "Eye contact initiated 2 of 8 prompts (25%). Below developmental baseline of 70%.", severity: "high" },
-      { label: "Joint Attention", detail: "No gaze following detected on pointing gestures. Protodeclarative pointing absent.", severity: "high" },
-      { label: "Reciprocal Communication", detail: "Turn-taking initiated once in 4:32 min session. Response latency avg 6.2s.", severity: "moderate" },
-      { label: "Repetitive Movement", detail: "Hand-flapping pattern detected 3 instances. Duration avg 8s per episode.", severity: "moderate" },
-    ],
-    recommendation: "Referral to developmental pediatrician recommended. ADOS-2 assessment suggested. Immediate enrollment in joint attention intervention program.",
-  },
-  {
-    child: "Lucas Dela Cruz",
-    task: "Social Play Simulation",
-    duration: "6:15",
-    status: "Pending Review",
-    features: "Impulsive interaction patterns, brief peer engagement, attention shifts",
-    aiFindings: [
-      { label: "Attention Duration", detail: "Mean attention span 42s on structured tasks. Unstructured play: 18s. ADHD-range indicator.", severity: "high" },
-      { label: "Impulse Control", detail: "Grabbed peer toy 5 times without social cue. Waiting behavior absent in turn-taking.", severity: "moderate" },
-      { label: "Peer Engagement", detail: "Parallel play predominant. Interactive play episodes: 2 in 6 min. Brief but positive.", severity: "moderate" },
-      { label: "Emotional Regulation", detail: "1 dysregulation episode when toy removed. Recovery time: 2m 10s.", severity: "low" },
-    ],
-    recommendation: "ADHD behavioral screen recommended. Parent-Child Interaction Therapy (PCIT) referral. Classroom accommodation letter advised.",
-  },
-  {
-    child: "Miguel Santos",
-    task: "Communication Prompts",
-    duration: "3:48",
-    status: "Reviewed",
-    features: "Speech presence detected, 2-word utterances, improved response latency",
-    aiFindings: [
-      { label: "Speech Presence", detail: "Vocalizations detected in 78% of prompted intervals. Clear improvement vs. baseline (34%).", severity: "low" },
-      { label: "Utterance Complexity", detail: "2-word combinations achieved in 4 of 7 prompts. First 3-word utterance milestone recorded at 3:12.", severity: "low" },
-      { label: "Response Latency", detail: "Avg 2.1s response latency (improved from 4.8s at intake). Within age-appropriate range.", severity: "low" },
-      { label: "Intelligibility", detail: "Intelligibility rated 72% by AI phoneme model. Target: 85% by next review.", severity: "moderate" },
-    ],
-    recommendation: "Continue current speech therapy plan. Increase home practice to 3x/week. Re-assess in 30 days. Positive trajectory confirmed.",
-  },
-];
+const VIDEO_SESSIONS: VideoSession[] = [];
 
 function VideoReviewTab() {
   const [selected, setSelected] = useState<VideoSession | null>(null);
@@ -255,6 +212,17 @@ function VideoReviewTab() {
           </div>
         ))}
       </div>
+      {VIDEO_SESSIONS.length === 0 && (
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center space-y-3">
+            <Video className="h-12 w-12 text-muted-foreground mx-auto" />
+            <div>
+              <p className="font-semibold text-lg">No video sessions yet</p>
+              <p className="text-sm text-muted-foreground mt-1">Video sessions submitted by enrolled families will appear here for clinical review.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <div className="space-y-3">
         {VIDEO_SESSIONS.map((v, i) => (
           <Card key={i} data-testid={`video-session-${i}`}>

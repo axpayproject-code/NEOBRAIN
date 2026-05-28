@@ -3,8 +3,9 @@ import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashb
 import {
   LayoutDashboard, Users, ClipboardList, Brain, Calendar,
   HeartPulse, FileText, Settings, Plus, ChevronRight,
-  AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play
+  AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star
 } from "lucide-react";
+import { getPlanFeatures } from "@/lib/planFeatures";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -82,8 +83,39 @@ function StatCard({ label, value, icon: Icon, desc }: { label: string; value: nu
   );
 }
 
-function AddChildDialog({ onSuccess }: { onSuccess: () => void }) {
+function UpgradeGate({ allowed, title, description, upgradeHref, currentPlan, children }: {
+  allowed: boolean;
+  title: string;
+  description: string;
+  upgradeHref: string;
+  currentPlan: string;
+  children: React.ReactNode;
+}) {
+  if (allowed) return <>{children}</>;
+  return (
+    <div className="p-6 lg:p-8 flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center">
+      <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
+        <Lock className="h-10 w-10 text-muted-foreground" />
+      </div>
+      <div className="space-y-2 max-w-sm">
+        <h2 className="text-2xl font-bold">{title}</h2>
+        <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+      </div>
+      <div className="space-y-3">
+        <Button className="rounded-full gap-2 px-6" asChild>
+          <a href={upgradeHref}>
+            <Star className="h-4 w-4" /> Upgrade Plan
+          </a>
+        </Button>
+        <p className="text-xs text-muted-foreground">Your current plan: <strong>{currentPlan}</strong></p>
+      </div>
+    </div>
+  );
+}
+
+function AddChildDialog({ onSuccess, maxChildren, currentCount }: { onSuccess: () => void; maxChildren: number; currentCount: number }) {
   const [open, setOpen] = useState(false);
+  const atLimit = maxChildren !== Infinity && currentCount >= maxChildren;
   const createChild = useCreateChild();
   const { register, handleSubmit, setValue, reset, formState: { isSubmitting } } = useForm({
     defaultValues: { fullName: "", dateOfBirth: "", gender: "male", parentName: "", schoolName: "" }
@@ -99,10 +131,36 @@ function AddChildDialog({ onSuccess }: { onSuccess: () => void }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="rounded-full gap-2" data-testid="button-add-child">
-          <Plus className="h-4 w-4" /> Add Child
+        <Button
+          className="rounded-full gap-2"
+          data-testid="button-add-child"
+          variant={atLimit ? "outline" : "default"}
+        >
+          {atLimit ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {atLimit ? `Limit reached` : "Add Child"}
         </Button>
       </DialogTrigger>
+      {atLimit ? (
+        <DialogContent className="max-w-sm text-center">
+          <DialogHeader>
+            <DialogTitle>Profile limit reached</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mx-auto">
+              <Lock className="h-7 w-7 text-muted-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Your plan allows up to <strong>{maxChildren}</strong> child profile{maxChildren === 1 ? "" : "s"}.
+              Upgrade to add more children to your account.
+            </p>
+            <Button className="w-full rounded-full gap-2" asChild>
+              <a href="/onboarding?role=parent&plan=care-plus">
+                <Star className="h-4 w-4" /> Upgrade to Care Plus
+              </a>
+            </Button>
+          </div>
+        </DialogContent>
+      ) : (
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Add Child Profile</DialogTitle>
@@ -144,6 +202,7 @@ function AddChildDialog({ onSuccess }: { onSuccess: () => void }) {
           </Button>
         </form>
       </DialogContent>
+      )}
     </Dialog>
   );
 }
@@ -306,15 +365,31 @@ function OverviewTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
 
 function ChildrenTab() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const features = getPlanFeatures(user?.tier);
   const { data: children, isLoading } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
+  const currentCount = children?.length ?? 0;
+  const maxChildren = features.maxChildren;
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl lg:text-2xl font-bold">My Children</h1>
+          {maxChildren !== Infinity && (
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {currentCount} / {maxChildren} profile{maxChildren === 1 ? "" : "s"} used
+              {currentCount >= maxChildren && (
+                <a href="/onboarding?role=parent&plan=care-plus" className="ml-2 text-primary font-medium hover:underline">Upgrade for more →</a>
+              )}
+            </p>
+          )}
         </div>
-        <AddChildDialog onSuccess={() => queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() })} />
+        <AddChildDialog
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() })}
+          maxChildren={maxChildren}
+          currentCount={currentCount}
+        />
       </div>
       {isLoading ? (
         <div className="grid sm:grid-cols-2 gap-4">{Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-48 rounded-xl" />)}</div>
@@ -778,9 +853,18 @@ function AppointmentsTab() {
 }
 
 function TherapyTab() {
+  const { user } = useAuth();
+  const features = getPlanFeatures(user?.tier);
   const { data: plans, isLoading } = useListTherapyPlans({}, { query: { queryKey: ["therapy-parent"] } });
 
   return (
+    <UpgradeGate
+      allowed={features.therapyTracking}
+      title="Therapy Tracking"
+      description={`Therapy plan tracking is included in Care Plus and Care Family Pro. Upgrade to monitor your child's speech, OT, behavioral, and other therapy programs with progress tracking.`}
+      upgradeHref="/onboarding?role=parent&plan=care-plus"
+      currentPlan={features.planName}
+    >
     <div className="p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Therapy Tracking</h1>
@@ -819,6 +903,7 @@ function TherapyTab() {
           ))}
       </div>
     </div>
+    </UpgradeGate>
   );
 }
 
@@ -910,14 +995,27 @@ function SettingsTab() {
 }
 
 function VideoTab() {
+  const { user } = useAuth();
+  const features = getPlanFeatures(user?.tier);
   return (
-    <div className="p-6 lg:p-8 space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold">Video Assessment</h1>
-        <p className="text-sm text-muted-foreground">Structured video protocols for AI-assisted behavioral observation</p>
+    <UpgradeGate
+      allowed={features.videoAnalysis}
+      title="Video Assessment"
+      description={`Video behavioral analysis is available on Care Plus and Care Family Pro plans. Your ${features.planName} plan includes text-based AI summaries. Upgrade to submit behavioral video for AI analysis.`}
+      upgradeHref="/onboarding?role=parent&plan=care-plus"
+      currentPlan={features.planName}
+    >
+      <div className="p-6 lg:p-8 space-y-5">
+        <div>
+          <h1 className="text-2xl font-bold">Video Assessment</h1>
+          <p className="text-sm text-muted-foreground">
+            Structured video protocols for AI-assisted behavioral observation
+            {features.videoPerMonth !== Infinity && ` · ${features.videoPerMonth} sessions/month included`}
+          </p>
+        </div>
+        <VideoProtocol />
       </div>
-      <VideoProtocol />
-    </div>
+    </UpgradeGate>
   );
 }
 
