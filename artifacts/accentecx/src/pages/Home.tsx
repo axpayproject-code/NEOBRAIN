@@ -984,8 +984,11 @@ export default function Home() {
         </section>
 
         {/* ── STATS BAR ──────────────────────────────────────────────────── */}
-        <div className="border-y bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 py-10 px-4 md:px-12">
-          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 place-items-center">
+        <div className="border-y bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 py-10 px-4 md:px-12 relative overflow-hidden">
+          <img src="/neobrain-logo.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute right-8 top-1/2 -translate-y-1/2 h-20 w-auto opacity-[0.06] object-contain"
+            draggable={false} />
+          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 place-items-center relative z-10">
             {[
               { stat: "1M+", label: "Children undiagnosed in PH", icon: Brain,     iconBg: "bg-primary/10",   iconColor: "text-primary",   statColor: "text-primary" },
               { stat: "6",   label: "Integrated care ecosystems",  icon: Activity,  iconBg: "bg-secondary/20", iconColor: "text-secondary", statColor: "text-secondary" },
@@ -1120,8 +1123,11 @@ export default function Home() {
         </section>
 
         {/* ── USER JOURNEY ────────────────────────────────────────────────── */}
-        <section id="how-it-works" className="bg-primary py-12 md:py-24 px-4 md:px-12">
-          <div className="max-w-7xl mx-auto">
+        <section id="how-it-works" className="bg-primary py-12 md:py-24 px-4 md:px-12 relative overflow-hidden">
+          <img src="/neobrain-logo.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute -bottom-6 -right-6 h-64 w-auto opacity-[0.07] object-contain"
+            draggable={false} />
+          <div className="max-w-7xl mx-auto relative z-10">
             <div className="text-center max-w-2xl mx-auto mb-8 md:mb-14">
               <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">Care Journey</p>
               <h2 className="text-3xl md:text-5xl font-bold text-background mb-3 md:mb-5">
@@ -1311,8 +1317,11 @@ export default function Home() {
         <PricingSection />
 
         {/* ── SAFETY BLOCK ────────────────────────────────────────────────── */}
-        <section className="bg-primary py-10 md:py-20 px-4 md:px-12">
-          <div className="max-w-4xl mx-auto text-center">
+        <section className="bg-primary py-10 md:py-20 px-4 md:px-12 relative overflow-hidden">
+          <img src="/neobrain-logo.png" alt="" aria-hidden="true"
+            className="pointer-events-none select-none absolute -top-4 left-1/2 -translate-x-1/2 h-48 w-auto opacity-[0.06] object-contain"
+            draggable={false} />
+          <div className="max-w-4xl mx-auto text-center relative z-10">
             <ShieldCheck className="h-10 w-10 md:h-12 md:w-12 text-secondary mx-auto mb-4 md:mb-6" />
             <h2 className="text-2xl md:text-4xl font-bold text-background mb-3 md:mb-5">
               Built with clinical responsibility at its core.
