@@ -773,140 +773,132 @@ export default function Home() {
             className="absolute -bottom-16 right-1/3 w-64 h-64 bg-secondary/12 rounded-full blur-3xl pointer-events-none"
           />
 
-          <div className="max-w-7xl mx-auto grid gap-8 lg:grid-cols-2 items-center relative z-10">
-            <motion.div
-              initial="hidden" animate="visible"
-              className="flex flex-col gap-5 items-center lg:items-start text-center lg:text-left"
-            >
-              <motion.div variants={fadeUp} custom={0}>
-                <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs md:text-sm font-semibold text-primary w-fit bg-primary/5 border-primary/10">
-                  <span className="flex h-2 w-2 rounded-full bg-secondary mr-2 animate-pulse"></span>
-                  The Philippines' National AI Developmental Health Platform
-                </div>
-              </motion.div>
-              <motion.h1 variants={fadeUp} custom={1}
-                className="text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.05] tracking-tighter text-foreground"
-              >
-                Intelligent care for every developmental journey.
-              </motion.h1>
-              <motion.p variants={fadeUp} custom={2}
-                className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0"
-              >
-                A national-scale AI-assisted infrastructure connecting parents, clinicians, therapists, schools, and government into one continuous developmental intelligence system.
-              </motion.p>
-              <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row gap-3 mt-1 w-full sm:w-auto justify-center lg:justify-start">
-                <Link href="/login">
-                  <Button size="lg" className="rounded-full px-6 md:px-8 h-11 md:h-13 text-sm md:text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
-                    Join the Ecosystem <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <Button
-                  size="lg" variant="outline"
-                  className="rounded-full px-6 md:px-8 h-11 md:h-13 text-sm md:text-base w-full sm:w-auto border-primary/20"
-                  data-testid="button-clinic-demo"
-                  onClick={() => setDemoModal({ open: true, audience: "clinics" })}
-                >
-                  Request Clinic Demo
-                </Button>
-              </motion.div>
-              <motion.div variants={fadeUp} custom={4}
-                className="flex flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-6 mt-1 text-xs md:text-sm text-muted-foreground"
-              >
-                {["Never diagnoses", "HIPAA-aligned", "Philippine DOH-ready"].map(t => (
-                  <span key={t} className="flex items-center gap-1.5">
-                    <ShieldCheck className="h-3 w-3 md:h-3.5 md:w-3.5 text-secondary" /> {t}
-                  </span>
-                ))}
-              </motion.div>
+          {/* ── Centered hero content ─────────────────────────────────── */}
+          <div className="max-w-4xl mx-auto flex flex-col items-center text-center gap-5 relative z-10">
 
-              {/* Role ecosystem chips — visible on mobile, centered */}
-              <motion.div variants={fadeUp} custom={5} className="flex flex-wrap justify-center gap-2.5 mt-2 lg:hidden">
-                {[
-                  { label: "Parents",    Icon: Users,        border: "border-blue-200",   bg: "bg-blue-50",   text: "text-blue-800",   iconCls: "text-blue-600" },
-                  { label: "Doctors",    Icon: Stethoscope,  border: "border-green-200",  bg: "bg-green-50",  text: "text-green-800",  iconCls: "text-green-600" },
-                  { label: "Therapists", Icon: Activity,     border: "border-purple-200", bg: "bg-purple-50", text: "text-purple-800", iconCls: "text-purple-600" },
-                  { label: "Schools",    Icon: GraduationCap,border: "border-amber-200",  bg: "bg-amber-50",  text: "text-amber-800",  iconCls: "text-amber-600" },
-                  { label: "Government", Icon: Globe,         border: "border-primary/20", bg: "bg-primary/5", text: "text-primary",    iconCls: "text-primary" },
-                ].map(({ label, Icon, border, bg, text, iconCls }, i) => (
-                  <motion.span
-                    key={label}
-                    initial={{ opacity: 0, scale: 0.8, y: 12 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 0.35, delay: 0.55 + i * 0.07, ease: "easeOut" }}
-                    whileHover={{ scale: 1.08, y: -3, boxShadow: "0 6px 20px rgba(0,0,0,0.10)" }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`inline-flex items-center gap-2 rounded-full border ${border} ${bg} px-4 py-2 text-sm font-semibold ${text} cursor-pointer select-none shadow-sm`}
-                  >
-                    <Icon className={`h-4 w-4 ${iconCls}`} />
-                    {label}
-                  </motion.span>
-                ))}
-              </motion.div>
+            {/* Badge */}
+            <motion.div variants={fadeUp} custom={0} initial="hidden" animate="visible">
+              <div className="inline-flex items-center rounded-full border px-3 py-1.5 text-xs md:text-sm font-semibold text-primary bg-primary/5 border-primary/10">
+                <span className="flex h-2 w-2 rounded-full bg-secondary mr-2 animate-pulse" />
+                The Philippines' National AI Developmental Health Platform
+              </div>
             </motion.div>
 
-            {/* Hero visual — desktop */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-              className="hidden lg:block relative h-[480px]"
+            {/* Heading */}
+            <motion.h1 variants={fadeUp} custom={1} initial="hidden" animate="visible"
+              className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.04] tracking-tighter text-foreground"
             >
-              {/* Floating role chips */}
-              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute z-20 top-6 left-0 flex items-center gap-2 rounded-xl border border-blue-200 bg-white shadow-md px-3 py-2">
-                <div className="h-7 w-7 rounded-full bg-blue-50 flex items-center justify-center"><Users className="h-3.5 w-3.5 text-blue-700" /></div>
-                <span className="text-xs font-semibold text-foreground">Parent</span>
-              </motion.div>
-              <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute z-20 top-14 right-0 flex items-center gap-2 rounded-xl border border-green-200 bg-white shadow-md px-3 py-2">
-                <div className="h-7 w-7 rounded-full bg-green-50 flex items-center justify-center"><Stethoscope className="h-3.5 w-3.5 text-green-700" /></div>
-                <span className="text-xs font-semibold text-foreground">Doctor</span>
-              </motion.div>
-              <motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute z-20 bottom-24 left-0 flex items-center gap-2 rounded-xl border border-purple-200 bg-white shadow-md px-3 py-2">
-                <div className="h-7 w-7 rounded-full bg-purple-50 flex items-center justify-center"><Activity className="h-3.5 w-3.5 text-purple-700" /></div>
-                <span className="text-xs font-semibold text-foreground">Therapist</span>
-              </motion.div>
-              <motion.div animate={{ y: [0, -9, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-                className="absolute z-20 bottom-6 right-6 flex items-center gap-2 rounded-xl border border-amber-200 bg-white shadow-md px-3 py-2">
-                <div className="h-7 w-7 rounded-full bg-amber-50 flex items-center justify-center"><GraduationCap className="h-3.5 w-3.5 text-amber-700" /></div>
-                <span className="text-xs font-semibold text-foreground">School</span>
-              </motion.div>
+              Intelligent care for every developmental journey.
+            </motion.h1>
 
-              {/* Main card */}
-              <div className="absolute inset-x-12 inset-y-0 rounded-2xl overflow-hidden border border-primary/10 bg-primary/4">
-                <div className="absolute inset-0 bg-gradient-to-br from-secondary/15 via-transparent to-primary/10" />
-                <div className="absolute inset-5 rounded-xl border border-border bg-card shadow-lg p-5 flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-secondary/25 flex items-center justify-center">
-                      <HeartPulse className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-foreground">Isabella Tan, 6 yrs</div>
-                      <div className="text-xs text-muted-foreground">Developmental Digital Twin</div>
-                    </div>
-                    <Badge className="ml-auto bg-red-100 text-red-700 border-red-200 text-xs">Critical</Badge>
+            {/* Description */}
+            <motion.p variants={fadeUp} custom={2} initial="hidden" animate="visible"
+              className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl"
+            >
+              A national-scale AI-assisted infrastructure connecting parents, clinicians, therapists, schools, and government into one continuous developmental intelligence system.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div variants={fadeUp} custom={3} initial="hidden" animate="visible"
+              className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center"
+            >
+              <Link href="/login">
+                <Button size="lg" className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
+                  Join the Ecosystem <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Button size="lg" variant="outline"
+                className="rounded-full px-8 h-12 md:h-14 text-sm md:text-base w-full sm:w-auto border-primary/20"
+                data-testid="button-clinic-demo"
+                onClick={() => setDemoModal({ open: true, audience: "clinics" })}
+              >
+                Request Clinic Demo
+              </Button>
+            </motion.div>
+
+            {/* Trust badges */}
+            <motion.div variants={fadeUp} custom={4} initial="hidden" animate="visible"
+              className="flex flex-wrap items-center justify-center gap-4 text-xs md:text-sm text-muted-foreground"
+            >
+              {["Never diagnoses", "HIPAA-aligned", "Philippine DOH-ready"].map(t => (
+                <span key={t} className="flex items-center gap-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5 text-secondary" /> {t}
+                </span>
+              ))}
+            </motion.div>
+
+            {/* ── Centered product visual ──────────────────────────────────── */}
+            <motion.div
+              initial={{ opacity: 0, y: 36, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.42, ease: "easeOut" }}
+              className="relative w-full max-w-2xl mt-4 px-6 sm:px-10"
+            >
+              {/* Glow halo */}
+              <div className="absolute -inset-6 bg-gradient-to-br from-secondary/25 via-transparent to-primary/12 rounded-3xl blur-2xl pointer-events-none" />
+
+              {/* Main dashboard card */}
+              <div className="relative rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
+                {/* Card header */}
+                <div className="flex items-center gap-3 border-b px-5 py-4">
+                  <div className="h-10 w-10 rounded-full bg-secondary/25 flex items-center justify-center shrink-0">
+                    <HeartPulse className="h-5 w-5 text-primary" />
                   </div>
+                  <div className="text-left">
+                    <div className="text-sm font-semibold text-foreground">Isabella Tan, 6 yrs</div>
+                    <div className="text-xs text-muted-foreground">Developmental Digital Twin</div>
+                  </div>
+                  <Badge className="ml-auto bg-red-100 text-red-700 border-red-200 text-xs shrink-0">Critical</Badge>
+                </div>
+
+                {/* Domain scores */}
+                <div className="px-5 pt-4 pb-2 space-y-3">
                   <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Domain Scores</div>
-                  <div className="flex flex-col gap-2.5 flex-1">
-                    {DOMAINS.map(d => (
-                      <div key={d.name} className="flex items-center gap-3">
-                        <div className="text-xs text-muted-foreground w-32 shrink-0">{d.name}</div>
-                        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }} animate={{ width: `${d.score}%` }}
-                            transition={{ duration: 1, delay: 0.8 }}
-                            className={`h-full rounded-full ${d.color}`}
-                          />
-                        </div>
-                        <div className="text-xs font-mono text-foreground w-6 text-right">{d.score}</div>
+                  {DOMAINS.map(d => (
+                    <div key={d.name} className="flex items-center gap-3">
+                      <div className="text-xs text-muted-foreground w-36 shrink-0 text-left">{d.name}</div>
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }} animate={{ width: `${d.score}%` }}
+                          transition={{ duration: 1, delay: 0.85 }}
+                          className={`h-full rounded-full ${d.color}`}
+                        />
                       </div>
-                    ))}
-                  </div>
-                  <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">
-                    <span className="font-semibold">AI Assessment Note:</span> Clinical indicators consistent with developmental concerns requiring professional evaluation. Referral recommended.
-                  </div>
+                      <div className="text-xs font-mono text-foreground w-6 text-right">{d.score}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* AI note */}
+                <div className="mx-5 mb-5 mt-3 rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800 text-left">
+                  <span className="font-semibold">AI Assessment Note:</span> Clinical indicators consistent with developmental concerns requiring professional evaluation. Referral recommended.
                 </div>
               </div>
+
+              {/* Floating role chips — corners */}
+              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute z-10 -top-5 -left-2 sm:-left-6 flex items-center gap-2 rounded-xl border border-blue-200 bg-white shadow-lg px-3 py-2">
+                <div className="h-7 w-7 rounded-full bg-blue-50 flex items-center justify-center shrink-0"><Users className="h-3.5 w-3.5 text-blue-700" /></div>
+                <span className="text-xs font-semibold text-foreground">Parent</span>
+              </motion.div>
+
+              <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute z-10 -top-5 -right-2 sm:-right-6 flex items-center gap-2 rounded-xl border border-green-200 bg-white shadow-lg px-3 py-2">
+                <div className="h-7 w-7 rounded-full bg-green-50 flex items-center justify-center shrink-0"><Stethoscope className="h-3.5 w-3.5 text-green-700" /></div>
+                <span className="text-xs font-semibold text-foreground">Doctor</span>
+              </motion.div>
+
+              <motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                className="absolute z-10 -bottom-5 -left-2 sm:-left-6 flex items-center gap-2 rounded-xl border border-purple-200 bg-white shadow-lg px-3 py-2">
+                <div className="h-7 w-7 rounded-full bg-purple-50 flex items-center justify-center shrink-0"><Activity className="h-3.5 w-3.5 text-purple-700" /></div>
+                <span className="text-xs font-semibold text-foreground">Therapist</span>
+              </motion.div>
+
+              <motion.div animate={{ y: [0, -9, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+                className="absolute z-10 -bottom-5 -right-2 sm:-right-6 flex items-center gap-2 rounded-xl border border-amber-200 bg-white shadow-lg px-3 py-2">
+                <div className="h-7 w-7 rounded-full bg-amber-50 flex items-center justify-center shrink-0"><GraduationCap className="h-3.5 w-3.5 text-amber-700" /></div>
+                <span className="text-xs font-semibold text-foreground">School</span>
+              </motion.div>
             </motion.div>
           </div>
         </section>
