@@ -49,7 +49,7 @@ const PLANS: Record<string, PlanFeatures> = {
     planName: "Care Plus",
   },
   "care-family-pro": {
-    maxChildren: Infinity,
+    maxChildren: 6,
     screeningsPerYear: Infinity,
     videoAnalysis: true,
     videoPerMonth: Infinity,

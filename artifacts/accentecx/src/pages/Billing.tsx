@@ -70,7 +70,7 @@ const PLANS = [
     priceAnnual: 19990,
     tagline: "For families who need everything",
     features: [
-      "Unlimited children",
+      "Up to 6 children",
       "Priority AI processing",
       "Full video analytics suite",
       "Advanced clinical reports",

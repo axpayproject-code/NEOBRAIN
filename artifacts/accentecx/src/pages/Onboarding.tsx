@@ -54,10 +54,10 @@ const FAMILY_PLANS = {
     name: "Care Family Pro", price: "₱1,999", period: "/month",
     tagline: "Clinical-grade care for families who need the most.",
     highlight: false, badge: "Premium",
-    features: ["Unlimited child profiles", "Full AI clinical reports with risk scoring", "Unlimited video behavioral analysis", "Therapy plan tracking + automation", "School input system", "Priority AI processing", "Specialist messaging (priority queue)", "Advanced clinical reports & PDF exports", "Dedicated family support manager", "24/7 support"],
+    features: ["Up to 6 child profiles", "Full AI clinical reports with risk scoring", "Unlimited video behavioral analysis", "Therapy plan tracking + automation", "School input system", "Priority AI processing", "Specialist messaging (priority queue)", "Advanced clinical reports & PDF exports", "Dedicated family support manager", "24/7 support"],
     excluded: [],
     quickStart: [
-      { icon: Users, label: "Add all your children", desc: "Unlimited profiles, one family account" },
+      { icon: Users, label: "Add up to 6 children", desc: "6 profiles, one family account" },
       { icon: Brain, label: "Run full AI screenings", desc: "5-domain clinical intake" },
       { icon: Video, label: "Submit video sessions", desc: "Unlimited behavioral video analysis" },
       { icon: Stethoscope, label: "Connect with specialists", desc: "Priority access to developmental pediatricians" },

@@ -165,7 +165,7 @@ const B2C_TIERS = [
     highlight: false,
     badge: "Premium",
     features: [
-      "Unlimited children",
+      "Up to 6 children",
       "Priority AI processing",
       "Full video analytics suite",
       "Advanced clinical reports",
@@ -305,7 +305,7 @@ function PricingSection() {
         {/* ── FAMILIES TAB ─────────────────────────────────────────────── */}
         {activeTab === "families" && (
           <div className="space-y-10">
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {B2C_TIERS.map((tier, i) => (
                 <motion.div
                   key={tier.name}
@@ -379,10 +379,10 @@ function PricingSection() {
                   </thead>
                   <tbody>
                     {[
-                      { feature: "Child profiles", free: "1 child", starter: "1 child", plus: "Up to 4", pro: "Unlimited" },
+                      { feature: "Child profiles", free: "1 child", starter: "1 child", plus: "Up to 4", pro: "Up to 6" },
                       { feature: "Developmental screenings", free: "1 screening", starter: "Basic (2×/yr)", plus: "Full (unlimited)", pro: "Full (unlimited)" },
                       { feature: "AI developmental report", free: false, starter: "Text summary", plus: "Full + risk score", pro: "Full + risk score" },
-                      { feature: "Video behavioral analysis", free: false, starter: false, plus: "Up to 3/month", pro: "Unlimited" },
+                      { feature: "Video behavioral analysis", free: false, starter: false, plus: "Up to 3/month", pro: "Unlimited sessions" },
                       { feature: "Therapy plan tracking", free: false, starter: false, plus: true, pro: true },
                       { feature: "School input system", free: false, starter: false, plus: true, pro: true },
                       { feature: "Specialist messaging", free: false, starter: false, plus: "Standard queue", pro: "Priority queue" },
