@@ -5,13 +5,6 @@ interface Props {
   className?: string;
 }
 
-const IMG_HEIGHT: Record<string, string> = {
-  xs: "h-7",
-  sm: "h-8",
-  md: "h-9",
-  lg: "h-11",
-};
-
 const SIZE = {
   xs: { box: "h-6 w-6 rounded-lg",   icon: "h-3.5 w-3.5", text: "text-xs",   tag: "text-[8px]",  gap: "gap-1.5" },
   sm: { box: "h-7 w-7 rounded-lg",   icon: "h-4 w-4",     text: "text-sm",   tag: "text-[9px]",  gap: "gap-2"   },
@@ -20,23 +13,12 @@ const SIZE = {
 };
 
 const VARIANT = {
-  dark:    { box: "bg-secondary/25", icon: "text-secondary",             name: "text-background",         tag: "text-background/50"         },
-  sidebar: { box: "bg-sidebar-primary/20", icon: "text-sidebar-primary", name: "text-sidebar-foreground", tag: "text-sidebar-foreground/40" },
+  light:   { box: "bg-[#163300]/10",          icon: "text-[#163300]",              name: "text-[#163300]",              tag: "text-[#163300]/60"              },
+  dark:    { box: "bg-[#9FE870]/25",           icon: "text-[#9FE870]",              name: "text-white",                  tag: "text-white/50"                  },
+  sidebar: { box: "bg-sidebar-primary/20",     icon: "text-sidebar-primary",        name: "text-sidebar-foreground",     tag: "text-sidebar-foreground/40"     },
 };
 
 export default function NeoBrainLogo({ size = "md", showTagline = false, variant = "light", className = "" }: Props) {
-  if (variant === "light" || variant === "dark") {
-    return (
-      <img
-        src="/neobrain-logo-transparent.png"
-        alt="NEOBRAIN by ACCENTECX AI"
-        className={`${IMG_HEIGHT[size]} w-auto object-contain select-none ${className}`}
-        style={variant === "dark" ? { filter: "brightness(0) invert(1)" } : undefined}
-        draggable={false}
-      />
-    );
-  }
-
   const s = SIZE[size];
   const v = VARIANT[variant];
   return (
