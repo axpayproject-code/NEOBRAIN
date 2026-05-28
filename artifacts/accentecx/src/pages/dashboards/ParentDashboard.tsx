@@ -180,51 +180,126 @@ function ChildDomainCard({ childId, childName }: { childId: number; childName: s
 
 // ── Tab views ──────────────────────────────────────────────────────────────────
 
-function OverviewTab() {
+function WelcomeEmptyState({ onAddChild, onStartScreening, onBook }: { onAddChild: () => void; onStartScreening: () => void; onBook: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col items-center text-center px-6 py-10 space-y-8"
+    >
+      {/* Animated illustration */}
+      <div className="relative">
+        <motion.div
+          animate={{ scale: [1, 1.06, 1] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="w-28 h-28 rounded-full bg-secondary/15 flex items-center justify-center"
+        >
+          <div className="w-20 h-20 rounded-full bg-secondary/25 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-secondary/30 flex items-center justify-center">
+              <HeartPulse className="h-8 w-8 text-primary" />
+            </div>
+          </div>
+        </motion.div>
+        <motion.div
+          animate={{ scale: [0, 1], opacity: [0, 1] }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          className="absolute -top-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-secondary shadow-sm border-2 border-background"
+        >
+          <TrendingUp className="h-4 w-4 text-primary" />
+        </motion.div>
+      </div>
+
+      <div className="space-y-2 max-w-xs">
+        <h2 className="text-xl font-bold text-foreground">You're all set!</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Add your child's profile to start tracking developmental milestones, run AI screenings, and book specialists.
+        </p>
+      </div>
+
+      <Button onClick={onAddChild} className="rounded-full px-8 gap-2 font-bold" data-testid="empty-add-child">
+        <Plus className="h-4 w-4" /> Add Your First Child
+      </Button>
+
+      <div className="grid grid-cols-3 gap-3 w-full max-w-sm">
+        {[
+          { icon: ClipboardList, label: "Screening", color: "bg-blue-50 text-blue-700", action: onStartScreening },
+          { icon: Calendar, label: "Appointment", color: "bg-purple-50 text-purple-700", action: onBook },
+          { icon: Brain, label: "AI Analysis", color: "bg-lime-50 text-lime-700", action: () => {} },
+        ].map(({ icon: Icon, label, color, action }) => (
+          <button key={label} onClick={action}
+            className={`flex flex-col items-center gap-2 rounded-2xl p-4 ${color} transition-opacity hover:opacity-80`}>
+            <Icon className="h-6 w-6" />
+            <span className="text-xs font-semibold leading-tight">{label}</span>
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function OverviewTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { data: summary, isLoading: loadSum } = useGetDashboardSummary({ query: { queryKey: ["dashboard-summary"] } });
   const { data: activity, isLoading: loadAct } = useGetDashboardActivity({ query: { queryKey: ["dashboard-activity"] } });
   const { user } = useAuth();
 
+  const hasData = loadSum || (summary?.totalChildren ?? 0) > 0 || (summary?.upcomingAppointments ?? 0) > 0;
+
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 lg:p-8 space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Welcome back, {user?.name?.split(" ")[0]}</h1>
-        <p className="text-muted-foreground text-sm mt-1">Here's a summary of your family's care progress.</p>
+        <h1 className="text-xl lg:text-2xl font-bold text-foreground">
+          Hi, {user?.name?.split(" ")[0]} 👋
+        </h1>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {loadSum ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />) : (
-          <>
-            <StatCard label="Children" value={summary?.totalChildren ?? 0} icon={Users} desc="Active profiles" />
-            <StatCard label="Therapy Plans" value={summary?.activeTherapyPlans ?? 0} icon={HeartPulse} desc="Currently active" />
-            <StatCard label="Appointments" value={summary?.upcomingAppointments ?? 0} icon={Calendar} desc="Upcoming" />
-            <StatCard label="Screenings Due" value={summary?.pendingScreenings ?? 0} icon={ClipboardList} desc="Awaiting review" />
-          </>
-        )}
-      </div>
-      <div>
-        <h2 className="text-base font-semibold mb-3">Recent Activity</h2>
-        {loadAct ? <Skeleton className="h-48 rounded-xl" /> : (
-          <div className="space-y-2">
-            {(activity ?? []).slice(0, 8).map(item => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                className="flex items-start gap-3 rounded-xl border bg-card px-4 py-3"
-                data-testid={`activity-item-${item.id}`}
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/15 shrink-0 mt-0.5">
-                  <Activity className="h-4 w-4 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{item.title}</p>
-                  <p className="text-xs text-muted-foreground">{item.description}</p>
-                </div>
-                <span className="text-xs text-muted-foreground shrink-0">{new Date(item.occurredAt).toLocaleDateString()}</span>
-              </motion.div>
-            ))}
+
+      {!loadSum && !hasData ? (
+        <WelcomeEmptyState
+          onAddChild={() => onNavigate?.("children")}
+          onStartScreening={() => onNavigate?.("screening")}
+          onBook={() => onNavigate?.("appointments")}
+        />
+      ) : (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {loadSum ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />) : (
+              <>
+                <StatCard label="Children" value={summary?.totalChildren ?? 0} icon={Users} />
+                <StatCard label="Plans" value={summary?.activeTherapyPlans ?? 0} icon={HeartPulse} />
+                <StatCard label="Upcoming" value={summary?.upcomingAppointments ?? 0} icon={Calendar} />
+                <StatCard label="Screenings" value={summary?.pendingScreenings ?? 0} icon={ClipboardList} />
+              </>
+            )}
           </div>
-        )}
-      </div>
+
+          <div>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Recent Activity</h2>
+            {loadAct ? <Skeleton className="h-40 rounded-xl" /> : (
+              <div className="space-y-2">
+                {(activity ?? []).length === 0 ? (
+                  <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+                    No activity yet — add a child or start a screening to get started.
+                  </div>
+                ) : (activity ?? []).slice(0, 6).map(item => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                    className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3"
+                    data-testid={`activity-item-${item.id}`}
+                  >
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/15 shrink-0">
+                      <Activity className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(item.occurredAt).toLocaleDateString("en-PH")}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -237,8 +312,7 @@ function ChildrenTab() {
     <div className="p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">My Children</h1>
-          <p className="text-sm text-muted-foreground">Manage and track each child's developmental profile</p>
+          <h1 className="text-xl lg:text-2xl font-bold">My Children</h1>
         </div>
         <AddChildDialog onSuccess={() => queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() })} />
       </div>
@@ -849,7 +923,6 @@ function VideoTab() {
 
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
-  overview: OverviewTab,
   children: ChildrenTab,
   screening: ScreeningTab,
   "ai-results": AIResultsTab,
@@ -872,11 +945,16 @@ export default function ParentDashboard() {
     return n;
   });
 
-  const TabView: TabComponent = TABS[activeTab] ?? OverviewTab;
+  const TabView: TabComponent | undefined = TABS[activeTab];
 
   return (
     <RoleDashboardLayout navItems={nav} activeTab={activeTab} onTabChange={setActiveTab}>
-      <TabView />
+      {activeTab === "overview"
+        ? <OverviewTab onNavigate={setActiveTab} />
+        : TabView
+          ? <TabView />
+          : <OverviewTab onNavigate={setActiveTab} />
+      }
     </RoleDashboardLayout>
   );
 }
