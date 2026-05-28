@@ -106,12 +106,13 @@ function StepIndicator({ step, total = 3 }: { step: Step; total?: number }) {
 
 // ── PARENT ONBOARDING ─────────────────────────────────────────────────────────
 
-function ParentOnboarding({ planKey, onComplete }: { planKey: PlanKey; onComplete: (name: string, email: string, tier: string) => void }) {
+function ParentOnboarding({ planKey, onComplete }: { planKey: PlanKey; onComplete: (name: string, email: string, tier: string, userId: string) => void }) {
   const plan = FAMILY_PLANS[planKey] ?? FAMILY_PLANS["care-plus"];
   const [step, setStep] = useState<Step>(1);
-  const [form, setForm] = useState({ name: "", email: "", childName: "", guardianType: "Parent" });
-  const [errors, setErrors] = useState<Partial<typeof form>>({});
+  const [form, setForm] = useState({ name: "", email: "", password: "", childName: "", guardianType: "Parent" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [createdUserId, setCreatedUserId] = useState("");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -120,15 +121,28 @@ function ParentOnboarding({ planKey, onComplete }: { planKey: PlanKey; onComplet
 
   async function handleAccountSubmit(ev: React.FormEvent) {
     ev.preventDefault();
-    const e: Partial<typeof form> = {};
+    const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = "Full name is required";
     if (!form.email.includes("@")) e.email = "A valid email address is required";
     if (!form.childName.trim()) e.childName = "Child's name is required";
+    if (form.password.length < 6) e.password = "Password must be at least 6 characters";
     if (Object.keys(e).length) { setErrors(e); return; }
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setSubmitting(false);
-    setStep(3);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role: "parent" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Signup failed");
+      setCreatedUserId(data.id);
+      setStep(3);
+    } catch (err) {
+      setErrors(prev => ({ ...prev, api: err instanceof Error ? err.message : "Signup failed. Please try again." }));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   useEffect(() => { window.scrollTo(0, 0); }, [step]);
@@ -211,6 +225,11 @@ function ParentOnboarding({ planKey, onComplete }: { planKey: PlanKey; onComplet
                 <Input name="email" type="email" placeholder="you@email.com" value={form.email} onChange={handleChange} className={`h-11 ${errors.email ? "border-red-400" : ""}`} data-testid="onboarding-input-email" />
                 {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
               </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Password <span className="text-red-500">*</span></Label>
+                <Input name="password" type="password" placeholder="Min 6 characters" value={form.password} onChange={handleChange} className={`h-11 ${errors.password ? "border-red-400" : ""}`} data-testid="onboarding-input-password" />
+                {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold">I am a</Label>
@@ -235,10 +254,15 @@ function ParentOnboarding({ planKey, onComplete }: { planKey: PlanKey; onComplet
                 {errors.childName && <p className="text-red-500 text-xs">{errors.childName}</p>}
               </div>
             </div>
+            {errors.api && (
+              <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+                <span>{errors.api}</span>
+              </div>
+            )}
             <div className="flex gap-3">
               <Button type="button" variant="outline" onClick={() => setStep(1)} className="rounded-full px-5 h-12"><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
               <Button type="submit" disabled={submitting} className="flex-1 h-12 rounded-full bg-primary text-primary-foreground font-semibold" data-testid="onboarding-create-account">
-                {submitting ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Setting up…</span> : <span className="flex items-center gap-2">Create My Account <ArrowRight className="h-4 w-4" /></span>}
+                {submitting ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Creating account…</span> : <span className="flex items-center gap-2">Create My Account <ArrowRight className="h-4 w-4" /></span>}
               </Button>
             </div>
             <p className="text-center text-xs text-muted-foreground">Protected under the Philippine Data Privacy Act (RA 10173).</p>
@@ -270,7 +294,7 @@ function ParentOnboarding({ planKey, onComplete }: { planKey: PlanKey; onComplet
               );
             })}
           </div>
-          <Button onClick={() => onComplete(form.name, form.email, planKey)} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold text-base" data-testid="onboarding-enter-dashboard">
+          <Button onClick={() => onComplete(form.name, form.email, planKey, createdUserId)} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold text-base" data-testid="onboarding-enter-dashboard">
             Enter My Dashboard <ArrowRight className="h-5 w-5 ml-1" />
           </Button>
         </motion.div>
@@ -281,13 +305,14 @@ function ParentOnboarding({ planKey, onComplete }: { planKey: PlanKey; onComplet
 
 // ── DOCTOR ONBOARDING ─────────────────────────────────────────────────────────
 
-function DoctorOnboarding({ onComplete }: { onComplete: (name: string, email: string) => void }) {
+function DoctorOnboarding({ onComplete }: { onComplete: (name: string, email: string, userId: string) => void }) {
   const [step, setStep] = useState<Step>(1);
   const [clinic, setClinic] = useState({ name: "", type: "", province: "", email: "" });
-  const [profile, setProfile] = useState({ name: "", specialty: "", license: "", phone: "", email: "" });
+  const [profile, setProfile] = useState({ name: "", specialty: "", license: "", phone: "", email: "", password: "" });
   const [clinicErrors, setClinicErrors] = useState<Partial<typeof clinic>>({});
-  const [profileErrors, setProfileErrors] = useState<Partial<typeof profile>>({});
+  const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [createdUserId, setCreatedUserId] = useState("");
 
   function handleClinicChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setClinic(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -310,15 +335,28 @@ function DoctorOnboarding({ onComplete }: { onComplete: (name: string, email: st
 
   async function submitProfile(e: React.FormEvent) {
     e.preventDefault();
-    const errs: Partial<typeof profile> = {};
+    const errs: Record<string, string> = {};
     if (!profile.name.trim()) errs.name = "Required";
     if (!profile.specialty) errs.specialty = "Required";
     if (!profile.email.includes("@")) errs.email = "Valid email required";
+    if (profile.password.length < 6) errs.password = "Min 6 characters";
     if (Object.keys(errs).length) { setProfileErrors(errs); return; }
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setSubmitting(false);
-    setStep(3);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: profile.name, email: profile.email, password: profile.password, role: "doctor" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Signup failed");
+      setCreatedUserId(data.id);
+      setStep(3);
+    } catch (err) {
+      setProfileErrors(prev => ({ ...prev, api: err instanceof Error ? err.message : "Signup failed. Try again." }));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   useEffect(() => { window.scrollTo(0, 0); }, [step]);
@@ -423,11 +461,21 @@ function DoctorOnboarding({ onComplete }: { onComplete: (name: string, email: st
                 <Input name="email" type="email" placeholder="doctor@clinic.ph" value={profile.email} onChange={handleProfileChange} className={`h-11 ${profileErrors.email ? "border-red-400" : ""}`} data-testid="onboarding-doctor-email" />
                 {profileErrors.email && <p className="text-red-500 text-xs">{profileErrors.email}</p>}
               </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Password <span className="text-red-500">*</span></Label>
+                <Input name="password" type="password" placeholder="Min 6 characters" value={profile.password} onChange={handleProfileChange} className={`h-11 ${profileErrors.password ? "border-red-400" : ""}`} />
+                {profileErrors.password && <p className="text-red-500 text-xs">{profileErrors.password}</p>}
+              </div>
             </div>
+            {profileErrors.api && (
+              <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+                <span>{profileErrors.api}</span>
+              </div>
+            )}
             <div className="flex gap-3">
               <Button type="button" variant="outline" onClick={() => setStep(1)} className="rounded-full px-5 h-12"><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
               <Button type="submit" disabled={submitting} className="flex-1 h-12 rounded-full bg-primary text-primary-foreground font-semibold" data-testid="onboarding-doctor-submit">
-                {submitting ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Setting up clinic…</span> : <span className="flex items-center gap-2">Create Clinic Account <ArrowRight className="h-4 w-4" /></span>}
+                {submitting ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Creating account…</span> : <span className="flex items-center gap-2">Create Clinic Account <ArrowRight className="h-4 w-4" /></span>}
               </Button>
             </div>
           </form>
@@ -466,7 +514,7 @@ function DoctorOnboarding({ onComplete }: { onComplete: (name: string, email: st
               );
             })}
           </div>
-          <Button onClick={() => onComplete(profile.name, profile.email)} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold" data-testid="onboarding-enter-dashboard">
+          <Button onClick={() => onComplete(profile.name, profile.email, createdUserId)} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold" data-testid="onboarding-enter-dashboard">
             Enter Clinical Dashboard <ArrowRight className="h-5 w-5 ml-1" />
           </Button>
         </motion.div>
@@ -477,14 +525,15 @@ function DoctorOnboarding({ onComplete }: { onComplete: (name: string, email: st
 
 // ── THERAPIST ONBOARDING ──────────────────────────────────────────────────────
 
-function TherapistOnboarding({ onComplete }: { onComplete: (name: string, email: string) => void }) {
+function TherapistOnboarding({ onComplete }: { onComplete: (name: string, email: string, userId: string) => void }) {
   const [step, setStep] = useState<Step>(1);
   const [joinMode, setJoinMode] = useState<"clinic" | "independent">("clinic");
   const [clinicCode, setClinicCode] = useState("");
   const [clinicCodeError, setClinicCodeError] = useState("");
-  const [profile, setProfile] = useState({ name: "", specialty: "", license: "", email: "", phone: "" });
-  const [profileErrors, setProfileErrors] = useState<Partial<typeof profile>>({});
+  const [profile, setProfile] = useState({ name: "", specialty: "", license: "", email: "", phone: "", password: "" });
+  const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [createdUserId, setCreatedUserId] = useState("");
 
   function handleProfileChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setProfile(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -502,15 +551,28 @@ function TherapistOnboarding({ onComplete }: { onComplete: (name: string, email:
 
   async function submitProfile(e: React.FormEvent) {
     e.preventDefault();
-    const errs: Partial<typeof profile> = {};
+    const errs: Record<string, string> = {};
     if (!profile.name.trim()) errs.name = "Required";
     if (!profile.specialty) errs.specialty = "Required";
     if (!profile.email.includes("@")) errs.email = "Valid email required";
+    if (profile.password.length < 6) errs.password = "Min 6 characters";
     if (Object.keys(errs).length) { setProfileErrors(errs); return; }
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setSubmitting(false);
-    setStep(3);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: profile.name, email: profile.email, password: profile.password, role: "therapist" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Signup failed");
+      setCreatedUserId(data.id);
+      setStep(3);
+    } catch (err) {
+      setProfileErrors(prev => ({ ...prev, api: err instanceof Error ? err.message : "Signup failed. Try again." }));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   useEffect(() => { window.scrollTo(0, 0); }, [step]);
@@ -614,7 +676,17 @@ function TherapistOnboarding({ onComplete }: { onComplete: (name: string, email:
                 <Input name="email" type="email" placeholder="therapist@example.com" value={profile.email} onChange={handleProfileChange} className={`h-11 ${profileErrors.email ? "border-red-400" : ""}`} data-testid="therapist-email" />
                 {profileErrors.email && <p className="text-red-500 text-xs">{profileErrors.email}</p>}
               </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Password <span className="text-red-500">*</span></Label>
+                <Input name="password" type="password" placeholder="Min 6 characters" value={profile.password} onChange={handleProfileChange} className={`h-11 ${profileErrors.password ? "border-red-400" : ""}`} />
+                {profileErrors.password && <p className="text-red-500 text-xs">{profileErrors.password}</p>}
+              </div>
             </div>
+            {profileErrors.api && (
+              <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+                <span>{profileErrors.api}</span>
+              </div>
+            )}
             <div className="flex gap-3">
               <Button type="button" variant="outline" onClick={() => setStep(1)} className="rounded-full px-5 h-12"><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
               <Button type="submit" disabled={submitting} className="flex-1 h-12 rounded-full bg-primary text-primary-foreground font-semibold" data-testid="therapist-submit">
@@ -656,7 +728,7 @@ function TherapistOnboarding({ onComplete }: { onComplete: (name: string, email:
               );
             })}
           </div>
-          <Button onClick={() => onComplete(profile.name, profile.email)} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold" data-testid="onboarding-enter-dashboard">
+          <Button onClick={() => onComplete(profile.name, profile.email, createdUserId)} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold" data-testid="onboarding-enter-dashboard">
             Enter Therapy Dashboard <ArrowRight className="h-5 w-5 ml-1" />
           </Button>
         </motion.div>
@@ -667,14 +739,15 @@ function TherapistOnboarding({ onComplete }: { onComplete: (name: string, email:
 
 // ── ADMIN ONBOARDING ──────────────────────────────────────────────────────────
 
-function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: string) => void }) {
+function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: string, userId: string) => void }) {
   const [step, setStep] = useState<Step>(1);
   const [access, setAccess] = useState({ inviteCode: "", orgName: "", orgType: "" });
   const [accessErrors, setAccessErrors] = useState<Partial<typeof access>>({});
-  const [adminProfile, setAdminProfile] = useState({ name: "", email: "", title: "" });
-  const [profileErrors, setProfileErrors] = useState<Partial<typeof adminProfile>>({});
+  const [adminProfile, setAdminProfile] = useState({ name: "", email: "", title: "", password: "" });
+  const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [noCode, setNoCode] = useState(false);
+  const [createdUserId, setCreatedUserId] = useState("");
 
   function handleAccessChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setAccess(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -698,14 +771,27 @@ function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: str
 
   async function submitProfile(e: React.FormEvent) {
     e.preventDefault();
-    const errs: Partial<typeof adminProfile> = {};
+    const errs: Record<string, string> = {};
     if (!adminProfile.name.trim()) errs.name = "Required";
     if (!adminProfile.email.includes("@")) errs.email = "Valid email required";
+    if (adminProfile.password.length < 6) errs.password = "Min 6 characters";
     if (Object.keys(errs).length) { setProfileErrors(errs); return; }
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setSubmitting(false);
-    setStep(3);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: adminProfile.name, email: adminProfile.email, password: adminProfile.password, role: "admin" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Signup failed");
+      setCreatedUserId(data.id);
+      setStep(3);
+    } catch (err) {
+      setProfileErrors(prev => ({ ...prev, api: err instanceof Error ? err.message : "Signup failed. Try again." }));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   useEffect(() => { window.scrollTo(0, 0); }, [step]);
@@ -797,11 +883,21 @@ function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: str
                 <Label className="text-xs font-semibold">Job Title</Label>
                 <Input name="title" placeholder="e.g. Health Systems Director" value={adminProfile.title} onChange={handleProfileChange} className="h-11" />
               </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Password <span className="text-red-500">*</span></Label>
+                <Input name="password" type="password" placeholder="Min 6 characters" value={adminProfile.password} onChange={handleProfileChange} className={`h-11 ${profileErrors.password ? "border-red-400" : ""}`} />
+                {profileErrors.password && <p className="text-red-500 text-xs">{profileErrors.password}</p>}
+              </div>
             </div>
+            {profileErrors.api && (
+              <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+                <span>{profileErrors.api}</span>
+              </div>
+            )}
             <div className="flex gap-3">
               <Button type="button" variant="outline" onClick={() => setStep(1)} className="rounded-full px-5 h-12"><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
               <Button type="submit" disabled={submitting} className="flex-1 h-12 rounded-full bg-primary text-primary-foreground font-semibold" data-testid="admin-submit">
-                {submitting ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Setting up admin access…</span> : <span className="flex items-center gap-2">Complete Setup <ArrowRight className="h-4 w-4" /></span>}
+                {submitting ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Creating account…</span> : <span className="flex items-center gap-2">Complete Setup <ArrowRight className="h-4 w-4" /></span>}
               </Button>
             </div>
           </form>
@@ -837,7 +933,7 @@ function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: str
               );
             })}
           </div>
-          <Button onClick={() => onComplete(adminProfile.name, adminProfile.email)} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold" data-testid="onboarding-enter-dashboard">
+          <Button onClick={() => onComplete(adminProfile.name, adminProfile.email, createdUserId)} className="w-full h-12 rounded-full bg-primary text-primary-foreground font-bold" data-testid="onboarding-enter-dashboard">
             Enter Admin Dashboard <ArrowRight className="h-5 w-5 ml-1" />
           </Button>
         </motion.div>
@@ -877,11 +973,12 @@ export default function Onboarding() {
     admin: ["Access Code", "Admin Profile", "Welcome"],
   };
 
-  function handleComplete(name: string, email: string, tier?: string) {
+  function handleComplete(name: string, email: string, tier?: string, userId?: string) {
     const ROLE_DEFAULT_ROUTES: Record<UserRole, string> = {
       parent: "/parent", doctor: "/doctor", therapist: "/therapist", admin: "/admin",
     };
-    login({ id: crypto.randomUUID(), name: name || `${meta.label} User`, email: email || `user@accentecx.ph`, role, tier });
+    if (!userId) return;
+    login({ id: userId, name: name || `${meta.label} User`, email: email || `user@accentecx.ph`, role, tier });
     setLocation(ROLE_DEFAULT_ROUTES[role]);
   }
 
@@ -917,22 +1014,22 @@ export default function Onboarding() {
         {role === "parent" && (
           <ParentOnboarding
             planKey={planKey}
-            onComplete={(name, email, tier) => handleComplete(name, email, tier)}
+            onComplete={(name, email, tier, userId) => handleComplete(name, email, tier, userId)}
           />
         )}
         {role === "doctor" && (
           <DoctorOnboarding
-            onComplete={(name, email) => handleComplete(name, email)}
+            onComplete={(name, email, userId) => handleComplete(name, email, undefined, userId)}
           />
         )}
         {role === "therapist" && (
           <TherapistOnboarding
-            onComplete={(name, email) => handleComplete(name, email)}
+            onComplete={(name, email, userId) => handleComplete(name, email, undefined, userId)}
           />
         )}
         {role === "admin" && (
           <AdminOnboarding
-            onComplete={(name, email) => handleComplete(name, email)}
+            onComplete={(name, email, userId) => handleComplete(name, email, undefined, userId)}
           />
         )}
       </main>
