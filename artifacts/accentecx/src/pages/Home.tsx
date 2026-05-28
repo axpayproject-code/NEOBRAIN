@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -672,6 +672,10 @@ function PricingSection() {
 export default function Home() {
   const [demoModal, setDemoModal] = useState<{ open: boolean; audience: SalesAudience }>({ open: false, audience: "clinics" });
   const [menuOpen, setMenuOpen] = useState(false);
+  const [systemsIdx, setSystemsIdx] = useState(0);
+  const [journeyIdx, setJourneyIdx] = useState(0);
+  const systemsRef = useRef<HTMLDivElement>(null);
+  const journeyRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
@@ -948,7 +952,66 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Mobile: horizontal snap-scroll carousel */}
+            <div className="md:hidden">
+              <div
+                ref={systemsRef}
+                onScroll={() => {
+                  const el = systemsRef.current;
+                  if (!el) return;
+                  setSystemsIdx(Math.round(el.scrollLeft / (el.scrollWidth / SYSTEMS.length)));
+                }}
+                className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-3 -mx-4 px-4 no-scrollbar"
+              >
+                {SYSTEMS.map((sys, i) => (
+                  <motion.div
+                    key={sys.num}
+                    initial={{ opacity: 0, scale: 0.94 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={{ duration: 0.35, delay: i * 0.04 }}
+                    className={`snap-start shrink-0 w-[84vw] border rounded-2xl p-6 ${sys.color} flex flex-col gap-4`}
+                    data-testid={`card-system-${i + 1}`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${sys.iconBg}`}>
+                        <sys.icon className={`h-6 w-6 ${sys.iconColor}`} />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-muted-foreground">{sys.num}</span>
+                        <Badge variant="outline" className="text-xs">{sys.badge}</Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-foreground mb-2">{sys.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{sys.desc}</p>
+                    </div>
+                    <ul className="mt-auto space-y-1.5">
+                      {sys.features.map(f => (
+                        <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Check className="h-3.5 w-3.5 text-secondary shrink-0" /> {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                ))}
+              </div>
+              {/* Dot indicators */}
+              <div className="flex justify-center items-center gap-1.5 mt-4">
+                {SYSTEMS.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => systemsRef.current?.scrollTo({ left: i * (systemsRef.current.scrollWidth / SYSTEMS.length), behavior: "smooth" })}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === systemsIdx ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/25 hover:bg-muted-foreground/50"}`}
+                  />
+                ))}
+              </div>
+              <p className="text-center text-xs text-muted-foreground mt-2">{systemsIdx + 1} of {SYSTEMS.length}</p>
+            </div>
+
+            {/* Desktop: grid */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {SYSTEMS.map((sys, i) => (
                 <motion.div
                   key={sys.num}
@@ -996,7 +1059,54 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+            {/* Mobile: horizontal snap-scroll carousel */}
+            <div className="lg:hidden">
+              <div
+                ref={journeyRef}
+                onScroll={() => {
+                  const el = journeyRef.current;
+                  if (!el) return;
+                  setJourneyIdx(Math.round(el.scrollLeft / (el.scrollWidth / JOURNEY_STEPS.length)));
+                }}
+                className="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-3 -mx-4 px-4 no-scrollbar"
+              >
+                {JOURNEY_STEPS.map((s, i) => (
+                  <motion.div
+                    key={s.step}
+                    whileTap={{ scale: 0.97 }}
+                    className="snap-start shrink-0 w-[72vw] bg-background/10 border border-background/20 rounded-2xl p-5 flex flex-col gap-3"
+                    data-testid={`card-journey-step-${s.step}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-primary text-sm font-bold shrink-0 shadow-sm">
+                        {s.step}
+                      </div>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background/15">
+                        <s.icon className="h-4 w-4 text-background/80" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-background mb-1">{s.title}</div>
+                      <div className="text-xs text-background/60 leading-relaxed">{s.desc}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              {/* Dot indicators */}
+              <div className="flex justify-center items-center gap-1.5 mt-4">
+                {JOURNEY_STEPS.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => journeyRef.current?.scrollTo({ left: i * (journeyRef.current.scrollWidth / JOURNEY_STEPS.length), behavior: "smooth" })}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === journeyIdx ? "w-5 bg-secondary" : "w-1.5 bg-background/25 hover:bg-background/50"}`}
+                  />
+                ))}
+              </div>
+              <p className="text-center text-xs text-background/50 mt-2">Step {journeyIdx + 1} of {JOURNEY_STEPS.length}</p>
+            </div>
+
+            {/* Desktop: grid */}
+            <div className="hidden lg:grid lg:grid-cols-5 gap-3 md:gap-4">
               {JOURNEY_STEPS.map((s, i) => (
                 <motion.div
                   key={s.step}
@@ -1005,9 +1115,8 @@ export default function Home() {
                   className="relative bg-background/10 border border-background/20 rounded-2xl p-5 flex flex-col gap-3 hover:bg-background/15 transition-colors"
                   data-testid={`card-journey-step-${s.step}`}
                 >
-                  {/* Connector arrow (not on last two per row) */}
                   {i % 5 < 4 && (
-                    <div className="hidden lg:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10">
+                    <div className="absolute -right-2.5 top-1/2 -translate-y-1/2 z-10">
                       <ChevronRight className="h-5 w-5 text-secondary/60" />
                     </div>
                   )}
