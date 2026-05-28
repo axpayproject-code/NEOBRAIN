@@ -11,6 +11,7 @@ import {
 import { motion } from "framer-motion";
 import ContactSalesModal, { type SalesAudience } from "@/components/sales/ContactSalesModal";
 import LandingLiveDemo from "@/components/landing/LandingLiveDemo";
+import PhilippinesMap from "@/components/landing/PhilippinesMap";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -775,7 +776,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto grid gap-8 lg:grid-cols-2 items-center relative z-10">
             <motion.div
               initial="hidden" animate="visible"
-              className="flex flex-col gap-5"
+              className="flex flex-col gap-5 items-center lg:items-start text-center lg:text-left"
             >
               <motion.div variants={fadeUp} custom={0}>
                 <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs md:text-sm font-semibold text-primary w-fit bg-primary/5 border-primary/10">
@@ -789,11 +790,11 @@ export default function Home() {
                 Intelligent care for every developmental journey.
               </motion.h1>
               <motion.p variants={fadeUp} custom={2}
-                className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl"
+                className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0"
               >
                 A national-scale AI-assisted infrastructure connecting parents, clinicians, therapists, schools, and government into one continuous developmental intelligence system.
               </motion.p>
-              <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row gap-3 mt-1">
+              <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row gap-3 mt-1 w-full sm:w-auto justify-center lg:justify-start">
                 <Link href="/login">
                   <Button size="lg" className="rounded-full px-6 md:px-8 h-11 md:h-13 text-sm md:text-base w-full sm:w-auto gap-2" data-testid="button-join-hero">
                     Join the Ecosystem <ArrowRight className="h-4 w-4" />
@@ -809,7 +810,7 @@ export default function Home() {
                 </Button>
               </motion.div>
               <motion.div variants={fadeUp} custom={4}
-                className="flex flex-wrap items-center gap-3 md:gap-6 mt-1 text-xs md:text-sm text-muted-foreground"
+                className="flex flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-6 mt-1 text-xs md:text-sm text-muted-foreground"
               >
                 {["Never diagnoses", "HIPAA-aligned", "Philippine DOH-ready"].map(t => (
                   <span key={t} className="flex items-center gap-1.5">
@@ -1137,6 +1138,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* ── PHILIPPINES MAP ─────────────────────────────────────────────── */}
+        <PhilippinesMap />
 
         {/* ── AI ENGINE ───────────────────────────────────────────────────── */}
         <section id="ai" className="py-12 md:py-24 px-4 md:px-12">

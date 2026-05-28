@@ -8,6 +8,11 @@
     display: none;
   }
 }
+
+@keyframes ping {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%       { transform: scale(1.9); opacity: 0; }
+}
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
