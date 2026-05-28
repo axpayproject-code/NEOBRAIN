@@ -257,6 +257,141 @@ const PLAN_SLUGS: Record<string, string> = {
   "Care Family Pro": "care-family-pro",
 };
 
+const DOMAIN_SCORES = [
+  {
+    key: "communication",
+    label: "Communication",
+    icon: MessageSquare,
+    desc: "Tracks verbal & non-verbal expression, receptive language, and pragmatic communication across age milestones.",
+    risk: "Low Risk",
+    riskColor: "text-green-700 bg-green-50 border-green-200",
+    accent: "border-primary/40 bg-primary/5",
+    iconColor: "text-primary",
+  },
+  {
+    key: "social",
+    label: "Social Interaction",
+    icon: Users,
+    desc: "Evaluates peer engagement, joint attention, turn-taking, and contextual social awareness in structured settings.",
+    risk: "Moderate Risk",
+    riskColor: "text-yellow-700 bg-yellow-50 border-yellow-200",
+    accent: "border-chart-3/40 bg-chart-3/5",
+    iconColor: "text-chart-3",
+  },
+  {
+    key: "attention",
+    label: "Attention",
+    icon: Zap,
+    desc: "Measures sustained focus, impulse regulation, task persistence, and distractibility in learning environments.",
+    risk: "High Risk",
+    riskColor: "text-orange-700 bg-orange-50 border-orange-200",
+    accent: "border-chart-4/40 bg-chart-4/5",
+    iconColor: "text-chart-4",
+  },
+  {
+    key: "motor",
+    label: "Motor Skills",
+    icon: Activity,
+    desc: "Assesses fine and gross motor coordination, bilateral integration, and sensorimotor processing efficiency.",
+    risk: "Low Risk",
+    riskColor: "text-green-700 bg-green-50 border-green-200",
+    accent: "border-secondary/40 bg-secondary/5",
+    iconColor: "text-secondary",
+  },
+  {
+    key: "emotional",
+    label: "Emotional Regulation",
+    icon: HeartPulse,
+    desc: "Quantifies emotional reactivity, coping flexibility, co-regulation needs, and behavioral self-management.",
+    risk: "Critical Risk",
+    riskColor: "text-red-700 bg-red-50 border-red-200",
+    accent: "border-chart-5/40 bg-chart-5/5",
+    iconColor: "text-chart-5",
+  },
+];
+
+function DomainScoringPicker() {
+  const [selected, setSelected] = useState<string>("communication");
+  const active = DOMAIN_SCORES.find(d => d.key === selected)!;
+  const Icon = active.icon;
+
+  return (
+    <section className="bg-muted/30 border-y py-10 md:py-20 px-4 md:px-12">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center max-w-xl mx-auto mb-8 md:mb-10">
+          <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">Assessment Output</p>
+          <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-3">Five developmental domains. One risk score.</h2>
+          <p className="text-sm md:text-base text-muted-foreground">Each screening generates quantified scores across 5 domains — surfacing exactly where intervention is needed.</p>
+        </div>
+
+        {/* Joined card picker */}
+        <div className="flex rounded-2xl border border-border overflow-hidden shadow-sm divide-x divide-border mb-6">
+          {DOMAIN_SCORES.map((d) => {
+            const DIcon = d.icon;
+            const isActive = selected === d.key;
+            return (
+              <button
+                key={d.key}
+                onClick={() => setSelected(d.key)}
+                className={`flex-1 flex flex-col items-center gap-2 py-4 px-2 transition-all duration-200 focus:outline-none
+                  ${isActive
+                    ? "bg-primary text-primary-foreground shadow-inner"
+                    : "bg-background text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  }`}
+              >
+                <DIcon className={`h-5 w-5 shrink-0 ${isActive ? "text-secondary" : ""}`} />
+                <span className={`text-xs font-semibold text-center leading-tight hidden sm:block ${isActive ? "text-primary-foreground" : ""}`}>
+                  {d.label}
+                </span>
+                <span className={`text-[10px] font-semibold text-center leading-tight sm:hidden ${isActive ? "text-primary-foreground/80" : ""}`}>
+                  {d.label.split(" ")[0]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Detail panel */}
+        <motion.div
+          key={selected}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className={`rounded-2xl border p-6 md:p-8 flex flex-col sm:flex-row items-start gap-5 ${active.accent}`}
+        >
+          <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-background border border-border shadow-sm`}>
+            <Icon className={`h-7 w-7 ${active.iconColor}`} />
+          </div>
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-3 mb-2">
+              <h3 className="text-xl font-bold text-foreground">{active.label}</h3>
+              <span className={`rounded-full border px-3 py-0.5 text-xs font-semibold ${active.riskColor}`}>
+                {active.risk}
+              </span>
+              <span className="text-xs text-muted-foreground font-mono bg-muted border border-border rounded-full px-2 py-0.5">Score: 0–100</span>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">{active.desc}</p>
+          </div>
+        </motion.div>
+
+        {/* Risk legend */}
+        <div className="flex flex-wrap justify-center gap-3 mt-6">
+          {[
+            { level: "Low Risk",      color: "bg-green-50 border-green-200 text-green-800" },
+            { level: "Moderate Risk", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
+            { level: "High Risk",     color: "bg-orange-50 border-orange-200 text-orange-800" },
+            { level: "Critical Risk", color: "bg-red-50 border-red-200 text-red-800" },
+          ].map(r => (
+            <div key={r.level} className={`rounded-full border px-4 py-1.5 text-xs font-semibold ${r.color}`}>
+              {r.level}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function PricingSection() {
   const [activeTab, setActiveTab] = useState<PricingTab>("families");
   const [salesModal, setSalesModal] = useState<{ open: boolean; audience: SalesAudience }>({
@@ -983,34 +1118,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── STATS BAR ──────────────────────────────────────────────────── */}
-        <div className="border-y bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 py-10 px-4 md:px-12 relative overflow-hidden">
-          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 place-items-center">
-            {[
-              { stat: "1M+", label: "Children undiagnosed in PH", icon: Brain,     iconBg: "bg-primary/10",   iconColor: "text-primary",   statColor: "text-primary" },
-              { stat: "6",   label: "Integrated care ecosystems",  icon: Activity,  iconBg: "bg-secondary/20", iconColor: "text-secondary", statColor: "text-secondary" },
-              { stat: "5",   label: "AI behavioral engine layers", icon: Zap,       iconBg: "bg-primary/10",   iconColor: "text-primary",   statColor: "text-primary" },
-              { stat: "∞",   label: "Scalable to every barangay",  icon: Globe,     iconBg: "bg-secondary/20", iconColor: "text-secondary", statColor: "text-secondary" },
-            ].map(({ stat, label, icon: Icon, iconBg, iconColor, statColor }, i) => (
-              <motion.div
-                key={label}
-                initial={{ opacity: 0, y: 20, scale: 0.92 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.1, ease: "easeOut" }}
-                whileHover={{ y: -6, scale: 1.04, boxShadow: "0 12px 32px rgba(0,0,0,0.10)" }}
-                whileTap={{ scale: 0.97 }}
-                className="flex flex-col items-center text-center gap-2 rounded-2xl border border-border bg-background/80 backdrop-blur px-4 py-6 cursor-default shadow-sm"
-              >
-                <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${iconBg}`}>
-                  <Icon className={`h-5 w-5 ${iconColor}`} />
-                </div>
-                <div className={`text-3xl md:text-4xl font-bold tracking-tight ${statColor}`}>{stat}</div>
-                <div className="text-xs text-muted-foreground leading-snug max-w-[110px]">{label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
 
         {/* ── 6 SYSTEMS ──────────────────────────────────────────────────── */}
         <section id="systems" className="py-12 md:py-24 px-4 md:px-12">
@@ -1267,42 +1374,7 @@ export default function Home() {
         </section>
 
         {/* ── DOMAIN SCORING VISUAL ────────────────────────────────────── */}
-        <section className="bg-muted/30 border-y py-10 md:py-20 px-4 md:px-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-xl mx-auto mb-8 md:mb-12">
-              <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">Assessment Output</p>
-              <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-3">Five developmental domains. One risk score.</h2>
-              <p className="text-sm md:text-base text-muted-foreground">Each screening generates quantified scores across 5 domains — surfacing exactly where intervention is needed.</p>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 max-w-4xl mx-auto">
-              {[
-                { domain: "Communication", score: "0–100", icon: MessageSquare, color: "border-chart-1/30 bg-chart-1/5" },
-                { domain: "Social Interaction", score: "0–100", icon: Users, color: "border-chart-3/30 bg-chart-3/5" },
-                { domain: "Attention", score: "0–100", icon: Zap, color: "border-chart-4/30 bg-chart-4/5" },
-                { domain: "Motor Skills", score: "0–100", icon: Activity, color: "border-secondary/30 bg-secondary/5" },
-                { domain: "Emotional Regulation", score: "0–100", icon: HeartPulse, color: "border-chart-5/30 bg-chart-5/5" }
-              ].map(d => (
-                <div key={d.domain} className={`border rounded-xl p-5 text-center flex flex-col items-center gap-3 ${d.color}`} data-testid={`card-domain-${d.domain.toLowerCase().replace(/ /g, "-")}`}>
-                  <d.icon className="h-6 w-6 text-primary" />
-                  <div className="text-sm font-semibold text-foreground">{d.domain}</div>
-                  <div className="text-xs text-muted-foreground font-mono">{d.score}</div>
-                </div>
-              ))}
-            </div>
-            <div className="grid sm:grid-cols-4 gap-4 max-w-2xl mx-auto mt-6">
-              {[
-                { level: "Low", color: "bg-green-100 border-green-200 text-green-800" },
-                { level: "Moderate", color: "bg-yellow-100 border-yellow-200 text-yellow-800" },
-                { level: "High", color: "bg-orange-100 border-orange-200 text-orange-800" },
-                { level: "Critical", color: "bg-red-100 border-red-200 text-red-800" }
-              ].map(r => (
-                <div key={r.level} className={`rounded-lg border px-4 py-3 text-center text-sm font-semibold ${r.color}`} data-testid={`badge-risk-${r.level.toLowerCase()}`}>
-                  {r.level} Risk
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <DomainScoringPicker />
 
         {/* ── LIVE DEMO ───────────────────────────────────────────────────── */}
         <LandingLiveDemo />
