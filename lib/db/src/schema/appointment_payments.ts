@@ -9,6 +9,11 @@ export const appointmentPaymentsTable = pgTable("appointment_payments", {
   currency: text("currency").notNull().default("PHP"),
   status: text("status").notNull().default("pending"),
   transactionRef: text("transaction_ref"),
+  paymentMethod: text("payment_method"),
+  referenceNumber: text("reference_number"),
+  proofImageBase64: text("proof_image_base64"),
+  verifiedBy: text("verified_by"),
+  verifiedAt: timestamp("verified_at", { withTimezone: true }),
   paidAt: timestamp("paid_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

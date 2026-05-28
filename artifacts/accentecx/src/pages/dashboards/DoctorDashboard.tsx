@@ -3,7 +3,7 @@ import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashb
 import {
   Users, ClipboardList, Video, Stethoscope, FileText,
   HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2,
-  CalendarDays, Link
+  CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck
 } from "lucide-react";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import AvailabilityManagerWidget from "@/components/appointments/AvailabilityManager";
@@ -31,6 +31,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const NAV: NavItem[] = [
   { id: "queue", label: "Patient Queue", icon: Users },
+  { id: "appointments", label: "Appointments", icon: CalendarCheck },
   { id: "ai-summaries", label: "AI Summaries", icon: ClipboardList },
   { id: "video-review", label: "Video Review", icon: Video },
   { id: "consultation", label: "Consultation Room", icon: Stethoscope },
@@ -745,9 +746,357 @@ function PatientHistoryTab() {
   );
 }
 
+function AppointmentsTab() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const { data: appointments, isLoading } = useListAppointments({}, { query: { queryKey: ["doctor-appointments-all"] } });
+  const [setupApptId, setSetupApptId] = useState<number | null>(null);
+  const [setupMode, setSetupMode] = useState<"telehealth" | "inperson">("telehealth");
+  const [meetingUrl, setMeetingUrl] = useState("");
+  const [locationText, setLocationText] = useState("");
+  const [proofApptId, setProofApptId] = useState<number | null>(null);
+  const [proofData, setProofData] = useState<{ proofImageBase64?: string; paymentMethod?: string; referenceNumber?: string; amount?: number } | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isSettingUp, setIsSettingUp] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [showRejectFor, setShowRejectFor] = useState<number | null>(null);
+
+  const token = user?.id ? `Bearer ${user.id}` : "";
+
+  const pending = (appointments ?? []).filter(a => a.paymentStatus === "submitted");
+  const needsSetup = (appointments ?? []).filter(a => a.status === "pending_setup");
+  const scheduled = (appointments ?? []).filter(a => a.status === "scheduled");
+
+  async function handleViewProof(apptId: number) {
+    setProofApptId(apptId);
+    setProofData(null);
+    try {
+      const res = await fetch(`/api/appointments/${apptId}/payment/proof`, {
+        headers: { "Authorization": token },
+      });
+      if (res.ok) setProofData(await res.json());
+    } catch { /* ignore */ }
+  }
+
+  async function handleVerify(apptId: number) {
+    setIsVerifying(true);
+    try {
+      await fetch(`/api/appointments/${apptId}/verify-payment`, {
+        method: "POST",
+        headers: { "Authorization": token, "Content-Type": "application/json" },
+      });
+      await qc.invalidateQueries({ queryKey: ["doctor-appointments-all"] });
+    } finally {
+      setIsVerifying(false);
+      setProofApptId(null);
+    }
+  }
+
+  async function handleReject(apptId: number) {
+    setIsVerifying(true);
+    try {
+      await fetch(`/api/appointments/${apptId}/reject-payment`, {
+        method: "POST",
+        headers: { "Authorization": token, "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: rejectReason || "Payment proof not valid" }),
+      });
+      await qc.invalidateQueries({ queryKey: ["doctor-appointments-all"] });
+    } finally {
+      setIsVerifying(false);
+      setShowRejectFor(null);
+      setRejectReason("");
+    }
+  }
+
+  async function handleSetup() {
+    if (!setupApptId) return;
+    setIsSettingUp(true);
+    try {
+      await fetch(`/api/appointments/${setupApptId}/setup`, {
+        method: "PATCH",
+        headers: { "Authorization": token, "Content-Type": "application/json" },
+        body: JSON.stringify(
+          setupMode === "telehealth"
+            ? { meetingUrl: meetingUrl.trim() }
+            : { location: locationText.trim() }
+        ),
+      });
+      await qc.invalidateQueries({ queryKey: ["doctor-appointments-all"] });
+      setSetupApptId(null);
+      setMeetingUrl("");
+      setLocationText("");
+    } finally {
+      setIsSettingUp(false);
+    }
+  }
+
+  const setupAppt = (appointments ?? []).find(a => a.id === setupApptId);
+
+  function fmtDate(iso: string) {
+    return new Date(iso).toLocaleDateString("en-PH", { dateStyle: "medium" });
+  }
+
+  return (
+    <div className="p-6 lg:p-8 space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold">Appointments</h1>
+        <p className="text-sm text-muted-foreground">Verify payments and set up appointment details for your patients</p>
+      </div>
+
+      {/* Pending Payment Verification */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-amber-600" />
+          <h2 className="text-base font-semibold">Pending Payment Verification</h2>
+          {pending.length > 0 && <Badge className="bg-amber-100 text-amber-800 border-amber-200">{pending.length}</Badge>}
+        </div>
+        {isLoading ? <Skeleton className="h-24 rounded-xl" /> :
+          pending.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">No pending payment verifications</div>
+          ) : pending.map(appt => (
+            <Card key={appt.id} className="border-amber-200 bg-amber-50/40">
+              <CardContent className="pt-4 pb-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm">{appt.childName ?? "Patient"}</p>
+                    <p className="text-xs text-muted-foreground">{appt.specialistName} · {fmtDate(appt.scheduledAt)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {appt.telehealth ? "Telehealth" : "In-Person"} · ₱{(appt.feeAmount ?? 0).toLocaleString()}
+                    </p>
+                  </div>
+                  <Badge className="bg-amber-100 text-amber-800 border-amber-200 shrink-0">Awaiting Verification</Badge>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleViewProof(appt.id)}>
+                    <ShieldCheck className="h-3.5 w-3.5" /> View Proof
+                  </Button>
+                  <Button size="sm" className="gap-1.5 bg-[#163300] hover:bg-[#1e4a00] text-white" onClick={() => handleVerify(appt.id)} disabled={isVerifying}>
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Approve Payment
+                  </Button>
+                  <Button size="sm" variant="outline" className="gap-1.5 text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowRejectFor(appt.id)}>
+                    <XCircle className="h-3.5 w-3.5" /> Reject
+                  </Button>
+                </div>
+                {showRejectFor === appt.id && (
+                  <div className="space-y-2 border-t pt-3">
+                    <Input
+                      placeholder="Reason for rejection (optional)"
+                      value={rejectReason}
+                      onChange={e => setRejectReason(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setShowRejectFor(null)}>Cancel</Button>
+                      <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white" onClick={() => handleReject(appt.id)} disabled={isVerifying}>
+                        Confirm Rejection
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        }
+      </section>
+
+      {/* Needs Setup */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Link className="h-5 w-5 text-blue-600" />
+          <h2 className="text-base font-semibold">Verified — Needs Appointment Setup</h2>
+          {needsSetup.length > 0 && <Badge className="bg-blue-100 text-blue-800 border-blue-200">{needsSetup.length}</Badge>}
+        </div>
+        {isLoading ? <Skeleton className="h-24 rounded-xl" /> :
+          needsSetup.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">No appointments awaiting setup</div>
+          ) : needsSetup.map(appt => (
+            <Card key={appt.id} className="border-blue-200 bg-blue-50/30">
+              <CardContent className="pt-4 pb-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm">{appt.childName ?? "Patient"}</p>
+                    <p className="text-xs text-muted-foreground">{appt.specialistName} · {fmtDate(appt.scheduledAt)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {appt.telehealth ? "Telehealth — needs meet link" : "In-Person — needs clinic address"} · ₱{(appt.feeAmount ?? 0).toLocaleString()} verified
+                    </p>
+                  </div>
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-200 shrink-0">Payment Verified</Badge>
+                </div>
+                <Button
+                  size="sm"
+                  className="gap-1.5 bg-[#163300] hover:bg-[#1e4a00] text-white"
+                  onClick={() => {
+                    setSetupApptId(appt.id);
+                    setSetupMode(appt.telehealth ? "telehealth" : "inperson");
+                  }}
+                >
+                  {appt.telehealth ? <ExternalLink className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
+                  {appt.telehealth ? "Set Meeting Link" : "Set Clinic Address"}
+                </Button>
+              </CardContent>
+            </Card>
+          ))
+        }
+      </section>
+
+      {/* Scheduled */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="h-5 w-5 text-green-600" />
+          <h2 className="text-base font-semibold">Confirmed Appointments</h2>
+        </div>
+        {isLoading ? <Skeleton className="h-24 rounded-xl" /> :
+          scheduled.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">No confirmed appointments yet</div>
+          ) : scheduled.map(appt => (
+            <Card key={appt.id} className="border-green-200 bg-green-50/30">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm">{appt.childName ?? "Patient"}</p>
+                    <p className="text-xs text-muted-foreground">{appt.specialistName} · {fmtDate(appt.scheduledAt)}</p>
+                    {appt.meetingUrl && (
+                      <a href={appt.meetingUrl} target="_blank" rel="noopener noreferrer"
+                        className="text-xs text-blue-600 underline flex items-center gap-1 mt-0.5">
+                        <ExternalLink className="h-3 w-3" /> {appt.meetingUrl}
+                      </a>
+                    )}
+                    {(appt as { location?: string }).location && (
+                      <p className="text-xs text-[#163300] flex items-center gap-1 mt-0.5">
+                        <MapPin className="h-3 w-3" /> {(appt as { location?: string }).location}
+                      </p>
+                    )}
+                  </div>
+                  <Badge className="bg-green-100 text-green-800 border-green-200 shrink-0">Confirmed</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        }
+      </section>
+
+      {/* Proof Image Dialog */}
+      <Dialog open={proofApptId !== null} onOpenChange={open => { if (!open) setProofApptId(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-[#163300]" />
+              Payment Proof
+            </DialogTitle>
+          </DialogHeader>
+          {proofData ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {proofData.paymentMethod && (
+                  <div><p className="text-xs text-muted-foreground">Method</p><p className="font-medium capitalize">{proofData.paymentMethod.toUpperCase()}</p></div>
+                )}
+                {proofData.referenceNumber && (
+                  <div><p className="text-xs text-muted-foreground">Reference #</p><p className="font-mono font-semibold">{proofData.referenceNumber}</p></div>
+                )}
+                {proofData.amount && (
+                  <div><p className="text-xs text-muted-foreground">Amount</p><p className="font-bold text-[#163300]">₱{proofData.amount.toLocaleString()}</p></div>
+                )}
+              </div>
+              {proofData.proofImageBase64 ? (
+                <img src={proofData.proofImageBase64} alt="Payment proof" className="w-full rounded-xl border max-h-80 object-contain" />
+              ) : (
+                <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">No screenshot uploaded — reference number only</div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-10">
+              <Skeleton className="h-48 w-full rounded-xl" />
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowRejectFor(proofApptId!); setProofApptId(null)}>
+              Reject
+            </Button>
+            <Button
+              className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-2"
+              onClick={() => handleVerify(proofApptId!)}
+              disabled={isVerifying}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              {isVerifying ? "Approving…" : "Approve Payment"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Setup Dialog */}
+      <Dialog open={setupApptId !== null} onOpenChange={open => { if (!open) setSetupApptId(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {setupMode === "telehealth" ? <ExternalLink className="h-5 w-5 text-[#163300]" /> : <MapPin className="h-5 w-5 text-[#163300]" />}
+              Set Up Appointment
+            </DialogTitle>
+          </DialogHeader>
+          {setupAppt && (
+            <p className="text-sm text-muted-foreground">
+              {setupAppt.childName ?? "Patient"} · {setupAppt.specialistName} · {fmtDate(setupAppt.scheduledAt)}
+            </p>
+          )}
+          <div className="space-y-4">
+            {/* Mode toggle */}
+            <div className="flex gap-2 rounded-xl border p-1 bg-muted/30">
+              {[
+                { mode: "telehealth" as const, icon: Video, label: "Telehealth" },
+                { mode: "inperson" as const, icon: MapPin, label: "In-Person" },
+              ].map(({ mode, icon: Icon, label }) => (
+                <button
+                  key={mode}
+                  onClick={() => setSetupMode(mode)}
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-all ${
+                    setupMode === mode ? "bg-white shadow text-[#163300]" : "text-muted-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />{label}
+                </button>
+              ))}
+            </div>
+
+            {setupMode === "telehealth" ? (
+              <div className="space-y-1">
+                <Label>Meeting Link (Google Meet, Zoom, Teams…)</Label>
+                <Input
+                  placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                  value={meetingUrl}
+                  onChange={e => setMeetingUrl(e.target.value)}
+                />
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <Label>Clinic Address</Label>
+                <textarea
+                  className="w-full min-h-[90px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#163300]/30"
+                  placeholder="Unit 101, NEOBRAIN Building, 123 Ayala Ave., Makati City, Metro Manila"
+                  value={locationText}
+                  onChange={e => setLocationText(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSetupApptId(null)}>Cancel</Button>
+            <Button
+              className="bg-[#163300] hover:bg-[#1e4a00] text-white"
+              onClick={handleSetup}
+              disabled={isSettingUp || (setupMode === "telehealth" ? !meetingUrl.trim() : !locationText.trim())}
+            >
+              {isSettingUp ? "Saving…" : "Confirm & Notify Patient"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   queue: PatientQueueTab,
+  appointments: AppointmentsTab,
   "ai-summaries": AISummariesTab,
   "video-review": VideoReviewTab,
   consultation: ConsultationRoomTab,

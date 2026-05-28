@@ -15,6 +15,9 @@ export const appointmentsTable = pgTable("appointments", {
   notes: text("notes"),
   paymentStatus: text("payment_status").notNull().default("unpaid"),
   feeAmount: doublePrecision("fee_amount"),
+  location: text("location"),
+  regionId: text("region_id"),
+  province: text("province"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
