@@ -113,21 +113,12 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
                 ))}
               </div>
               {/* ACCENTECX AI brand block */}
-              <div className="flex items-start gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-muted-foreground">Powered by</span>
-                  <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
-                    className="flex items-center px-3 py-1.5 rounded-lg border border-border bg-background hover:border-primary/30 hover:bg-primary/5 transition-colors">
-                    <img src="/accentecx-logo.png" alt="ACCENTECX AI" className="h-6 w-auto object-contain" />
-                  </a>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-muted-foreground">Scan to visit</span>
-                  <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center p-1 rounded-lg border border-border bg-white hover:border-primary/30 transition-colors">
-                    <img src="/accentecx-qr.png" alt="ACCENTECX AI QR Code" className="h-14 w-14 object-contain" />
-                  </a>
-                </div>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs text-muted-foreground">Powered by</span>
+                <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center px-3 py-1.5 rounded-lg border border-border bg-background hover:border-primary/30 hover:bg-primary/5 transition-colors w-fit">
+                  <img src="/accentecx-logo.png" alt="ACCENTECX AI" className="h-6 w-auto object-contain" />
+                </a>
               </div>
             </div>
             <div>
@@ -153,9 +144,19 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} ACCENTECX AI. All rights reserved. NEOBRAIN is a product of ACCENTECX AI.</p>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Lock className="h-3.5 w-3.5" />
-              <span>This platform does not diagnose. All AI outputs are for clinical decision support only.</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Lock className="h-3.5 w-3.5" />
+                <span>This platform does not diagnose. All AI outputs are for clinical decision support only.</span>
+              </div>
+              <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-border bg-background hover:border-primary/30 transition-colors shrink-0">
+                <img src="/accentecx-qr.png" alt="ACCENTECX AI QR Code" className="h-10 w-10 object-contain" />
+                <div className="text-left">
+                  <div className="text-[10px] text-muted-foreground leading-tight">Scan to visit</div>
+                  <div className="text-[10px] font-semibold text-foreground leading-tight">accentecxai.com</div>
+                </div>
+              </a>
             </div>
           </div>
         </div>

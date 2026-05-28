@@ -853,41 +853,111 @@ export default function Home() {
               {/* Glow halo */}
               <div className="absolute -inset-6 bg-gradient-to-br from-secondary/25 via-transparent to-primary/12 rounded-3xl blur-2xl pointer-events-none" />
 
-              {/* Main dashboard card */}
+              {/* AI Camera Behavior Tracking Card */}
               <div className="relative rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
                 {/* Card header */}
-                <div className="flex items-center gap-3 border-b px-5 py-4">
-                  <div className="h-10 w-10 rounded-full bg-secondary/25 flex items-center justify-center shrink-0">
-                    <HeartPulse className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3 border-b px-5 py-3 bg-primary/5">
+                  <div className="flex items-center gap-1.5">
+                    <motion.div
+                      animate={{ opacity: [1, 0.2, 1] }}
+                      transition={{ duration: 1.2, repeat: Infinity }}
+                      className="h-2 w-2 rounded-full bg-red-500"
+                    />
+                    <span className="text-xs font-semibold text-red-600 uppercase tracking-wider">Live</span>
                   </div>
-                  <div className="text-left">
-                    <div className="text-sm font-semibold text-foreground">Isabella Tan, 6 yrs</div>
-                    <div className="text-xs text-muted-foreground">Developmental Digital Twin</div>
+                  <div className="flex items-center gap-1.5 ml-1">
+                    <Video className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">NEOBRAIN AI · Behavior Tracking</span>
                   </div>
-                  <Badge className="ml-auto bg-red-100 text-red-700 border-red-200 text-xs shrink-0">Critical</Badge>
+                  <div className="ml-auto flex items-center gap-2">
+                    <Badge className="bg-secondary/20 text-primary border-secondary/30 text-xs">AI Active</Badge>
+                  </div>
                 </div>
 
-                {/* Domain scores */}
-                <div className="px-5 pt-4 pb-2 space-y-3">
-                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Domain Scores</div>
-                  {DOMAINS.map(d => (
-                    <div key={d.name} className="flex items-center gap-3">
-                      <div className="text-xs text-muted-foreground w-36 shrink-0 text-left">{d.name}</div>
-                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }} animate={{ width: `${d.score}%` }}
-                          transition={{ duration: 1, delay: 0.85 }}
-                          className={`h-full rounded-full ${d.color}`}
+                {/* Camera viewport */}
+                <div className="relative bg-slate-900 aspect-video overflow-hidden">
+                  {/* Scanline overlay */}
+                  <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.015) 3px,rgba(255,255,255,0.015) 4px)" }} />
+                  {/* Grid lines */}
+                  <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(159,232,112,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(159,232,112,0.06) 1px,transparent 1px)", backgroundSize: "25% 25%" }} />
+
+                  {/* Face tracking circle */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative">
+                      {/* Head outline */}
+                      <motion.div
+                        animate={{ scale: [1, 1.02, 1], opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                        className="w-28 h-36 rounded-full border-2 border-secondary/70"
+                        style={{ boxShadow: "0 0 20px rgba(159,232,112,0.2)" }}
+                      />
+                      {/* Tracking corner brackets */}
+                      {["-top-3 -left-3", "-top-3 -right-3", "-bottom-3 -left-3", "-bottom-3 -right-3"].map((pos, i) => (
+                        <div key={i} className={`absolute ${pos} w-4 h-4`}>
+                          <div className={`absolute ${i < 2 ? "top-0" : "bottom-0"} ${i % 2 === 0 ? "left-0" : "right-0"} w-3 h-0.5 bg-secondary`} />
+                          <div className={`absolute ${i < 2 ? "top-0" : "bottom-0"} ${i % 2 === 0 ? "left-0" : "right-0"} w-0.5 h-3 bg-secondary`} />
+                        </div>
+                      ))}
+                      {/* Facial landmark dots */}
+                      {[
+                        { x: "-translate-x-6", y: "-translate-y-8", label: "L-Eye", delay: 0 },
+                        { x: "translate-x-6",  y: "-translate-y-8", label: "R-Eye", delay: 0.2 },
+                        { x: "translate-x-0",  y: "-translate-y-2", label: "Nose",  delay: 0.4 },
+                        { x: "-translate-x-4", y: "translate-y-6",  label: "Mouth", delay: 0.6 },
+                        { x: "translate-x-4",  y: "translate-y-6",  label: "",      delay: 0.7 },
+                      ].map((dot, i) => (
+                        <motion.div key={i}
+                          animate={{ scale: [1, 1.6, 1], opacity: [0.8, 1, 0.8] }}
+                          transition={{ duration: 1.8, repeat: Infinity, delay: dot.delay, ease: "easeInOut" }}
+                          className={`absolute top-1/2 left-1/2 ${dot.x} ${dot.y} w-2 h-2 -mt-1 -ml-1 rounded-full bg-secondary`}
+                          style={{ boxShadow: "0 0 6px rgba(159,232,112,0.8)" }}
                         />
-                      </div>
-                      <div className="text-xs font-mono text-foreground w-6 text-right">{d.score}</div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Floating behavior tags */}
+                  <motion.div animate={{ opacity: [0, 1, 1, 0], x: [8, 0, 0, -4] }} transition={{ duration: 3, repeat: Infinity, delay: 0, repeatDelay: 1 }}
+                    className="absolute top-4 right-4 bg-black/70 border border-secondary/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
+                    <div className="text-xs text-secondary font-mono">Eye Contact</div>
+                    <div className="text-sm font-bold text-white">72%</div>
+                  </motion.div>
+
+                  <motion.div animate={{ opacity: [0, 1, 1, 0], x: [-8, 0, 0, 4] }} transition={{ duration: 3, repeat: Infinity, delay: 1, repeatDelay: 1 }}
+                    className="absolute top-4 left-4 bg-black/70 border border-blue-400/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
+                    <div className="text-xs text-blue-300 font-mono">Gesture Freq</div>
+                    <div className="text-sm font-bold text-white">4.2/min</div>
+                  </motion.div>
+
+                  <motion.div animate={{ opacity: [0, 1, 1, 0], y: [-6, 0, 0, 4] }} transition={{ duration: 3, repeat: Infinity, delay: 2, repeatDelay: 1 }}
+                    className="absolute bottom-4 left-4 bg-black/70 border border-amber-400/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
+                    <div className="text-xs text-amber-300 font-mono">Attention Span</div>
+                    <div className="text-sm font-bold text-white">38 sec</div>
+                  </motion.div>
+
+                  <motion.div animate={{ opacity: [0, 1, 1, 0], y: [6, 0, 0, -4] }} transition={{ duration: 3, repeat: Infinity, delay: 0.5, repeatDelay: 2 }}
+                    className="absolute bottom-4 right-4 bg-black/70 border border-purple-400/40 rounded-lg px-2.5 py-1.5 backdrop-blur-sm">
+                    <div className="text-xs text-purple-300 font-mono">Vocal Pattern</div>
+                    <div className="text-sm font-bold text-white">Typical</div>
+                  </motion.div>
+
+                  {/* Scanning sweep line */}
+                  <motion.div
+                    animate={{ top: ["0%", "100%", "0%"] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-secondary/60 to-transparent pointer-events-none"
+                    style={{ position: "absolute" }}
+                  />
                 </div>
 
-                {/* AI note */}
-                <div className="mx-5 mb-5 mt-3 rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800 text-left">
-                  <span className="font-semibold">AI Assessment Note:</span> Clinical indicators consistent with developmental concerns requiring professional evaluation. Referral recommended.
+                {/* AI analysis bar */}
+                <div className="px-5 py-3 border-t flex items-center justify-between gap-3 bg-primary/3">
+                  <div className="flex items-center gap-2">
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="h-4 w-4 rounded-full border-2 border-secondary border-t-transparent" />
+                    <span className="text-xs text-muted-foreground">Analyzing behavioral markers…</span>
+                  </div>
+                  <div className="text-xs font-mono text-secondary font-semibold">5 domains · 12 indicators</div>
                 </div>
               </div>
 
@@ -1345,21 +1415,12 @@ export default function Home() {
                 ))}
               </div>
               {/* ACCENTECX AI brand block */}
-              <div className="flex items-start gap-4 mt-1">
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-muted-foreground">Powered by</span>
-                  <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
-                    className="flex items-center px-3 py-1.5 rounded-lg border border-border bg-background hover:border-primary/30 hover:bg-primary/5 transition-colors group">
-                    <img src="/accentecx-logo.png" alt="ACCENTECX AI" className="h-6 w-auto object-contain" />
-                  </a>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-muted-foreground">Scan to visit</span>
-                  <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center p-1 rounded-lg border border-border bg-white hover:border-primary/30 transition-colors">
-                    <img src="/accentecx-qr.png" alt="ACCENTECX AI QR Code" className="h-14 w-14 object-contain" />
-                  </a>
-                </div>
+              <div className="flex flex-col gap-1.5 mt-1">
+                <span className="text-xs text-muted-foreground">Powered by</span>
+                <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center px-3 py-1.5 rounded-lg border border-border bg-background hover:border-primary/30 hover:bg-primary/5 transition-colors w-fit">
+                  <img src="/accentecx-logo.png" alt="ACCENTECX AI" className="h-6 w-auto object-contain" />
+                </a>
               </div>
             </div>
             <div>
@@ -1399,9 +1460,19 @@ export default function Home() {
           </div>
           <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} NEOBRAIN by ACCENTECX AI. All rights reserved. Built for the Philippines.</p>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Lock className="h-3.5 w-3.5" />
-              <span>This platform does not diagnose. All AI outputs are for clinical decision support only.</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Lock className="h-3.5 w-3.5" />
+                <span>This platform does not diagnose. All AI outputs are for clinical decision support only.</span>
+              </div>
+              <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-border bg-background hover:border-primary/30 transition-colors shrink-0">
+                <img src="/accentecx-qr.png" alt="ACCENTECX AI QR Code" className="h-10 w-10 object-contain" />
+                <div className="text-left">
+                  <div className="text-[10px] text-muted-foreground leading-tight">Scan to visit</div>
+                  <div className="text-[10px] font-semibold text-foreground leading-tight">accentecxai.com</div>
+                </div>
+              </a>
             </div>
           </div>
         </div>
