@@ -38,7 +38,7 @@ const INSTRUCTIONS = [
 ];
 
 const SEV = {
-  normal:   { bar: "bg-[#9FE870]",   badge: "bg-green-100 text-green-800",  label: "Normal"  },
+  normal:   { bar: "bg-[#FCD116]",   badge: "bg-green-100 text-green-800",  label: "Normal"  },
   moderate: { bar: "bg-yellow-400",  badge: "bg-yellow-100 text-yellow-800", label: "Monitor" },
   high:     { bar: "bg-orange-500",  badge: "bg-orange-100 text-orange-800", label: "Concern" },
 };
@@ -318,9 +318,9 @@ export default function LandingLiveDemo() {
   const elapsed = RECORD_DURATION - countdown;
 
   return (
-    <section id="live-demo" className="py-16 md:py-24 px-4 md:px-12 bg-gradient-to-br from-[#163300] to-[#1a3d00] relative overflow-hidden">
+    <section id="live-demo" className="py-16 md:py-24 px-4 md:px-12 bg-gradient-to-br from-[#0038A8] to-[#001A70] relative overflow-hidden">
       <div className="absolute inset-0 opacity-5 pointer-events-none" style={{
-        backgroundImage: "radial-gradient(circle at 30% 50%, #9FE870 0%, transparent 50%), radial-gradient(circle at 70% 30%, #9FE870 0%, transparent 40%)"
+        backgroundImage: "radial-gradient(circle at 30% 50%, #FCD116 0%, transparent 50%), radial-gradient(circle at 70% 30%, #FCD116 0%, transparent 40%)"
       }} />
 
       {/*
@@ -334,7 +334,7 @@ export default function LandingLiveDemo() {
       <div className="max-w-7xl mx-auto relative">
         {/* Header */}
         <div className="text-center mb-10 md:mb-14">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#9FE870]/30 bg-[#9FE870]/10 px-4 py-1.5 text-sm font-semibold text-[#9FE870] mb-5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#FCD116]/30 bg-[#FCD116]/10 px-4 py-1.5 text-sm font-semibold text-[#FCD116] mb-5">
             <Sparkles className="h-4 w-4" /> Live AI Demo — No Account Required
           </div>
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">See NEOBRAIN AI in action.</h2>
@@ -372,13 +372,13 @@ export default function LandingLiveDemo() {
 
                   {/* Overlay: face guide oval */}
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                    <div className="w-36 h-48 md:w-44 md:h-56 rounded-full border-2 border-[#9FE870]/60 border-dashed opacity-60" />
+                    <div className="w-36 h-48 md:w-44 md:h-56 rounded-full border-2 border-[#FCD116]/60 border-dashed opacity-60" />
                   </div>
 
                   {/* Instruction overlay at bottom of video */}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent pt-8 pb-3 px-4 z-10">
                     <div className="flex items-start gap-2">
-                      <Volume2 className="h-4 w-4 text-[#9FE870] shrink-0 mt-0.5" />
+                      <Volume2 className="h-4 w-4 text-[#FCD116] shrink-0 mt-0.5" />
                       <p className="text-sm text-white font-medium leading-snug">{instruction}</p>
                     </div>
                   </div>
@@ -392,7 +392,7 @@ export default function LandingLiveDemo() {
                       {INSTRUCTIONS.map((ins, i) => (
                         <div
                           key={i}
-                          className={`h-1.5 rounded-full transition-all duration-500 ${elapsed >= ins.at ? "bg-[#9FE870] w-6" : "bg-white/20 w-2"}`}
+                          className={`h-1.5 rounded-full transition-all duration-500 ${elapsed >= ins.at ? "bg-[#FCD116] w-6" : "bg-white/20 w-2"}`}
                         />
                       ))}
                     </div>
@@ -405,7 +405,7 @@ export default function LandingLiveDemo() {
 
                 {/* Progress bar */}
                 <div className="h-1 bg-white/10">
-                  <div className="h-full bg-[#9FE870] transition-all duration-1000" style={{ width: `${(elapsed / RECORD_DURATION) * 100}%` }} />
+                  <div className="h-full bg-[#FCD116] transition-all duration-1000" style={{ width: `${(elapsed / RECORD_DURATION) * 100}%` }} />
                 </div>
               </div>
             </div>
@@ -419,11 +419,11 @@ export default function LandingLiveDemo() {
                   className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 md:p-8 space-y-6"
                 >
                   <div className="text-center">
-                    <div className="relative mx-auto w-20 h-20 rounded-2xl bg-[#9FE870]/10 border border-[#9FE870]/20 flex items-center justify-center mb-4">
-                      <Brain className="h-10 w-10 text-[#9FE870]" />
+                    <div className="relative mx-auto w-20 h-20 rounded-2xl bg-[#FCD116]/10 border border-[#FCD116]/20 flex items-center justify-center mb-4">
+                      <Brain className="h-10 w-10 text-[#FCD116]" />
                       <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#9FE870] opacity-50" />
-                        <span className="relative inline-flex rounded-full h-4 w-4 bg-[#9FE870]" />
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FCD116] opacity-50" />
+                        <span className="relative inline-flex rounded-full h-4 w-4 bg-[#FCD116]" />
                       </span>
                     </div>
                     <h3 className="text-lg font-bold text-white mb-1">Choose how to start</h3>
@@ -432,10 +432,10 @@ export default function LandingLiveDemo() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Camera option */}
-                    <div className={`rounded-xl border p-4 space-y-3 ${inIframe ? "border-white/10 opacity-60" : "border-[#9FE870]/30 bg-[#9FE870]/5 cursor-pointer hover:bg-[#9FE870]/10 transition-colors"}`}>
+                    <div className={`rounded-xl border p-4 space-y-3 ${inIframe ? "border-white/10 opacity-60" : "border-[#FCD116]/30 bg-[#FCD116]/5 cursor-pointer hover:bg-[#FCD116]/10 transition-colors"}`}>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#9FE870]/15 shrink-0">
-                          <Camera className="h-4 w-4 text-[#9FE870]" />
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FCD116]/15 shrink-0">
+                          <Camera className="h-4 w-4 text-[#FCD116]" />
                         </div>
                         <div>
                           <p className="text-sm font-bold text-white">Live Camera</p>
@@ -446,12 +446,12 @@ export default function LandingLiveDemo() {
                         <div className="rounded-lg bg-amber-900/30 border border-amber-500/30 p-2.5 text-xs text-amber-300 leading-relaxed">
                           Camera requires opening NEOBRAIN directly in your browser (not inside a preview frame).
                           <a href={window.location.origin} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-1 mt-1.5 font-semibold text-[#9FE870] hover:underline">
+                            className="flex items-center gap-1 mt-1.5 font-semibold text-[#FCD116] hover:underline">
                             Open directly <ExternalLink className="h-3 w-3" />
                           </a>
                         </div>
                       ) : (
-                        <Button onClick={startCamera} size="sm" className="w-full rounded-full bg-[#9FE870] text-[#163300] hover:bg-[#8ed660] font-bold gap-1.5">
+                        <Button onClick={startCamera} size="sm" className="w-full rounded-full bg-[#FCD116] text-[#0038A8] hover:bg-[#e4bf00] font-bold gap-1.5">
                           <Camera className="h-3.5 w-3.5" /> Start Camera
                         </Button>
                       )}
@@ -459,7 +459,7 @@ export default function LandingLiveDemo() {
 
                     {/* Upload option */}
                     <div
-                      className={`rounded-xl border border-white/20 p-4 space-y-3 cursor-pointer hover:border-white/40 hover:bg-white/5 transition-colors ${isDrag ? "border-[#9FE870] bg-[#9FE870]/10" : ""}`}
+                      className={`rounded-xl border border-white/20 p-4 space-y-3 cursor-pointer hover:border-white/40 hover:bg-white/5 transition-colors ${isDrag ? "border-[#FCD116] bg-[#FCD116]/10" : ""}`}
                       onDragOver={e => { e.preventDefault(); setIsDrag(true); }}
                       onDragLeave={() => setIsDrag(false)}
                       onDrop={e => { e.preventDefault(); setIsDrag(false); handleFile(e.dataTransfer.files?.[0]); }}
@@ -489,7 +489,7 @@ export default function LandingLiveDemo() {
                       { icon: Clock, label: "~30 sec", sub: "Analysis time" },
                     ].map(({ icon: Icon, label, sub }) => (
                       <div key={label} className="rounded-xl bg-white/5 border border-white/10 p-2.5">
-                        <Icon className="h-4 w-4 text-[#9FE870] mx-auto mb-1" />
+                        <Icon className="h-4 w-4 text-[#FCD116] mx-auto mb-1" />
                         <p className="text-xs font-semibold text-white">{label}</p>
                         <p className="text-xs text-white/40">{sub}</p>
                       </div>
@@ -525,8 +525,8 @@ export default function LandingLiveDemo() {
                   className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#9FE870]/15 shrink-0">
-                      <Brain className="h-5 w-5 text-[#9FE870] animate-pulse" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#FCD116]/15 shrink-0">
+                      <Brain className="h-5 w-5 text-[#FCD116] animate-pulse" />
                     </div>
                     <div className="flex-1">
                       <p className="font-bold text-white text-sm">NEOBRAIN AI Analyzing</p>
@@ -534,18 +534,18 @@ export default function LandingLiveDemo() {
                         {mode === "upload" ? `${frameCount} frames extracted` : `${frameCount} frames captured`} · Social Reciprocity Protocol
                       </p>
                     </div>
-                    <Loader2 className="h-4 w-4 text-[#9FE870] animate-spin shrink-0" />
+                    <Loader2 className="h-4 w-4 text-[#FCD116] animate-spin shrink-0" />
                   </div>
                   <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                    <div className="h-full bg-[#9FE870] transition-all duration-500" style={{ width: `${analyzePct}%` }} />
+                    <div className="h-full bg-[#FCD116] transition-all duration-500" style={{ width: `${analyzePct}%` }} />
                   </div>
                   <div className="space-y-2">
                     {AI_STEPS.map((s, i) => (
                       <div key={i} className={`flex items-center gap-2 text-xs transition-opacity ${i < stepIdx ? "opacity-30" : i === stepIdx ? "opacity-100" : "opacity-15"}`}>
                         {i < stepIdx
-                          ? <CheckCircle className="h-3 w-3 text-[#9FE870] shrink-0" />
+                          ? <CheckCircle className="h-3 w-3 text-[#FCD116] shrink-0" />
                           : i === stepIdx
-                            ? <Loader2 className="h-3 w-3 text-[#9FE870] animate-spin shrink-0" />
+                            ? <Loader2 className="h-3 w-3 text-[#FCD116] animate-spin shrink-0" />
                             : <div className="h-3 w-3 rounded-full border border-white/20 shrink-0" />}
                         <span className={i === stepIdx ? "text-white font-medium" : "text-white/40"}>{s}</span>
                       </div>
@@ -561,7 +561,7 @@ export default function LandingLiveDemo() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-[#9FE870]" />
+                      <CheckCircle className="h-5 w-5 text-[#FCD116]" />
                       <span className="font-bold text-white text-sm">Analysis Complete</span>
                     </div>
                     <span className={`text-xs font-semibold rounded-full px-2.5 py-1 ${RISK_STYLE[result.riskLevel].badge}`}>
@@ -591,8 +591,8 @@ export default function LandingLiveDemo() {
                     <p className="text-sm text-white/85 leading-relaxed">{result.summary}</p>
                   </div>
 
-                  <div className="rounded-xl bg-[#9FE870]/10 border border-[#9FE870]/20 p-3.5 space-y-1">
-                    <p className="text-xs text-[#9FE870] font-semibold uppercase tracking-wider">Recommendation</p>
+                  <div className="rounded-xl bg-[#FCD116]/10 border border-[#FCD116]/20 p-3.5 space-y-1">
+                    <p className="text-xs text-[#FCD116] font-semibold uppercase tracking-wider">Recommendation</p>
                     <p className="text-sm text-white/80 leading-relaxed">{result.recommendation}</p>
                   </div>
 
@@ -605,7 +605,7 @@ export default function LandingLiveDemo() {
                     <Button size="sm" onClick={reset} variant="outline" className="flex-1 rounded-full border-white/20 text-white hover:bg-white/10 gap-1.5">
                       <RefreshCw className="h-3.5 w-3.5" /> Try Again
                     </Button>
-                    <Button size="sm" className="flex-1 rounded-full bg-[#9FE870] text-[#163300] hover:bg-[#8ed660] font-bold gap-1.5" asChild>
+                    <Button size="sm" className="flex-1 rounded-full bg-[#FCD116] text-[#0038A8] hover:bg-[#e4bf00] font-bold gap-1.5" asChild>
                       <a href="/login">
                         Full Assessment <ArrowRight className="h-3.5 w-3.5" />
                       </a>
@@ -642,7 +642,7 @@ export default function LandingLiveDemo() {
                   </div>
                   {errorMsg === "IFRAME_BLOCKED" && (
                     <a href={window.location.origin} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-sm font-semibold text-[#9FE870] hover:underline">
+                      className="flex items-center gap-1.5 text-sm font-semibold text-[#FCD116] hover:underline">
                       Open in browser <ExternalLink className="h-4 w-4" />
                     </a>
                   )}
@@ -668,7 +668,7 @@ export default function LandingLiveDemo() {
           <div className="space-y-5 lg:pt-2">
             <div className="rounded-2xl bg-white/5 border border-white/10 p-5 space-y-4">
               <div className="flex items-center gap-2 mb-2">
-                <Brain className="h-4 w-4 text-[#9FE870]" />
+                <Brain className="h-4 w-4 text-[#FCD116]" />
                 <span className="text-sm font-bold text-white">What NEOBRAIN AI measures</span>
               </div>
               {[
@@ -679,7 +679,7 @@ export default function LandingLiveDemo() {
                 { label: "Social Reciprocity", detail: "Measures turn-taking, imitation, and interaction patterns" },
               ].map((item, i) => (
                 <div key={i} className="flex gap-3">
-                  <div className="h-2 w-2 rounded-full bg-[#9FE870] mt-1.5 shrink-0" />
+                  <div className="h-2 w-2 rounded-full bg-[#FCD116] mt-1.5 shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-white">{item.label}</p>
                     <p className="text-xs text-white/50 leading-relaxed">{item.detail}</p>
@@ -697,16 +697,16 @@ export default function LandingLiveDemo() {
                 { n: "4", text: "You receive a risk-level summary with recommendations" },
               ].map(({ n, text }) => (
                 <div key={n} className="flex items-start gap-3">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#9FE870]/20 text-[#9FE870] text-xs font-bold shrink-0">{n}</div>
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FCD116]/20 text-[#FCD116] text-xs font-bold shrink-0">{n}</div>
                   <p className="text-sm text-white/70 leading-relaxed">{text}</p>
                 </div>
               ))}
             </div>
 
-            <div className="rounded-2xl border border-[#9FE870]/20 bg-[#9FE870]/5 p-5">
+            <div className="rounded-2xl border border-[#FCD116]/20 bg-[#FCD116]/5 p-5">
               <p className="text-sm font-bold text-white mb-1">Want the full clinical suite?</p>
               <p className="text-xs text-white/60 mb-3 leading-relaxed">The full platform includes multi-session tracking, therapist collaboration, school reporting, and government risk mapping.</p>
-              <Button size="sm" className="rounded-full bg-[#9FE870] text-[#163300] hover:bg-[#8ed660] font-bold gap-1.5 w-full" asChild>
+              <Button size="sm" className="rounded-full bg-[#FCD116] text-[#0038A8] hover:bg-[#e4bf00] font-bold gap-1.5 w-full" asChild>
                 <a href="/login">
                   Start Free Trial <ArrowRight className="h-3.5 w-3.5" />
                 </a>

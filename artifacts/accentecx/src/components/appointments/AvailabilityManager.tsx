@@ -89,7 +89,7 @@ export default function AvailabilityManager({ practitionerName, specialistType }
           )}
           <Button
             size="sm"
-            className="gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00] rounded-full"
+            className="gap-1.5 bg-[#0038A8] text-white hover:bg-[#1e4a00] rounded-full"
             onClick={() => setAdding(a => !a)}
           >
             <Plus className="h-4 w-4" /> Add Slot
@@ -99,7 +99,7 @@ export default function AvailabilityManager({ practitionerName, specialistType }
 
       {/* Add form */}
       {adding && (
-        <Card className="border-[#163300]/20 bg-[#163300]/5">
+        <Card className="border-[#0038A8]/20 bg-[#0038A8]/5">
           <CardContent className="p-5 space-y-4">
             <div className="flex gap-3">
               {(["recurring", "oneoff"] as const).map(m => (
@@ -107,7 +107,7 @@ export default function AvailabilityManager({ practitionerName, specialistType }
                   key={m}
                   onClick={() => setMode(m)}
                   className={`flex-1 rounded-lg border p-2.5 text-sm font-medium transition-all ${
-                    mode === m ? "border-[#163300] bg-[#163300] text-white" : "border-gray-200 text-gray-600 hover:border-[#163300]/40"
+                    mode === m ? "border-[#0038A8] bg-[#0038A8] text-white" : "border-gray-200 text-gray-600 hover:border-[#0038A8]/40"
                   }`}
                 >
                   {m === "recurring" ? "🔁 Recurring (weekly)" : "📅 Specific date"}
@@ -164,7 +164,7 @@ export default function AvailabilityManager({ practitionerName, specialistType }
             <div className="flex gap-2 pt-1">
               <Button variant="outline" className="flex-1" onClick={() => setAdding(false)}>Cancel</Button>
               <Button
-                className="flex-1 bg-[#163300] text-white hover:bg-[#1e4a00]"
+                className="flex-1 bg-[#0038A8] text-white hover:bg-[#1e4a00]"
                 disabled={saving || (mode === "oneoff" && !form.specificDate)}
                 onClick={handleAdd}
               >
@@ -188,8 +188,8 @@ export default function AvailabilityManager({ practitionerName, specialistType }
         <div className="space-y-2">
           {activeBlocks.map(block => (
             <div key={block.id} className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#163300]/10 shrink-0">
-                <Clock className="h-5 w-5 text-[#163300]" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0038A8]/10 shrink-0">
+                <Clock className="h-5 w-5 text-[#0038A8]" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">

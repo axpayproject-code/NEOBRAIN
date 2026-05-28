@@ -1025,7 +1025,7 @@ function FeesTab() {
                   />
                   <Button
                     size="sm"
-                    className="h-8 bg-[#163300] text-white hover:bg-[#1e4a00]"
+                    className="h-8 bg-[#0038A8] text-white hover:bg-[#1e4a00]"
                     disabled={saving === fee.specialistType}
                     onClick={() => handleSave(fee.specialistType)}
                   >
@@ -1042,7 +1042,7 @@ function FeesTab() {
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
-                  <span className="text-lg font-bold text-[#163300]">₱{fee.feeAmount.toLocaleString()}</span>
+                  <span className="text-lg font-bold text-[#0038A8]">₱{fee.feeAmount.toLocaleString()}</span>
                   <Button
                     size="sm"
                     variant="outline"

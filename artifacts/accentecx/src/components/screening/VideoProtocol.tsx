@@ -309,7 +309,7 @@ function VideoUploadPanel({
   if (state === "idle") {
     return (
       <div
-        className={`rounded-xl border-2 border-dashed p-6 text-center transition-colors cursor-pointer ${isDrag ? "border-[#163300] bg-[#9FE870]/10" : "border-muted-foreground/30 hover:border-[#163300]/50 hover:bg-muted/30"}`}
+        className={`rounded-xl border-2 border-dashed p-6 text-center transition-colors cursor-pointer ${isDrag ? "border-[#0038A8] bg-[#FCD116]/10" : "border-muted-foreground/30 hover:border-[#0038A8]/50 hover:bg-muted/30"}`}
         onDragOver={e => { e.preventDefault(); setIsDrag(true); }}
         onDragLeave={() => setIsDrag(false)}
         onDrop={e => { e.preventDefault(); setIsDrag(false); handleFile(e.dataTransfer.files?.[0]); }}
@@ -322,15 +322,15 @@ function VideoUploadPanel({
           className="hidden"
           onChange={e => handleFile(e.target.files?.[0])}
         />
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#163300]/10 mx-auto mb-3">
-          <FileVideo className="h-7 w-7 text-[#163300]" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0038A8]/10 mx-auto mb-3">
+          <FileVideo className="h-7 w-7 text-[#0038A8]" />
         </div>
         <p className="font-semibold text-sm mb-1">Upload Video Recording</p>
         <p className="text-xs text-muted-foreground mb-4">Drag & drop or tap to select · MP4, MOV, AVI</p>
         <div className="flex items-center justify-center gap-2 flex-wrap">
           <Button
             size="sm"
-            className="rounded-full gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00] text-xs"
+            className="rounded-full gap-1.5 bg-[#0038A8] text-white hover:bg-[#1e4a00] text-xs"
             onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
           >
             <Upload className="h-3.5 w-3.5" /> Choose Video File
@@ -377,7 +377,7 @@ function VideoUploadPanel({
   if (state === "extracting") {
     return (
       <div className="rounded-xl border bg-card p-5 space-y-3 text-center">
-        <Loader2 className="h-8 w-8 text-[#163300] animate-spin mx-auto" />
+        <Loader2 className="h-8 w-8 text-[#0038A8] animate-spin mx-auto" />
         <p className="font-semibold text-sm">Extracting video frames...</p>
         <p className="text-xs text-muted-foreground">Sampling key moments from your recording for AI analysis</p>
       </div>
@@ -388,14 +388,14 @@ function VideoUploadPanel({
     return (
       <div className="rounded-xl border bg-card p-5 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#163300]/10 shrink-0">
-            <Brain className="h-5 w-5 text-[#163300]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0038A8]/10 shrink-0">
+            <Brain className="h-5 w-5 text-[#0038A8]" />
           </div>
           <div className="flex-1">
             <p className="font-semibold text-sm">NEOBRAIN AI Analysis</p>
             <p className="text-xs text-muted-foreground">Gemini is analyzing behavioral patterns in {fileName}</p>
           </div>
-          <Loader2 className="h-5 w-5 text-[#163300] animate-spin shrink-0" />
+          <Loader2 className="h-5 w-5 text-[#0038A8] animate-spin shrink-0" />
         </div>
         <Progress value={analyzePct} className="h-2.5" />
         <div className="space-y-1.5">
@@ -404,7 +404,7 @@ function VideoUploadPanel({
               {i < stepIdx
                 ? <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0" />
                 : i === stepIdx
-                  ? <Loader2 className="h-3.5 w-3.5 text-[#163300] animate-spin shrink-0" />
+                  ? <Loader2 className="h-3.5 w-3.5 text-[#0038A8] animate-spin shrink-0" />
                   : <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30 shrink-0" />}
               <span className={i === stepIdx ? "font-medium text-foreground" : "text-muted-foreground"}>{step}</span>
             </div>
@@ -507,14 +507,14 @@ function AnalysisResultPanel({
         <p className="text-xs leading-relaxed">{result.summary}</p>
       </div>
 
-      <div className="rounded-xl border bg-[#163300]/5 border-[#163300]/20 p-4 space-y-1.5">
-        <p className="text-xs font-semibold text-[#163300]">Clinical Recommendation</p>
+      <div className="rounded-xl border bg-[#0038A8]/5 border-[#0038A8]/20 p-4 space-y-1.5">
+        <p className="text-xs font-semibold text-[#0038A8]">Clinical Recommendation</p>
         <p className="text-xs text-foreground/80 leading-relaxed">{result.recommendation}</p>
       </div>
 
       {!result.submittedToDoctor ? (
         <Button
-          className="w-full rounded-full bg-[#163300] text-white hover:bg-[#1e4a00] gap-2"
+          className="w-full rounded-full bg-[#0038A8] text-white hover:bg-[#1e4a00] gap-2"
           onClick={onSubmitToDoctor}
         >
           <BarChart3 className="h-4 w-4" /> Submit to Doctor for Review
@@ -562,12 +562,12 @@ export default function VideoProtocol() {
   return (
     <div className="space-y-5">
       {/* Info card */}
-      <Card className="border-[#163300]/20 bg-[#163300]/5">
+      <Card className="border-[#0038A8]/20 bg-[#0038A8]/5">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-[#163300]">
+          <CardTitle className="flex items-center gap-2 text-[#0038A8]">
             <Video className="w-5 h-5" /> Structured Video Assessment Protocols
           </CardTitle>
-          <CardDescription className="text-[#163300]/70">
+          <CardDescription className="text-[#0038A8]/70">
             Complete all 4 video tasks. Upload each recording and our AI (Google Gemini) will analyze real behavioral patterns from the frames — not scripted mock data. Results are sent to your clinician.
           </CardDescription>
         </CardHeader>
@@ -579,9 +579,9 @@ export default function VideoProtocol() {
               { icon: Brain, label: "Real AI analysis", sub: "Powered by Google Gemini" },
               { icon: CheckCircle, label: "4 tasks total", sub: `${completed.size}/4 completed` },
             ].map(({ icon: Icon, label, sub }) => (
-              <div key={label} className="rounded-lg border border-[#163300]/20 bg-white p-3">
-                <Icon className="w-5 h-5 text-[#163300] mx-auto mb-1" />
-                <p className="text-xs font-semibold text-[#163300]">{label}</p>
+              <div key={label} className="rounded-lg border border-[#0038A8]/20 bg-white p-3">
+                <Icon className="w-5 h-5 text-[#0038A8] mx-auto mb-1" />
+                <p className="text-xs font-semibold text-[#0038A8]">{label}</p>
                 <p className="text-xs text-muted-foreground">{sub}</p>
               </div>
             ))}
@@ -610,7 +610,7 @@ export default function VideoProtocol() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
-                      <div className={`rounded-full w-8 h-8 flex items-center justify-center shrink-0 text-sm font-bold ${isDone ? "bg-green-500 text-white" : "bg-[#163300] text-[#9FE870]"}`}>
+                      <div className={`rounded-full w-8 h-8 flex items-center justify-center shrink-0 text-sm font-bold ${isDone ? "bg-green-500 text-white" : "bg-[#0038A8] text-[#FCD116]"}`}>
                         {isDone ? <CheckCircle className="w-4 h-4" /> : index + 1}
                       </div>
                       <div>
@@ -657,7 +657,7 @@ export default function VideoProtocol() {
                     <ol className="space-y-2">
                       {protocol.steps.map((step, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm">
-                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#163300] text-[#9FE870] text-xs flex items-center justify-center font-bold mt-0.5">{i + 1}</span>
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#0038A8] text-[#FCD116] text-xs flex items-center justify-center font-bold mt-0.5">{i + 1}</span>
                           <span>{step}</span>
                         </li>
                       ))}
@@ -697,13 +697,13 @@ export default function VideoProtocol() {
 
       {/* All done banner */}
       {completed.size === PROTOCOLS.length && (
-        <Card className="border-[#163300]/40 bg-[#163300]/5">
+        <Card className="border-[#0038A8]/40 bg-[#0038A8]/5">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center gap-3">
-              <CheckCircle className="w-6 h-6 text-[#163300] shrink-0" />
+              <CheckCircle className="w-6 h-6 text-[#0038A8] shrink-0" />
               <div>
-                <p className="font-semibold text-[#163300]">All 4 video assessments complete!</p>
-                <p className="text-sm text-[#163300]/70">
+                <p className="font-semibold text-[#0038A8]">All 4 video assessments complete!</p>
+                <p className="text-sm text-[#0038A8]/70">
                   {Object.values(analyses).filter(a => a.submittedToDoctor).length} of {PROTOCOLS.length} submitted to your doctor. AI reports are ready for clinical review.
                 </p>
               </div>

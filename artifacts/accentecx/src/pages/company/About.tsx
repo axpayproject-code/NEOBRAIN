@@ -50,13 +50,13 @@ const TIMELINE = [
     year: "2022",
     title: "A system still failing",
     desc: "Only 278 physicians were registered with the Philippine Pediatric Society's developmental section. Wait times for a single developmental evaluation reached 8–14 months in Metro Manila. Outside NCR: 18–24 months, or never.",
-    color: "border-[#163300]/40",
+    color: "border-[#0038A8]/40",
   },
   {
     year: "2026",
     title: "NEOBRAIN is founded — and scaling",
     desc: "ACCENTECX AI launches NEOBRAIN — AI-assisted infrastructure built specifically for the Philippine healthcare system. In our founding year, we are already live in Metro Manila, Cebu, and Davao, with 500+ clinicians, 50 schools, and the first LGU partnerships underway. The DOH data-sharing pilot begins. The mission: 10 million children by 2028.",
-    color: "border-[#9FE870]",
+    color: "border-[#FCD116]",
     highlight: true,
   },
 ];
@@ -171,8 +171,8 @@ const HOW_TO_HELP = [
     icon: Building2,
     audience: "For Government",
     color: "bg-green-50 border-green-200",
-    iconColor: "text-[#163300]",
-    badgeColor: "bg-[#9FE870]/30 text-[#163300]",
+    iconColor: "text-[#0038A8]",
+    badgeColor: "bg-[#FCD116]/30 text-[#0038A8]",
     title: "Build the national system",
     desc: "LGUs and national agencies get real-time prevalence dashboards, Barangay Health Center integration, and subsidy management tools. Help us build the developmental health infrastructure the Philippines never had.",
     cta: "Government Inquiry",
@@ -207,13 +207,13 @@ export default function About() {
     <PublicLayout>
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="relative py-24 px-6 md:px-12 bg-gradient-to-br from-[#163300] to-[#1a3d00] overflow-hidden">
+      <section className="relative py-24 px-6 md:px-12 bg-gradient-to-br from-[#0038A8] to-[#001A70] overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{
-          backgroundImage: "radial-gradient(circle at 20% 60%, #9FE870 0%, transparent 50%), radial-gradient(circle at 80% 20%, #9FE870 0%, transparent 40%)"
+          backgroundImage: "radial-gradient(circle at 20% 60%, #FCD116 0%, transparent 50%), radial-gradient(circle at 80% 20%, #FCD116 0%, transparent 40%)"
         }} />
         <div className="max-w-4xl mx-auto text-center relative">
           <motion.div variants={fadeUp} custom={0} initial="hidden" animate="visible">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#9FE870]/30 bg-[#9FE870]/10 px-4 py-1.5 text-sm font-semibold text-[#9FE870] mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#FCD116]/30 bg-[#FCD116]/10 px-4 py-1.5 text-sm font-semibold text-[#FCD116] mb-8">
               <HeartPulse className="h-4 w-4" />
               Our Story
             </div>
@@ -222,7 +222,7 @@ export default function About() {
             className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.05] tracking-tighter mb-7"
           >
             3.5 million Filipino children are waiting.<br />
-            <span className="text-[#9FE870]">We refused to look away.</span>
+            <span className="text-[#FCD116]">We refused to look away.</span>
           </motion.h1>
           <motion.p variants={fadeUp} custom={2} initial="hidden" animate="visible"
             className="text-xl text-white/65 max-w-2xl mx-auto leading-relaxed"
@@ -236,7 +236,7 @@ export default function About() {
       <section className="py-20 px-6 md:px-12 bg-background">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-[#163300] font-semibold text-sm uppercase tracking-wider mb-3">The Scale of the Problem</p>
+            <p className="text-[#0038A8] font-semibold text-sm uppercase tracking-wider mb-3">The Scale of the Problem</p>
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
               The numbers that made us act.
             </h2>
@@ -247,9 +247,9 @@ export default function About() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {CRISIS_STATS.map((s, i) => (
               <motion.div key={s.value} variants={fadeUp} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
-                className="rounded-2xl border-2 border-[#163300]/10 bg-card p-7 text-center"
+                className="rounded-2xl border-2 border-[#0038A8]/10 bg-card p-7 text-center"
               >
-                <p className="text-4xl md:text-5xl font-bold text-[#163300] mb-3">{s.value}</p>
+                <p className="text-4xl md:text-5xl font-bold text-[#0038A8] mb-3">{s.value}</p>
                 <p className="text-sm font-semibold text-foreground mb-1.5">{s.label}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">{s.sub}</p>
               </motion.div>
@@ -281,7 +281,7 @@ export default function About() {
       <section className="py-20 px-6 md:px-12 bg-muted/20 border-y">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-[#163300] font-semibold text-sm uppercase tracking-wider mb-3">How We Got Here</p>
+            <p className="text-[#0038A8] font-semibold text-sm uppercase tracking-wider mb-3">How We Got Here</p>
             <h2 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight mb-4">
               A crisis two decades in the making.
             </h2>
@@ -301,14 +301,14 @@ export default function About() {
                 >
                   {/* Year node */}
                   <div className="shrink-0 flex flex-col items-center">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 ${item.highlight ? "bg-[#163300] border-[#9FE870] text-[#9FE870]" : "bg-background border-border text-muted-foreground"} text-xs font-bold shrink-0`}>
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 ${item.highlight ? "bg-[#0038A8] border-[#FCD116] text-[#FCD116]" : "bg-background border-border text-muted-foreground"} text-xs font-bold shrink-0`}>
                       {item.highlight ? <Flag className="h-4 w-4" /> : <span>{item.year.slice(-2)}</span>}
                     </div>
                   </div>
                   {/* Content */}
-                  <div className={`flex-1 rounded-2xl border-l-4 ${item.color} ${item.highlight ? "bg-[#163300]/5 border border-[#163300]/20" : "bg-card border border-border"} p-6 -mt-1`}>
+                  <div className={`flex-1 rounded-2xl border-l-4 ${item.color} ${item.highlight ? "bg-[#0038A8]/5 border border-[#0038A8]/20" : "bg-card border border-border"} p-6 -mt-1`}>
                     <div className="flex items-center gap-3 mb-2">
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${item.highlight ? "bg-[#9FE870]/20 text-[#163300]" : "bg-muted text-muted-foreground"}`}>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${item.highlight ? "bg-[#FCD116]/20 text-[#0038A8]" : "bg-muted text-muted-foreground"}`}>
                         {item.year}
                       </span>
                       <h3 className="font-bold text-foreground">{item.title}</h3>
@@ -323,19 +323,19 @@ export default function About() {
       </section>
 
       {/* ── MISSION 10M ──────────────────────────────────────────────────── */}
-      <section className="py-24 px-6 md:px-12 bg-gradient-to-br from-[#163300] to-[#1a3d00] relative overflow-hidden">
+      <section className="py-24 px-6 md:px-12 bg-gradient-to-br from-[#0038A8] to-[#001A70] relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{
-          backgroundImage: "radial-gradient(circle at 70% 30%, #9FE870 0%, transparent 50%)"
+          backgroundImage: "radial-gradient(circle at 70% 30%, #FCD116 0%, transparent 50%)"
         }} />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#9FE870]/30 bg-[#9FE870]/10 px-4 py-1.5 text-sm font-semibold text-[#9FE870] mb-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#FCD116]/30 bg-[#FCD116]/10 px-4 py-1.5 text-sm font-semibold text-[#FCD116] mb-6">
               <Target className="h-4 w-4" />
               Our Mission
             </div>
             <h2 className="text-5xl md:text-6xl font-bold text-white tracking-tight mb-6">
               10 million children.<br />
-              <span className="text-[#9FE870]">By 2028.</span>
+              <span className="text-[#FCD116]">By 2028.</span>
             </h2>
             <p className="text-xl text-white/65 max-w-2xl mx-auto leading-relaxed">
               Not screened. Not enrolled. Not just reached. <strong className="text-white">Actually helped</strong> — with structured developmental support, coordinated care, and a digital record that follows them through school, therapy, and beyond.
@@ -346,11 +346,11 @@ export default function About() {
           <div className="grid md:grid-cols-3 gap-6 mb-16">
             {ROADMAP.map((phase, i) => (
               <motion.div key={phase.phase} variants={fadeUp} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
-                className={`rounded-2xl border p-7 ${phase.status === "active" ? "border-[#9FE870]/50 bg-[#9FE870]/10" : phase.status === "mission" ? "border-white/20 bg-white/5" : "border-white/10 bg-white/5"}`}
+                className={`rounded-2xl border p-7 ${phase.status === "active" ? "border-[#FCD116]/50 bg-[#FCD116]/10" : phase.status === "mission" ? "border-white/20 bg-white/5" : "border-white/10 bg-white/5"}`}
               >
                 <div className="flex items-center justify-between mb-4">
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                    phase.status === "active" ? "bg-[#9FE870] text-[#163300]" :
+                    phase.status === "active" ? "bg-[#FCD116] text-[#0038A8]" :
                     phase.status === "done" ? "bg-white/15 text-white/80" :
                     phase.status === "mission" ? "bg-white/20 text-white" :
                     "bg-white/10 text-white/60"
@@ -360,11 +360,11 @@ export default function About() {
                   <span className="text-xs text-white/50">{phase.period}</span>
                 </div>
                 <p className="text-sm font-semibold text-white/60 mb-1">{phase.phase}</p>
-                <p className="text-3xl font-bold text-[#9FE870] mb-4">{phase.target}</p>
+                <p className="text-3xl font-bold text-[#FCD116] mb-4">{phase.target}</p>
                 <ul className="space-y-2">
                   {phase.goals.map(goal => (
                     <li key={goal} className="flex items-start gap-2 text-sm text-white/70">
-                      <CheckCircle className="h-4 w-4 text-[#9FE870] shrink-0 mt-0.5" />
+                      <CheckCircle className="h-4 w-4 text-[#FCD116] shrink-0 mt-0.5" />
                       {goal}
                     </li>
                   ))}
@@ -385,8 +385,8 @@ export default function About() {
                 <motion.div key={p.title} variants={fadeUp} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
                   className="rounded-xl border border-white/10 bg-white/5 p-5"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#9FE870]/15 mb-4">
-                    <Icon className="h-5 w-5 text-[#9FE870]" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FCD116]/15 mb-4">
+                    <Icon className="h-5 w-5 text-[#FCD116]" />
                   </div>
                   <h4 className="font-bold text-white mb-2 text-sm">{p.title}</h4>
                   <p className="text-xs text-white/55 leading-relaxed">{p.desc}</p>
@@ -401,7 +401,7 @@ export default function About() {
       <section className="py-24 px-6 md:px-12 bg-background">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[#163300] font-semibold text-sm uppercase tracking-wider mb-3">Join the Mission</p>
+            <p className="text-[#0038A8] font-semibold text-sm uppercase tracking-wider mb-3">Join the Mission</p>
             <h2 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight mb-5">
               10 million children requires everyone.
             </h2>
@@ -426,7 +426,7 @@ export default function About() {
                   <h3 className="font-bold text-foreground mb-2">{card.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-5">{card.desc}</p>
                   <Link href={card.href}>
-                    <Button size="sm" className="w-full rounded-full gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00]">
+                    <Button size="sm" className="w-full rounded-full gap-1.5 bg-[#0038A8] text-white hover:bg-[#1e4a00]">
                       {card.cta} <ChevronRight className="h-3.5 w-3.5" />
                     </Button>
                   </Link>
@@ -443,7 +443,7 @@ export default function About() {
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
             className="text-center"
           >
-            <BrainSvg className="h-14 w-14 text-[#9FE870] mx-auto mb-8" />
+            <BrainSvg className="h-14 w-14 text-[#FCD116] mx-auto mb-8" />
             <blockquote className="text-3xl md:text-4xl font-bold text-foreground leading-snug mb-8 tracking-tight">
               "Every week we do not build this, 10,000 more Filipino children miss the window that changes everything."
             </blockquote>
@@ -453,12 +453,12 @@ export default function About() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/onboarding?role=parent">
-                <Button size="lg" className="rounded-full px-10 h-13 gap-2 bg-[#163300] text-white hover:bg-[#1e4a00]">
+                <Button size="lg" className="rounded-full px-10 h-13 gap-2 bg-[#0038A8] text-white hover:bg-[#1e4a00]">
                   Join the Mission <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/contact">
-                <Button size="lg" variant="outline" className="rounded-full px-10 h-13 gap-2 border-[#163300]/20">
+                <Button size="lg" variant="outline" className="rounded-full px-10 h-13 gap-2 border-[#0038A8]/20">
                   Talk to Our Team
                 </Button>
               </Link>

@@ -119,8 +119,8 @@ export default function TelehealthCallModal({
               <div className="rounded-xl bg-muted/60 border aspect-video flex items-center justify-center relative overflow-hidden">
                 {camOn ? (
                   <div className="text-center space-y-2">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#163300]/10 mx-auto">
-                      <Video className="h-8 w-8 text-[#163300]" />
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#0038A8]/10 mx-auto">
+                      <Video className="h-8 w-8 text-[#0038A8]" />
                     </div>
                     <p className="text-sm font-medium">Camera Ready</p>
                     <p className="text-xs text-muted-foreground">{selfLabel}'s video will appear here</p>
@@ -149,14 +149,14 @@ export default function TelehealthCallModal({
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => setMicOn(m => !m)}
-                  className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-colors ${micOn ? "border-[#163300] bg-[#163300]/10 text-[#163300]" : "border-red-300 bg-red-50 text-red-600"}`}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-colors ${micOn ? "border-[#0038A8] bg-[#0038A8]/10 text-[#0038A8]" : "border-red-300 bg-red-50 text-red-600"}`}
                   title={micOn ? "Mute" : "Unmute"}
                 >
                   {micOn ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
                 </button>
                 <button
                   onClick={() => setCamOn(c => !c)}
-                  className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-colors ${camOn ? "border-[#163300] bg-[#163300]/10 text-[#163300]" : "border-red-300 bg-red-50 text-red-600"}`}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-colors ${camOn ? "border-[#0038A8] bg-[#0038A8]/10 text-[#0038A8]" : "border-red-300 bg-red-50 text-red-600"}`}
                   title={camOn ? "Turn off camera" : "Turn on camera"}
                 >
                   {camOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
@@ -204,7 +204,7 @@ export default function TelehealthCallModal({
             /* ── In-session view ────────────────────────────────── */
             <>
               {/* Main video area */}
-              <div className="rounded-xl bg-[#163300] aspect-video flex items-center justify-center relative overflow-hidden">
+              <div className="rounded-xl bg-[#0038A8] aspect-video flex items-center justify-center relative overflow-hidden">
                 {/* Remote participant */}
                 <div className="text-center text-white space-y-2">
                   <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/15 mx-auto border-2 border-white/30">
@@ -282,7 +282,7 @@ export default function TelehealthCallModal({
           </Button>
           {!inCall && (
             <Button
-              className="rounded-full bg-[#163300] text-white hover:bg-[#1e4a00] gap-1.5"
+              className="rounded-full bg-[#0038A8] text-white hover:bg-[#1e4a00] gap-1.5"
               onClick={() => setInCall(true)}
               data-testid="button-start-call"
             >

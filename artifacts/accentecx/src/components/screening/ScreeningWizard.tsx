@@ -276,7 +276,7 @@ export default function ScreeningWizard({ onComplete, onCancel }: Props) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ClipboardList className="w-5 h-5 text-[#163300]" />
+              <ClipboardList className="w-5 h-5 text-[#0038A8]" />
               Select Child & Screener Type
             </CardTitle>
             <CardDescription>Choose which child this screening is for and the type of assessment.</CardDescription>
@@ -502,7 +502,7 @@ export default function ScreeningWizard({ onComplete, onCancel }: Props) {
                 <p className="text-xs text-gray-500 mt-1">Frequency avg</p>
               </div>
             </div>
-            <div className="rounded-lg bg-[#163300]/5 border border-[#163300]/20 p-4 text-sm text-[#163300]">
+            <div className="rounded-lg bg-[#0038A8]/5 border border-[#0038A8]/20 p-4 text-sm text-[#0038A8]">
               <strong>Child:</strong> {selectedChild?.fullName ?? "—"} &nbsp;|&nbsp; <strong>Type:</strong> {screeningType.replace(/_/g, " ")}
             </div>
             <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 text-xs text-amber-800">
@@ -520,7 +520,7 @@ export default function ScreeningWizard({ onComplete, onCancel }: Props) {
           <Button
             onClick={() => setStep((s) => s + 1)}
             disabled={!canProceed()}
-            className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-1"
+            className="bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-1"
           >
             Continue <ChevronRight className="w-4 h-4" />
           </Button>
@@ -528,7 +528,7 @@ export default function ScreeningWizard({ onComplete, onCancel }: Props) {
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-1"
+            className="bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-1"
           >
             {isSubmitting ? "Generating report..." : "Submit & Generate Report"}
             <Brain className="w-4 h-4" />

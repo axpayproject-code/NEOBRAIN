@@ -717,9 +717,9 @@ function PricingSection() {
                     ))}
                   </div>
                 </div>
-                <div className="rounded-xl border border-[#163300]/20 bg-[#163300]/5 p-5">
-                  <p className="text-sm font-semibold text-[#163300] mb-2">Includes for all schools</p>
-                  <ul className="space-y-1.5 text-sm text-[#163300]/80">
+                <div className="rounded-xl border border-[#0038A8]/20 bg-[#0038A8]/5 p-5">
+                  <p className="text-sm font-semibold text-[#0038A8] mb-2">Includes for all schools</p>
+                  <ul className="space-y-1.5 text-sm text-[#0038A8]/80">
                     {["Free teacher onboarding training", "Dedicated school success manager", "DepEd-aligned report formats", "Data privacy DPA compliance tools"].map(f => (
                       <li key={f} className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-secondary shrink-0" />{f}</li>
                     ))}
@@ -852,7 +852,7 @@ export default function Home() {
             <a href="#systems" className="hover:text-foreground transition-colors">Systems</a>
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
             <a href="#ai" className="hover:text-foreground transition-colors">AI Engine</a>
-            <a href="#live-demo" className="hover:text-foreground transition-colors font-semibold text-[#163300]">Live Demo</a>
+            <a href="#live-demo" className="hover:text-foreground transition-colors font-semibold text-[#0038A8]">Live Demo</a>
             <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
             <Link href="/about" className="hover:text-foreground transition-colors">Our Story</Link>
           </nav>

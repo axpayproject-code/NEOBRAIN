@@ -449,7 +449,7 @@ function EditChildDialog({ child, onSuccess }: {
           </div>
           <div className="flex gap-3">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" className="flex-1 bg-[#163300] text-white hover:bg-[#1e4a00]" disabled={isSubmitting}>
+            <Button type="submit" className="flex-1 bg-[#0038A8] text-white hover:bg-[#1e4a00]" disabled={isSubmitting}>
               {isSubmitting ? "Saving…" : "Save Changes"}
             </Button>
           </div>
@@ -627,7 +627,7 @@ function ScreeningTab() {
         </div>
         <Button
           onClick={() => setMode("wizard")}
-          className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-2 shrink-0"
+          className="bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2 shrink-0"
           data-testid="start-screening-btn"
         >
           <Plus className="w-4 h-4" /> Start New Screening
@@ -642,7 +642,7 @@ function ScreeningTab() {
               <p className="font-semibold text-lg">No screenings yet</p>
               <p className="text-sm text-muted-foreground mt-1">Complete a developmental screening to get AI-assisted domain scores and clinical observations.</p>
             </div>
-            <Button onClick={() => setMode("wizard")} className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-2">
+            <Button onClick={() => setMode("wizard")} className="bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2">
               <Brain className="w-4 h-4" /> Start Your First Screening
             </Button>
           </CardContent>
@@ -796,8 +796,8 @@ function RescheduleSection({
           const StatusIcon = STATUS_ICONS[appt.status] ?? Clock;
           return (
             <div key={appt.id} className="rounded-xl border bg-card px-5 py-4 flex items-center gap-4" data-testid={`appointment-${appt.id}`}>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#163300]/5 shrink-0">
-                <StatusIcon className="h-5 w-5 text-[#163300]" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0038A8]/5 shrink-0">
+                <StatusIcon className="h-5 w-5 text-[#0038A8]" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm">{appt.specialistName}</p>
@@ -820,7 +820,7 @@ function RescheduleSection({
                   {appt.telehealth && (
                     <Button
                       size="sm"
-                      className="text-xs h-7 bg-[#163300] text-white hover:bg-[#1e4a00] gap-1"
+                      className="text-xs h-7 bg-[#0038A8] text-white hover:bg-[#1e4a00] gap-1"
                       data-testid={`button-join-${appt.id}`}
                       onClick={() => onJoin(appt as TelehealthAppt)}
                     >
@@ -883,7 +883,7 @@ function RescheduleSection({
                 <div className="space-y-1">
                   <Label>Reason (optional)</Label>
                   <textarea
-                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#163300]/30"
+                    className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#0038A8]/30"
                     placeholder="Why do you need to reschedule?"
                     value={reason}
                     onChange={e => setReason(e.target.value)}
@@ -896,7 +896,7 @@ function RescheduleSection({
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setRescheduleAppt(null)}>Cancel</Button>
               <Button
-                className="flex-1 bg-[#163300] text-white hover:bg-[#1e4a00]"
+                className="flex-1 bg-[#0038A8] text-white hover:bg-[#1e4a00]"
                 disabled={!proposedDate || !proposedTime || submitting}
                 onClick={handleRequestReschedule}
               >
@@ -962,7 +962,7 @@ function AppointmentsTab() {
         </div>
         <Button
           onClick={() => setScheduling(true)}
-          className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-2 shrink-0"
+          className="bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2 shrink-0"
           data-testid="schedule-appointment-btn"
         >
           <Plus className="w-4 h-4" /> Schedule Appointment
@@ -977,7 +977,7 @@ function AppointmentsTab() {
               <p className="font-semibold text-lg">No appointments scheduled</p>
               <p className="text-sm text-muted-foreground mt-1">Book a telehealth or in-person consultation with a developmental specialist.</p>
             </div>
-            <Button onClick={() => setScheduling(true)} className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-2">
+            <Button onClick={() => setScheduling(true)} className="bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2">
               <Plus className="w-4 h-4" /> Schedule First Appointment
             </Button>
           </CardContent>

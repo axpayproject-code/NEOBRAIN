@@ -13,8 +13,8 @@ const SIZE = {
 };
 
 const VARIANT = {
-  light:   { box: "bg-[#163300]/10",          icon: "text-[#163300]",              name: "text-[#163300]",              tag: "text-[#163300]/60"              },
-  dark:    { box: "bg-[#9FE870]/25",           icon: "text-[#9FE870]",              name: "text-white",                  tag: "text-white/50"                  },
+  light:   { box: "bg-[#0038A8]/10",          icon: "text-[#0038A8]",              name: "text-[#0038A8]",              tag: "text-[#0038A8]/60"              },
+  dark:    { box: "bg-[#FCD116]/25",           icon: "text-[#FCD116]",              name: "text-white",                  tag: "text-white/50"                  },
   sidebar: { box: "bg-sidebar-primary/20",     icon: "text-sidebar-primary",        name: "text-sidebar-foreground",     tag: "text-sidebar-foreground/40"     },
 };
 

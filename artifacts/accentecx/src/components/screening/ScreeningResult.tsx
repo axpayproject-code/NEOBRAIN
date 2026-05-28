@@ -156,7 +156,7 @@ export default function ScreeningResultDisplay({ result, onNewScreening, onSched
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Brain className="w-5 h-5 text-[#163300]" />
+            <Brain className="w-5 h-5 text-[#0038A8]" />
             <h2 className="text-xl font-semibold font-[Syne]">Developmental Screening Report</h2>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -166,11 +166,11 @@ export default function ScreeningResultDisplay({ result, onNewScreening, onSched
         <Badge className={`text-sm px-3 py-1.5 border ${risk.color}`}>{risk.label}</Badge>
       </div>
 
-      <Card className="border-2 border-[#163300]/10 bg-[#163300]/5">
+      <Card className="border-2 border-[#0038A8]/10 bg-[#0038A8]/5">
         <CardContent className="pt-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold text-[#163300]">Overall Developmental Score</span>
-            <span className="text-2xl font-bold text-[#163300]">{avgScore}<span className="text-sm font-normal">/100</span></span>
+            <span className="text-sm font-semibold text-[#0038A8]">Overall Developmental Score</span>
+            <span className="text-2xl font-bold text-[#0038A8]">{avgScore}<span className="text-sm font-normal">/100</span></span>
           </div>
           <Progress value={avgScore} className="h-3" />
           <p className="text-xs text-muted-foreground mt-2">
@@ -261,18 +261,18 @@ export default function ScreeningResultDisplay({ result, onNewScreening, onSched
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-3 rounded-lg border border-[#163300]/20 bg-[#163300]/5 p-3">
-              <Clock className="w-5 h-5 text-[#163300] shrink-0" />
+            <div className="flex items-center gap-3 rounded-lg border border-[#0038A8]/20 bg-[#0038A8]/5 p-3">
+              <Clock className="w-5 h-5 text-[#0038A8] shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-[#163300]">Suggested Timeline</p>
-                <p className="text-sm text-[#163300]/80">{timeline}</p>
+                <p className="text-sm font-semibold text-[#0038A8]">Suggested Timeline</p>
+                <p className="text-sm text-[#0038A8]/80">{timeline}</p>
               </div>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-semibold">Suggested Specialist Referrals</p>
               {specialists.map((s, i) => (
                 <div key={i} className="flex items-start gap-3 rounded-lg border p-3 bg-white">
-                  <User className="w-4 h-4 mt-0.5 text-[#9FE870] shrink-0" />
+                  <User className="w-4 h-4 mt-0.5 text-[#FCD116] shrink-0" />
                   <div>
                     <p className="text-sm font-medium">{s.name}</p>
                     <p className="text-xs text-muted-foreground">{s.reason}</p>
@@ -282,7 +282,7 @@ export default function ScreeningResultDisplay({ result, onNewScreening, onSched
             </div>
             <Button
               onClick={onScheduleAppointment}
-              className="w-full bg-[#163300] hover:bg-[#1e4a00] text-white gap-2"
+              className="w-full bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2"
             >
               <Clock className="w-4 h-4" /> Schedule Appointment Now
               <ChevronRight className="w-4 h-4 ml-auto" />
@@ -301,7 +301,7 @@ export default function ScreeningResultDisplay({ result, onNewScreening, onSched
           <ul className="space-y-2">
             {parentActions.map((action, i) => (
               <li key={i} className="flex items-start gap-3">
-                <CheckCircle className="w-4 h-4 mt-0.5 text-[#9FE870] shrink-0" />
+                <CheckCircle className="w-4 h-4 mt-0.5 text-[#FCD116] shrink-0" />
                 <span className="text-sm">{action}</span>
               </li>
             ))}
@@ -309,9 +309,9 @@ export default function ScreeningResultDisplay({ result, onNewScreening, onSched
         </CardContent>
       </Card>
 
-      <Card className="border-[#163300]/20 bg-[#163300]/5">
+      <Card className="border-[#0038A8]/20 bg-[#0038A8]/5">
         <CardContent className="pt-4 pb-4">
-          <div className="flex items-start gap-2 text-xs text-[#163300]/70">
+          <div className="flex items-start gap-2 text-xs text-[#0038A8]/70">
             <FileText className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             <span>Screening ID #{result.screening.id} has been saved to your child's health record and is available for clinician review. Environmental factors recorded: home language ({result.context.homeLanguage}), screen time ({result.context.screenTime}/day), sleep ({result.context.sleepHours}/night).</span>
           </div>
@@ -320,7 +320,7 @@ export default function ScreeningResultDisplay({ result, onNewScreening, onSched
 
       <div className="flex gap-3 pt-2">
         <Button variant="outline" onClick={onNewScreening} className="flex-1">Start New Screening</Button>
-        <Button onClick={onScheduleAppointment} className="flex-1 bg-[#163300] hover:bg-[#1e4a00] text-white">
+        <Button onClick={onScheduleAppointment} className="flex-1 bg-[#0038A8] hover:bg-[#1e4a00] text-white">
           Schedule Appointment
         </Button>
       </div>

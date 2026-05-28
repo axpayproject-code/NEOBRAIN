@@ -697,7 +697,7 @@ function TelehealthTab() {
                   </Button>
                   <Button
                     size="sm"
-                    className="rounded-full gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00]"
+                    className="rounded-full gap-1.5 bg-[#0038A8] text-white hover:bg-[#1e4a00]"
                     data-testid={`button-join-${appt.id}`}
                     onClick={() => setJoinAppt(appt)}
                   >
@@ -741,7 +741,7 @@ function TelehealthTab() {
             <Button
               disabled={!meetingUrl.trim() || saving}
               onClick={handleSetMeetingUrl}
-              className="bg-[#163300] text-white hover:bg-[#1e4a00]"
+              className="bg-[#0038A8] text-white hover:bg-[#1e4a00]"
             >
               {saving ? "Saving…" : "Save Link"}
             </Button>

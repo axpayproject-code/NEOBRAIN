@@ -195,39 +195,39 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
   // ── Submitted ──────────────────────────────────────────────────
   if (step === "submitted") {
     return (
-      <Card className="border-[#163300]/30 bg-[#163300]/5">
+      <Card className="border-[#0038A8]/30 bg-[#0038A8]/5">
         <CardContent className="pt-10 pb-10 text-center space-y-5">
-          <div className="mx-auto w-16 h-16 rounded-full bg-[#9FE870]/30 flex items-center justify-center">
-            <ShieldCheck className="w-9 h-9 text-[#163300]" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-[#FCD116]/30 flex items-center justify-center">
+            <ShieldCheck className="w-9 h-9 text-[#0038A8]" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-[#163300]">Booking Under Review</h3>
+            <h3 className="text-lg font-bold text-[#0038A8]">Booking Under Review</h3>
             {feeAmount > 0 ? (
               <>
-                <p className="text-sm text-[#163300]/80 mt-1">
+                <p className="text-sm text-[#0038A8]/80 mt-1">
                   Your payment proof has been submitted for verification.
                 </p>
-                <p className="text-sm text-[#163300]/80 mt-1">
+                <p className="text-sm text-[#0038A8]/80 mt-1">
                   Once verified, your specialist will set up your appointment details
                   {form.telehealth ? " and send the meeting link." : " and confirm the clinic address."}
                 </p>
               </>
             ) : (
-              <p className="text-sm text-[#163300]/80 mt-1">
+              <p className="text-sm text-[#0038A8]/80 mt-1">
                 Your appointment with <strong>{selectedSpecialist?.name}</strong> is scheduled.
                 The specialist will send you details shortly.
               </p>
             )}
           </div>
-          <div className="rounded-xl border border-[#163300]/20 bg-white p-4 text-left space-y-2 mx-4">
-            <p className="text-xs font-semibold text-[#163300] uppercase tracking-wide">Appointment Summary</p>
+          <div className="rounded-xl border border-[#0038A8]/20 bg-white p-4 text-left space-y-2 mx-4">
+            <p className="text-xs font-semibold text-[#0038A8] uppercase tracking-wide">Appointment Summary</p>
             <div className="text-sm space-y-1">
               <div className="flex justify-between"><span className="text-muted-foreground">Specialist</span><span className="font-medium text-right">{selectedSpecialist?.name}, {selectedSpecialist?.credentials}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Date</span><span className="font-medium">{new Date(`${form.date}T${form.time}`).toLocaleDateString("en-PH", { dateStyle: "long" })}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Time</span><span className="font-medium">{fmt12h(form.time)}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Format</span><span className="font-medium">{form.telehealth ? "Telehealth (Online)" : "In-Person"}</span></div>
               {feeAmount > 0 && (
-                <div className="flex justify-between"><span className="text-muted-foreground">Fee</span><span className="font-medium text-[#163300]">₱{feeAmount.toLocaleString()} — Pending verification</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Fee</span><span className="font-medium text-[#0038A8]">₱{feeAmount.toLocaleString()} — Pending verification</span></div>
               )}
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
             <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
             <span>Check your <strong>Appointments</strong> tab for status updates. You'll see the meeting link or clinic address once confirmed.</span>
           </div>
-          <Button onClick={onSuccess} className="bg-[#163300] text-white hover:bg-[#1e4a00]">
+          <Button onClick={onSuccess} className="bg-[#0038A8] text-white hover:bg-[#1e4a00]">
             Back to Dashboard
           </Button>
         </CardContent>
@@ -249,18 +249,18 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-[#163300]" />
+            <ShieldCheck className="w-5 h-5 text-[#0038A8]" />
             Manual Payment
           </CardTitle>
           <CardDescription>Pay via GCash, Maya, or bank transfer then upload your proof</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Order summary */}
-          <div className="rounded-xl bg-[#163300]/5 border border-[#163300]/20 p-4 space-y-2">
-            <p className="text-sm font-semibold text-[#163300]">Order Summary</p>
+          <div className="rounded-xl bg-[#0038A8]/5 border border-[#0038A8]/20 p-4 space-y-2">
+            <p className="text-sm font-semibold text-[#0038A8]">Order Summary</p>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">{selectedSpecialist?.name}, {selectedSpecialist?.credentials}</span>
-              <span className="font-bold text-[#163300]">₱{feeAmount.toLocaleString()}</span>
+              <span className="font-bold text-[#0038A8]">₱{feeAmount.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{new Date(`${form.date}T${form.time}`).toLocaleDateString("en-PH", { dateStyle: "medium" })} · {fmt12h(form.time)}</span>
@@ -278,7 +278,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
                   onClick={() => setPaymentMethod(ch.id)}
                   className={`rounded-xl border px-3 py-3 text-left transition-all ${
                     paymentMethod === ch.id
-                      ? "border-[#163300] bg-[#163300]/5 ring-1 ring-[#163300]"
+                      ? "border-[#0038A8] bg-[#0038A8]/5 ring-1 ring-[#0038A8]"
                       : "border-gray-200 hover:border-gray-400"
                   }`}
                 >
@@ -306,7 +306,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
               </div>
               <div className="flex justify-between font-bold text-sm border-t border-blue-200 pt-2">
                 <span className="text-blue-800">Amount to send</span>
-                <span className="text-[#163300] text-base">₱{feeAmount.toLocaleString()}</span>
+                <span className="text-[#0038A8] text-base">₱{feeAmount.toLocaleString()}</span>
               </div>
             </div>
           )}
@@ -349,7 +349,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
               ) : (
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="w-full rounded-xl border-2 border-dashed border-gray-300 hover:border-[#163300]/40 p-5 flex flex-col items-center gap-2 text-muted-foreground transition-colors"
+                  className="w-full rounded-xl border-2 border-dashed border-gray-300 hover:border-[#0038A8]/40 p-5 flex flex-col items-center gap-2 text-muted-foreground transition-colors"
                 >
                   <Upload className="h-6 w-6" />
                   <span className="text-sm">Click to upload screenshot</span>
@@ -371,7 +371,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
             <Button
               onClick={handleSubmitPayment}
               disabled={!paymentValid || isSubmitting}
-              className="flex-1 bg-[#163300] hover:bg-[#1e4a00] text-white gap-2"
+              className="flex-1 bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2"
             >
               <ImageIcon className="w-4 h-4" />
               {isSubmitting ? "Submitting…" : "Submit Payment Proof"}
@@ -389,7 +389,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-[#163300]" />
+            <CheckCircle className="w-5 h-5 text-[#0038A8]" />
             Review Appointment
           </CardTitle>
           <CardDescription>Confirm your booking details before payment</CardDescription>
@@ -443,7 +443,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
             <Button
               onClick={handleBook}
               disabled={isSubmitting}
-              className="flex-1 bg-[#163300] hover:bg-[#1e4a00] text-white gap-2"
+              className="flex-1 bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2"
             >
               {isSubmitting ? "Booking…" : feeAmount > 0 ? "Continue to Payment" : "Confirm Appointment"}
               <ChevronRight className="h-4 w-4" />
@@ -463,7 +463,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[#163300]" />
+            <Calendar className="w-5 h-5 text-[#0038A8]" />
             Choose a Date & Time
           </CardTitle>
           <CardDescription>Select from {selectedSpecialist?.name?.split(",")[0]}'s available slots</CardDescription>
@@ -505,8 +505,8 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
                       onClick={() => setForm(p => ({ ...p, time: slot.time }))}
                       className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
                         form.time === slot.time
-                          ? "border-[#163300] bg-[#163300] text-white"
-                          : "border-gray-200 text-gray-700 hover:border-[#163300]/40 hover:bg-[#163300]/5"
+                          ? "border-[#0038A8] bg-[#0038A8] text-white"
+                          : "border-gray-200 text-gray-700 hover:border-[#0038A8]/40 hover:bg-[#0038A8]/5"
                       }`}
                     >
                       {fmt12h(slot.time)}
@@ -540,13 +540,13 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
                   onClick={() => setForm(p => ({ ...p, telehealth: value }))}
                   className={`flex-1 flex items-center gap-2 rounded-lg border p-3 text-sm transition-all ${
                     form.telehealth === value
-                      ? "border-[#163300] bg-[#163300]/5 text-[#163300] font-medium"
+                      ? "border-[#0038A8] bg-[#0038A8]/5 text-[#0038A8] font-medium"
                       : "border-gray-200 text-gray-500 hover:border-gray-400"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
                   {label}
-                  {value && <Badge className="ml-auto text-xs bg-[#9FE870] text-[#163300]">Recommended</Badge>}
+                  {value && <Badge className="ml-auto text-xs bg-[#FCD116] text-[#0038A8]">Recommended</Badge>}
                 </button>
               ))}
             </div>
@@ -563,7 +563,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
           <div className="space-y-1">
             <Label>Notes for Specialist (optional)</Label>
             <textarea
-              className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#163300]/30"
+              className="w-full min-h-[70px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#0038A8]/30"
               placeholder="Any specific concerns or questions..."
               value={form.notes}
               onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
@@ -575,7 +575,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
             <Button
               disabled={!slotValid}
               onClick={() => setStep("review")}
-              className="flex-1 bg-[#163300] hover:bg-[#1e4a00] text-white gap-2"
+              className="flex-1 bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2"
             >
               Review Booking <ChevronRight className="h-4 w-4" />
             </Button>
@@ -592,7 +592,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-[#163300]" />
+          <Calendar className="w-5 h-5 text-[#0038A8]" />
           Schedule an Appointment
         </CardTitle>
         <CardDescription>Book a specialist for your child — nationwide coverage across the Philippines</CardDescription>
@@ -610,8 +610,8 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
         </div>
 
         {/* User location */}
-        <div className="rounded-xl border border-[#163300]/20 bg-[#163300]/4 p-4 space-y-3">
-          <p className="text-sm font-semibold text-[#163300] flex items-center gap-1.5">
+        <div className="rounded-xl border border-[#0038A8]/20 bg-[#0038A8]/4 p-4 space-y-3">
+          <p className="text-sm font-semibold text-[#0038A8] flex items-center gap-1.5">
             <MapPin className="h-4 w-4" /> Your Location (Philippines)
           </p>
           <div className="grid sm:grid-cols-2 gap-3">
@@ -639,7 +639,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
             </div>
           </div>
           {form.userRegionId && (
-            <p className="text-xs text-[#163300]/70">
+            <p className="text-xs text-[#0038A8]/70">
               Showing specialists available in <strong>{getRegionName(form.userRegionId)}</strong> first. All specialists offer telehealth nationwide.
             </p>
           )}
@@ -688,8 +688,8 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
                       }}
                       className={`w-full rounded-xl border p-3 text-left transition-all ${
                         isSelected
-                          ? "border-[#163300] bg-[#163300]/5 ring-1 ring-[#163300]"
-                          : "border-gray-200 hover:border-[#163300]/40"
+                          ? "border-[#0038A8] bg-[#0038A8]/5 ring-1 ring-[#0038A8]"
+                          : "border-gray-200 hover:border-[#0038A8]/40"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -703,7 +703,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
                         </div>
                         <div className="flex flex-col items-end gap-1 shrink-0">
                           {isNearby && (
-                            <Badge className="text-xs bg-[#9FE870] text-[#163300]">Near You</Badge>
+                            <Badge className="text-xs bg-[#FCD116] text-[#0038A8]">Near You</Badge>
                           )}
                           <div className="flex gap-1">
                             {sp.telehealth && <Badge className="text-xs bg-blue-100 text-blue-700">Telehealth</Badge>}
@@ -712,7 +712,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
                         </div>
                       </div>
                       {isSelected && sp.clinic && !form.telehealth && (
-                        <p className="text-xs text-[#163300] mt-2 flex items-center gap-1">
+                        <p className="text-xs text-[#0038A8] mt-2 flex items-center gap-1">
                           <MapPin className="h-3 w-3" /> {sp.clinic}
                         </p>
                       )}
@@ -733,10 +733,10 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
 
         {/* Fee display */}
         {specialistFee && form.specialistName && (
-          <div className="rounded-xl bg-[#163300]/5 border border-[#163300]/20 p-3 flex items-center gap-3">
-            <ShieldCheck className="h-5 w-5 text-[#163300] shrink-0" />
+          <div className="rounded-xl bg-[#0038A8]/5 border border-[#0038A8]/20 p-3 flex items-center gap-3">
+            <ShieldCheck className="h-5 w-5 text-[#0038A8] shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-[#163300]">
+              <p className="text-sm font-semibold text-[#0038A8]">
                 Consultation Fee: ₱{specialistFee.feeAmount.toLocaleString()}
               </p>
               <p className="text-xs text-muted-foreground">Payable via GCash, Maya, or bank transfer after booking</p>
@@ -749,7 +749,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
           <Button
             disabled={!detailsValid}
             onClick={() => setStep("slot")}
-            className="flex-1 bg-[#163300] hover:bg-[#1e4a00] text-white gap-2"
+            className="flex-1 bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2"
           >
             Pick a Time Slot <ChevronRight className="h-4 w-4" />
           </Button>

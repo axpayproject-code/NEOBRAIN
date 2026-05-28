@@ -370,7 +370,7 @@ function ConsultationRoomTab() {
                   </Button>
                   <Button
                     size="sm"
-                    className="rounded-full gap-1.5 bg-[#163300] text-white hover:bg-[#1e4a00]"
+                    className="rounded-full gap-1.5 bg-[#0038A8] text-white hover:bg-[#1e4a00]"
                     data-testid={`button-join-${a.id}`}
                     onClick={() => setJoinAppt(a)}
                   >
@@ -414,7 +414,7 @@ function ConsultationRoomTab() {
             <Button
               disabled={!meetingUrl.trim() || saving}
               onClick={handleSetMeetingUrl}
-              className="bg-[#163300] text-white hover:bg-[#1e4a00]"
+              className="bg-[#0038A8] text-white hover:bg-[#1e4a00]"
             >
               {saving ? "Saving…" : "Save Link"}
             </Button>
@@ -870,7 +870,7 @@ function AppointmentsTab() {
                   <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleViewProof(appt.id)}>
                     <ShieldCheck className="h-3.5 w-3.5" /> View Proof
                   </Button>
-                  <Button size="sm" className="gap-1.5 bg-[#163300] hover:bg-[#1e4a00] text-white" onClick={() => handleVerify(appt.id)} disabled={isVerifying}>
+                  <Button size="sm" className="gap-1.5 bg-[#0038A8] hover:bg-[#1e4a00] text-white" onClick={() => handleVerify(appt.id)} disabled={isVerifying}>
                     <CheckCircle2 className="h-3.5 w-3.5" /> Approve Payment
                   </Button>
                   <Button size="sm" variant="outline" className="gap-1.5 text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowRejectFor(appt.id)}>
@@ -923,7 +923,7 @@ function AppointmentsTab() {
                 </div>
                 <Button
                   size="sm"
-                  className="gap-1.5 bg-[#163300] hover:bg-[#1e4a00] text-white"
+                  className="gap-1.5 bg-[#0038A8] hover:bg-[#1e4a00] text-white"
                   onClick={() => {
                     setSetupApptId(appt.id);
                     setSetupMode(appt.telehealth ? "telehealth" : "inperson");
@@ -961,7 +961,7 @@ function AppointmentsTab() {
                       </a>
                     )}
                     {(appt as { location?: string }).location && (
-                      <p className="text-xs text-[#163300] flex items-center gap-1 mt-0.5">
+                      <p className="text-xs text-[#0038A8] flex items-center gap-1 mt-0.5">
                         <MapPin className="h-3 w-3" /> {(appt as { location?: string }).location}
                       </p>
                     )}
@@ -979,7 +979,7 @@ function AppointmentsTab() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-[#163300]" />
+              <ShieldCheck className="h-5 w-5 text-[#0038A8]" />
               Payment Proof
             </DialogTitle>
           </DialogHeader>
@@ -993,7 +993,7 @@ function AppointmentsTab() {
                   <div><p className="text-xs text-muted-foreground">Reference #</p><p className="font-mono font-semibold">{proofData.referenceNumber}</p></div>
                 )}
                 {proofData.amount && (
-                  <div><p className="text-xs text-muted-foreground">Amount</p><p className="font-bold text-[#163300]">₱{proofData.amount.toLocaleString()}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Amount</p><p className="font-bold text-[#0038A8]">₱{proofData.amount.toLocaleString()}</p></div>
                 )}
               </div>
               {proofData.proofImageBase64 ? (
@@ -1012,7 +1012,7 @@ function AppointmentsTab() {
               Reject
             </Button>
             <Button
-              className="bg-[#163300] hover:bg-[#1e4a00] text-white gap-2"
+              className="bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2"
               onClick={() => handleVerify(proofApptId!)}
               disabled={isVerifying}
             >
@@ -1028,7 +1028,7 @@ function AppointmentsTab() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {setupMode === "telehealth" ? <ExternalLink className="h-5 w-5 text-[#163300]" /> : <MapPin className="h-5 w-5 text-[#163300]" />}
+              {setupMode === "telehealth" ? <ExternalLink className="h-5 w-5 text-[#0038A8]" /> : <MapPin className="h-5 w-5 text-[#0038A8]" />}
               Set Up Appointment
             </DialogTitle>
           </DialogHeader>
@@ -1048,7 +1048,7 @@ function AppointmentsTab() {
                   key={mode}
                   onClick={() => setSetupMode(mode)}
                   className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-all ${
-                    setupMode === mode ? "bg-white shadow text-[#163300]" : "text-muted-foreground"
+                    setupMode === mode ? "bg-white shadow text-[#0038A8]" : "text-muted-foreground"
                   }`}
                 >
                   <Icon className="h-4 w-4" />{label}
@@ -1069,7 +1069,7 @@ function AppointmentsTab() {
               <div className="space-y-1">
                 <Label>Clinic Address</Label>
                 <textarea
-                  className="w-full min-h-[90px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#163300]/30"
+                  className="w-full min-h-[90px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#0038A8]/30"
                   placeholder="Unit 101, NEOBRAIN Building, 123 Ayala Ave., Makati City, Metro Manila"
                   value={locationText}
                   onChange={e => setLocationText(e.target.value)}
@@ -1080,7 +1080,7 @@ function AppointmentsTab() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setSetupApptId(null)}>Cancel</Button>
             <Button
-              className="bg-[#163300] hover:bg-[#1e4a00] text-white"
+              className="bg-[#0038A8] hover:bg-[#1e4a00] text-white"
               onClick={handleSetup}
               disabled={isSettingUp || (setupMode === "telehealth" ? !meetingUrl.trim() : !locationText.trim())}
             >
