@@ -147,7 +147,7 @@ export default function PhilippinesMap() {
     <section
       id="map"
       className="relative py-16 md:py-28 px-4 md:px-12 overflow-hidden"
-      style={{ background: `linear-gradient(160deg, #163300 0%, #0d2200 55%, #080f00 100%)` }}
+      style={{ background: `linear-gradient(160deg, ${FLAG.blue} 0%, #001A70 55%, #000c3a 100%)` }}
     >
       {/* ── Decorative: lower red glow (flag stripe) ── */}
       <div className="absolute inset-0 pointer-events-none"
