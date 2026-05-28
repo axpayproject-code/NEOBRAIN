@@ -51,10 +51,25 @@ router.post("/auth/signup", async (req, res) => {
     name,
     role,
     passwordHash,
-  }).returning({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, createdAt: usersTable.createdAt });
+  }).returning({
+    id: usersTable.id,
+    email: usersTable.email,
+    name: usersTable.name,
+    role: usersTable.role,
+    subscriptionTier: usersTable.subscriptionTier,
+    subscriptionStatus: usersTable.subscriptionStatus,
+    createdAt: usersTable.createdAt,
+  });
 
   req.log.info({ userId: user.id }, "User created");
-  return res.status(201).json({ id: user.id, email: user.email, name: user.name, role: user.role });
+  return res.status(201).json({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    subscriptionTier: user.subscriptionTier,
+    subscriptionStatus: user.subscriptionStatus,
+  });
 });
 
 router.post("/auth/login", async (req, res) => {
@@ -75,6 +90,8 @@ router.post("/auth/login", async (req, res) => {
     email: user.email,
     name: user.name,
     role: isValidRole(roleRaw) ? role : user.role,
+    subscriptionTier: user.subscriptionTier,
+    subscriptionStatus: user.subscriptionStatus,
   });
 });
 

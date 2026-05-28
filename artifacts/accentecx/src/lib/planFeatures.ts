@@ -12,6 +12,18 @@ export interface PlanFeatures {
 }
 
 const PLANS: Record<string, PlanFeatures> = {
+  "free": {
+    maxChildren: 1,
+    screeningsPerYear: 1,
+    videoAnalysis: false,
+    videoPerMonth: 0,
+    therapyTracking: false,
+    specialistMessaging: false,
+    priorityAI: false,
+    fullAIReports: false,
+    upgradeLabel: "Upgrade to Starter Care (₱200/mo)",
+    planName: "Free",
+  },
   "starter-care": {
     maxChildren: 1,
     screeningsPerYear: 2,
@@ -21,7 +33,7 @@ const PLANS: Record<string, PlanFeatures> = {
     specialistMessaging: false,
     priorityAI: false,
     fullAIReports: false,
-    upgradeLabel: "Upgrade to Care Plus",
+    upgradeLabel: "Upgrade to Care Plus (₱799/mo)",
     planName: "Starter Care",
   },
   "care-plus": {
@@ -33,7 +45,7 @@ const PLANS: Record<string, PlanFeatures> = {
     specialistMessaging: true,
     priorityAI: false,
     fullAIReports: true,
-    upgradeLabel: "Upgrade to Care Family Pro",
+    upgradeLabel: "Upgrade to Care Family Pro (₱1,999/mo)",
     planName: "Care Plus",
   },
   "care-family-pro": {
@@ -51,16 +63,27 @@ const PLANS: Record<string, PlanFeatures> = {
 };
 
 const TIER_MAP: Record<string, string> = {
-  "starter care": "starter-care",
-  "care plus": "care-plus",
-  "care family pro": "care-family-pro",
+  // DB keys (from subscriptionTier column)
+  "free": "free",
   "starter-care": "starter-care",
   "care-plus": "care-plus",
   "care-family-pro": "care-family-pro",
+  // Legacy / alternate keys
+  "starter_care": "starter-care",
+  "care_plus": "care-plus",
+  "care_family_pro": "care-family-pro",
+  // Human-readable names (from pricing page)
+  "starter care": "starter-care",
+  "care plus": "care-plus",
+  "care family pro": "care-family-pro",
+  // Onboarding plan slugs
+  "starter": "starter-care",
+  "plus": "care-plus",
+  "pro": "care-family-pro",
 };
 
 export function getPlanFeatures(tier?: string): PlanFeatures {
-  if (!tier) return PLANS["care-plus"];
-  const key = TIER_MAP[tier.toLowerCase()] ?? "care-plus";
-  return PLANS[key] ?? PLANS["care-plus"];
+  if (!tier) return PLANS["free"];
+  const key = TIER_MAP[tier.toLowerCase()] ?? "free";
+  return PLANS[key] ?? PLANS["free"];
 }

@@ -13,10 +13,10 @@ function getUserId(req: { headers: Record<string, string | string[] | undefined>
 }
 
 const PLANS: Record<string, { name: string; priceMonthly: number; priceAnnual: number }> = {
-  free: { name: "Free", priceMonthly: 0, priceAnnual: 0 },
-  care_plus: { name: "Care Plus", priceMonthly: 499, priceAnnual: 4990 },
-  clinical_pro: { name: "Clinical Pro", priceMonthly: 2999, priceAnnual: 29990 },
-  institutional: { name: "Institutional", priceMonthly: 15000, priceAnnual: 150000 },
+  "free": { name: "Free", priceMonthly: 0, priceAnnual: 0 },
+  "starter-care": { name: "Starter Care", priceMonthly: 200, priceAnnual: 2000 },
+  "care-plus": { name: "Care Plus", priceMonthly: 799, priceAnnual: 7990 },
+  "care-family-pro": { name: "Care Family Pro", priceMonthly: 1999, priceAnnual: 19990 },
 };
 
 // GET /billing/status — returns current subscription for the authenticated user
@@ -37,7 +37,7 @@ router.get("/billing/status", async (req, res) => {
 
   if (!user) return res.status(404).json({ error: "User not found" });
 
-  const plan = PLANS[user.subscriptionTier] ?? PLANS.free;
+  const plan = PLANS[user.subscriptionTier] ?? PLANS["free"];
 
   return res.json({
     tier: user.subscriptionTier,
@@ -62,11 +62,11 @@ router.post("/billing/subscribe", async (req, res) => {
   };
 
   if (!tier || !PLANS[tier]) return res.status(400).json({ error: "Invalid subscription tier" });
+  if (tier === "free") return res.status(400).json({ error: "Cannot subscribe to free plan" });
   if (!paymentRef || typeof paymentRef !== "string" || paymentRef.trim().length < 4) {
     return res.status(400).json({ error: "Valid payment reference is required" });
   }
 
-  // Calculate expiry
   const now = new Date();
   const cycle = billingCycle === "annual" ? "annual" : "monthly";
   const paidUntil = new Date(now);

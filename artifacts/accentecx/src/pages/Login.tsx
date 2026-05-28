@@ -80,7 +80,7 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
-      login({ id: data.id, email: data.email, name: data.name, role: data.role, tier: ROLE_TIERS[data.role as UserRole] });
+      login({ id: data.id, email: data.email, name: data.name, role: data.role, tier: data.subscriptionTier ?? "free" });
       setLocation(roleDefaultRoute(data.role));
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Login failed. Please try again.");
@@ -105,7 +105,7 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Signup failed");
-      login({ id: data.id, email: data.email, name: data.name, role: data.role, tier: ROLE_TIERS[data.role as UserRole] });
+      login({ id: data.id, email: data.email, name: data.name, role: data.role, tier: data.subscriptionTier ?? "free" });
       setLocation(roleDefaultRoute(data.role));
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Signup failed. Please try again.");
