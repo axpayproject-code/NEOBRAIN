@@ -1419,6 +1419,111 @@ function ClinicTeamTab() { return <ManageTeamTab orgRole="clinic" orgLabel="clin
 
 function GamesTab() { return <GamesAssessment />; }
 
+type ClinicNotifKey = "newAppointment" | "screeningAlert" | "urgentCase" | "parentMessage" | "reportReady";
+
+function ClinicSettingsTab() {
+  const { user } = useAuth();
+  const [savedSection, setSavedSection] = useState<string | null>(null);
+  const [pwSaved, setPwSaved] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [profile, setProfile] = useState({ name: user?.name ?? "", email: user?.email ?? "", license: "", specialization: "Developmental Pediatrics" });
+  const [clinic, setClinic] = useState({ name: "", address: "", phone: "", website: "" });
+  const [notifs, setNotifs] = useState<Record<ClinicNotifKey, boolean>>({ newAppointment: true, screeningAlert: true, urgentCase: true, parentMessage: true, reportReady: false });
+  const [pw, setPw] = useState({ current: "", newPw: "", confirm: "" });
+  const SPECIALIZATIONS = ["Developmental Pediatrics", "Child Psychiatry", "Pediatric Neurology", "Occupational Therapy", "Speech-Language Pathology", "Child Psychology", "Behavioral Pediatrics", "General Pediatrics"];
+  const save = (section: string) => { setSavedSection(section); setTimeout(() => setSavedSection(null), 2500); };
+  const savePw = () => { setPwSaved(true); setPw({ current: "", newPw: "", confirm: "" }); setTimeout(() => setPwSaved(false), 2500); };
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6 max-w-3xl">
+      <div>
+        <h1 className="text-2xl font-bold">Account Settings</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage your profile, clinic information, and preferences</p>
+      </div>
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Settings className="h-4 w-4 text-primary" /> Profile Information</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5"><Label>Full Name</Label><Input value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} /></div>
+            <div className="space-y-1.5"><Label>Email Address</Label><Input type="email" value={profile.email} onChange={e => setProfile(p => ({ ...p, email: e.target.value }))} /></div>
+            <div className="space-y-1.5"><Label>PRC License No.</Label><Input value={profile.license} onChange={e => setProfile(p => ({ ...p, license: e.target.value }))} placeholder="e.g. 0123456" /></div>
+            <div className="space-y-1.5">
+              <Label>Specialization</Label>
+              <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={profile.specialization} onChange={e => setProfile(p => ({ ...p, specialization: e.target.value }))}>
+                {SPECIALIZATIONS.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+          <Button className="rounded-full gap-1.5" onClick={() => save("profile")}>
+            {savedSection === "profile" ? <><CheckCircle className="h-3.5 w-3.5" /> Saved!</> : "Save Profile"}
+          </Button>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Stethoscope className="h-4 w-4 text-primary" /> Clinic Information</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5 sm:col-span-2"><Label>Clinic / Hospital Name</Label><Input value={clinic.name} onChange={e => setClinic(c => ({ ...c, name: e.target.value }))} placeholder="e.g. ChildCare Developmental Clinic" /></div>
+            <div className="space-y-1.5 sm:col-span-2"><Label>Address</Label><Input value={clinic.address} onChange={e => setClinic(c => ({ ...c, address: e.target.value }))} placeholder="Unit, Building, Street, City, Province" /></div>
+            <div className="space-y-1.5"><Label>Contact Number</Label><Input value={clinic.phone} onChange={e => setClinic(c => ({ ...c, phone: e.target.value }))} placeholder="+63 2 8xxx xxxx" /></div>
+            <div className="space-y-1.5"><Label>Website (optional)</Label><Input value={clinic.website} onChange={e => setClinic(c => ({ ...c, website: e.target.value }))} placeholder="https://yourclinic.ph" /></div>
+          </div>
+          <Button className="rounded-full gap-1.5" onClick={() => save("clinic")}>
+            {savedSection === "clinic" ? <><CheckCircle className="h-3.5 w-3.5" /> Saved!</> : "Save Clinic Info"}
+          </Button>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><MessageSquare className="h-4 w-4 text-primary" /> Notification Preferences</CardTitle></CardHeader>
+        <CardContent className="space-y-1">
+          {([
+            { key: "newAppointment", label: "New appointment booked", desc: "Alert when a patient books or reschedules" },
+            { key: "screeningAlert", label: "Screening results available", desc: "Alert when a screening is submitted for your patients" },
+            { key: "urgentCase", label: "Urgent / critical cases", desc: "Immediate alert for high or critical risk levels" },
+            { key: "parentMessage", label: "Parent portal messages", desc: "Alert when a parent sends a message" },
+            { key: "reportReady", label: "AI report generated", desc: "Alert when a new AI summary report is ready" },
+          ] as { key: ClinicNotifKey; label: string; desc: string }[]).map(({ key, label, desc }) => (
+            <div key={key} className="flex items-center justify-between gap-4 py-2.5 border-b last:border-0">
+              <div><p className="text-sm font-medium">{label}</p><p className="text-xs text-muted-foreground">{desc}</p></div>
+              <button onClick={() => setNotifs(n => ({ ...n, [key]: !n[key] }))} className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${notifs[key] ? "bg-primary" : "bg-muted"}`}>
+                <span className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${notifs[key] ? "translate-x-4" : ""}`} />
+              </button>
+            </div>
+          ))}
+          <Button className="rounded-full gap-1.5 mt-3" onClick={() => save("notifs")}>
+            {savedSection === "notifs" ? <><CheckCircle className="h-3.5 w-3.5" /> Saved!</> : "Save Preferences"}
+          </Button>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> Security</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Current Password</Label>
+              <div className="relative"><Input type={showCurrent ? "text" : "password"} value={pw.current} onChange={e => setPw(p => ({ ...p, current: e.target.value }))} className="pr-10" />
+                <button onClick={() => setShowCurrent(v => !v)} className="absolute right-3 top-2.5 text-muted-foreground">{showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>New Password</Label>
+              <div className="relative"><Input type={showNew ? "text" : "password"} value={pw.newPw} onChange={e => setPw(p => ({ ...p, newPw: e.target.value }))} placeholder="Min. 8 characters" className="pr-10" />
+                <button onClick={() => setShowNew(v => !v)} className="absolute right-3 top-2.5 text-muted-foreground">{showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+              </div>
+            </div>
+            <div className="space-y-1.5"><Label>Confirm New Password</Label><Input type="password" value={pw.confirm} onChange={e => setPw(p => ({ ...p, confirm: e.target.value }))} /></div>
+          </div>
+          {pw.newPw && pw.confirm && pw.newPw !== pw.confirm && <p className="text-xs text-destructive">Passwords do not match.</p>}
+          <Button className="rounded-full gap-1.5" onClick={savePw} disabled={!pw.current || !pw.newPw || pw.newPw !== pw.confirm}>
+            {pwSaved ? <><CheckCircle className="h-3.5 w-3.5" /> Password Updated!</> : "Change Password"}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   queue: PatientQueueTab,
@@ -1434,6 +1539,7 @@ const TABS: Record<string, TabComponent> = {
   analytics: ClinicAnalyticsTab,
   calendar: DoctorAvailabilityTab,
   team: ClinicTeamTab,
+  settings: ClinicSettingsTab,
 };
 
 export default function DoctorDashboard() {

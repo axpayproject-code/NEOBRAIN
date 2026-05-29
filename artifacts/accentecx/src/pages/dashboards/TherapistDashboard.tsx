@@ -1013,6 +1013,117 @@ function ManageTeamTab({ orgRole, orgLabel }: { orgRole: string; orgLabel: strin
 
 function SchoolTeamTab() { return <ManageTeamTab orgRole="school" orgLabel="school" />; }
 
+type SchoolNotifKey = "screeningComplete" | "parentMessage" | "iepReview" | "atRiskAlert" | "reportReady";
+
+function SchoolSettingsTab() {
+  const { user } = useAuth();
+  const [savedSection, setSavedSection] = useState<string | null>(null);
+  const [pwSaved, setPwSaved] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [profile, setProfile] = useState({ name: user?.name ?? "", email: user?.email ?? "", employeeId: "", position: "SPED Teacher" });
+  const [school, setSchool] = useState({ name: "", division: "", region: "", gradeLevel: "Kindergarten–Grade 6" });
+  const [notifs, setNotifs] = useState<Record<SchoolNotifKey, boolean>>({ screeningComplete: true, parentMessage: true, iepReview: true, atRiskAlert: true, reportReady: false });
+  const [pw, setPw] = useState({ current: "", newPw: "", confirm: "" });
+  const POSITIONS = ["SPED Teacher", "Guidance Counselor", "School Psychologist", "Class Adviser", "Principal / Head Teacher", "School Nurse"];
+  const GRADE_LEVELS = ["Kindergarten–Grade 6", "Grade 7–10 (JHS)", "Grade 11–12 (SHS)", "All Grade Levels"];
+  const save = (section: string) => { setSavedSection(section); setTimeout(() => setSavedSection(null), 2500); };
+  const savePw = () => { setPwSaved(true); setPw({ current: "", newPw: "", confirm: "" }); setTimeout(() => setPwSaved(false), 2500); };
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6 max-w-3xl">
+      <div>
+        <h1 className="text-2xl font-bold">Account Settings</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage your profile, school information, and notification preferences</p>
+      </div>
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Settings className="h-4 w-4 text-primary" /> Profile Information</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5"><Label>Full Name</Label><Input value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} /></div>
+            <div className="space-y-1.5"><Label>Email Address</Label><Input type="email" value={profile.email} onChange={e => setProfile(p => ({ ...p, email: e.target.value }))} /></div>
+            <div className="space-y-1.5"><Label>DepEd Employee ID</Label><Input value={profile.employeeId} onChange={e => setProfile(p => ({ ...p, employeeId: e.target.value }))} placeholder="e.g. 123-456-789" /></div>
+            <div className="space-y-1.5">
+              <Label>Position / Role</Label>
+              <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={profile.position} onChange={e => setProfile(p => ({ ...p, position: e.target.value }))}>
+                {POSITIONS.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+          <Button className="rounded-full gap-1.5" onClick={() => save("profile")}>
+            {savedSection === "profile" ? <><CheckCircle className="h-3.5 w-3.5" /> Saved!</> : "Save Profile"}
+          </Button>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><GraduationCap className="h-4 w-4 text-primary" /> School Information</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5 sm:col-span-2"><Label>School Name</Label><Input value={school.name} onChange={e => setSchool(s => ({ ...s, name: e.target.value }))} placeholder="e.g. Marikina Elementary School" /></div>
+            <div className="space-y-1.5"><Label>Division / District</Label><Input value={school.division} onChange={e => setSchool(s => ({ ...s, division: e.target.value }))} placeholder="e.g. Schools Division of Marikina" /></div>
+            <div className="space-y-1.5"><Label>Region</Label><Input value={school.region} onChange={e => setSchool(s => ({ ...s, region: e.target.value }))} placeholder="e.g. Region IV-A (CALABARZON)" /></div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Grade Levels Handled</Label>
+              <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={school.gradeLevel} onChange={e => setSchool(s => ({ ...s, gradeLevel: e.target.value }))}>
+                {GRADE_LEVELS.map(g => <option key={g}>{g}</option>)}
+              </select>
+            </div>
+          </div>
+          <Button className="rounded-full gap-1.5" onClick={() => save("school")}>
+            {savedSection === "school" ? <><CheckCircle className="h-3.5 w-3.5" /> Saved!</> : "Save School Info"}
+          </Button>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><MessageSquare className="h-4 w-4 text-primary" /> Notification Preferences</CardTitle></CardHeader>
+        <CardContent className="space-y-1">
+          {([
+            { key: "screeningComplete", label: "Screening completed", desc: "Alert when a screening form is submitted" },
+            { key: "parentMessage", label: "Parent portal messages", desc: "Alert when a parent sends a message" },
+            { key: "iepReview", label: "IEP review reminders", desc: "Reminder when an IEP is due for review" },
+            { key: "atRiskAlert", label: "At-risk student alerts", desc: "Immediate alert for high or critical risk flags" },
+            { key: "reportReady", label: "DepEd report generated", desc: "Alert when a new DepEd report is ready" },
+          ] as { key: SchoolNotifKey; label: string; desc: string }[]).map(({ key, label, desc }) => (
+            <div key={key} className="flex items-center justify-between gap-4 py-2.5 border-b last:border-0">
+              <div><p className="text-sm font-medium">{label}</p><p className="text-xs text-muted-foreground">{desc}</p></div>
+              <button onClick={() => setNotifs(n => ({ ...n, [key]: !n[key] }))} className={`relative h-5 w-9 rounded-full transition-colors shrink-0 ${notifs[key] ? "bg-primary" : "bg-muted"}`}>
+                <span className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${notifs[key] ? "translate-x-4" : ""}`} />
+              </button>
+            </div>
+          ))}
+          <Button className="rounded-full gap-1.5 mt-3" onClick={() => save("notifs")}>
+            {savedSection === "notifs" ? <><CheckCircle className="h-3.5 w-3.5" /> Saved!</> : "Save Preferences"}
+          </Button>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> Security</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Current Password</Label>
+              <div className="relative"><Input type={showCurrent ? "text" : "password"} value={pw.current} onChange={e => setPw(p => ({ ...p, current: e.target.value }))} className="pr-10" />
+                <button onClick={() => setShowCurrent(v => !v)} className="absolute right-3 top-2.5 text-muted-foreground">{showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>New Password</Label>
+              <div className="relative"><Input type={showNew ? "text" : "password"} value={pw.newPw} onChange={e => setPw(p => ({ ...p, newPw: e.target.value }))} placeholder="Min. 8 characters" className="pr-10" />
+                <button onClick={() => setShowNew(v => !v)} className="absolute right-3 top-2.5 text-muted-foreground">{showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+              </div>
+            </div>
+            <div className="space-y-1.5"><Label>Confirm New Password</Label><Input type="password" value={pw.confirm} onChange={e => setPw(p => ({ ...p, confirm: e.target.value }))} /></div>
+          </div>
+          {pw.newPw && pw.confirm && pw.newPw !== pw.confirm && <p className="text-xs text-destructive">Passwords do not match.</p>}
+          <Button className="rounded-full gap-1.5" onClick={savePw} disabled={!pw.current || !pw.newPw || pw.newPw !== pw.confirm}>
+            {pwSaved ? <><CheckCircle className="h-3.5 w-3.5" /> Password Updated!</> : "Change Password"}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function TherapistDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -1027,6 +1138,7 @@ export default function TherapistDashboard() {
     "reports": <DepEdReportsTab />,
     "analytics": <SchoolAnalyticsTab />,
     "team": <SchoolTeamTab />,
+    "settings": <SchoolSettingsTab />,
   };
 
   return (
