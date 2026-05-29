@@ -4,7 +4,8 @@ import {
   Users, ClipboardList, Video, Stethoscope, FileText,
   HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2,
   CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck,
-  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap
+  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap,
+  Check, Copy, BadgeCheck, AlertCircle
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
@@ -45,6 +46,7 @@ const NAV: NavItem[] = [
   { id: "analytics", label: "Clinic Analytics", icon: BarChart3 },
   { id: "calendar", label: "My Availability", icon: CalendarDays },
   { id: "team", label: "Manage Team", icon: UserPlus },
+  { id: "billing", label: "Billing & Plans", icon: CreditCard },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -1524,9 +1526,9 @@ function ClinicSettingsTab() {
       {/* Billing & Usage */}
       {(() => {
         const CLINIC_PLANS = [
-          { id: "starter", name: "Clinic Starter", price: "₱2,999", tagline: "For small clinics up to 5 providers", features: ["50 active patients", "20 screenings/month", "5 telehealth sessions/month", "10 AI reports/month", "Basic analytics"], limits: { patients: 50, screenings: 20, telehealth: 5, reports: 10 } },
-          { id: "pro", name: "Clinic Pro", price: "₱7,999", tagline: "For growing multi-specialty clinics", features: ["Unlimited patients", "100 screenings/month", "30 telehealth sessions/month", "Unlimited AI reports", "Advanced analytics + export"], limits: { patients: Infinity, screenings: 100, telehealth: 30, reports: Infinity } },
-          { id: "enterprise", name: "Enterprise", price: "Custom", tagline: "Hospital systems & multi-branch networks", features: ["All Clinic Pro features", "White-label option", "Dedicated account manager", "SLA & priority support", "Custom integrations"], limits: { patients: Infinity, screenings: Infinity, telehealth: Infinity, reports: Infinity } },
+          { id: "solo", name: "Solo Practice", price: "₱4,999/mo", tagline: "For individual practitioners", features: ["1 doctor / account", "Full clinical system", "Telehealth sessions", "50 patients / month", "AI intake reports"], limits: { patients: 50, screenings: 20, telehealth: 5, reports: 10 } },
+          { id: "small-clinic", name: "Small Clinic", price: "₱9,999/mo", tagline: "Up to 5 doctors, 200 patients/month", features: ["Up to 5 doctors", "Multi-role access", "Telehealth", "200 patients / month", "Priority AI processing", "Clinic analytics"], limits: { patients: Infinity, screenings: 100, telehealth: 30, reports: Infinity } },
+          { id: "enterprise", name: "Hospital / Large", price: "Custom", tagline: "Hospital systems & large networks", features: ["Unlimited doctors", "Enterprise integration", "Custom analytics", "Dedicated support", "API access", "DOH reporting"], limits: { patients: Infinity, screenings: Infinity, telehealth: Infinity, reports: Infinity } },
         ];
         const activePlan = CLINIC_PLANS[0];
         const usage = { patients: 18, screenings: 9, telehealth: 3, reports: 4 };
@@ -1602,6 +1604,148 @@ function ClinicSettingsTab() {
   );
 }
 
+function ClinicBillingTab() {
+  const PLANS = [
+    { id: "solo", name: "Solo Practice", priceMonthly: 4999, priceAnnual: 49990, tagline: "For individual practitioners", highlight: false,
+      features: ["1 doctor / account", "Full clinical system", "Telehealth sessions", "50 patients / month", "AI intake reports"] },
+    { id: "small-clinic", name: "Small Clinic", priceMonthly: 9999, priceAnnual: 99990, tagline: "Up to 5 doctors, 200 patients/month", highlight: true,
+      features: ["Up to 5 doctors", "Multi-role access", "Telehealth", "200 patients / month", "Priority AI processing", "Clinic analytics"] },
+    { id: "enterprise", name: "Hospital / Large", priceMonthly: null, priceAnnual: null, tagline: "For hospital systems & large networks", highlight: false,
+      features: ["Unlimited doctors", "Enterprise integration", "Custom analytics", "Dedicated support", "API access", "DOH reporting"] },
+  ];
+  const PAYMENT_METHODS = [
+    { id: "gcash", name: "GCash", icon: "📱", instructions: ["Open GCash → Send Money → GCash", "Number: 0917-XXX-XXXX (ACCENTECX AI)", "Enter the plan amount for your billing cycle", 'Reference: "NEOBRAIN-CLINIC-[your email]"', "Screenshot the transaction", "Enter the GCash reference number below"] },
+    { id: "bpi", name: "BPI Transfer", icon: "🏦", instructions: ["Log into BPI Online or the BPI app", "Transfer → Other BPI Account", "Account Name: ACCENTECX AI Inc.", "Account Number: 1234-5678-90", "Enter the plan amount", 'Remarks: "NEOBRAIN-CLINIC-[your email]"', "Enter the transaction reference number below"] },
+    { id: "unionbank", name: "UnionBank", icon: "💳", instructions: ["Open UnionBank Online app", "Send Money → Other Bank / InstaPay", "Account: ACCENTECX AI Inc., 0987-6543-21", "Enter the plan amount", 'Reference: "NEOBRAIN-CLINIC-[your email]"', "Enter the transaction reference number below"] },
+  ];
+  const RANK: Record<string, number> = { solo: 0, "small-clinic": 1, enterprise: 2 };
+  const currentPlan = "solo";
+  const [cycle, setCycle] = useState<"monthly" | "annual">("monthly");
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [method, setMethod] = useState("gcash");
+  const [ref, setRef] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
+  const chosen = PLANS.find(p => p.id === selectedPlan);
+  const refHint = "NEOBRAIN-CLINIC-clinic@email.com";
+
+  function copyRef() { navigator.clipboard.writeText(refHint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }); }
+  async function handleSubmit() {
+    if (!selectedPlan || !ref.trim()) return;
+    setSubmitting(true); setError("");
+    try { await new Promise(r => setTimeout(r, 900)); setSubmitted(true); }
+    catch { setError("Failed to submit. Email support@accentecx.com for assistance."); }
+    finally { setSubmitting(false); }
+  }
+
+  return (
+    <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold">Subscription & Billing</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage your clinic's NEOBRAIN plan. Payment via GCash or bank transfer, activated within 24 hours on business days.</p>
+      </div>
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="pt-5 pb-5 px-6 flex items-center gap-4 flex-wrap">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shrink-0"><CreditCard className="h-5 w-5 text-secondary" /></div>
+          <div>
+            <p className="text-xs text-muted-foreground">Current Plan</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-lg font-bold">Solo Practice</p>
+              <Badge className="bg-green-100 text-green-800 text-xs"><BadgeCheck className="h-3 w-3 mr-1 inline" />Active</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><Clock className="h-3 w-3" /> ₱4,999/month · Renews monthly</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <h2 className="font-semibold">Choose Your Plan</h2>
+          <div className="flex items-center gap-1 rounded-full border p-1">
+            {(["monthly", "annual"] as const).map(c => (
+              <button key={c} onClick={() => setCycle(c)} className={`rounded-full px-4 py-1 text-xs font-medium transition-all ${cycle === c ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+                {c === "monthly" ? "Monthly" : "Annual (save ~17%)"}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-3 gap-4">
+          {PLANS.map(plan => {
+            const price = plan.priceMonthly === null ? null : cycle === "annual" ? plan.priceAnnual : plan.priceMonthly;
+            const isCurrent = plan.id === currentPlan;
+            const isSelected = selectedPlan === plan.id;
+            const isDowngrade = RANK[plan.id] < RANK[currentPlan];
+            const canSelect = !isCurrent && !isDowngrade;
+            return (
+              <div key={plan.id} onClick={() => canSelect && setSelectedPlan(isSelected ? null : plan.id)}
+                className={`relative rounded-2xl border-2 p-5 transition-all ${isSelected ? "border-primary bg-primary/5 shadow-md" : plan.highlight && canSelect ? "border-secondary/60 bg-secondary/5" : isCurrent ? "border-green-300 bg-green-50/50" : canSelect ? "border-border hover:border-primary/30 cursor-pointer" : "border-border opacity-60 cursor-not-allowed"}`}>
+                {plan.highlight && canSelect && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><span className="bg-primary text-primary-foreground text-[10px] font-bold px-3 py-0.5 rounded-full flex items-center gap-1"><Zap className="h-2.5 w-2.5" /> POPULAR</span></div>}
+                {isCurrent && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><span className="bg-green-600 text-white text-[10px] font-bold px-3 py-0.5 rounded-full flex items-center gap-1"><BadgeCheck className="h-2.5 w-2.5" /> CURRENT</span></div>}
+                <p className="font-bold text-sm">{plan.name}</p>
+                <p className="text-2xl font-bold text-primary mt-1">
+                  {price === null ? "Custom" : `₱${price.toLocaleString()}`}
+                  {price !== null && <span className="text-xs font-normal text-muted-foreground">/{cycle === "annual" ? "yr" : "mo"}</span>}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 mb-3">{plan.tagline}</p>
+                <ul className="space-y-1.5">{plan.features.map(f => <li key={f} className="flex items-start gap-1.5 text-xs"><Check className="h-3.5 w-3.5 text-green-600 shrink-0 mt-0.5" />{f}</li>)}</ul>
+                {plan.priceMonthly === null && canSelect && <a href="mailto:sales@accentecx.com" className="mt-3 block text-xs text-center text-primary font-medium border border-primary/20 rounded-full py-1.5 hover:bg-primary/5">Contact Sales</a>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {selectedPlan && chosen?.priceMonthly !== null && !submitted && (
+        <div className="space-y-6">
+          <h2 className="font-semibold">Complete Payment</h2>
+          <div className="flex gap-2 flex-wrap">
+            {PAYMENT_METHODS.map(pm => <button key={pm.id} onClick={() => setMethod(pm.id)} className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all ${method === pm.id ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}><span>{pm.icon}</span>{pm.name}</button>)}
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="rounded-2xl border bg-muted/30 p-5">
+              <p className="font-semibold text-sm mb-3">Payment Instructions</p>
+              <ol className="space-y-2.5">{PAYMENT_METHODS.find(p => p.id === method)?.instructions.map((step, i) => (
+                <li key={i} className="flex gap-2 text-sm text-muted-foreground"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0 mt-0.5">{i + 1}</span>{step}</li>
+              ))}</ol>
+              <div className="mt-4 rounded-xl bg-primary/5 border border-primary/20 p-3 flex items-center justify-between gap-2">
+                <div><p className="text-[10px] text-muted-foreground uppercase tracking-wide">Use as reference</p><p className="text-sm font-mono font-bold text-primary">{refHint}</p></div>
+                <button onClick={copyRef} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 shrink-0">{copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}{copied ? "Copied" : "Copy"}</button>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="pt-4 pb-4 px-4 flex items-center justify-between">
+                  <div><p className="text-xs text-muted-foreground">Plan</p><p className="font-bold">{chosen?.name}</p></div>
+                  <div className="text-right"><p className="text-xs text-muted-foreground">{cycle === "annual" ? "Annual" : "Monthly"}</p><p className="text-xl font-bold text-primary">₱{((cycle === "annual" ? chosen?.priceAnnual : chosen?.priceMonthly) ?? 0).toLocaleString()}</p></div>
+                </CardContent>
+              </Card>
+              <div>
+                <Label className="text-sm font-medium">Transaction Reference Number</Label>
+                <Input className="mt-1" placeholder="e.g. GCASH-20260528-XXXXXXXX" value={ref} onChange={e => setRef(e.target.value)} />
+                <p className="text-xs text-muted-foreground mt-1">The reference number from your GCash or bank receipt</p>
+              </div>
+              {error && <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div>}
+              <Button className="w-full rounded-xl h-11" disabled={!ref.trim() || submitting} onClick={handleSubmit}>{submitting ? "Submitting…" : "Submit Payment Reference"}</Button>
+              <p className="text-xs text-muted-foreground text-center">Activation within 24h on business days. Questions? <strong>support@accentecx.com</strong></p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {submitted && (
+        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="rounded-2xl border border-green-200 bg-green-50 p-8 text-center">
+          <BadgeCheck className="h-12 w-12 text-green-600 mx-auto mb-3" />
+          <h3 className="font-bold text-lg text-green-800">Payment Reference Submitted!</h3>
+          <p className="text-sm text-green-700 mt-2 max-w-sm mx-auto">Reference <strong className="font-mono">{ref}</strong> received. Your <strong>{chosen?.name}</strong> plan will activate within 24 hours on business days.</p>
+          <p className="text-xs text-green-600 mt-4">After activation, log out and back in to access your new plan features.</p>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   queue: PatientQueueTab,
@@ -1615,6 +1759,7 @@ const TABS: Record<string, TabComponent> = {
   history: PatientHistoryTab,
   "parent-portal": ClinicParentPortalTab,
   analytics: ClinicAnalyticsTab,
+  billing: ClinicBillingTab,
   calendar: DoctorAvailabilityTab,
   team: ClinicTeamTab,
   settings: ClinicSettingsTab,

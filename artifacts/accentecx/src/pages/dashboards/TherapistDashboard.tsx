@@ -4,7 +4,8 @@ import {
   Users, GraduationCap, ClipboardList, BookOpen,
   MessageSquare, LayoutDashboard, CheckCircle,
   Clock, AlertTriangle, Plus, BarChart3, FileText,
-  Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap
+  Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap,
+  Check, Copy, BadgeCheck, AlertCircle
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +35,7 @@ const NAV: NavItem[] = [
   { id: "reports", label: "DepEd Reports", icon: FileText },
   { id: "analytics", label: "School Analytics", icon: BarChart3 },
   { id: "team", label: "Manage Team", icon: UserPlus },
+  { id: "billing", label: "Billing & Plans", icon: CreditCard },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -1124,9 +1126,9 @@ function SchoolSettingsTab() {
       {/* Billing & Usage */}
       {(() => {
         const SCHOOL_PLANS = [
-          { id: "starter", name: "School Starter", price: "₱1,499", tagline: "For single-school deployments", features: ["Up to 200 students", "20 screenings/month", "5 active IEP plans", "2 DepEd reports/month", "Parent portal access"], limits: { students: 200, screenings: 20, iep: 5, reports: 2 } },
-          { id: "pro", name: "School Pro", price: "₱3,999", tagline: "For schools with active SPED programs", features: ["Unlimited students", "Unlimited screenings", "Unlimited IEP plans", "Unlimited DepEd reports", "Games Assessment module", "Advanced analytics"], limits: { students: Infinity, screenings: Infinity, iep: Infinity, reports: Infinity } },
-          { id: "district", name: "District License", price: "Custom", tagline: "Multi-school & division deployments", features: ["All School Pro features", "Division-wide dashboard", "DepEd API integration", "Dedicated training & support", "Custom data export"], limits: { students: Infinity, screenings: Infinity, iep: Infinity, reports: Infinity } },
+          { id: "small-school", name: "Small School", price: "₱50/student/yr", tagline: "Up to 200 students", features: ["Teacher observation system", "SPED tracking", "Basic referral engine", "Parent-school portal", "Up to 200 students"], limits: { students: 200, screenings: 20, iep: 5, reports: 2 } },
+          { id: "medium-school", name: "Medium School", price: "₱30/student/yr", tagline: "200–1,000 students", features: ["All Small features", "Guidance counselor dashboard", "Class-wide analytics", "Automated clinical referrals", "School-wide risk reporting"], limits: { students: Infinity, screenings: Infinity, iep: Infinity, reports: Infinity } },
+          { id: "large-network", name: "Large Network", price: "Custom", tagline: "1,000+ students, multi-campus", features: ["All Medium features", "Multi-campus management", "District-level analytics", "DOH data integration", "Dedicated account manager"], limits: { students: Infinity, screenings: Infinity, iep: Infinity, reports: Infinity } },
         ];
         const activePlan = SCHOOL_PLANS[0];
         const usage = { students: 127, screenings: 11, iep: 3, reports: 1 };
@@ -1202,6 +1204,150 @@ function SchoolSettingsTab() {
   );
 }
 
+function SchoolBillingTab() {
+  const PLANS = [
+    { id: "small-school", name: "Small School", pricePerStudent: 50, billingNote: "per student / year", maxStudents: 200, tagline: "Up to 200 students", highlight: false,
+      features: ["Teacher observation system", "SPED tracking", "Basic referral engine", "Parent-school portal", "Up to 200 students"] },
+    { id: "medium-school", name: "Medium School", pricePerStudent: 30, billingNote: "per student / year", maxStudents: 1000, tagline: "200–1,000 students", highlight: true,
+      features: ["All Small features", "Guidance counselor dashboard", "Class-wide analytics", "Automated clinical referrals", "School-wide risk reporting"] },
+    { id: "large-network", name: "Large Network", pricePerStudent: null, billingNote: "Custom pricing", maxStudents: null, tagline: "1,000+ students", highlight: false,
+      features: ["All Medium features", "Multi-campus management", "District-level analytics", "DOH data integration", "Dedicated account manager"] },
+  ];
+  const PAYMENT_METHODS = [
+    { id: "gcash", name: "GCash", icon: "📱", instructions: ["Open GCash → Send Money → GCash", "Number: 0917-XXX-XXXX (ACCENTECX AI)", "Enter the total annual amount (students × rate)", 'Reference: "NEOBRAIN-SCHOOL-[school name]"', "Screenshot the transaction", "Enter the reference number below"] },
+    { id: "bpi", name: "BPI Transfer", icon: "🏦", instructions: ["Log into BPI Online or the BPI app", "Transfer → Other BPI Account", "Account Name: ACCENTECX AI Inc.", "Account Number: 1234-5678-90", "Enter the total annual amount", 'Remarks: "NEOBRAIN-SCHOOL-[school name]"', "Enter the transaction reference number below"] },
+    { id: "unionbank", name: "UnionBank", icon: "💳", instructions: ["Open UnionBank Online app", "Send Money → Other Bank / InstaPay", "Account: ACCENTECX AI Inc., 0987-6543-21", "Enter the total annual amount", 'Reference: "NEOBRAIN-SCHOOL-[school name]"', "Enter the transaction reference below"] },
+  ];
+  const RANK: Record<string, number> = { "small-school": 0, "medium-school": 1, "large-network": 2 };
+  const currentPlan = "small-school";
+  const [studentCount, setStudentCount] = useState(127);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [method, setMethod] = useState("gcash");
+  const [ref, setRef] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
+  const chosen = PLANS.find(p => p.id === selectedPlan);
+  const refHint = "NEOBRAIN-SCHOOL-yourschool";
+  const totalAnnual = chosen?.pricePerStudent !== null && chosen?.pricePerStudent !== undefined ? chosen.pricePerStudent * studentCount : null;
+
+  function copyRef() { navigator.clipboard.writeText(refHint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }); }
+  async function handleSubmit() {
+    if (!selectedPlan || !ref.trim()) return;
+    setSubmitting(true); setError("");
+    try { await new Promise(r => setTimeout(r, 900)); setSubmitted(true); }
+    catch { setError("Failed to submit. Email support@accentecx.com for assistance."); }
+    finally { setSubmitting(false); }
+  }
+
+  return (
+    <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold">Subscription & Billing</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage your school's NEOBRAIN plan. Per-student annual pricing. Activation within 24 hours on business days.</p>
+      </div>
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="pt-5 pb-5 px-6 flex items-center gap-4 flex-wrap">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shrink-0"><CreditCard className="h-5 w-5 text-secondary" /></div>
+          <div>
+            <p className="text-xs text-muted-foreground">Current Plan</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-lg font-bold">Small School</p>
+              <Badge className="bg-green-100 text-green-800 text-xs"><BadgeCheck className="h-3 w-3 mr-1 inline" />Active</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><Clock className="h-3 w-3" /> ₱50/student/year · {studentCount} students enrolled · ₱{(50 * studentCount).toLocaleString()}/year</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <h2 className="font-semibold">Choose Your Plan</h2>
+          <div className="flex items-center gap-2 text-sm">
+            <Label htmlFor="student-count" className="text-muted-foreground text-xs">Enrolled students:</Label>
+            <Input id="student-count" type="number" min={1} value={studentCount} onChange={e => setStudentCount(Number(e.target.value) || 1)} className="h-8 w-24 text-sm" />
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-3 gap-4">
+          {PLANS.map(plan => {
+            const estimatedTotal = plan.pricePerStudent !== null ? plan.pricePerStudent * studentCount : null;
+            const isCurrent = plan.id === currentPlan;
+            const isSelected = selectedPlan === plan.id;
+            const isDowngrade = RANK[plan.id] < RANK[currentPlan];
+            const canSelect = !isCurrent && !isDowngrade;
+            return (
+              <div key={plan.id} onClick={() => canSelect && setSelectedPlan(isSelected ? null : plan.id)}
+                className={`relative rounded-2xl border-2 p-5 transition-all ${isSelected ? "border-primary bg-primary/5 shadow-md" : plan.highlight && canSelect ? "border-secondary/60 bg-secondary/5" : isCurrent ? "border-green-300 bg-green-50/50" : canSelect ? "border-border hover:border-primary/30 cursor-pointer" : "border-border opacity-60 cursor-not-allowed"}`}>
+                {plan.highlight && canSelect && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><span className="bg-primary text-primary-foreground text-[10px] font-bold px-3 py-0.5 rounded-full flex items-center gap-1"><Zap className="h-2.5 w-2.5" />POPULAR</span></div>}
+                {isCurrent && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><span className="bg-green-600 text-white text-[10px] font-bold px-3 py-0.5 rounded-full flex items-center gap-1"><BadgeCheck className="h-2.5 w-2.5" />CURRENT</span></div>}
+                <p className="font-bold text-sm">{plan.name}</p>
+                <p className="text-2xl font-bold text-primary mt-1">
+                  {plan.pricePerStudent === null ? "Custom" : `₱${plan.pricePerStudent}`}
+                  {plan.pricePerStudent !== null && <span className="text-xs font-normal text-muted-foreground"> /student/yr</span>}
+                </p>
+                {estimatedTotal !== null && <p className="text-xs text-muted-foreground mb-1">≈ ₱{estimatedTotal.toLocaleString()} / year for {studentCount} students</p>}
+                <p className="text-xs text-muted-foreground mt-1 mb-3">{plan.tagline}</p>
+                <ul className="space-y-1.5">{plan.features.map(f => <li key={f} className="flex items-start gap-1.5 text-xs"><Check className="h-3.5 w-3.5 text-green-600 shrink-0 mt-0.5" />{f}</li>)}</ul>
+                {plan.pricePerStudent === null && canSelect && <a href="mailto:sales@accentecx.com" className="mt-3 block text-xs text-center text-primary font-medium border border-primary/20 rounded-full py-1.5 hover:bg-primary/5">Contact Sales</a>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {selectedPlan && chosen?.pricePerStudent !== null && !submitted && (
+        <div className="space-y-6">
+          <h2 className="font-semibold">Complete Payment</h2>
+          <div className="flex gap-2 flex-wrap">
+            {PAYMENT_METHODS.map(pm => <button key={pm.id} onClick={() => setMethod(pm.id)} className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all ${method === pm.id ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}><span>{pm.icon}</span>{pm.name}</button>)}
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="rounded-2xl border bg-muted/30 p-5">
+              <p className="font-semibold text-sm mb-3">Payment Instructions</p>
+              <ol className="space-y-2.5">{PAYMENT_METHODS.find(p => p.id === method)?.instructions.map((step, i) => (
+                <li key={i} className="flex gap-2 text-sm text-muted-foreground"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0 mt-0.5">{i + 1}</span>{step}</li>
+              ))}</ol>
+              <div className="mt-4 rounded-xl bg-primary/5 border border-primary/20 p-3 flex items-center justify-between gap-2">
+                <div><p className="text-[10px] text-muted-foreground uppercase tracking-wide">Use as reference</p><p className="text-sm font-mono font-bold text-primary">{refHint}</p></div>
+                <button onClick={copyRef} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 shrink-0">{copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}{copied ? "Copied" : "Copy"}</button>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="pt-4 pb-4 px-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div><p className="text-xs text-muted-foreground">Plan</p><p className="font-bold">{chosen?.name}</p></div>
+                    <div className="text-right"><p className="text-xs text-muted-foreground">Annual Total</p><p className="text-xl font-bold text-primary">₱{(totalAnnual ?? 0).toLocaleString()}</p></div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">₱{chosen?.pricePerStudent}/student × {studentCount} students</p>
+                </CardContent>
+              </Card>
+              <div>
+                <Label className="text-sm font-medium">Transaction Reference Number</Label>
+                <Input className="mt-1" placeholder="e.g. GCASH-20260528-XXXXXXXX" value={ref} onChange={e => setRef(e.target.value)} />
+                <p className="text-xs text-muted-foreground mt-1">The reference number from your GCash or bank receipt</p>
+              </div>
+              {error && <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div>}
+              <Button className="w-full rounded-xl h-11" disabled={!ref.trim() || submitting} onClick={handleSubmit}>{submitting ? "Submitting…" : "Submit Payment Reference"}</Button>
+              <p className="text-xs text-muted-foreground text-center">Activation within 24h on business days. Questions? <strong>support@accentecx.com</strong></p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {submitted && (
+        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="rounded-2xl border border-green-200 bg-green-50 p-8 text-center">
+          <BadgeCheck className="h-12 w-12 text-green-600 mx-auto mb-3" />
+          <h3 className="font-bold text-lg text-green-800">Payment Reference Submitted!</h3>
+          <p className="text-sm text-green-700 mt-2 max-w-sm mx-auto">Reference <strong className="font-mono">{ref}</strong> received. Your <strong>{chosen?.name}</strong> plan will activate within 24 hours on business days.</p>
+          <p className="text-xs text-green-600 mt-4">After activation, log out and back in to access your new plan features.</p>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
 export default function TherapistDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -1216,6 +1362,7 @@ export default function TherapistDashboard() {
     "reports": <DepEdReportsTab />,
     "analytics": <SchoolAnalyticsTab />,
     "team": <SchoolTeamTab />,
+    "billing": <SchoolBillingTab />,
     "settings": <SchoolSettingsTab />,
   };
 

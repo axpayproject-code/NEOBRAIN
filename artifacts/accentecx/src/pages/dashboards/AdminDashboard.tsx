@@ -6,7 +6,8 @@ import {
   BarChart3, TrendingUp, Server, AlertTriangle,
   CheckCircle, Clock, Globe, GraduationCap, Stethoscope,
   Plus, Download, RefreshCw, X, Mail, Shield,
-  MapPin, FileText, Activity, FlaskConical, UserPlus, Eye, EyeOff, Settings, CreditCard, Zap
+  MapPin, FileText, Activity, FlaskConical, UserPlus, Eye, EyeOff, Settings, CreditCard, Zap,
+  Check, Copy, BadgeCheck, AlertCircle, Send
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,7 @@ const NAV: NavItem[] = [
   { id: "doh-reporting", label: "DOH / PhilHealth", icon: FileText },
   { id: "coordination", label: "LGU Coordination", icon: Users },
   { id: "team", label: "Manage Team", icon: UserPlus },
+  { id: "billing", label: "Billing & Plans", icon: CreditCard },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -1178,9 +1180,9 @@ function GovSettingsTab() {
       {/* Billing & Usage */}
       {(() => {
         const GOV_PLANS = [
-          { id: "provincial", name: "Provincial", price: "₱9,999", tagline: "For provincial health offices & LGUs", features: ["Up to 50 LGU partners", "Up to 10,000 children in network", "Unlimited screenings", "10 DOH reports/month", "Population analytics dashboard"], limits: { partners: 50, children: 10000, reports: 10 } },
-          { id: "regional", name: "Regional", price: "₱24,999", tagline: "For regional government deployments", features: ["Up to 300 LGU partners", "Up to 100,000 children", "Unlimited screenings & reports", "PhilHealth API integration", "AI population intelligence", "Priority DOH data pipeline"], limits: { partners: 300, children: 100000, reports: Infinity } },
-          { id: "national", name: "National", price: "Custom", tagline: "For DOH national-level access", features: ["Unlimited LGU partners", "National-scale child registry", "All Regional features", "Dedicated data engineering", "Custom API integrations", "Dedicated government liaison"], limits: { partners: Infinity, children: Infinity, reports: Infinity } },
+          { id: "rhu", name: "RHU / Barangay", price: "Subsidized", tagline: "DOH Grant / Subsidized access", features: ["RHU-level screening portal", "Basic risk flagging", "Referral to partner clinics", "Barangay health reporting"], limits: { partners: 10, children: 1000, reports: 5 } },
+          { id: "city", name: "City / Municipality", price: "Contact for Pricing", tagline: "Municipal health offices", features: ["All RHU features", "Municipal risk dashboard", "School integration", "Clinic network access", "Monthly DOH-ready reports"], limits: { partners: 50, children: 10000, reports: 10 } },
+          { id: "provincial", name: "Provincial / Regional", price: "Custom Contract", tagline: "Provincial health offices & regions", features: ["All City features", "Regional risk heatmaps", "Intervention forecasting", "LGU budget planning tools", "Research data access"], limits: { partners: Infinity, children: Infinity, reports: Infinity } },
         ];
         const activePlan = GOV_PLANS[0];
         const usage = { partners: 23, children: 4218, reports: 6 };
@@ -1255,6 +1257,103 @@ function GovSettingsTab() {
   );
 }
 
+function GovBillingTab() {
+  const TIERS = [
+    { id: "rhu", name: "RHU / Barangay", price: "Subsidized", priceNote: "DOH Grant / Subsidized", tagline: "Barangay health units & RHUs", highlight: false,
+      features: ["RHU-level screening portal", "Basic risk flagging", "Referral to partner clinics", "Barangay health reporting"], contact: true },
+    { id: "city", name: "City / Municipality", price: "Contact for Pricing", priceNote: "Contact for Pricing", tagline: "Municipal health offices", highlight: false,
+      features: ["All RHU features", "Municipal risk dashboard", "School integration", "Clinic network access", "Monthly DOH-ready reports"], contact: true },
+    { id: "provincial", name: "Provincial / Regional", price: "Custom Contract", priceNote: "Custom Contract", tagline: "Provincial health offices & regions", highlight: true,
+      features: ["All City features", "Regional risk heatmaps", "Intervention forecasting", "LGU budget planning tools", "Research data access"], contact: true },
+    { id: "national", name: "National / DOH Program", price: "DOH Partnership", priceNote: "DOH Partnership", tagline: "DOH national-level deployment", highlight: false,
+      features: ["All Provincial features", "National analytics layer", "API integration with DOH systems", "Dedicated implementation team", "Research dataset access", "24/7 technical support"], contact: true },
+  ];
+  const [submittedContact, setSubmittedContact] = useState(false);
+  const [contactTier, setContactTier] = useState<string | null>(null);
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactMsg, setContactMsg] = useState("");
+  const [sending, setSending] = useState(false);
+
+  async function handleContact() {
+    if (!contactTier || !contactName.trim() || !contactEmail.trim()) return;
+    setSending(true);
+    await new Promise(r => setTimeout(r, 900));
+    setSending(false);
+    setSubmittedContact(true);
+  }
+
+  return (
+    <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold">Subscription & Billing</h1>
+        <p className="text-sm text-muted-foreground mt-1">Government & LGU plans are custom-contracted. Select a tier and our team will reach out with pricing and onboarding details.</p>
+      </div>
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="pt-5 pb-5 px-6 flex items-center gap-4 flex-wrap">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shrink-0"><CreditCard className="h-5 w-5 text-secondary" /></div>
+          <div>
+            <p className="text-xs text-muted-foreground">Current Plan</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-lg font-bold">Provincial / Regional</p>
+              <Badge className="bg-green-100 text-green-800 text-xs"><BadgeCheck className="h-3 w-3 mr-1 inline" />Active</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><Clock className="h-3 w-3" /> Custom government contract · Annual billing</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div>
+        <h2 className="font-semibold mb-4">Government Tiers</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {TIERS.map(tier => {
+            const isSelected = contactTier === tier.id;
+            return (
+              <div key={tier.id} onClick={() => setContactTier(isSelected ? null : tier.id)}
+                className={`relative rounded-2xl border-2 p-5 cursor-pointer transition-all ${isSelected ? "border-primary bg-primary/5 shadow-md" : tier.highlight ? "border-secondary/60 bg-secondary/5 hover:border-primary/40" : "border-border hover:border-primary/30"}`}>
+                {tier.highlight && <div className="absolute -top-3 left-1/2 -translate-x-1/2"><span className="bg-primary text-primary-foreground text-[10px] font-bold px-3 py-0.5 rounded-full">POPULAR</span></div>}
+                <p className="font-bold text-sm">{tier.name}</p>
+                <p className="text-sm font-semibold text-primary mt-1">{tier.price}</p>
+                <p className="text-xs text-muted-foreground mt-1 mb-3">{tier.tagline}</p>
+                <ul className="space-y-1.5">{tier.features.map(f => <li key={f} className="flex items-start gap-1.5 text-xs"><Check className="h-3.5 w-3.5 text-green-600 shrink-0 mt-0.5" />{f}</li>)}</ul>
+                {isSelected && <div className="mt-3 text-center text-xs font-semibold text-primary">Selected — fill in the form below</div>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {contactTier && !submittedContact && (
+        <div className="space-y-4 rounded-2xl border p-6 bg-muted/20">
+          <h2 className="font-semibold">Request Upgrade — {TIERS.find(t => t.id === contactTier)?.name}</h2>
+          <p className="text-sm text-muted-foreground">Fill in your details and our government partnerships team will reach out within 2 business days.</p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5"><Label>Full Name / Designation</Label><Input placeholder="Dr. Juan dela Cruz, Provincial Health Officer" value={contactName} onChange={e => setContactName(e.target.value)} /></div>
+            <div className="space-y-1.5"><Label>Official Email</Label><Input placeholder="jdelacruz@province.gov.ph" type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} /></div>
+            <div className="space-y-1.5 sm:col-span-2"><Label>LGU / Agency & Additional Notes</Label><Input placeholder="Province of Rizal, Region IV-A — expecting 15 partner RHUs" value={contactMsg} onChange={e => setContactMsg(e.target.value)} /></div>
+          </div>
+          <Button className="rounded-full gap-1.5 h-10 px-6" disabled={!contactName.trim() || !contactEmail.trim() || sending} onClick={handleContact}>
+            {sending ? "Sending…" : <><Send className="h-3.5 w-3.5" /> Send Upgrade Request</>}
+          </Button>
+        </div>
+      )}
+
+      {submittedContact && (
+        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="rounded-2xl border border-green-200 bg-green-50 p-8 text-center">
+          <BadgeCheck className="h-12 w-12 text-green-600 mx-auto mb-3" />
+          <h3 className="font-bold text-lg text-green-800">Upgrade Request Sent!</h3>
+          <p className="text-sm text-green-700 mt-2 max-w-sm mx-auto">Our government partnerships team will reach out to <strong>{contactEmail}</strong> within 2 business days to discuss the <strong>{TIERS.find(t => t.id === contactTier)?.name}</strong> tier.</p>
+        </motion.div>
+      )}
+
+      <div className="rounded-2xl border bg-muted/20 p-5">
+        <p className="text-sm font-semibold mb-1">Direct Contact</p>
+        <p className="text-xs text-muted-foreground">For urgent billing inquiries or existing contract amendments, email <strong>gov@accentecx.com</strong> or call <strong>(02) 8XXX-XXXX</strong>.</p>
+      </div>
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   overview: NationalOverviewTab,
@@ -1266,6 +1365,7 @@ const TABS: Record<string, TabComponent> = {
   "doh-reporting": DOHReportingTab,
   coordination: LGUCoordinationTab,
   team: GovTeamTab,
+  billing: GovBillingTab,
   settings: GovSettingsTab,
 };
 
