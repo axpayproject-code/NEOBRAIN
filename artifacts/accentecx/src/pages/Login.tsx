@@ -307,7 +307,7 @@ export default function Login() {
                   <p className="text-muted-foreground text-sm">Select your role — each has its own workspace and onboarding</p>
                 </div>
 
-                <form onSubmit={handleSignUp} className="space-y-5">
+                <div className="space-y-5">
                   {/* Role selection */}
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold">Your role</Label>
@@ -319,7 +319,7 @@ export default function Login() {
                           <button
                             key={role.id}
                             type="button"
-                            onClick={() => setSelectedRole(role.id)}
+                            onClick={() => { setSelectedRole(role.id); setErrorMsg(""); }}
                             data-testid={`signup-role-${role.id}`}
                             className={`w-full flex items-center gap-4 p-3 rounded-xl border-2 text-left transition-all ${
                               active
@@ -343,40 +343,52 @@ export default function Login() {
                     </div>
                   </div>
 
-                  {/* Account details */}
-                  <div className="space-y-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="name" className="text-sm">Full Name</Label>
-                      <Input id="name" name="name" type="text" placeholder="Your full name" required className="h-11 rounded-xl" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="signup-email" className="text-sm">Email</Label>
-                      <Input id="signup-email" name="email" type="email" placeholder="name@example.com" required className="h-11 rounded-xl" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="signup-password" className="text-sm">Password</Label>
-                      <Input id="signup-password" name="password" type="password" placeholder="Min 6 characters" required minLength={6} className="h-11 rounded-xl" />
-                    </div>
-                  </div>
-
-                  {errorMsg && (
-                    <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
-                      <AlertCircle className="h-4 w-4 shrink-0" />
-                      {errorMsg}
+                  {/* Family role: quick signup form. Org roles: redirect to full onboarding */}
+                  {selectedRole === "family" ? (
+                    <form onSubmit={handleSignUp} className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="name" className="text-sm">Full Name</Label>
+                        <Input id="name" name="name" type="text" placeholder="Your full name" required className="h-11 rounded-xl" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="signup-email" className="text-sm">Email</Label>
+                        <Input id="signup-email" name="email" type="email" placeholder="name@example.com" required className="h-11 rounded-xl" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="signup-password" className="text-sm">Password</Label>
+                        <Input id="signup-password" name="password" type="password" placeholder="Min 6 characters" required minLength={6} className="h-11 rounded-xl" />
+                      </div>
+                      {errorMsg && (
+                        <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+                          <AlertCircle className="h-4 w-4 shrink-0" />
+                          {errorMsg}
+                        </div>
+                      )}
+                      <Button type="submit" className="w-full h-12 rounded-full text-base font-bold bg-primary text-primary-foreground" disabled={loading} data-testid="button-continue-signup">
+                        {loading ? "Creating account…" : <><span>Create Account</span> <ArrowRight className="h-4 w-4 ml-1" /></>}
+                      </Button>
+                    </form>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-1.5">
+                        <p className="text-sm font-semibold text-foreground">Organization onboarding</p>
+                        <p className="text-xs text-muted-foreground">
+                          {selectedRole === "clinic" && "Set up your clinic or hospital workspace with DOH licensing, PhilHealth accreditation, plan selection, and admin account — takes about 3 minutes."}
+                          {selectedRole === "school" && "Register your school with DepEd details, grade coverage, enrollment size, plan selection, and admin account — takes about 3 minutes."}
+                          {selectedRole === "government" && "Register your government agency with LGU details, regional coverage, plan selection, and responsible officer account — takes about 3 minutes."}
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => setLocation(`/onboarding?role=${selectedRole}`)}
+                        className="w-full h-12 rounded-full text-base font-bold bg-primary text-primary-foreground"
+                        data-testid="button-continue-signup"
+                      >
+                        Begin {ROLES.find(r => r.id === selectedRole)?.label} Setup <ArrowRight className="h-4 w-4 ml-1" />
+                      </Button>
                     </div>
                   )}
-
-                  <Button
-                    type="submit"
-                    className="w-full h-12 rounded-full text-base font-bold bg-primary text-primary-foreground"
-                    disabled={loading}
-                    data-testid="button-continue-signup"
-                  >
-                    {loading ? "Creating account…" : (
-                      <>Create Account as {ROLES.find(r => r.id === selectedRole)?.label} <ArrowRight className="h-4 w-4 ml-1" /></>
-                    )}
-                  </Button>
-                </form>
+                </div>
 
                 <p className="text-center text-sm text-muted-foreground mt-5">
                   Already have an account?{" "}
