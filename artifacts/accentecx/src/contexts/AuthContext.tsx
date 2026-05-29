@@ -30,11 +30,19 @@ const AuthContext = createContext<AuthContextValue>({
   refreshTier: async () => {},
 });
 
+const VALID_ROLES: UserRole[] = ["family", "clinic", "school", "government", "superadmin"];
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
     try {
       const stored = localStorage.getItem("accentecx_user");
-      return stored ? JSON.parse(stored) : null;
+      if (!stored) return null;
+      const parsed = JSON.parse(stored) as AuthUser;
+      if (!parsed?.role || !VALID_ROLES.includes(parsed.role)) {
+        localStorage.removeItem("accentecx_user");
+        return null;
+      }
+      return parsed;
     } catch {
       return null;
     }
