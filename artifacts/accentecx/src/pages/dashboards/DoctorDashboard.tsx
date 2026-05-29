@@ -3,7 +3,8 @@ import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashb
 import {
   Users, ClipboardList, Video, Stethoscope, FileText,
   HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2,
-  CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck
+  CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck,
+  BarChart3, MessageSquare, Download, Send, CheckCircle
 } from "lucide-react";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import AvailabilityManagerWidget from "@/components/appointments/AvailabilityManager";
@@ -23,7 +24,7 @@ import {
   getListTherapyPlansQueryKey, useGetChildDomainScores,
   useSetMeetingUrl, getListAppointmentsQueryKey
 } from "@workspace/api-client-react";
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
@@ -38,6 +39,8 @@ const NAV: NavItem[] = [
   { id: "diagnosis", label: "Diagnosis Notes", icon: FileText },
   { id: "therapy-planning", label: "Therapy Planning", icon: HeartPulse },
   { id: "history", label: "Patient History", icon: History },
+  { id: "parent-portal", label: "Parent Portal", icon: MessageSquare },
+  { id: "analytics", label: "Clinic Analytics", icon: BarChart3 },
   { id: "calendar", label: "My Availability", icon: CalendarDays },
 ];
 
@@ -1093,6 +1096,198 @@ function AppointmentsTab() {
   );
 }
 
+type ParentMessage = { from: string; childName: string; body: string; date: string; read: boolean; type: string };
+
+function ClinicParentPortalTab() {
+  const { data: children } = useListChildren({ query: { queryKey: ["children-portal"] } });
+  const [messages, setMessages] = useState<ParentMessage[]>([
+    { from: "Maria Santos", childName: "Aaliyah Santos", body: "We noticed Aaliyah has been having difficulty sleeping. Could this be related to the behavioral findings from last week's session?", date: "May 28", read: false, type: "question" },
+    { from: "Rodrigo Cruz", childName: "Bienvenido Cruz", body: "Thank you for the therapy plan — we've started the exercises at home. His focus does seem better in the evenings.", date: "May 26", read: true, type: "update" },
+    { from: "Elena Reyes", childName: "Carmela Reyes", body: "Requesting a reschedule for June 3 — we have a school event. Can we move to June 5 afternoon instead?", date: "May 25", read: false, type: "reschedule" },
+  ]);
+  const [selected, setSelected] = useState<ParentMessage | null>(null);
+  const [reply, setReply] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const TYPE_COLORS: Record<string, string> = {
+    question: "bg-blue-100 text-blue-800",
+    update: "bg-green-100 text-green-800",
+    reschedule: "bg-orange-100 text-orange-800",
+    concern: "bg-red-100 text-red-800",
+  };
+
+  const handleSend = async () => {
+    if (!reply.trim() || !selected) return;
+    setSending(true);
+    await new Promise(r => setTimeout(r, 600));
+    setMessages(ms => ms.map(m => m === selected ? { ...m, read: true } : m));
+    setSending(false);
+    setReply("");
+    setSelected(null);
+  };
+
+  const unread = messages.filter(m => !m.read).length;
+
+  return (
+    <div className="p-6 lg:p-8 space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold">Parent Portal</h1>
+        <p className="text-sm text-muted-foreground">
+          Direct communication with families — {unread > 0 ? `${unread} unread message${unread > 1 ? "s" : ""}` : "all messages read"}
+        </p>
+      </div>
+
+      <div className="grid lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-2 space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Messages from Families</p>
+          {messages.map((m, i) => (
+            <button
+              key={i}
+              onClick={() => { setSelected(m); setReply(""); }}
+              className={`w-full text-left rounded-xl border p-4 transition-colors ${selected === m ? "bg-primary/5 border-primary/30" : "bg-card hover:bg-muted/30"}`}
+              data-testid={`portal-msg-${i}`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-semibold text-sm">{m.from}</span>
+                {!m.read && <span className="flex h-2 w-2 rounded-full bg-primary shrink-0" />}
+                <Badge className={`text-xs ml-auto ${TYPE_COLORS[m.type] ?? "bg-muted"}`}>{m.type}</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">Re: {m.childName} · {m.date}</p>
+              <p className="text-xs text-muted-foreground truncate mt-1">{m.body}</p>
+            </button>
+          ))}
+        </div>
+
+        <div className="lg:col-span-3">
+          {selected ? (
+            <div className="rounded-xl border bg-card p-6 space-y-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold">{selected.from}</span>
+                  <Badge className={`text-xs ${TYPE_COLORS[selected.type] ?? "bg-muted"}`}>{selected.type}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">Re: {selected.childName} · {selected.date}</p>
+              </div>
+              <div className="rounded-lg bg-muted/30 border p-4 text-sm text-foreground leading-relaxed">
+                {selected.body}
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Clinical Response to {selected.from}</Label>
+                <Textarea rows={4} value={reply} onChange={e => setReply(e.target.value)} placeholder="Type your clinical response. This will be sent directly to the family's app..." data-testid="input-portal-reply" />
+                <Button className="rounded-full gap-2" onClick={handleSend} disabled={sending || !reply.trim()} data-testid="button-portal-send">
+                  <Send className="h-4 w-4" />
+                  {sending ? "Sending..." : "Send to Family"}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-border h-full min-h-[200px] flex items-center justify-center">
+              <p className="text-sm text-muted-foreground">Select a message to respond to a family</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClinicAnalyticsTab() {
+  const { data: children } = useListChildren({ query: { queryKey: ["children-clinic-analytics"] } });
+  const { data: appointments } = useListAppointments({}, { query: { queryKey: ["appts-clinic-analytics"] } });
+  const { data: plans } = useListTherapyPlans({}, { query: { queryKey: ["plans-clinic-analytics"] } });
+  const [exported, setExported] = useState(false);
+
+  const monthlyData = [
+    { month: "Jan", patients: 38, appointments: 92, reports: 24 },
+    { month: "Feb", patients: 44, appointments: 108, reports: 31 },
+    { month: "Mar", patients: 51, appointments: 127, reports: 38 },
+    { month: "Apr", patients: 58, appointments: 143, reports: 44 },
+    { month: "May", patients: 62, appointments: 156, reports: 52 },
+  ];
+
+  const ehrFormats = [
+    { name: "HL7 FHIR R4 — Full Patient Record", format: "JSON", patients: children?.length ?? 62 },
+    { name: "Philippine PHIE-compatible Export", format: "XML", patients: children?.length ?? 62 },
+    { name: "Developmental Screening Summary", format: "CSV", patients: children?.length ?? 62 },
+    { name: "Therapy Plan Export (all active)", format: "PDF", patients: plans?.length ?? 18 },
+    { name: "Appointment History Log", format: "CSV", patients: appointments?.length ?? 156 },
+  ];
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Clinic Analytics</h1>
+          <p className="text-sm text-muted-foreground">Clinic-level performance metrics and reporting</p>
+        </div>
+        <Button variant="outline" className="rounded-full gap-2" onClick={() => { setExported(true); setTimeout(() => setExported(false), 2000); }} data-testid="button-export-analytics">
+          <Download className="h-4 w-4" />
+          {exported ? "Exported!" : "Export Report"}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: "Total Patients", value: children?.length ?? 62, delta: "+4 this month" },
+          { label: "Appointments (May)", value: appointments?.length ?? 156, delta: "+9% vs April" },
+          { label: "Active Therapy Plans", value: plans?.length ?? 18, delta: "Across all types" },
+          { label: "Avg Risk Score", value: "Moderate", delta: "Down from High" },
+        ].map(s => (
+          <Card key={s.label}>
+            <CardContent className="pt-5 pb-4 px-5">
+              <p className="text-sm text-muted-foreground">{s.label}</p>
+              <p className="text-2xl font-bold">{s.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{s.delta}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base">Monthly Clinic Activity</CardTitle></CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={monthlyData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
+              <Bar dataKey="patients" name="Patients" fill="#0038A8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="appointments" name="Appointments" fill="#9FE870" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="reports" name="AI Reports" fill="#FCD116" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-base font-semibold">EHR Export</p>
+          <Badge className="text-xs bg-green-100 text-green-800">PHIE Compatible</Badge>
+        </div>
+        <div className="space-y-2">
+          {ehrFormats.map((e, i) => (
+            <div key={i} className="rounded-xl border bg-card p-4 flex items-center gap-4" data-testid={`ehr-export-${i}`}>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">{e.name}</p>
+                <p className="text-xs text-muted-foreground">{e.patients} records · {e.format}</p>
+              </div>
+              <Button
+                size="sm" variant="outline" className="rounded-full gap-1.5 shrink-0"
+                data-testid={`button-ehr-${i}`}
+                onClick={() => { setExported(true); setTimeout(() => setExported(false), 2000); }}
+              >
+                <Download className="h-3.5 w-3.5" /> Export {e.format}
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   queue: PatientQueueTab,
@@ -1103,6 +1298,8 @@ const TABS: Record<string, TabComponent> = {
   diagnosis: DiagnosisNotesTab,
   "therapy-planning": TherapyPlanningTab,
   history: PatientHistoryTab,
+  "parent-portal": ClinicParentPortalTab,
+  analytics: ClinicAnalyticsTab,
   calendar: DoctorAvailabilityTab,
 };
 

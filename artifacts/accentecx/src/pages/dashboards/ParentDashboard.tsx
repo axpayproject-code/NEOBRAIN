@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, ClipboardList, Brain, Calendar,
   HeartPulse, FileText, Settings, Plus, ChevronRight,
   AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star, CreditCard,
-  Trash2, Download, Pencil
+  Trash2, Download, Pencil, MessageSquare, Heart, BookOpen, ThumbsUp
 } from "lucide-react";
 import { getPlanFeatures } from "@/lib/planFeatures";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
@@ -69,6 +69,7 @@ const NAV: NavItem[] = [
   { id: "appointments", label: "Appointments", icon: Calendar },
   { id: "therapy", label: "Therapy Tracking", icon: HeartPulse },
   { id: "reports", label: "Reports", icon: FileText },
+  { id: "community", label: "Community", icon: MessageSquare },
   { id: "billing", label: "Billing", icon: CreditCard },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -1251,6 +1252,173 @@ function VideoTab() {
   );
 }
 
+type CommunityPost = { id: number; author: string; avatar: string; title: string; body: string; category: string; likes: number; replies: number; time: string; liked: boolean };
+
+function CommunityTab() {
+  const [posts, setPosts] = useState<CommunityPost[]>([
+    { id: 1, author: "Maria S.", avatar: "M", title: "Speech delay at 2.5 years — when did your child start catching up?", body: "Our daughter was flagged for a speech delay at her 2-year screening. We've started speech therapy but I'm wondering about other families' timelines. Any encouragement helps!", category: "Speech & Language", likes: 24, replies: 11, time: "2 hrs ago", liked: false },
+    { id: 2, author: "Rodrigo C.", avatar: "R", title: "Tip: Visual schedule cards made a huge difference for us", body: "We printed simple picture cards for our son's morning routine — eat, brush, dress, bag. After 2 weeks, he went from daily meltdowns to calm transitions. Sharing because it cost ₱0 to try!", category: "Parent Tips", likes: 41, replies: 8, time: "5 hrs ago", liked: false },
+    { id: 3, author: "Ana T.", avatar: "A", title: "Sensory processing — how do you handle supermarket trips?", body: "Our 4-year-old has sensory sensitivities and grocery shopping is a nightmare. We've tried noise-canceling headphones but he keeps pulling them off. What's worked for your family?", category: "Sensory", likes: 17, replies: 14, time: "1 day ago", liked: false },
+    { id: 4, author: "Jun M.", avatar: "J", title: "NEOBRAIN AI report helped us get an earlier clinic slot", body: "Sharing this because it might help others — I showed the AI risk summary to our pediatrician and she prioritized our referral. The report was well-organized and the doctor took it seriously.", category: "Platform Tips", likes: 33, replies: 5, time: "2 days ago", liked: false },
+  ]);
+
+  const [newPost, setNewPost] = useState({ title: "", body: "", category: "General" });
+  const [composing, setComposing] = useState(false);
+  const [posting, setPosting] = useState(false);
+
+  const CATEGORIES = ["General", "Speech & Language", "Sensory", "Behavioral", "OT", "Parent Tips", "Platform Tips", "School Support"];
+
+  const CAT_COLORS: Record<string, string> = {
+    "Speech & Language": "bg-blue-100 text-blue-800",
+    "Sensory": "bg-purple-100 text-purple-800",
+    "Behavioral": "bg-orange-100 text-orange-800",
+    "OT": "bg-teal-100 text-teal-800",
+    "Parent Tips": "bg-green-100 text-green-800",
+    "Platform Tips": "bg-primary/10 text-primary",
+    "School Support": "bg-yellow-100 text-yellow-800",
+    "General": "bg-muted text-muted-foreground",
+  };
+
+  const handlePost = async () => {
+    if (!newPost.title.trim() || !newPost.body.trim()) return;
+    setPosting(true);
+    await new Promise(r => setTimeout(r, 600));
+    setPosts(p => [{
+      id: Date.now(), author: "You", avatar: "Y", title: newPost.title, body: newPost.body,
+      category: newPost.category, likes: 0, replies: 0, time: "Just now", liked: false,
+    }, ...p]);
+    setPosting(false);
+    setComposing(false);
+    setNewPost({ title: "", body: "", category: "General" });
+  };
+
+  const handleLike = (id: number) => {
+    setPosts(ps => ps.map(p => p.id === id ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p));
+  };
+
+  const RESOURCES = [
+    { title: "Understanding Developmental Milestones (0–6 years)", icon: BookOpen, link: "#" },
+    { title: "ABA Therapy: A Parent's Introduction", icon: Brain, link: "#" },
+    { title: "DepEd SPED Guide for Parents", icon: BookOpen, link: "#" },
+    { title: "PhilHealth Coverage for Developmental Therapy", icon: Heart, link: "#" },
+  ];
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Community</h1>
+          <p className="text-sm text-muted-foreground">Connect with other NEOBRAIN families — share, learn, and support each other</p>
+        </div>
+        <Button className="rounded-full gap-2" onClick={() => setComposing(c => !c)} data-testid="button-new-post">
+          <Plus className="h-4 w-4" /> {composing ? "Cancel" : "Share a Post"}
+        </Button>
+      </div>
+
+      {composing && (
+        <div className="rounded-xl border bg-card p-5 space-y-3">
+          <p className="text-sm font-semibold">Share with the community</p>
+          <input
+            className="w-full h-9 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            placeholder="Post title..."
+            value={newPost.title}
+            onChange={e => setNewPost(p => ({ ...p, title: e.target.value }))}
+            data-testid="input-post-title"
+          />
+          <textarea
+            className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+            rows={4}
+            placeholder="Share your experience, question, or tip..."
+            value={newPost.body}
+            onChange={e => setNewPost(p => ({ ...p, body: e.target.value }))}
+            data-testid="input-post-body"
+          />
+          <div className="flex items-center gap-3">
+            <select
+              className="h-9 rounded-lg border bg-background px-3 text-sm"
+              value={newPost.category}
+              onChange={e => setNewPost(p => ({ ...p, category: e.target.value }))}
+            >
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <Button className="rounded-full ml-auto" onClick={handlePost} disabled={posting || !newPost.title.trim() || !newPost.body.trim()} data-testid="button-submit-post">
+              {posting ? "Posting..." : "Post to Community"}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          {posts.map(post => (
+            <div key={post.id} className="rounded-xl border bg-card p-5 space-y-3" data-testid={`post-${post.id}`}>
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shrink-0">
+                  {post.avatar}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                    <span className="font-semibold text-sm">{post.author}</span>
+                    <Badge className={`text-xs ${CAT_COLORS[post.category] ?? "bg-muted"}`}>{post.category}</Badge>
+                    <span className="text-xs text-muted-foreground ml-auto">{post.time}</span>
+                  </div>
+                  <p className="font-medium text-sm leading-snug">{post.title}</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">{post.body}</p>
+              <div className="flex items-center gap-4 pt-1">
+                <button
+                  onClick={() => handleLike(post.id)}
+                  className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${post.liked ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  data-testid={`button-like-${post.id}`}
+                >
+                  <ThumbsUp className="h-3.5 w-3.5" /> {post.likes}
+                </button>
+                <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
+                  <MessageSquare className="h-3.5 w-3.5" /> {post.replies} replies
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-5">
+          <div className="rounded-xl border bg-muted/30 p-5">
+            <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-primary" /> Parent Resources
+            </p>
+            <div className="space-y-2">
+              {RESOURCES.map((r, i) => (
+                <a key={i} href={r.link} className="flex items-center gap-2 text-sm text-primary hover:underline" data-testid={`resource-${i}`}>
+                  <r.icon className="h-3.5 w-3.5 shrink-0" />
+                  {r.title}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3">
+            <p className="text-sm font-semibold text-primary">Community Guidelines</p>
+            <ul className="space-y-1.5 text-xs text-primary/80">
+              {[
+                "Be kind and respectful — every family's journey is unique",
+                "No medical advice — share experiences, not diagnoses",
+                "Protect your child's privacy — avoid full names or photos",
+                "Report harmful or misleading content",
+              ].map(g => (
+                <li key={g} className="flex items-start gap-1.5">
+                  <CheckCircle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-secondary" />
+                  {g}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   children: ChildrenTab,
@@ -1260,6 +1428,7 @@ const TABS: Record<string, TabComponent> = {
   appointments: AppointmentsTab,
   therapy: TherapyTab,
   reports: ReportsTab,
+  community: CommunityTab,
   billing: BillingPage,
   settings: SettingsTab,
 };
