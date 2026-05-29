@@ -347,7 +347,7 @@ function DoctorOnboarding({ onComplete }: { onComplete: (name: string, email: st
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: profile.name, email: profile.email, password: profile.password, role: "doctor" }),
+        body: JSON.stringify({ name: profile.name, email: profile.email, password: profile.password, role: "clinic" }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Signup failed");
@@ -563,7 +563,7 @@ function TherapistOnboarding({ onComplete }: { onComplete: (name: string, email:
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: profile.name, email: profile.email, password: profile.password, role: "therapist" }),
+        body: JSON.stringify({ name: profile.name, email: profile.email, password: profile.password, role: "school" }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Signup failed");
@@ -782,7 +782,7 @@ function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: str
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: adminProfile.name, email: adminProfile.email, password: adminProfile.password, role: "admin" }),
+        body: JSON.stringify({ name: adminProfile.name, email: adminProfile.email, password: adminProfile.password, role: "government" }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Signup failed");

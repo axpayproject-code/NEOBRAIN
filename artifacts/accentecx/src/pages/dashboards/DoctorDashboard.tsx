@@ -4,7 +4,7 @@ import {
   Users, ClipboardList, Video, Stethoscope, FileText,
   HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2,
   CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck,
-  BarChart3, MessageSquare, Download, Send, CheckCircle
+  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff
 } from "lucide-react";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import AvailabilityManagerWidget from "@/components/appointments/AvailabilityManager";
@@ -42,6 +42,7 @@ const NAV: NavItem[] = [
   { id: "parent-portal", label: "Parent Portal", icon: MessageSquare },
   { id: "analytics", label: "Clinic Analytics", icon: BarChart3 },
   { id: "calendar", label: "My Availability", icon: CalendarDays },
+  { id: "team", label: "Manage Team", icon: UserPlus },
 ];
 
 const RISK_COLORS: Record<string, string> = {
@@ -1288,6 +1289,131 @@ function ClinicAnalyticsTab() {
   );
 }
 
+type TeamMember = { id: string; name: string; email: string; role: string; createdAt: string };
+
+function ManageTeamTab({ orgRole, orgLabel }: { orgRole: string; orgLabel: string }) {
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [showPw, setShowPw] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  async function handleCreate() {
+    if (!form.name.trim() || !form.email.trim() || form.password.length < 6) {
+      setError("All fields required. Password must be at least 6 characters.");
+      return;
+    }
+    setSaving(true); setError(""); setSuccess("");
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role: orgRole }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create team member");
+      setMembers(prev => [...prev, { id: data.id, name: form.name, email: form.email, role: orgRole, createdAt: new Date().toLocaleDateString("en-PH") }]);
+      setForm({ name: "", email: "", password: "" });
+      setSuccess(`${form.name} added successfully! They can now log in with their email and password.`);
+      setOpen(false);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Error creating account");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Manage Team</h1>
+          <p className="text-sm text-muted-foreground">Onboard {orgLabel} staff — they'll get their own login to this platform</p>
+        </div>
+        <Button onClick={() => { setOpen(true); setError(""); setSuccess(""); }} className="gap-2">
+          <UserPlus className="h-4 w-4" /> Add Team Member
+        </Button>
+      </div>
+
+      {success && (
+        <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+          <CheckCircle className="h-4 w-4 shrink-0" /> {success}
+        </div>
+      )}
+
+      {members.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-muted py-16 text-center">
+          <UserPlus className="h-10 w-10 text-muted-foreground/40" />
+          <p className="font-medium">No team members yet</p>
+          <p className="text-sm text-muted-foreground max-w-xs">Add practitioners, coordinators, or admin staff who need access to this {orgLabel} dashboard.</p>
+          <Button variant="outline" onClick={() => setOpen(true)} className="mt-2 gap-2">
+            <UserPlus className="h-4 w-4" /> Add Your First Team Member
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {members.map(m => (
+            <Card key={m.id}>
+              <CardContent className="flex items-center justify-between py-4 px-5">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                    {m.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{m.name}</p>
+                    <p className="text-xs text-muted-foreground">{m.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="capitalize">{m.role}</Badge>
+                  <span className="text-xs text-muted-foreground">Added {m.createdAt}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Team Member</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Full Name</label>
+              <input className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Dr. Juan Dela Cruz" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Email Address</label>
+              <input className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" type="email" placeholder="staff@yourclinic.ph" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Temporary Password</label>
+              <div className="relative">
+                <input className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-ring" type={showPw ? "text" : "password"} placeholder="Min. 6 characters" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+                <button type="button" className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground" onClick={() => setShowPw(v => !v)}>
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">Share this with the staff member — they can change it after logging in</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreate} disabled={saving}>{saving ? "Creating…" : "Create Account"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function ClinicTeamTab() { return <ManageTeamTab orgRole="clinic" orgLabel="clinic" />; }
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   queue: PatientQueueTab,
@@ -1301,6 +1427,7 @@ const TABS: Record<string, TabComponent> = {
   "parent-portal": ClinicParentPortalTab,
   analytics: ClinicAnalyticsTab,
   calendar: DoctorAvailabilityTab,
+  team: ClinicTeamTab,
 };
 
 export default function DoctorDashboard() {

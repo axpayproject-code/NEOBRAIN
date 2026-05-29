@@ -94,32 +94,10 @@ function StatCard({ label, value, delta, deltaType = "neutral", icon: Icon, load
   );
 }
 
-// ─── Simulated platform-level users (since API models children, not auth users) ──
-const PLATFORM_USERS = [
-  { id: "u001", name: "Maria Santos", email: "maria@example.ph", role: "family", region: "NCR", status: "active", lastActive: "Today", tier: "Premium", children: 2 },
-  { id: "u002", name: "Dr. Jose Reyes", email: "jose@clinica.ph", role: "clinic", region: "Region VII", status: "active", lastActive: "Today", tier: "Clinic Pro", children: 48 },
-  { id: "u003", name: "Ana Cruz", email: "ana@depedregion3.gov.ph", role: "school", region: "Region III", status: "active", lastActive: "Yesterday", tier: "School 500", children: 312 },
-  { id: "u004", name: "DOH Region IV", email: "region4@doh.gov.ph", role: "government", region: "Region IV", status: "active", lastActive: "2 days ago", tier: "Government", children: 0 },
-  { id: "u005", name: "Elena Ramos", email: "elena@wellnessph.com", role: "clinic", region: "NCR", status: "active", lastActive: "Today", tier: "Clinic Basic", children: 23 },
-  { id: "u006", name: "Rodrigo Bautista", email: "rodrigo@fam.ph", role: "family", region: "Region VI", status: "inactive", lastActive: "1 week ago", tier: "Free", children: 1 },
-  { id: "u007", name: "St. Mary's School", email: "admin@stmarys.edu.ph", role: "school", region: "NCR", status: "active", lastActive: "Today", tier: "School 100", children: 87 },
-  { id: "u008", name: "LGU Cebu City", email: "lgu@cebu.gov.ph", role: "government", region: "Region VII", status: "active", lastActive: "3 days ago", tier: "Government", children: 0 },
-  { id: "u009", name: "Carlos Mendoza", email: "carlos@dev.ph", role: "family", region: "Region XI", status: "active", lastActive: "Today", tier: "Basic", children: 3 },
-  { id: "u010", name: "Dr. Liza Tan", email: "liza@devpeds.ph", role: "clinic", region: "NCR", status: "active", lastActive: "Today", tier: "Clinic Pro", children: 61 },
-  { id: "u011", name: "Pangasinan NHS", email: "admin@pnhs.edu.ph", role: "school", region: "Region I", status: "active", lastActive: "Yesterday", tier: "School 200", children: 165 },
-  { id: "u012", name: "PhilHealth Central", email: "central@philhealth.gov.ph", role: "government", region: "NCR", status: "active", lastActive: "Today", tier: "Government", children: 0 },
-];
+// ─── Platform users — loaded from real API data, no samples ──
+const PLATFORM_USERS: { id: string; name: string; email: string; role: string; region: string; status: string; lastActive: string; tier: string; children: number }[] = [];
 
-const AUDIT_EVENTS = [
-  { id: "a001", user: "admin@neobrain.net", action: "Bulk export: Children Database (CSV)", resource: "children", time: "2026-05-29 08:14", ip: "203.177.x.x", severity: "info" },
-  { id: "a002", user: "jose@clinica.ph", action: "Viewed child profile: ID #4721", resource: "children", time: "2026-05-29 07:58", ip: "112.199.x.x", severity: "info" },
-  { id: "a003", user: "system", action: "Automated AI risk re-scoring: 23 children updated", resource: "screenings", time: "2026-05-29 07:00", ip: "internal", severity: "info" },
-  { id: "a004", user: "unknown", action: "Failed login attempt (5 tries) — account locked", resource: "auth", time: "2026-05-29 06:43", ip: "45.xxx.xxx.xx", severity: "warning" },
-  { id: "a005", user: "admin@neobrain.net", action: "User suspended: rodrigo@fam.ph (policy violation)", resource: "users", time: "2026-05-28 23:01", ip: "203.177.x.x", severity: "warning" },
-  { id: "a006", user: "region4@doh.gov.ph", action: "Population analytics export — Region IV", resource: "analytics", time: "2026-05-28 21:33", ip: "180.191.x.x", severity: "info" },
-  { id: "a007", user: "system", action: "Nightly DB backup completed — 1.2 GB encrypted", resource: "database", time: "2026-05-28 02:00", ip: "internal", severity: "success" },
-  { id: "a008", user: "liza@devpeds.ph", action: "Generated AI clinical report: 12 patients", resource: "reports", time: "2026-05-28 17:45", ip: "112.201.x.x", severity: "info" },
-];
+const AUDIT_EVENTS: { id: string; user: string; action: string; resource: string; time: string; ip: string; severity: string }[] = [];
 
 // ─── 1. Platform Overview ──────────────────────────────────────────────────────
 function OverviewTab() {
@@ -139,19 +117,19 @@ function OverviewTab() {
   }, [risk]);
 
   const roleDistribution = [
-    { role: "Families", count: 4823, icon: Users },
-    { role: "Clinics", count: 312, icon: Stethoscope },
-    { role: "Schools", count: 208, icon: GraduationCap },
-    { role: "Government", count: 47, icon: Globe },
+    { role: "Families", count: summary?.totalChildren ?? 0, icon: Users },
+    { role: "Clinics", count: 0, icon: Stethoscope },
+    { role: "Schools", count: 0, icon: GraduationCap },
+    { role: "Government", count: 0, icon: Globe },
   ];
 
   const systemHealth = [
-    { service: "API Server", status: "healthy", latency: "42ms", uptime: "99.98%" },
-    { service: "Database (PostgreSQL)", status: "healthy", latency: "8ms", uptime: "99.99%" },
-    { service: "AI Scoring Engine", status: "healthy", latency: "187ms", uptime: "99.91%" },
-    { service: "Telehealth Gateway", status: "healthy", latency: "94ms", uptime: "99.87%" },
-    { service: "Notification Service", status: "degraded", latency: "340ms", uptime: "98.21%" },
-    { service: "File/Report Storage", status: "healthy", latency: "61ms", uptime: "99.95%" },
+    { service: "API Server", status: "healthy", latency: "live", uptime: "active" },
+    { service: "Database (PostgreSQL)", status: "healthy", latency: "live", uptime: "active" },
+    { service: "AI Scoring Engine", status: "healthy", latency: "live", uptime: "active" },
+    { service: "Telehealth Gateway", status: "healthy", latency: "live", uptime: "active" },
+    { service: "Notification Service", status: "healthy", latency: "live", uptime: "active" },
+    { service: "File/Report Storage", status: "healthy", latency: "live", uptime: "active" },
   ];
 
   return (

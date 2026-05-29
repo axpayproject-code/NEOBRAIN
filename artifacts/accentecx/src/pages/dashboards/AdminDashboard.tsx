@@ -6,7 +6,7 @@ import {
   BarChart3, TrendingUp, Server, AlertTriangle,
   CheckCircle, Clock, Globe, GraduationCap, Stethoscope,
   Plus, Download, RefreshCw, X, Mail, Shield,
-  MapPin, FileText, Activity, FlaskConical
+  MapPin, FileText, Activity, FlaskConical, UserPlus, Eye, EyeOff
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,7 @@ const NAV: NavItem[] = [
   { id: "ai-intelligence", label: "Developmental Intelligence", icon: Brain },
   { id: "doh-reporting", label: "DOH / PhilHealth", icon: FileText },
   { id: "coordination", label: "LGU Coordination", icon: Users },
+  { id: "team", label: "Manage Team", icon: UserPlus },
 ];
 
 const RISK_COLORS: Record<string, string> = {
@@ -72,13 +73,9 @@ function NationalOverviewTab() {
     { name: "Critical", value: riskDist.critical, color: RISK_COLORS.critical },
   ] : [];
 
-  const interventionData = [
-    { month: "Jan", screened: 1240, referred: 312 },
-    { month: "Feb", screened: 1480, referred: 380 },
-    { month: "Mar", screened: 1720, referred: 440 },
-    { month: "Apr", screened: 1960, referred: 510 },
-    { month: "May", screened: 2184, referred: 560 },
-  ];
+  const interventionData = summary ? [
+    { month: "This Month", screened: summary.completedScreeningsThisMonth ?? 0, referred: summary.pendingScreenings ?? 0 },
+  ] : [];
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -91,8 +88,8 @@ function NationalOverviewTab() {
         {isLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />) : [
           { label: "Children Screened", value: summary?.totalChildren ?? 2184, icon: Users, delta: "+12% this month" },
           { label: "At-Risk Population", value: summary?.activeTherapyPlans ?? 641, icon: AlertTriangle, delta: `${summary?.completedScreeningsThisMonth ?? 560} referred this month`, color: "text-orange-600" },
-          { label: "LGU Partners", value: "48", icon: MapPin, delta: "Across 12 provinces" },
-          { label: "System Uptime", value: "99.8%", icon: Server, delta: "All systems nominal" },
+          { label: "LGU Partners", value: "—", icon: MapPin, delta: "Connect via Partner Organizations" },
+          { label: "System Uptime", value: "Live", icon: Server, delta: "All systems nominal" },
         ].map(s => (
           <Card key={s.label} data-testid={`gov-stat-${s.label.toLowerCase().replace(/ /g, "-")}`}>
             <CardContent className="pt-5 pb-4 px-5">
@@ -154,25 +151,27 @@ function NationalOverviewTab() {
 
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
         <p className="text-sm font-semibold text-primary mb-3">Government Priority Alerts</p>
-        <div className="space-y-2">
-          {[
-            { label: "Marikina City — High-risk cluster detected (barangay level)", severity: "high" },
-            { label: "Malabon — Q2 DOH report submission due May 31", severity: "medium" },
-            { label: "Quezon City — School SPED compliance audit pending", severity: "medium" },
-            { label: "BGC / Taguig — Early intervention targets met for Q1", severity: "info" },
-          ].map((a, i) => (
-            <div key={i} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
-              a.severity === "high" ? "bg-red-50 border border-red-200 text-red-800" :
-              a.severity === "medium" ? "bg-yellow-50 border border-yellow-200 text-yellow-800" :
-              "bg-green-50 border border-green-200 text-green-800"
-            }`}>
-              {a.severity === "high" ? <AlertTriangle className="h-4 w-4 shrink-0" /> :
-               a.severity === "medium" ? <Clock className="h-4 w-4 shrink-0" /> :
-               <CheckCircle className="h-4 w-4 shrink-0" />}
-              {a.label}
-            </div>
-          ))}
-        </div>
+        {(summary?.totalChildren ?? 0) === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-4 text-center text-muted-foreground">
+            <CheckCircle className="h-7 w-7 opacity-30" />
+            <p className="text-sm">No active alerts. Alerts will appear automatically as screening data comes in from partner organizations.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {(summary?.pendingScreenings ?? 0) > 0 && (
+              <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm bg-yellow-50 border border-yellow-200 text-yellow-800">
+                <Clock className="h-4 w-4 shrink-0" />
+                {summary!.pendingScreenings} screenings pending review across the platform
+              </div>
+            )}
+            {(summary?.activeTherapyPlans ?? 0) > 0 && (
+              <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm bg-green-50 border border-green-200 text-green-800">
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                {summary!.activeTherapyPlans} active therapy plans in progress
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -181,27 +180,13 @@ function NationalOverviewTab() {
 function PopulationAnalyticsTab() {
   const { data: children } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
 
-  const monthlyScreenings = [
-    { month: "Nov", screenings: 980 }, { month: "Dec", screenings: 1120 }, { month: "Jan", screenings: 1240 },
-    { month: "Feb", screenings: 1480 }, { month: "Mar", screenings: 1720 }, { month: "Apr", screenings: 1960 }, { month: "May", screenings: 2184 },
-  ];
+  const monthlyScreenings = children?.length ? [
+    { month: "Current", screenings: children.length },
+  ] : [];
 
-  const riskTrend = [
-    { month: "Jan", low: 42, moderate: 28, high: 18, critical: 12 },
-    { month: "Feb", low: 45, moderate: 30, high: 16, critical: 9 },
-    { month: "Mar", low: 50, moderate: 32, high: 14, critical: 7 },
-    { month: "Apr", low: 55, moderate: 30, high: 12, critical: 8 },
-    { month: "May", low: 58, moderate: 28, high: 10, critical: 4 },
-  ];
+  const riskTrend: { month: string; low: number; moderate: number; high: number; critical: number }[] = [];
 
-  const provinces = [
-    { city: "Quezon City", patients: 642, risk: "moderate" },
-    { city: "Marikina", patients: 389, risk: "high" },
-    { city: "Malabon", patients: 276, risk: "moderate" },
-    { city: "BGC / Taguig", patients: 531, risk: "low" },
-    { city: "Pasig", patients: 318, risk: "moderate" },
-    { city: "Caloocan", patients: 420, risk: "high" },
-  ];
+  const provinces: { city: string; patients: number; risk: string }[] = [];
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -292,11 +277,7 @@ function PopulationAnalyticsTab() {
 type RegionProgram = { name: string; region: string; type: string; beneficiaries: number; status: string; budget: string };
 
 function RegionalProgramsTab() {
-  const [programs, setPrograms] = useState<RegionProgram[]>([
-    { name: "Barangay Dev Screening Rollout", region: "NCR — Quezon City", type: "Screening", beneficiaries: 1200, status: "active", budget: "₱3.2M" },
-    { name: "SPED Integration — Public Schools", region: "Region IV-A (CALABARZON)", type: "School", beneficiaries: 4500, status: "active", budget: "₱8.5M" },
-    { name: "RHU Early Intervention Training", region: "NCR — Malabon/Navotas", type: "Capacity Building", beneficiaries: 280, status: "ongoing", budget: "₱1.1M" },
-  ]);
+  const [programs, setPrograms] = useState<RegionProgram[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", region: "", type: "Screening", beneficiaries: "", status: "planning", budget: "" });
   const [saving, setSaving] = useState(false);
@@ -914,6 +895,131 @@ function LGUCoordinationTab() {
   );
 }
 
+type TeamMember = { id: string; name: string; email: string; role: string; createdAt: string };
+
+function ManageTeamTab({ orgRole, orgLabel }: { orgRole: string; orgLabel: string }) {
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [showPw, setShowPw] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  async function handleCreate() {
+    if (!form.name.trim() || !form.email.trim() || form.password.length < 6) {
+      setError("All fields required. Password must be at least 6 characters.");
+      return;
+    }
+    setSaving(true); setError(""); setSuccess("");
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role: orgRole }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create team member");
+      setMembers(prev => [...prev, { id: data.id, name: form.name, email: form.email, role: orgRole, createdAt: new Date().toLocaleDateString("en-PH") }]);
+      setForm({ name: "", email: "", password: "" });
+      setSuccess(`${form.name} added successfully! They can now log in with their email and password.`);
+      setOpen(false);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Error creating account");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Manage Team</h1>
+          <p className="text-sm text-muted-foreground">Onboard {orgLabel} officers and staff — they'll get their own login to this platform</p>
+        </div>
+        <Button onClick={() => { setOpen(true); setError(""); setSuccess(""); }} className="gap-2">
+          <UserPlus className="h-4 w-4" /> Add Team Member
+        </Button>
+      </div>
+
+      {success && (
+        <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+          <CheckCircle className="h-4 w-4 shrink-0" /> {success}
+        </div>
+      )}
+
+      {members.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-muted py-16 text-center">
+          <UserPlus className="h-10 w-10 text-muted-foreground/40" />
+          <p className="font-medium">No team members yet</p>
+          <p className="text-sm text-muted-foreground max-w-xs">Add department officers, analysts, or health coordinators who need access to this {orgLabel} dashboard.</p>
+          <Button variant="outline" onClick={() => setOpen(true)} className="mt-2 gap-2">
+            <UserPlus className="h-4 w-4" /> Add Your First Team Member
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {members.map(m => (
+            <Card key={m.id}>
+              <CardContent className="flex items-center justify-between py-4 px-5">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                    {m.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{m.name}</p>
+                    <p className="text-xs text-muted-foreground">{m.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="capitalize">{m.role}</Badge>
+                  <span className="text-xs text-muted-foreground">Added {m.createdAt}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Team Member</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Full Name</label>
+              <input className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Maria Santos" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Email Address</label>
+              <input className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" type="email" placeholder="officer@doh.gov.ph" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Temporary Password</label>
+              <div className="relative">
+                <input className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-ring" type={showPw ? "text" : "password"} placeholder="Min. 6 characters" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+                <button type="button" className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground" onClick={() => setShowPw(v => !v)}>
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">Share this with the staff member — they can change it after logging in</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreate} disabled={saving}>{saving ? "Creating…" : "Create Account"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function GovTeamTab() { return <ManageTeamTab orgRole="government" orgLabel="government" />; }
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   overview: NationalOverviewTab,
@@ -924,6 +1030,7 @@ const TABS: Record<string, TabComponent> = {
   "ai-intelligence": DevelopmentalIntelligenceTab,
   "doh-reporting": DOHReportingTab,
   coordination: LGUCoordinationTab,
+  team: GovTeamTab,
 };
 
 export default function AdminDashboard() {

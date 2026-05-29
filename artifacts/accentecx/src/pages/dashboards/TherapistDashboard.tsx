@@ -4,7 +4,7 @@ import {
   Users, GraduationCap, ClipboardList, BookOpen,
   MessageSquare, LayoutDashboard, CheckCircle,
   Clock, AlertTriangle, Plus, BarChart3, FileText,
-  Link, Send, Download, RefreshCw
+  Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,7 @@ const NAV: NavItem[] = [
   { id: "parent-portal", label: "Parent Portal", icon: MessageSquare },
   { id: "reports", label: "DepEd Reports", icon: FileText },
   { id: "analytics", label: "School Analytics", icon: BarChart3 },
+  { id: "team", label: "Manage Team", icon: UserPlus },
 ];
 
 const RISK_COLORS: Record<string, string> = {
@@ -52,19 +53,14 @@ function OverviewTab() {
   const atRisk = (children ?? []).filter(c => c.riskLevel === "high" || c.riskLevel === "critical").length;
   const spedCount = Math.round(totalStudents * 0.08);
 
-  const domainData = [
-    { domain: "Communication", avg: 72 },
-    { domain: "Social", avg: 65 },
-    { domain: "Attention", avg: 58 },
-    { domain: "Motor", avg: 81 },
-    { domain: "Emotional", avg: 62 },
-  ];
+  // Domain averages require screening data — shown as empty state until screenings are recorded
+  const domainData: { domain: string; avg: number }[] = [];
 
   const riskPieData = [
-    { name: "Low", value: (children ?? []).filter(c => c.riskLevel === "low").length || 18, color: "#22c55e" },
-    { name: "Moderate", value: (children ?? []).filter(c => c.riskLevel === "moderate").length || 9, color: "#eab308" },
-    { name: "High", value: (children ?? []).filter(c => c.riskLevel === "high").length || 5, color: "#f97316" },
-    { name: "Critical", value: (children ?? []).filter(c => c.riskLevel === "critical").length || 2, color: "#ef4444" },
+    { name: "Low", value: (children ?? []).filter(c => c.riskLevel === "low").length, color: "#22c55e" },
+    { name: "Moderate", value: (children ?? []).filter(c => c.riskLevel === "moderate").length, color: "#eab308" },
+    { name: "High", value: (children ?? []).filter(c => c.riskLevel === "high").length, color: "#f97316" },
+    { name: "Critical", value: (children ?? []).filter(c => c.riskLevel === "critical").length, color: "#ef4444" },
   ];
 
   return (
@@ -76,10 +72,10 @@ function OverviewTab() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />) : [
-          { label: "Total Students", value: totalStudents || 34, icon: Users, delta: "Enrolled" },
-          { label: "Screened", value: screened || 28, icon: ClipboardList, delta: `${Math.round(((screened || 28) / (totalStudents || 34)) * 100)}% coverage` },
-          { label: "At Risk", value: atRisk || 7, icon: AlertTriangle, delta: "High + Critical", color: "text-orange-600" },
-          { label: "SPED Tracked", value: spedCount || 4, icon: GraduationCap, delta: "With active IEPs" },
+          { label: "Total Students", value: totalStudents, icon: Users, delta: "Enrolled" },
+          { label: "Screened", value: screened, icon: ClipboardList, delta: totalStudents > 0 ? `${Math.round((screened / totalStudents) * 100)}% coverage` : "No students yet" },
+          { label: "At Risk", value: atRisk, icon: AlertTriangle, delta: "High + Critical", color: "text-orange-600" },
+          { label: "SPED Tracked", value: spedCount, icon: GraduationCap, delta: "With active IEPs" },
         ].map(s => (
           <Card key={s.label} data-testid={`school-stat-${s.label.toLowerCase().replace(/ /g, "-")}`}>
             <CardContent className="pt-5 pb-4 px-5">
@@ -102,17 +98,24 @@ function OverviewTab() {
         <Card>
           <CardHeader><CardTitle className="text-base">Average Domain Scores</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={domainData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="domain" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} />
-                <Tooltip formatter={(v: number) => [`${v}`, "Avg Score"]} />
-                <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
-                  {domainData.map((_, i) => <Cell key={i} fill={DOMAIN_COLORS[i]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {domainData.length === 0 ? (
+              <div className="h-[200px] flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                <BarChart3 className="h-8 w-8 opacity-30" />
+                <p className="text-sm">No screening data yet</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={domainData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="domain" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} />
+                  <Tooltip formatter={(v: number) => [`${v}`, "Avg Score"]} />
+                  <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
+                    {domainData.map((_, i) => <Cell key={i} fill={DOMAIN_COLORS[i]} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -140,23 +143,30 @@ function OverviewTab() {
 
       <div className="rounded-xl border bg-primary/5 border-primary/20 p-5">
         <p className="text-sm font-semibold text-primary mb-3">School Compliance Checklist</p>
-        <div className="grid sm:grid-cols-2 gap-2">
-          {[
-            { label: "DepEd annual screening submitted", done: true },
-            { label: "SPED IEP reviews completed (Q1)", done: true },
-            { label: "Teacher behavioral forms — Grade 3", done: false },
-            { label: "DOH referral report due May 30", done: false },
-            { label: "DPA compliance audit", done: true },
-            { label: "Parent consent forms renewed", done: false },
-          ].map(item => (
-            <div key={item.label} className={`flex items-center gap-2 text-sm rounded-lg px-3 py-2 ${item.done ? "bg-green-50 border border-green-200" : "bg-orange-50 border border-orange-200"}`}>
-              {item.done
-                ? <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
-                : <Clock className="h-4 w-4 text-orange-500 shrink-0" />}
-              <span className={item.done ? "text-green-800" : "text-orange-800"}>{item.label}</span>
-            </div>
-          ))}
-        </div>
+        {totalStudents === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-4 text-center text-muted-foreground">
+            <CheckCircle className="h-7 w-7 opacity-30" />
+            <p className="text-sm">Compliance items will appear once students are enrolled and screenings are started.</p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 gap-2">
+            {[
+              { label: "Students enrolled and profiled", done: totalStudents > 0 },
+              { label: "Developmental screenings started", done: screened > 0 },
+              { label: `Screening coverage ≥ 80%`, done: totalStudents > 0 && (screened / totalStudents) >= 0.8 },
+              { label: "At-risk students identified", done: atRisk > 0 },
+              { label: "SPED students tracked (IEP)", done: spedCount > 0 },
+              { label: "Parent portal communications sent", done: false },
+            ].map(item => (
+              <div key={item.label} className={`flex items-center gap-2 text-sm rounded-lg px-3 py-2 ${item.done ? "bg-green-50 border border-green-200" : "bg-orange-50 border border-orange-200"}`}>
+                {item.done
+                  ? <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
+                  : <Clock className="h-4 w-4 text-orange-500 shrink-0" />}
+                <span className={item.done ? "text-green-800" : "text-orange-800"}>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -167,23 +177,15 @@ function StudentRosterTab() {
   const { data: screenings } = useListScreenings({}, { query: { queryKey: ["screenings-school-roster"] } });
   const [search, setSearch] = useState("");
 
-  const DEMO_STUDENTS = [
-    { id: 1, name: "Aaliyah Santos", grade: "Grade 2", age: 8, risk: "moderate", screened: true, sped: false },
-    { id: 2, name: "Bienvenido Cruz", grade: "Grade 3", age: 9, risk: "high", screened: true, sped: true },
-    { id: 3, name: "Carmela Reyes", grade: "Grade 1", age: 7, risk: "low", screened: true, sped: false },
-    { id: 4, name: "Danilo Garcia", grade: "Grade 4", age: 10, risk: "critical", screened: true, sped: true },
-    { id: 5, name: "Elena Dela Cruz", grade: "Grade 2", age: 8, risk: "low", screened: false, sped: false },
-  ];
-
-  const students = children?.length ? children.map((c, i) => ({
+  const students = (children ?? []).map(c => ({
     id: c.id,
     name: c.fullName,
-    grade: c.schoolName ? "Grade 1" : "Grade 1",
+    grade: c.schoolName ?? "—",
     age: new Date().getFullYear() - new Date(c.dateOfBirth).getFullYear(),
     risk: c.riskLevel,
     screened: (screenings ?? []).some(s => s.childId === c.id),
     sped: false,
-  })) : DEMO_STUDENTS;
+  }));
 
   const filtered = students.filter(s => s.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -364,10 +366,7 @@ function ScreeningFormsTab() {
 type IEPEntry = { studentName: string; grade: string; disability: string; goals: string; status: string; reviewDate: string };
 
 function SpedIepTab() {
-  const [entries, setEntries] = useState<IEPEntry[]>([
-    { studentName: "Bienvenido Cruz", grade: "Grade 3", disability: "ADHD", goals: "Improve sustained attention in 30-min blocks; reduce impulsive outbursts to <2/day", status: "active", reviewDate: "Jun 15, 2026" },
-    { studentName: "Danilo Garcia", grade: "Grade 4", disability: "ASD Level 2", goals: "Expand peer interaction from 1:1 to small group; complete self-care tasks independently", status: "under-review", reviewDate: "May 31, 2026" },
-  ]);
+  const [entries, setEntries] = useState<IEPEntry[]>([]);
   const [addOpen, setAddOpen] = useState(false);
   const [newEntry, setNewEntry] = useState<Partial<IEPEntry>>({ studentName: "", grade: "Grade 1", disability: "", goals: "", status: "active", reviewDate: "" });
   const [saving, setSaving] = useState(false);
@@ -502,10 +501,7 @@ function SpedIepTab() {
 type ReferralEntry = { studentName: string; referralType: string; specialistType: string; reason: string; status: string; date: string };
 
 function ReferralsTab() {
-  const [referrals, setReferrals] = useState<ReferralEntry[]>([
-    { studentName: "Danilo Garcia", referralType: "Clinic", specialistType: "Developmental Pediatrics", reason: "Autism screening — critical risk score (AI-flagged)", status: "sent", date: "May 28, 2026" },
-    { studentName: "Bienvenido Cruz", referralType: "Therapy", specialistType: "Occupational Therapy", reason: "Fine motor deficits identified in screening", status: "accepted", date: "May 20, 2026" },
-  ]);
+  const [referrals, setReferrals] = useState<ReferralEntry[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Partial<ReferralEntry>>({ studentName: "", referralType: "Clinic", specialistType: "", reason: "", status: "draft", date: new Date().toLocaleDateString() });
   const [sending, setSending] = useState(false);
@@ -611,10 +607,7 @@ function ReferralsTab() {
 type Message = { from: string; studentName: string; body: string; date: string; read: boolean };
 
 function ParentPortalTab() {
-  const [messages, setMessages] = useState<Message[]>([
-    { from: "Maria Santos", studentName: "Aaliyah Santos", body: "Thank you for the screening results. Could you explain what the 'moderate risk' in Social Interaction means for Aaliyah at home?", date: "May 28", read: false },
-    { from: "Rodrigo Cruz", studentName: "Bienvenido Cruz", body: "I received the IEP draft. I have a few questions about the OT referral — can we schedule a call?", date: "May 26", read: true },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [reply, setReply] = useState("");
   const [selected, setSelected] = useState<Message | null>(null);
 
@@ -818,6 +811,131 @@ function SchoolAnalyticsTab() {
   );
 }
 
+type TeamMember = { id: string; name: string; email: string; role: string; createdAt: string };
+
+function ManageTeamTab({ orgRole, orgLabel }: { orgRole: string; orgLabel: string }) {
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [showPw, setShowPw] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  async function handleCreate() {
+    if (!form.name.trim() || !form.email.trim() || form.password.length < 6) {
+      setError("All fields required. Password must be at least 6 characters.");
+      return;
+    }
+    setSaving(true); setError(""); setSuccess("");
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role: orgRole }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create team member");
+      setMembers(prev => [...prev, { id: data.id, name: form.name, email: form.email, role: orgRole, createdAt: new Date().toLocaleDateString("en-PH") }]);
+      setForm({ name: "", email: "", password: "" });
+      setSuccess(`${form.name} added successfully! They can now log in with their email and password.`);
+      setOpen(false);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Error creating account");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Manage Team</h1>
+          <p className="text-sm text-muted-foreground">Onboard {orgLabel} staff — they'll get their own login to this platform</p>
+        </div>
+        <Button onClick={() => { setOpen(true); setError(""); setSuccess(""); }} className="gap-2">
+          <UserPlus className="h-4 w-4" /> Add Team Member
+        </Button>
+      </div>
+
+      {success && (
+        <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+          <CheckCircle className="h-4 w-4 shrink-0" /> {success}
+        </div>
+      )}
+
+      {members.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-muted py-16 text-center">
+          <UserPlus className="h-10 w-10 text-muted-foreground/40" />
+          <p className="font-medium">No team members yet</p>
+          <p className="text-sm text-muted-foreground max-w-xs">Add teachers, counselors, or admin staff who need access to this {orgLabel} dashboard.</p>
+          <Button variant="outline" onClick={() => setOpen(true)} className="mt-2 gap-2">
+            <UserPlus className="h-4 w-4" /> Add Your First Team Member
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {members.map(m => (
+            <Card key={m.id}>
+              <CardContent className="flex items-center justify-between py-4 px-5">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                    {m.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{m.name}</p>
+                    <p className="text-xs text-muted-foreground">{m.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="capitalize">{m.role}</Badge>
+                  <span className="text-xs text-muted-foreground">Added {m.createdAt}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Team Member</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Full Name</label>
+              <input className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Juan Dela Cruz" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Email Address</label>
+              <input className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" type="email" placeholder="staff@yourschool.edu.ph" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Temporary Password</label>
+              <div className="relative">
+                <input className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-ring" type={showPw ? "text" : "password"} placeholder="Min. 6 characters" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+                <button type="button" className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground" onClick={() => setShowPw(v => !v)}>
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">Share this with the staff member — they can change it after logging in</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreate} disabled={saving}>{saving ? "Creating…" : "Create Account"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function SchoolTeamTab() { return <ManageTeamTab orgRole="school" orgLabel="school" />; }
+
 export default function TherapistDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -830,6 +948,7 @@ export default function TherapistDashboard() {
     "parent-portal": <ParentPortalTab />,
     "reports": <DepEdReportsTab />,
     "analytics": <SchoolAnalyticsTab />,
+    "team": <SchoolTeamTab />,
   };
 
   return (
