@@ -1421,7 +1421,21 @@ function CommunityTab() {
   );
 }
 
-function GamesTab() { return <GamesAssessment />; }
+function GamesTab() {
+  const { user } = useAuth();
+  const features = getPlanFeatures(user?.tier);
+  return (
+    <UpgradeGate
+      allowed={features.gamesAssessment}
+      title="Games Assessment"
+      description={`Interactive developmental mini-games are available on Starter Care and above. Your ${features.planName} plan includes basic milestone tracking. Upgrade to unlock 5 AI-scored games that measure memory, attention, and cognition.`}
+      upgradeHref="/onboarding?role=family&plan=starter-care"
+      currentPlan={features.planName}
+    >
+      <GamesAssessment />
+    </UpgradeGate>
+  );
+}
 
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {

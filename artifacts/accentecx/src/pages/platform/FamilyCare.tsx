@@ -21,9 +21,9 @@ const FEATURES = [
 ];
 
 const PLANS = [
-  { name: "Starter Care", price: "₱200/mo", features: ["1 child profile", "Basic screenings 2×/year", "AI text summary", "Email support"], href: "/onboarding?role=family&plan=starter-care" },
-  { name: "Care Plus", price: "₱799/mo", highlight: true, features: ["4 child profiles", "Unlimited screenings", "Video analysis 3×/mo", "Therapy tracking", "Specialist messaging"], href: "/onboarding?role=family&plan=care-plus" },
-  { name: "Care Family Pro", price: "₱1,999/mo", features: ["Up to 6 children", "Priority AI processing", "Full video analytics", "Dedicated support manager"], href: "/onboarding?role=family&plan=care-family-pro" },
+  { name: "Starter Care", price: "₱200/mo", features: ["1 child profile", "Basic screenings 2×/year", "Games Assessment (5 mini-games)", "AI text summary", "Email support"], href: "/onboarding?role=family&plan=starter-care" },
+  { name: "Care Plus", price: "₱799/mo", highlight: true, features: ["4 child profiles", "Unlimited screenings", "Games Assessment (5 mini-games)", "Video analysis 3×/mo", "Therapy tracking", "Specialist messaging"], href: "/onboarding?role=family&plan=care-plus" },
+  { name: "Care Family Pro", price: "₱1,999/mo", features: ["Up to 6 children", "Priority AI processing", "Games Assessment (5 mini-games)", "Full video analytics", "Dedicated support manager"], href: "/onboarding?role=family&plan=care-family-pro" },
 ];
 
 export default function FamilyCare() {

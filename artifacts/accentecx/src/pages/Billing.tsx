@@ -21,7 +21,7 @@ const PLANS = [
       "Appointment booking",
       "Basic milestone tracking",
     ],
-    locked: ["Video behavioral analysis", "Therapy plan tracking", "AI reports", "Specialist messaging"],
+    locked: ["Games Assessment (5 mini-games)", "Video behavioral analysis", "Therapy plan tracking", "AI reports", "Specialist messaging"],
     cta: "Your current free account",
     highlight: false,
     selectable: false,
@@ -35,6 +35,7 @@ const PLANS = [
     features: [
       "1 child profile",
       "Basic developmental screening (2×/yr)",
+      "Games Assessment (5 mini-games)",
       "AI summary report (text only)",
       "Appointment booking",
       "Milestone tracking",
@@ -53,6 +54,7 @@ const PLANS = [
     features: [
       "Up to 4 child profiles",
       "Full screening engine (unlimited)",
+      "Games Assessment (5 mini-games)",
       "Video behavioral analysis (3/mo)",
       "Therapy plan tracking",
       "School input system",
@@ -72,6 +74,7 @@ const PLANS = [
     features: [
       "Up to 6 children",
       "Priority AI processing",
+      "Games Assessment (5 mini-games)",
       "Full video analytics suite",
       "Advanced clinical reports",
       "Therapy automation",

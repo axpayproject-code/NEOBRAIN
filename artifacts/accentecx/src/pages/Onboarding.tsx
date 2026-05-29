@@ -30,7 +30,7 @@ const FAMILY_PLANS = {
     name: "Starter Care", price: "₱200", period: "/month",
     tagline: "Monitor your child's development — free to start, always.",
     highlight: false, badge: null,
-    features: ["1 child profile", "Basic developmental screening (2×/year)", "Milestone tracking dashboard", "Text-based AI developmental summary", "Parent resource library", "Email support"],
+    features: ["1 child profile", "Basic developmental screening (2×/year)", "Games Assessment (5 mini-games)", "Milestone tracking dashboard", "Text-based AI developmental summary", "Parent resource library", "Email support"],
     excluded: ["Video behavioral analysis", "Therapy plan tracking", "School input system", "Specialist messaging"],
     quickStart: [
       { icon: Users, label: "Add your child's profile", desc: "Set up their developmental digital twin" },
@@ -42,7 +42,7 @@ const FAMILY_PLANS = {
     name: "Care Plus", price: "₱799", period: "/month",
     tagline: "Full developmental intelligence for growing families.",
     highlight: true, badge: "Most Popular",
-    features: ["Up to 4 child profiles", "Full AI clinical report with risk scoring", "Full developmental screening (unlimited)", "Video behavioral analysis (up to 3/month)", "Therapy plan tracking", "School input system (teacher reports)", "Specialist messaging", "Priority email + chat support"],
+    features: ["Up to 4 child profiles", "Full AI clinical report with risk scoring", "Full developmental screening (unlimited)", "Games Assessment (5 mini-games)", "Video behavioral analysis (up to 3/month)", "Therapy plan tracking", "School input system (teacher reports)", "Specialist messaging", "Priority email + chat support"],
     excluded: ["Priority AI processing", "Therapy automation workflows"],
     quickStart: [
       { icon: Users, label: "Add all your children", desc: "Up to 4 child profiles on one account" },
@@ -55,7 +55,7 @@ const FAMILY_PLANS = {
     name: "Care Family Pro", price: "₱1,999", period: "/month",
     tagline: "Clinical-grade care for families who need the most.",
     highlight: false, badge: "Premium",
-    features: ["Up to 6 child profiles", "Full AI clinical reports with risk scoring", "Unlimited video behavioral analysis", "Therapy plan tracking + automation", "School input system", "Priority AI processing", "Specialist messaging (priority queue)", "Advanced clinical reports & PDF exports", "Dedicated family support manager", "24/7 support"],
+    features: ["Up to 6 child profiles", "Full AI clinical reports with risk scoring", "Unlimited video behavioral analysis", "Games Assessment (5 mini-games)", "Therapy plan tracking + automation", "School input system", "Priority AI processing", "Specialist messaging (priority queue)", "Advanced clinical reports & PDF exports", "Dedicated family support manager", "24/7 support"],
     excluded: [],
     quickStart: [
       { icon: Users, label: "Add up to 6 children", desc: "6 profiles, one family account" },

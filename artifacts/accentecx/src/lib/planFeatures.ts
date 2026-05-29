@@ -7,6 +7,7 @@ export interface PlanFeatures {
   specialistMessaging: boolean;
   priorityAI: boolean;
   fullAIReports: boolean;
+  gamesAssessment: boolean;
   upgradeLabel: string;
   planName: string;
 }
@@ -21,6 +22,7 @@ const PLANS: Record<string, PlanFeatures> = {
     specialistMessaging: false,
     priorityAI: false,
     fullAIReports: false,
+    gamesAssessment: false,
     upgradeLabel: "Upgrade to Starter Care (₱200/mo)",
     planName: "Free",
   },
@@ -33,6 +35,7 @@ const PLANS: Record<string, PlanFeatures> = {
     specialistMessaging: false,
     priorityAI: false,
     fullAIReports: false,
+    gamesAssessment: true,
     upgradeLabel: "Upgrade to Care Plus (₱799/mo)",
     planName: "Starter Care",
   },
@@ -45,6 +48,7 @@ const PLANS: Record<string, PlanFeatures> = {
     specialistMessaging: true,
     priorityAI: false,
     fullAIReports: true,
+    gamesAssessment: true,
     upgradeLabel: "Upgrade to Care Family Pro (₱1,999/mo)",
     planName: "Care Plus",
   },
@@ -57,6 +61,7 @@ const PLANS: Record<string, PlanFeatures> = {
     specialistMessaging: true,
     priorityAI: true,
     fullAIReports: true,
+    gamesAssessment: true,
     upgradeLabel: "You're on the top plan",
     planName: "Care Family Pro",
   },
