@@ -4,8 +4,9 @@ import {
   Users, ClipboardList, Video, Stethoscope, FileText,
   HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2,
   CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck,
-  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff
+  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2
 } from "lucide-react";
+import GamesAssessment from "@/pages/GamesAssessment";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import AvailabilityManagerWidget from "@/components/appointments/AvailabilityManager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +35,7 @@ const NAV: NavItem[] = [
   { id: "queue", label: "Patient Queue", icon: Users },
   { id: "appointments", label: "Appointments", icon: CalendarCheck },
   { id: "ai-summaries", label: "AI Summaries", icon: ClipboardList },
+  { id: "games", label: "Games Assessment", icon: Gamepad2 },
   { id: "video-review", label: "Video Review", icon: Video },
   { id: "consultation", label: "Consultation Room", icon: Stethoscope },
   { id: "diagnosis", label: "Diagnosis Notes", icon: FileText },
@@ -1414,11 +1416,14 @@ function ManageTeamTab({ orgRole, orgLabel }: { orgRole: string; orgLabel: strin
 
 function ClinicTeamTab() { return <ManageTeamTab orgRole="clinic" orgLabel="clinic" />; }
 
+function GamesTab() { return <GamesAssessment />; }
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   queue: PatientQueueTab,
   appointments: AppointmentsTab,
   "ai-summaries": AISummariesTab,
+  games: GamesTab,
   "video-review": VideoReviewTab,
   consultation: ConsultationRoomTab,
   diagnosis: DiagnosisNotesTab,

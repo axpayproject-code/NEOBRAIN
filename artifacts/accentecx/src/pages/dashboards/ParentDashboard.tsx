@@ -4,8 +4,9 @@ import {
   LayoutDashboard, Users, ClipboardList, Brain, Calendar,
   HeartPulse, FileText, Settings, Plus, ChevronRight,
   AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star, CreditCard,
-  Trash2, Download, Pencil, MessageSquare, Heart, BookOpen, ThumbsUp
+  Trash2, Download, Pencil, MessageSquare, Heart, BookOpen, ThumbsUp, Gamepad2
 } from "lucide-react";
+import GamesAssessment from "@/pages/GamesAssessment";
 import { getPlanFeatures } from "@/lib/planFeatures";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,7 @@ const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "children", label: "My Children", icon: Users },
   { id: "screening", label: "Screenings", icon: ClipboardList },
+  { id: "games", label: "Games Assessment", icon: Gamepad2 },
   { id: "ai-results", label: "AI Results", icon: Brain },
   { id: "video", label: "Video Assessment", icon: Video },
   { id: "appointments", label: "Appointments", icon: Calendar },
@@ -1419,10 +1421,13 @@ function CommunityTab() {
   );
 }
 
+function GamesTab() { return <GamesAssessment />; }
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   children: ChildrenTab,
   screening: ScreeningTab,
+  games: GamesTab,
   "ai-results": AIResultsTab,
   video: VideoTab,
   appointments: AppointmentsTab,

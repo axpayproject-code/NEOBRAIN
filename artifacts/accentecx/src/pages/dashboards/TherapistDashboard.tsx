@@ -4,8 +4,9 @@ import {
   Users, GraduationCap, ClipboardList, BookOpen,
   MessageSquare, LayoutDashboard, CheckCircle,
   Clock, AlertTriangle, Plus, BarChart3, FileText,
-  Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff
+  Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff, Gamepad2
 } from "lucide-react";
+import GamesAssessment from "@/pages/GamesAssessment";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "students", label: "Student Roster", icon: Users },
   { id: "screening-forms", label: "Screening Forms", icon: ClipboardList },
+  { id: "games", label: "Games Assessment", icon: Gamepad2 },
   { id: "sped-iep", label: "SPED / IEP", icon: GraduationCap },
   { id: "referrals", label: "Referrals", icon: Link },
   { id: "parent-portal", label: "Parent Portal", icon: MessageSquare },
@@ -943,6 +945,7 @@ export default function TherapistDashboard() {
     "overview": <OverviewTab />,
     "students": <StudentRosterTab />,
     "screening-forms": <ScreeningFormsTab />,
+    "games": <GamesAssessment />,
     "sped-iep": <SpedIepTab />,
     "referrals": <ReferralsTab />,
     "parent-portal": <ParentPortalTab />,
