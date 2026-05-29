@@ -13,6 +13,13 @@ import specialtyFeesRouter from "./specialty_fees";
 import paymentsRouter from "./payments";
 import rescheduleRouter from "./reschedule";
 import billingRouter from "./billing";
+import aiAnalysisRouter from "./ai_analysis_results";
+import auditLogsRouter from "./audit_logs";
+import therapySessionNotesRouter from "./therapy_session_notes";
+import developmentalMilestonesRouter from "./developmental_milestones";
+import riskHistoryRouter from "./risk_history";
+import screeningResponsesRouter from "./screening_responses";
+import documentsRouter from "./documents";
 
 const router: IRouter = Router();
 
@@ -30,5 +37,12 @@ router.use(reportsRouter);
 router.use(dashboardRouter);
 router.use(videoAnalysisRouter);
 router.use(billingRouter);
+router.use(aiAnalysisRouter);
+router.use(auditLogsRouter);
+router.use(therapySessionNotesRouter);
+router.use(developmentalMilestonesRouter);
+router.use(riskHistoryRouter);
+router.use(screeningResponsesRouter);
+router.use(documentsRouter);
 
 export default router;

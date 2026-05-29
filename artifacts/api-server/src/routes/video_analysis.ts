@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { ai } from "@workspace/integrations-gemini-ai";
+import { db, aiAnalysisResultsTable } from "@workspace/db";
 
 const router = Router();
 
@@ -31,7 +32,8 @@ const PROTOCOL_META: Record<string, { name: string; markers: string[] }> = {
 };
 
 router.post("/video-analysis", async (req, res) => {
-  const { protocolId, frames } = req.body as { protocolId: string; frames: string[] };
+  const { protocolId, frames, childId } = req.body as { protocolId: string; frames: string[]; childId?: number };
+  const startTime = Date.now();
 
   if (!protocolId || !frames || !Array.isArray(frames) || frames.length === 0) {
     return res.status(400).json({ error: "protocolId and frames are required" });
@@ -105,6 +107,34 @@ riskLevel rules:
       const text = response.text ?? "";
       const clean = text.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
       const result = JSON.parse(clean);
+      const processingTimeMs = Date.now() - startTime;
+
+      // Persist the AI analysis result to the database
+      if (childId) {
+        try {
+          const highFindings = (result.findings ?? []).filter((f: { severity: string }) => f.severity === "high");
+          const flaggedConcerns = highFindings.length > 0
+            ? highFindings.map((f: { label: string }) => f.label).join(", ")
+            : null;
+
+          await db.insert(aiAnalysisResultsTable).values({
+            childId,
+            analysisType: `video_${protocolId}`,
+            modelUsed: "gemini-2.5-flash",
+            inputSummary: `${frames.length} frames · protocol: ${protocol.name}`,
+            rawOutput: clean,
+            structuredInsights: result,
+            confidenceScore: result.findings?.length > 0
+              ? Math.round(result.findings.reduce((a: number, f: { score: number }) => a + f.score, 0) / result.findings.length)
+              : null,
+            flaggedConcerns,
+            recommendations: result.recommendation ?? null,
+            processingTimeMs,
+          });
+        } catch (persistErr) {
+          req.log.warn({ persistErr }, "Failed to persist AI analysis result — returning result anyway");
+        }
+      }
 
       return res.json(result);
     } catch (err: unknown) {

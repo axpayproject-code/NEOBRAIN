@@ -673,6 +673,286 @@ export interface VideoAnalysisResult {
   riskLevel: VideoAnalysisResultRiskLevel;
 }
 
+export interface AiAnalysisResult {
+  id: number;
+  childId: number;
+  /** @nullable */
+  screeningId?: number | null;
+  analysisType: string;
+  modelUsed: string;
+  /** @nullable */
+  inputSummary?: string | null;
+  /** @nullable */
+  rawOutput?: string | null;
+  structuredInsights?: unknown | null;
+  /** @nullable */
+  confidenceScore?: number | null;
+  /** @nullable */
+  flaggedConcerns?: string | null;
+  /** @nullable */
+  recommendations?: string | null;
+  /** @nullable */
+  processingTimeMs?: number | null;
+  /** @nullable */
+  createdBy?: string | null;
+  createdAt: string;
+}
+
+export type AiAnalysisResultInputStructuredInsights = { [key: string]: unknown };
+
+export interface AiAnalysisResultInput {
+  childId: number;
+  screeningId?: number;
+  analysisType: string;
+  modelUsed?: string;
+  inputSummary?: string;
+  rawOutput?: string;
+  structuredInsights?: AiAnalysisResultInputStructuredInsights;
+  confidenceScore?: number;
+  flaggedConcerns?: string;
+  recommendations?: string;
+  processingTimeMs?: number;
+  createdBy?: string;
+}
+
+export interface AuditLog {
+  id: number;
+  /** @nullable */
+  userId?: string | null;
+  /** @nullable */
+  userEmail?: string | null;
+  /** @nullable */
+  userRole?: string | null;
+  action: string;
+  resourceType: string;
+  /** @nullable */
+  resourceId?: string | null;
+  /** @nullable */
+  ipAddress?: string | null;
+  /** @nullable */
+  userAgent?: string | null;
+  /** @nullable */
+  requestId?: string | null;
+  outcome: string;
+  /** @nullable */
+  notes?: string | null;
+  occurredAt: string;
+}
+
+export interface AuditLogInput {
+  userId?: string;
+  userEmail?: string;
+  userRole?: string;
+  action: string;
+  resourceType: string;
+  resourceId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  requestId?: string;
+  outcome?: string;
+  notes?: string;
+}
+
+export interface TherapySessionNote {
+  id: number;
+  therapyPlanId: number;
+  childId: number;
+  sessionNumber: number;
+  sessionDate: string;
+  /** @nullable */
+  therapistName?: string | null;
+  sessionType: string;
+  /** @nullable */
+  durationMinutes?: number | null;
+  /** @nullable */
+  goalsAddressed?: string | null;
+  /** @nullable */
+  activitiesPerformed?: string | null;
+  /** @nullable */
+  childResponse?: string | null;
+  /** @nullable */
+  progressObserved?: string | null;
+  /** @nullable */
+  challenges?: string | null;
+  /** @nullable */
+  parentFeedback?: string | null;
+  /** @nullable */
+  nextSessionPlan?: string | null;
+  /** @nullable */
+  overallRating?: number | null;
+  /** @nullable */
+  createdBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TherapySessionNoteInput {
+  therapyPlanId: number;
+  childId: number;
+  sessionNumber: number;
+  sessionDate: string;
+  therapistName?: string;
+  sessionType?: string;
+  durationMinutes?: number;
+  goalsAddressed?: string;
+  activitiesPerformed?: string;
+  childResponse?: string;
+  progressObserved?: string;
+  challenges?: string;
+  parentFeedback?: string;
+  nextSessionPlan?: string;
+  overallRating?: number;
+  createdBy?: string;
+}
+
+export type DevelopmentalMilestoneStatus = typeof DevelopmentalMilestoneStatus[keyof typeof DevelopmentalMilestoneStatus];
+
+
+export const DevelopmentalMilestoneStatus = {
+  pending: 'pending',
+  achieved: 'achieved',
+  overdue: 'overdue',
+  skipped: 'skipped',
+} as const;
+
+export interface DevelopmentalMilestone {
+  id: number;
+  childId: number;
+  domain: string;
+  milestone: string;
+  /** @nullable */
+  typicalAgeMonths?: number | null;
+  status: DevelopmentalMilestoneStatus;
+  /** @nullable */
+  achievedAt?: string | null;
+  /** @nullable */
+  observedBy?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  isDelayed: boolean;
+  /** @nullable */
+  screeningId?: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DevelopmentalMilestoneInput {
+  childId: number;
+  domain: string;
+  milestone: string;
+  typicalAgeMonths?: number;
+  status?: string;
+  achievedAt?: string;
+  observedBy?: string;
+  notes?: string;
+  isDelayed?: boolean;
+  screeningId?: number;
+}
+
+export interface RiskHistoryEntry {
+  id: number;
+  childId: number;
+  /** @nullable */
+  previousRiskLevel?: string | null;
+  newRiskLevel: string;
+  triggerType: string;
+  /** @nullable */
+  triggerResourceId?: number | null;
+  /** @nullable */
+  communicationScore?: number | null;
+  /** @nullable */
+  socialScore?: number | null;
+  /** @nullable */
+  attentionScore?: number | null;
+  /** @nullable */
+  motorScore?: number | null;
+  /** @nullable */
+  emotionalScore?: number | null;
+  /** @nullable */
+  changedBy?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  recordedAt: string;
+}
+
+export interface ScreeningResponse {
+  id: number;
+  screeningId: number;
+  childId: number;
+  questionCode: string;
+  domain: string;
+  questionText: string;
+  responseValue: string;
+  /** @nullable */
+  responseLabel?: string | null;
+  /** @nullable */
+  scoreContribution?: number | null;
+  /** @nullable */
+  flagged?: string | null;
+  respondentType: string;
+  createdAt: string;
+}
+
+export interface ScreeningResponseInput {
+  screeningId: number;
+  childId: number;
+  questionCode: string;
+  domain: string;
+  questionText: string;
+  responseValue: string;
+  responseLabel?: string;
+  scoreContribution?: number;
+  flagged?: string;
+  respondentType?: string;
+}
+
+export interface Document {
+  id: number;
+  /** @nullable */
+  childId?: number | null;
+  /** @nullable */
+  uploadedBy?: string | null;
+  /** @nullable */
+  uploaderRole?: string | null;
+  documentType: string;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  fileName: string;
+  /** @nullable */
+  mimeType?: string | null;
+  /** @nullable */
+  fileSizeBytes?: number | null;
+  storageKey: string;
+  /** @nullable */
+  relatedResourceType?: string | null;
+  /** @nullable */
+  relatedResourceId?: number | null;
+  isConfidential: string;
+  /** @nullable */
+  expiresAt?: string | null;
+  createdAt: string;
+  /** @nullable */
+  deletedAt?: string | null;
+}
+
+export interface DocumentInput {
+  childId?: number;
+  uploadedBy?: string;
+  uploaderRole?: string;
+  documentType: string;
+  title: string;
+  description?: string;
+  fileName: string;
+  mimeType?: string;
+  fileSizeBytes?: number;
+  storageKey: string;
+  relatedResourceType?: string;
+  relatedResourceId?: number;
+  isConfidential?: string;
+  expiresAt?: string;
+}
+
 export type ListScreeningsParams = {
 childId?: number;
 };
@@ -712,5 +992,39 @@ childId?: number;
 
 export type ListReportsParams = {
 childId?: number;
+};
+
+export type ListAiAnalysisResultsParams = {
+childId?: number;
+};
+
+export type ListAuditLogsParams = {
+userId?: string;
+resourceType?: string;
+limit?: number;
+};
+
+export type ListTherapySessionNotesParams = {
+therapyPlanId?: number;
+childId?: number;
+};
+
+export type ListDevelopmentalMilestonesParams = {
+childId?: number;
+domain?: string;
+};
+
+export type ListRiskHistoryParams = {
+childId?: number;
+};
+
+export type ListScreeningResponsesParams = {
+screeningId?: number;
+childId?: number;
+};
+
+export type ListDocumentsParams = {
+childId?: number;
+documentType?: string;
 };
 

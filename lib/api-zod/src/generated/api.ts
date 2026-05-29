@@ -760,3 +760,506 @@ export const GetRiskDistributionResponse = zod.object({
 })
 
 
+/**
+ * @summary List persisted AI analysis results
+ */
+export const ListAiAnalysisResultsQueryParams = zod.object({
+  "childId": zod.coerce.number().optional()
+})
+
+export const ListAiAnalysisResultsResponseItem = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "screeningId": zod.number().nullish(),
+  "analysisType": zod.string(),
+  "modelUsed": zod.string(),
+  "inputSummary": zod.string().nullish(),
+  "rawOutput": zod.string().nullish(),
+  "structuredInsights": zod.unknown().nullish(),
+  "confidenceScore": zod.number().nullish(),
+  "flaggedConcerns": zod.string().nullish(),
+  "recommendations": zod.string().nullish(),
+  "processingTimeMs": zod.number().nullish(),
+  "createdBy": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListAiAnalysisResultsResponse = zod.array(ListAiAnalysisResultsResponseItem)
+
+
+/**
+ * @summary Store an AI analysis result
+ */
+export const CreateAiAnalysisResultBody = zod.object({
+  "childId": zod.number(),
+  "screeningId": zod.number().optional(),
+  "analysisType": zod.string(),
+  "modelUsed": zod.string().optional(),
+  "inputSummary": zod.string().optional(),
+  "rawOutput": zod.string().optional(),
+  "structuredInsights": zod.object({
+
+}).passthrough().optional(),
+  "confidenceScore": zod.number().optional(),
+  "flaggedConcerns": zod.string().optional(),
+  "recommendations": zod.string().optional(),
+  "processingTimeMs": zod.number().optional(),
+  "createdBy": zod.string().optional()
+})
+
+
+/**
+ * @summary Get a single AI analysis result
+ */
+export const GetAiAnalysisResultParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetAiAnalysisResultResponse = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "screeningId": zod.number().nullish(),
+  "analysisType": zod.string(),
+  "modelUsed": zod.string(),
+  "inputSummary": zod.string().nullish(),
+  "rawOutput": zod.string().nullish(),
+  "structuredInsights": zod.unknown().nullish(),
+  "confidenceScore": zod.number().nullish(),
+  "flaggedConcerns": zod.string().nullish(),
+  "recommendations": zod.string().nullish(),
+  "processingTimeMs": zod.number().nullish(),
+  "createdBy": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List audit log entries
+ */
+export const listAuditLogsQueryLimitDefault = 100;
+
+export const ListAuditLogsQueryParams = zod.object({
+  "userId": zod.coerce.string().optional(),
+  "resourceType": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().default(listAuditLogsQueryLimitDefault)
+})
+
+export const ListAuditLogsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.string().nullish(),
+  "userEmail": zod.string().nullish(),
+  "userRole": zod.string().nullish(),
+  "action": zod.string(),
+  "resourceType": zod.string(),
+  "resourceId": zod.string().nullish(),
+  "ipAddress": zod.string().nullish(),
+  "userAgent": zod.string().nullish(),
+  "requestId": zod.string().nullish(),
+  "outcome": zod.string(),
+  "notes": zod.string().nullish(),
+  "occurredAt": zod.string()
+})
+export const ListAuditLogsResponse = zod.array(ListAuditLogsResponseItem)
+
+
+/**
+ * @summary Write an audit log entry
+ */
+export const CreateAuditLogBody = zod.object({
+  "userId": zod.string().optional(),
+  "userEmail": zod.string().optional(),
+  "userRole": zod.string().optional(),
+  "action": zod.string(),
+  "resourceType": zod.string(),
+  "resourceId": zod.string().optional(),
+  "ipAddress": zod.string().optional(),
+  "userAgent": zod.string().optional(),
+  "requestId": zod.string().optional(),
+  "outcome": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+
+/**
+ * @summary List therapy session notes
+ */
+export const ListTherapySessionNotesQueryParams = zod.object({
+  "therapyPlanId": zod.coerce.number().optional(),
+  "childId": zod.coerce.number().optional()
+})
+
+export const ListTherapySessionNotesResponseItem = zod.object({
+  "id": zod.number(),
+  "therapyPlanId": zod.number(),
+  "childId": zod.number(),
+  "sessionNumber": zod.number(),
+  "sessionDate": zod.string(),
+  "therapistName": zod.string().nullish(),
+  "sessionType": zod.string(),
+  "durationMinutes": zod.number().nullish(),
+  "goalsAddressed": zod.string().nullish(),
+  "activitiesPerformed": zod.string().nullish(),
+  "childResponse": zod.string().nullish(),
+  "progressObserved": zod.string().nullish(),
+  "challenges": zod.string().nullish(),
+  "parentFeedback": zod.string().nullish(),
+  "nextSessionPlan": zod.string().nullish(),
+  "overallRating": zod.number().nullish(),
+  "createdBy": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListTherapySessionNotesResponse = zod.array(ListTherapySessionNotesResponseItem)
+
+
+/**
+ * @summary Create a therapy session note
+ */
+export const CreateTherapySessionNoteBody = zod.object({
+  "therapyPlanId": zod.number(),
+  "childId": zod.number(),
+  "sessionNumber": zod.number(),
+  "sessionDate": zod.string(),
+  "therapistName": zod.string().optional(),
+  "sessionType": zod.string().optional(),
+  "durationMinutes": zod.number().optional(),
+  "goalsAddressed": zod.string().optional(),
+  "activitiesPerformed": zod.string().optional(),
+  "childResponse": zod.string().optional(),
+  "progressObserved": zod.string().optional(),
+  "challenges": zod.string().optional(),
+  "parentFeedback": zod.string().optional(),
+  "nextSessionPlan": zod.string().optional(),
+  "overallRating": zod.number().optional(),
+  "createdBy": zod.string().optional()
+})
+
+
+/**
+ * @summary Update a therapy session note
+ */
+export const UpdateTherapySessionNoteParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateTherapySessionNoteBody = zod.object({
+  "therapyPlanId": zod.number(),
+  "childId": zod.number(),
+  "sessionNumber": zod.number(),
+  "sessionDate": zod.string(),
+  "therapistName": zod.string().optional(),
+  "sessionType": zod.string().optional(),
+  "durationMinutes": zod.number().optional(),
+  "goalsAddressed": zod.string().optional(),
+  "activitiesPerformed": zod.string().optional(),
+  "childResponse": zod.string().optional(),
+  "progressObserved": zod.string().optional(),
+  "challenges": zod.string().optional(),
+  "parentFeedback": zod.string().optional(),
+  "nextSessionPlan": zod.string().optional(),
+  "overallRating": zod.number().optional(),
+  "createdBy": zod.string().optional()
+})
+
+export const UpdateTherapySessionNoteResponse = zod.object({
+  "id": zod.number(),
+  "therapyPlanId": zod.number(),
+  "childId": zod.number(),
+  "sessionNumber": zod.number(),
+  "sessionDate": zod.string(),
+  "therapistName": zod.string().nullish(),
+  "sessionType": zod.string(),
+  "durationMinutes": zod.number().nullish(),
+  "goalsAddressed": zod.string().nullish(),
+  "activitiesPerformed": zod.string().nullish(),
+  "childResponse": zod.string().nullish(),
+  "progressObserved": zod.string().nullish(),
+  "challenges": zod.string().nullish(),
+  "parentFeedback": zod.string().nullish(),
+  "nextSessionPlan": zod.string().nullish(),
+  "overallRating": zod.number().nullish(),
+  "createdBy": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a therapy session note
+ */
+export const DeleteTherapySessionNoteParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary List developmental milestones for a child
+ */
+export const ListDevelopmentalMilestonesQueryParams = zod.object({
+  "childId": zod.coerce.number().optional(),
+  "domain": zod.coerce.string().optional()
+})
+
+export const ListDevelopmentalMilestonesResponseItem = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "domain": zod.string(),
+  "milestone": zod.string(),
+  "typicalAgeMonths": zod.number().nullish(),
+  "status": zod.enum(['pending', 'achieved', 'overdue', 'skipped']),
+  "achievedAt": zod.string().nullish(),
+  "observedBy": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "isDelayed": zod.boolean(),
+  "screeningId": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListDevelopmentalMilestonesResponse = zod.array(ListDevelopmentalMilestonesResponseItem)
+
+
+/**
+ * @summary Record a developmental milestone
+ */
+export const CreateDevelopmentalMilestoneBody = zod.object({
+  "childId": zod.number(),
+  "domain": zod.string(),
+  "milestone": zod.string(),
+  "typicalAgeMonths": zod.number().optional(),
+  "status": zod.string().optional(),
+  "achievedAt": zod.string().optional(),
+  "observedBy": zod.string().optional(),
+  "notes": zod.string().optional(),
+  "isDelayed": zod.boolean().optional(),
+  "screeningId": zod.number().optional()
+})
+
+
+/**
+ * @summary Update a developmental milestone
+ */
+export const UpdateDevelopmentalMilestoneParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateDevelopmentalMilestoneBody = zod.object({
+  "childId": zod.number(),
+  "domain": zod.string(),
+  "milestone": zod.string(),
+  "typicalAgeMonths": zod.number().optional(),
+  "status": zod.string().optional(),
+  "achievedAt": zod.string().optional(),
+  "observedBy": zod.string().optional(),
+  "notes": zod.string().optional(),
+  "isDelayed": zod.boolean().optional(),
+  "screeningId": zod.number().optional()
+})
+
+export const UpdateDevelopmentalMilestoneResponse = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "domain": zod.string(),
+  "milestone": zod.string(),
+  "typicalAgeMonths": zod.number().nullish(),
+  "status": zod.enum(['pending', 'achieved', 'overdue', 'skipped']),
+  "achievedAt": zod.string().nullish(),
+  "observedBy": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "isDelayed": zod.boolean(),
+  "screeningId": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary List risk history entries
+ */
+export const ListRiskHistoryQueryParams = zod.object({
+  "childId": zod.coerce.number().optional()
+})
+
+export const ListRiskHistoryResponseItem = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "previousRiskLevel": zod.string().nullish(),
+  "newRiskLevel": zod.string(),
+  "triggerType": zod.string(),
+  "triggerResourceId": zod.number().nullish(),
+  "communicationScore": zod.number().nullish(),
+  "socialScore": zod.number().nullish(),
+  "attentionScore": zod.number().nullish(),
+  "motorScore": zod.number().nullish(),
+  "emotionalScore": zod.number().nullish(),
+  "changedBy": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "recordedAt": zod.string()
+})
+export const ListRiskHistoryResponse = zod.array(ListRiskHistoryResponseItem)
+
+
+/**
+ * @summary Get full risk history for a specific child
+ */
+export const GetChildRiskHistoryParams = zod.object({
+  "childId": zod.coerce.number()
+})
+
+export const GetChildRiskHistoryResponseItem = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "previousRiskLevel": zod.string().nullish(),
+  "newRiskLevel": zod.string(),
+  "triggerType": zod.string(),
+  "triggerResourceId": zod.number().nullish(),
+  "communicationScore": zod.number().nullish(),
+  "socialScore": zod.number().nullish(),
+  "attentionScore": zod.number().nullish(),
+  "motorScore": zod.number().nullish(),
+  "emotionalScore": zod.number().nullish(),
+  "changedBy": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "recordedAt": zod.string()
+})
+export const GetChildRiskHistoryResponse = zod.array(GetChildRiskHistoryResponseItem)
+
+
+/**
+ * @summary List individual screening question responses
+ */
+export const ListScreeningResponsesQueryParams = zod.object({
+  "screeningId": zod.coerce.number().optional(),
+  "childId": zod.coerce.number().optional()
+})
+
+export const ListScreeningResponsesResponseItem = zod.object({
+  "id": zod.number(),
+  "screeningId": zod.number(),
+  "childId": zod.number(),
+  "questionCode": zod.string(),
+  "domain": zod.string(),
+  "questionText": zod.string(),
+  "responseValue": zod.string(),
+  "responseLabel": zod.string().nullish(),
+  "scoreContribution": zod.number().nullish(),
+  "flagged": zod.string().nullish(),
+  "respondentType": zod.string(),
+  "createdAt": zod.string()
+})
+export const ListScreeningResponsesResponse = zod.array(ListScreeningResponsesResponseItem)
+
+
+/**
+ * @summary Submit screening question responses (single or bulk array)
+ */
+export const CreateScreeningResponsesBody = zod.union([zod.object({
+  "screeningId": zod.number(),
+  "childId": zod.number(),
+  "questionCode": zod.string(),
+  "domain": zod.string(),
+  "questionText": zod.string(),
+  "responseValue": zod.string(),
+  "responseLabel": zod.string().optional(),
+  "scoreContribution": zod.number().optional(),
+  "flagged": zod.string().optional(),
+  "respondentType": zod.string().optional()
+}),zod.array(zod.object({
+  "screeningId": zod.number(),
+  "childId": zod.number(),
+  "questionCode": zod.string(),
+  "domain": zod.string(),
+  "questionText": zod.string(),
+  "responseValue": zod.string(),
+  "responseLabel": zod.string().optional(),
+  "scoreContribution": zod.number().optional(),
+  "flagged": zod.string().optional(),
+  "respondentType": zod.string().optional()
+}))])
+
+
+/**
+ * @summary List documents (excludes soft-deleted)
+ */
+export const ListDocumentsQueryParams = zod.object({
+  "childId": zod.coerce.number().optional(),
+  "documentType": zod.coerce.string().optional()
+})
+
+export const ListDocumentsResponseItem = zod.object({
+  "id": zod.number(),
+  "childId": zod.number().nullish(),
+  "uploadedBy": zod.string().nullish(),
+  "uploaderRole": zod.string().nullish(),
+  "documentType": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "fileName": zod.string(),
+  "mimeType": zod.string().nullish(),
+  "fileSizeBytes": zod.number().nullish(),
+  "storageKey": zod.string(),
+  "relatedResourceType": zod.string().nullish(),
+  "relatedResourceId": zod.number().nullish(),
+  "isConfidential": zod.string(),
+  "expiresAt": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "deletedAt": zod.string().nullish()
+})
+export const ListDocumentsResponse = zod.array(ListDocumentsResponseItem)
+
+
+/**
+ * @summary Store document metadata
+ */
+export const CreateDocumentBody = zod.object({
+  "childId": zod.number().optional(),
+  "uploadedBy": zod.string().optional(),
+  "uploaderRole": zod.string().optional(),
+  "documentType": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().optional(),
+  "fileName": zod.string(),
+  "mimeType": zod.string().optional(),
+  "fileSizeBytes": zod.number().optional(),
+  "storageKey": zod.string(),
+  "relatedResourceType": zod.string().optional(),
+  "relatedResourceId": zod.number().optional(),
+  "isConfidential": zod.string().optional(),
+  "expiresAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Get a document by ID
+ */
+export const GetDocumentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetDocumentResponse = zod.object({
+  "id": zod.number(),
+  "childId": zod.number().nullish(),
+  "uploadedBy": zod.string().nullish(),
+  "uploaderRole": zod.string().nullish(),
+  "documentType": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "fileName": zod.string(),
+  "mimeType": zod.string().nullish(),
+  "fileSizeBytes": zod.number().nullish(),
+  "storageKey": zod.string(),
+  "relatedResourceType": zod.string().nullish(),
+  "relatedResourceId": zod.number().nullish(),
+  "isConfidential": zod.string(),
+  "expiresAt": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "deletedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Soft-delete a document
+ */
+export const DeleteDocumentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+

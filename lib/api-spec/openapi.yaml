@@ -32,6 +32,20 @@ tags:
     description: AI-generated reports
   - name: dashboard
     description: Dashboard summary data
+  - name: aiAnalysis
+    description: Persisted AI analysis results
+  - name: auditLogs
+    description: Security and compliance audit trail
+  - name: therapySessionNotes
+    description: Individual therapy session notes
+  - name: developmentalMilestones
+    description: Child developmental milestone tracking
+  - name: riskHistory
+    description: Historical risk level changes per child
+  - name: screeningResponses
+    description: Individual question-level screening responses
+  - name: documents
+    description: Document and file metadata
 
 paths:
   /healthz:
@@ -779,6 +793,425 @@ paths:
               schema:
                 $ref: "#/components/schemas/RiskDistribution"
 
+  # ─── AI Analysis Results ─────────────────────────────────────────────────────
+  /ai-analysis:
+    get:
+      operationId: listAiAnalysisResults
+      tags: [aiAnalysis]
+      summary: List persisted AI analysis results
+      parameters:
+        - name: childId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of AI analysis results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AiAnalysisResult"
+    post:
+      operationId: createAiAnalysisResult
+      tags: [aiAnalysis]
+      summary: Store an AI analysis result
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiAnalysisResultInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiAnalysisResult"
+
+  /ai-analysis/{id}:
+    get:
+      operationId: getAiAnalysisResult
+      tags: [aiAnalysis]
+      summary: Get a single AI analysis result
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: AI analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiAnalysisResult"
+        "404":
+          description: Not found
+
+  # ─── Audit Logs ──────────────────────────────────────────────────────────────
+  /audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [auditLogs]
+      summary: List audit log entries
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+        - name: resourceType
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+      responses:
+        "200":
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLog"
+    post:
+      operationId: createAuditLog
+      tags: [auditLogs]
+      summary: Write an audit log entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditLogInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLog"
+
+  # ─── Therapy Session Notes ───────────────────────────────────────────────────
+  /therapy-session-notes:
+    get:
+      operationId: listTherapySessionNotes
+      tags: [therapySessionNotes]
+      summary: List therapy session notes
+      parameters:
+        - name: therapyPlanId
+          in: query
+          schema:
+            type: integer
+        - name: childId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TherapySessionNote"
+    post:
+      operationId: createTherapySessionNote
+      tags: [therapySessionNotes]
+      summary: Create a therapy session note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TherapySessionNoteInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TherapySessionNote"
+
+  /therapy-session-notes/{id}:
+    patch:
+      operationId: updateTherapySessionNote
+      tags: [therapySessionNotes]
+      summary: Update a therapy session note
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TherapySessionNoteInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TherapySessionNote"
+    delete:
+      operationId: deleteTherapySessionNote
+      tags: [therapySessionNotes]
+      summary: Delete a therapy session note
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── Developmental Milestones ────────────────────────────────────────────────
+  /developmental-milestones:
+    get:
+      operationId: listDevelopmentalMilestones
+      tags: [developmentalMilestones]
+      summary: List developmental milestones for a child
+      parameters:
+        - name: childId
+          in: query
+          schema:
+            type: integer
+        - name: domain
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Milestones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DevelopmentalMilestone"
+    post:
+      operationId: createDevelopmentalMilestone
+      tags: [developmentalMilestones]
+      summary: Record a developmental milestone
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DevelopmentalMilestoneInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DevelopmentalMilestone"
+
+  /developmental-milestones/{id}:
+    patch:
+      operationId: updateDevelopmentalMilestone
+      tags: [developmentalMilestones]
+      summary: Update a developmental milestone
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DevelopmentalMilestoneInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DevelopmentalMilestone"
+
+  # ─── Risk History ─────────────────────────────────────────────────────────────
+  /risk-history:
+    get:
+      operationId: listRiskHistory
+      tags: [riskHistory]
+      summary: List risk history entries
+      parameters:
+        - name: childId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Risk history entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RiskHistoryEntry"
+
+  /risk-history/{childId}:
+    get:
+      operationId: getChildRiskHistory
+      tags: [riskHistory]
+      summary: Get full risk history for a specific child
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Risk history for child
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RiskHistoryEntry"
+
+  # ─── Screening Responses ─────────────────────────────────────────────────────
+  /screening-responses:
+    get:
+      operationId: listScreeningResponses
+      tags: [screeningResponses]
+      summary: List individual screening question responses
+      parameters:
+        - name: screeningId
+          in: query
+          schema:
+            type: integer
+        - name: childId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Screening responses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScreeningResponse"
+    post:
+      operationId: createScreeningResponses
+      tags: [screeningResponses]
+      summary: Submit screening question responses (single or bulk array)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/ScreeningResponseInput"
+                - type: array
+                  items:
+                    $ref: "#/components/schemas/ScreeningResponseInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScreeningResponse"
+
+  # ─── Documents ───────────────────────────────────────────────────────────────
+  /documents:
+    get:
+      operationId: listDocuments
+      tags: [documents]
+      summary: List documents (excludes soft-deleted)
+      parameters:
+        - name: childId
+          in: query
+          schema:
+            type: integer
+        - name: documentType
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+    post:
+      operationId: createDocument
+      tags: [documents]
+      summary: Store document metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+
+  /documents/{id}:
+    get:
+      operationId: getDocument
+      tags: [documents]
+      summary: Get a document by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteDocument
+      tags: [documents]
+      summary: Soft-delete a document
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
 components:
   schemas:
     HealthStatus:
@@ -1421,3 +1854,420 @@ components:
         riskLevel:
           type: string
           enum: [low, moderate, high]
+
+    AiAnalysisResult:
+      type: object
+      required: [id, childId, analysisType, modelUsed, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        screeningId:
+          type: ["integer", "null"]
+        analysisType:
+          type: string
+        modelUsed:
+          type: string
+        inputSummary:
+          type: ["string", "null"]
+        rawOutput:
+          type: ["string", "null"]
+        structuredInsights:
+          nullable: true
+        confidenceScore:
+          type: ["integer", "null"]
+        flaggedConcerns:
+          type: ["string", "null"]
+        recommendations:
+          type: ["string", "null"]
+        processingTimeMs:
+          type: ["integer", "null"]
+        createdBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AiAnalysisResultInput:
+      type: object
+      required: [childId, analysisType]
+      properties:
+        childId:
+          type: integer
+        screeningId:
+          type: integer
+        analysisType:
+          type: string
+        modelUsed:
+          type: string
+        inputSummary:
+          type: string
+        rawOutput:
+          type: string
+        structuredInsights:
+          type: object
+        confidenceScore:
+          type: integer
+        flaggedConcerns:
+          type: string
+        recommendations:
+          type: string
+        processingTimeMs:
+          type: integer
+        createdBy:
+          type: string
+
+    AuditLog:
+      type: object
+      required: [id, action, resourceType, outcome, occurredAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: ["string", "null"]
+        userEmail:
+          type: ["string", "null"]
+        userRole:
+          type: ["string", "null"]
+        action:
+          type: string
+        resourceType:
+          type: string
+        resourceId:
+          type: ["string", "null"]
+        ipAddress:
+          type: ["string", "null"]
+        userAgent:
+          type: ["string", "null"]
+        requestId:
+          type: ["string", "null"]
+        outcome:
+          type: string
+        notes:
+          type: ["string", "null"]
+        occurredAt:
+          type: string
+
+    AuditLogInput:
+      type: object
+      required: [action, resourceType]
+      properties:
+        userId:
+          type: string
+        userEmail:
+          type: string
+        userRole:
+          type: string
+        action:
+          type: string
+        resourceType:
+          type: string
+        resourceId:
+          type: string
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        requestId:
+          type: string
+        outcome:
+          type: string
+        notes:
+          type: string
+
+    TherapySessionNote:
+      type: object
+      required: [id, therapyPlanId, childId, sessionNumber, sessionDate, sessionType, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        therapyPlanId:
+          type: integer
+        childId:
+          type: integer
+        sessionNumber:
+          type: integer
+        sessionDate:
+          type: string
+        therapistName:
+          type: ["string", "null"]
+        sessionType:
+          type: string
+        durationMinutes:
+          type: ["integer", "null"]
+        goalsAddressed:
+          type: ["string", "null"]
+        activitiesPerformed:
+          type: ["string", "null"]
+        childResponse:
+          type: ["string", "null"]
+        progressObserved:
+          type: ["string", "null"]
+        challenges:
+          type: ["string", "null"]
+        parentFeedback:
+          type: ["string", "null"]
+        nextSessionPlan:
+          type: ["string", "null"]
+        overallRating:
+          type: ["integer", "null"]
+        createdBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    TherapySessionNoteInput:
+      type: object
+      required: [therapyPlanId, childId, sessionNumber, sessionDate]
+      properties:
+        therapyPlanId:
+          type: integer
+        childId:
+          type: integer
+        sessionNumber:
+          type: integer
+        sessionDate:
+          type: string
+        therapistName:
+          type: string
+        sessionType:
+          type: string
+        durationMinutes:
+          type: integer
+        goalsAddressed:
+          type: string
+        activitiesPerformed:
+          type: string
+        childResponse:
+          type: string
+        progressObserved:
+          type: string
+        challenges:
+          type: string
+        parentFeedback:
+          type: string
+        nextSessionPlan:
+          type: string
+        overallRating:
+          type: integer
+        createdBy:
+          type: string
+
+    DevelopmentalMilestone:
+      type: object
+      required: [id, childId, domain, milestone, status, isDelayed, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        domain:
+          type: string
+        milestone:
+          type: string
+        typicalAgeMonths:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [pending, achieved, overdue, skipped]
+        achievedAt:
+          type: ["string", "null"]
+        observedBy:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        isDelayed:
+          type: boolean
+        screeningId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    DevelopmentalMilestoneInput:
+      type: object
+      required: [childId, domain, milestone]
+      properties:
+        childId:
+          type: integer
+        domain:
+          type: string
+        milestone:
+          type: string
+        typicalAgeMonths:
+          type: integer
+        status:
+          type: string
+        achievedAt:
+          type: string
+        observedBy:
+          type: string
+        notes:
+          type: string
+        isDelayed:
+          type: boolean
+        screeningId:
+          type: integer
+
+    RiskHistoryEntry:
+      type: object
+      required: [id, childId, newRiskLevel, triggerType, recordedAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        previousRiskLevel:
+          type: ["string", "null"]
+        newRiskLevel:
+          type: string
+        triggerType:
+          type: string
+        triggerResourceId:
+          type: ["integer", "null"]
+        communicationScore:
+          type: ["integer", "null"]
+        socialScore:
+          type: ["integer", "null"]
+        attentionScore:
+          type: ["integer", "null"]
+        motorScore:
+          type: ["integer", "null"]
+        emotionalScore:
+          type: ["integer", "null"]
+        changedBy:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        recordedAt:
+          type: string
+
+    ScreeningResponse:
+      type: object
+      required: [id, screeningId, childId, questionCode, domain, questionText, responseValue, respondentType, createdAt]
+      properties:
+        id:
+          type: integer
+        screeningId:
+          type: integer
+        childId:
+          type: integer
+        questionCode:
+          type: string
+        domain:
+          type: string
+        questionText:
+          type: string
+        responseValue:
+          type: string
+        responseLabel:
+          type: ["string", "null"]
+        scoreContribution:
+          type: ["integer", "null"]
+        flagged:
+          type: ["string", "null"]
+        respondentType:
+          type: string
+        createdAt:
+          type: string
+
+    ScreeningResponseInput:
+      type: object
+      required: [screeningId, childId, questionCode, domain, questionText, responseValue]
+      properties:
+        screeningId:
+          type: integer
+        childId:
+          type: integer
+        questionCode:
+          type: string
+        domain:
+          type: string
+        questionText:
+          type: string
+        responseValue:
+          type: string
+        responseLabel:
+          type: string
+        scoreContribution:
+          type: integer
+        flagged:
+          type: string
+        respondentType:
+          type: string
+
+    Document:
+      type: object
+      required: [id, documentType, title, fileName, storageKey, isConfidential, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: ["integer", "null"]
+        uploadedBy:
+          type: ["string", "null"]
+        uploaderRole:
+          type: ["string", "null"]
+        documentType:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        fileName:
+          type: string
+        mimeType:
+          type: ["string", "null"]
+        fileSizeBytes:
+          type: ["integer", "null"]
+        storageKey:
+          type: string
+        relatedResourceType:
+          type: ["string", "null"]
+        relatedResourceId:
+          type: ["integer", "null"]
+        isConfidential:
+          type: string
+        expiresAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        deletedAt:
+          type: ["string", "null"]
+
+    DocumentInput:
+      type: object
+      required: [documentType, title, fileName, storageKey]
+      properties:
+        childId:
+          type: integer
+        uploadedBy:
+          type: string
+        uploaderRole:
+          type: string
+        documentType:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        fileName:
+          type: string
+        mimeType:
+          type: string
+        fileSizeBytes:
+          type: integer
+        storageKey:
+          type: string
+        relatedResourceType:
+          type: string
+        relatedResourceId:
+          type: integer
+        isConfidential:
+          type: string
+        expiresAt:
+          type: string
+
