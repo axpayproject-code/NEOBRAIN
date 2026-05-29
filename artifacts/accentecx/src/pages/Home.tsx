@@ -1089,7 +1089,7 @@ export default function Home() {
 
             {/* ── Switchable demo card ──────────────────────────────────────── */}
             <motion.div
-              id="live-demo"
+              id="hero-demo"
               initial={{ opacity: 0, y: 36, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.7, delay: 0.42, ease: "easeOut" }}
@@ -1614,7 +1614,9 @@ export default function Home() {
         <DomainScoringPicker />
 
         {/* ── LIVE DEMO ───────────────────────────────────────────────────── */}
-        <LandingLiveDemo />
+        <div id="live-demo">
+          <LandingLiveDemo />
+        </div>
 
         {/* ── PRICING ─────────────────────────────────────────────────────── */}
         <PricingSection />
