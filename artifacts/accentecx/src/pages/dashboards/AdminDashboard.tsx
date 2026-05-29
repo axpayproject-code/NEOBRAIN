@@ -6,7 +6,7 @@ import {
   BarChart3, TrendingUp, Server, AlertTriangle,
   CheckCircle, Clock, Globe, GraduationCap, Stethoscope,
   Plus, Download, RefreshCw, X, Mail, Shield,
-  MapPin, FileText, Activity, FlaskConical, UserPlus, Eye, EyeOff
+  MapPin, FileText, Activity, FlaskConical, UserPlus, Eye, EyeOff, Settings
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,7 @@ const NAV: NavItem[] = [
   { id: "doh-reporting", label: "DOH / PhilHealth", icon: FileText },
   { id: "coordination", label: "LGU Coordination", icon: Users },
   { id: "team", label: "Manage Team", icon: UserPlus },
+  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 const RISK_COLORS: Record<string, string> = {

@@ -4,7 +4,7 @@ import {
   Users, GraduationCap, ClipboardList, BookOpen,
   MessageSquare, LayoutDashboard, CheckCircle,
   Clock, AlertTriangle, Plus, BarChart3, FileText,
-  Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff, Gamepad2
+  Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff, Gamepad2, Settings
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +34,7 @@ const NAV: NavItem[] = [
   { id: "reports", label: "DepEd Reports", icon: FileText },
   { id: "analytics", label: "School Analytics", icon: BarChart3 },
   { id: "team", label: "Manage Team", icon: UserPlus },
+  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 const RISK_COLORS: Record<string, string> = {

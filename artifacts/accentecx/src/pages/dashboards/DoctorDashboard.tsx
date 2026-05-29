@@ -4,7 +4,7 @@ import {
   Users, ClipboardList, Video, Stethoscope, FileText,
   HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2,
   CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck,
-  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2
+  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2, Settings
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
@@ -45,6 +45,7 @@ const NAV: NavItem[] = [
   { id: "analytics", label: "Clinic Analytics", icon: BarChart3 },
   { id: "calendar", label: "My Availability", icon: CalendarDays },
   { id: "team", label: "Manage Team", icon: UserPlus },
+  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 const RISK_COLORS: Record<string, string> = {

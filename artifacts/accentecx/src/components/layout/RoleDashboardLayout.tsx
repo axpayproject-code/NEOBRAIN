@@ -137,7 +137,7 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
                 onClick={() => photoInputRef.current?.click()}
               />
               <div className="min-w-0">
-                <div className="text-sm font-semibold text-sidebar-foreground truncate">{user.name}</div>
+                <div className="text-sm font-semibold text-sidebar-foreground leading-tight break-words">{user.name}</div>
                 <div className="text-xs text-sidebar-foreground/50 truncate">{user.email}</div>
               </div>
             </div>
@@ -304,7 +304,7 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
                         onClick={() => { setDrawerOpen(false); setTimeout(() => photoInputRef.current?.click(), 200); }}
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-foreground truncate">{user.name}</p>
+                        <p className="font-semibold text-foreground leading-tight break-words">{user.name}</p>
                         <p className="text-xs text-muted-foreground truncate mt-0.5">{user.email}</p>
                         <Badge className={cn("text-xs mt-1.5 px-2 py-0 rounded-full font-medium", badgeColor)}>
                           {planName}
