@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, FileText, Calendar, Activity, FileStack, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Calendar, Activity, FileStack, Settings, LogOut, Gamepad2 } from "lucide-react";
 import NeoBrainLogo from "@/components/ui/NeoBrainLogo";
 import { Button } from "@/components/ui/button";
 
@@ -8,6 +8,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/children", label: "Children", icon: Users },
   { href: "/screenings", label: "Screenings", icon: FileText },
+  { href: "/games", label: "Games Assessment", icon: Gamepad2 },
   { href: "/appointments", label: "Appointments", icon: Calendar },
   { href: "/therapy", label: "Therapy Plans", icon: Activity },
   { href: "/reports", label: "Reports", icon: FileStack },

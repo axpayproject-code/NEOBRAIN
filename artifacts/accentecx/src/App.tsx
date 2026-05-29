@@ -44,6 +44,7 @@ import AppointmentsList from "@/pages/AppointmentsList";
 import TherapyPlansList from "@/pages/TherapyPlansList";
 import ReportsList from "@/pages/ReportsList";
 import Settings from "@/pages/Settings";
+import GamesAssessment from "@/pages/GamesAssessment";
 import FloatingChat from "@/components/ui/FloatingChat";
 
 const queryClient = new QueryClient();
@@ -125,6 +126,9 @@ function AppRoutes() {
       </Route>
       <Route path="/reports">
         <SidebarLayout><ReportsList /></SidebarLayout>
+      </Route>
+      <Route path="/games">
+        <SidebarLayout><GamesAssessment /></SidebarLayout>
       </Route>
       <Route path="/settings">
         <SidebarLayout><Settings /></SidebarLayout>
