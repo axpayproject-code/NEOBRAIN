@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashboardLayout";
 import {
-  LayoutDashboard, Users, CreditCard, Brain, Building2,
-  BarChart3, LifeBuoy, TrendingUp, Server, AlertTriangle,
+  LayoutDashboard, Users, Brain, Building2,
+  BarChart3, TrendingUp, Server, AlertTriangle,
   CheckCircle, Clock, Globe, GraduationCap, Stethoscope,
-  Plus, Download, RefreshCw, X, Mail, Shield
+  Plus, Download, RefreshCw, X, Mail, Shield,
+  MapPin, FileText, Activity, FlaskConical
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,6 @@ import {
   useListChildren, useGetDashboardSummary, useGetRiskDistribution,
   useGetDashboardActivity, useListTherapyPlans, useListAppointments,
   getListChildrenQueryKey, getGetDashboardSummaryQueryKey,
-  useListSpecialtyFees, useUpsertSpecialtyFee, getListSpecialtyFeesQueryKey
 } from "@workspace/api-client-react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar,
@@ -30,14 +30,14 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV: NavItem[] = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "users", label: "User Management", icon: Users },
-  { id: "subscriptions", label: "Subscriptions", icon: CreditCard },
-  { id: "fees", label: "Consultation Fees", icon: CreditCard },
-  { id: "ai-monitoring", label: "AI Monitoring", icon: Brain },
-  { id: "onboarding", label: "Clinic / School", icon: Building2 },
-  { id: "analytics", label: "System Analytics", icon: BarChart3 },
-  { id: "support", label: "Support Tickets", icon: LifeBuoy },
+  { id: "overview", label: "National Overview", icon: LayoutDashboard },
+  { id: "analytics", label: "Population Analytics", icon: BarChart3 },
+  { id: "programs", label: "Regional Programs", icon: Globe },
+  { id: "partners", label: "Partner Organizations", icon: Building2 },
+  { id: "research", label: "Research Data", icon: FlaskConical },
+  { id: "ai-intelligence", label: "Developmental Intelligence", icon: Brain },
+  { id: "doh-reporting", label: "DOH / PhilHealth", icon: FileText },
+  { id: "coordination", label: "LGU Coordination", icon: Users },
 ];
 
 const RISK_COLORS: Record<string, string> = {
@@ -47,38 +47,22 @@ const RISK_COLORS: Record<string, string> = {
   critical: "#ef4444",
 };
 
-type DemoUser = { name: string; email: string; role: string; tier: string; status: string; joined: string };
-
-const INITIAL_USERS: DemoUser[] = [];
-
 const ROLE_COLORS: Record<string, string> = {
-  parent: "bg-blue-100 text-blue-800",
-  doctor: "bg-green-100 text-green-800",
-  therapist: "bg-purple-100 text-purple-800",
+  family: "bg-blue-100 text-blue-800",
+  clinic: "bg-green-100 text-green-800",
   school: "bg-orange-100 text-orange-800",
-  admin: "bg-gray-100 text-gray-800",
+  government: "bg-gray-100 text-gray-800",
 };
 
-const SUBSCRIPTIONS = [
-  { name: "Starter Care", price: "₱200/mo", users: 214, revenue: "₱42,800", color: "bg-blue-100 text-blue-800" },
-  { name: "Care Plus", price: "₱799/mo", users: 87, revenue: "₱69,513", color: "bg-green-100 text-green-800" },
-  { name: "Care Family Pro", price: "₱1,999/mo", users: 23, revenue: "₱45,977", color: "bg-purple-100 text-purple-800" },
-  { name: "Clinic SaaS", price: "₱4,999–19,999/mo", users: 12, revenue: "₱143,988", color: "bg-orange-100 text-orange-800" },
-  { name: "School License", price: "₱10–50/student", users: 3, revenue: "₱24,000", color: "bg-yellow-100 text-yellow-800" },
-];
+type LGUPartner = { name: string; type: string; region: string; children?: number; status: string; joined: string };
+const INITIAL_PARTNERS: LGUPartner[] = [];
 
-type SupportTicket = { id: string; user: string; issue: string; priority: string; status: string; created: string };
+type CoordMessage = { from: string; province: string; body: string; date: string; read: boolean };
 
-const INITIAL_TICKETS: SupportTicket[] = [];
-
-type OrgEntry = { name: string; type: string; doctors?: number; patients?: number; students?: number; tier: string; status: string };
-
-const INITIAL_CLINICS: OrgEntry[] = [];
-
-function PlatformOverviewTab() {
+function NationalOverviewTab() {
   const { data: summary, isLoading } = useGetDashboardSummary({ query: { queryKey: getGetDashboardSummaryQueryKey() } });
-  const { data: riskDist } = useGetRiskDistribution({ query: { queryKey: ["risk-dist-admin"] } });
-  const { data: activity } = useGetDashboardActivity({ query: { queryKey: ["activity-admin"] } });
+  const { data: riskDist } = useGetRiskDistribution({ query: { queryKey: ["risk-dist-gov"] } });
+  const { data: activity } = useGetDashboardActivity({ query: { queryKey: ["activity-gov"] } });
   const { user } = useAuth();
 
   const pieData = riskDist ? [
@@ -88,30 +72,34 @@ function PlatformOverviewTab() {
     { name: "Critical", value: riskDist.critical, color: RISK_COLORS.critical },
   ] : [];
 
-  const revenueData = [
-    { month: "Jan", mrr: 180000 }, { month: "Feb", mrr: 215000 }, { month: "Mar", mrr: 248000 },
-    { month: "Apr", mrr: 276000 }, { month: "May", mrr: 326278 },
+  const interventionData = [
+    { month: "Jan", screened: 1240, referred: 312 },
+    { month: "Feb", screened: 1480, referred: 380 },
+    { month: "Mar", screened: 1720, referred: 440 },
+    { month: "Apr", screened: 1960, referred: 510 },
+    { month: "May", screened: 2184, referred: 560 },
   ];
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Platform Overview</h1>
-        <p className="text-sm text-muted-foreground">Real-time metrics across all systems</p>
+        <h1 className="text-2xl font-bold">National Overview</h1>
+        <p className="text-sm text-muted-foreground">Population-level developmental health intelligence for the Philippines</p>
       </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />) : [
-          { label: "Total Patients", value: summary?.totalChildren ?? 0, icon: Users, delta: "+12 this month" },
-          { label: "Active Therapy Plans", value: summary?.activeTherapyPlans ?? 0, icon: TrendingUp, delta: `${summary?.completedScreeningsThisMonth ?? 0} screenings/mo` },
-          { label: "MRR", value: "₱326,278", icon: CreditCard, delta: "+18% vs last month" },
-          { label: "Platform Health", value: "99.8%", icon: Server, delta: "All systems nominal" },
+          { label: "Children Screened", value: summary?.totalChildren ?? 2184, icon: Users, delta: "+12% this month" },
+          { label: "At-Risk Population", value: summary?.activeTherapyPlans ?? 641, icon: AlertTriangle, delta: `${summary?.completedScreeningsThisMonth ?? 560} referred this month`, color: "text-orange-600" },
+          { label: "LGU Partners", value: "48", icon: MapPin, delta: "Across 12 provinces" },
+          { label: "System Uptime", value: "99.8%", icon: Server, delta: "All systems nominal" },
         ].map(s => (
-          <Card key={s.label} data-testid={`admin-stat-${s.label.toLowerCase().replace(/ /g, "-")}`}>
+          <Card key={s.label} data-testid={`gov-stat-${s.label.toLowerCase().replace(/ /g, "-")}`}>
             <CardContent className="pt-5 pb-4 px-5">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">{s.label}</p>
-                  <p className="text-2xl font-bold">{s.value}</p>
+                  <p className={`text-2xl font-bold ${s.color ?? ""}`}>{s.value}</p>
                   <p className="text-xs text-muted-foreground mt-1">{s.delta}</p>
                 </div>
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15">
@@ -122,23 +110,25 @@ function PlatformOverviewTab() {
           </Card>
         ))}
       </div>
+
       <div className="grid lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="text-base">Monthly Recurring Revenue</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Monthly Screening & Referral Volume</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
+              <BarChart data={interventionData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₱${(v/1000).toFixed(0)}k`} />
-                <Tooltip formatter={(v: number) => [`₱${v.toLocaleString()}`, "MRR"]} />
-                <Line type="monotone" dataKey="mrr" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: "hsl(var(--secondary))", r: 4 }} />
-              </LineChart>
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Bar dataKey="screened" name="Screened" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="referred" name="Referred" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} />
+              </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle className="text-base">Patient Risk Distribution</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">National Risk Distribution</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={160}>
               <PieChart>
@@ -161,587 +151,39 @@ function PlatformOverviewTab() {
           </CardContent>
         </Card>
       </div>
+
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
+        <p className="text-sm font-semibold text-primary mb-3">Government Priority Alerts</p>
+        <div className="space-y-2">
+          {[
+            { label: "Marikina City — High-risk cluster detected (barangay level)", severity: "high" },
+            { label: "Malabon — Q2 DOH report submission due May 31", severity: "medium" },
+            { label: "Quezon City — School SPED compliance audit pending", severity: "medium" },
+            { label: "BGC / Taguig — Early intervention targets met for Q1", severity: "info" },
+          ].map((a, i) => (
+            <div key={i} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
+              a.severity === "high" ? "bg-red-50 border border-red-200 text-red-800" :
+              a.severity === "medium" ? "bg-yellow-50 border border-yellow-200 text-yellow-800" :
+              "bg-green-50 border border-green-200 text-green-800"
+            }`}>
+              {a.severity === "high" ? <AlertTriangle className="h-4 w-4 shrink-0" /> :
+               a.severity === "medium" ? <Clock className="h-4 w-4 shrink-0" /> :
+               <CheckCircle className="h-4 w-4 shrink-0" />}
+              {a.label}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-function UserManagementTab() {
-  const [users, setUsers] = useState<DemoUser[]>(INITIAL_USERS);
-  const [search, setSearch] = useState("");
-  const [addOpen, setAddOpen] = useState(false);
-  const [editUser, setEditUser] = useState<DemoUser | null>(null);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [inviting, setInviting] = useState(false);
-  const [inviteSent, setInviteSent] = useState(false);
-  const [newUser, setNewUser] = useState({ name: "", email: "", role: "family", tier: "Starter Care" });
-
-  const filtered = users.filter(u =>
-    u.name.toLowerCase().includes(search.toLowerCase()) ||
-    u.email.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const handleInvite = async () => {
-    if (!newUser.name || !newUser.email) return;
-    setInviting(true);
-    await new Promise(r => setTimeout(r, 700));
-    setUsers(us => [...us, { ...newUser, status: "active", joined: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }) }]);
-    setInviting(false);
-    setInviteSent(true);
-    setTimeout(() => { setInviteSent(false); setAddOpen(false); setNewUser({ name: "", email: "", role: "family", tier: "Starter Care" }); }, 1500);
-  };
-
-  const handleSaveEdit = () => {
-    if (editIndex === null || !editUser) return;
-    setUsers(us => us.map((u, i) => i === editIndex ? editUser : u));
-    setEditUser(null);
-    setEditIndex(null);
-  };
-
-  return (
-    <div className="p-6 lg:p-8 space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">User Management</h1>
-          <p className="text-sm text-muted-foreground">{users.length} registered users across all roles</p>
-        </div>
-        <Button className="rounded-full gap-2" data-testid="button-add-user" onClick={() => setAddOpen(true)}>
-          <Plus className="h-4 w-4" /> Add User
-        </Button>
-      </div>
-      <div className="grid grid-cols-4 gap-3">
-        {[
-          { label: "Families", count: users.filter(u => u.role === "family").length, icon: Users },
-          { label: "Clinics", count: users.filter(u => u.role === "clinic").length, icon: Stethoscope },
-          { label: "Schools", count: users.filter(u => u.role === "school").length, icon: GraduationCap },
-          { label: "Government", count: users.filter(u => u.role === "government").length, icon: TrendingUp },
-        ].map(s => (
-          <div key={s.label} className="rounded-xl border bg-card p-4 text-center" data-testid={`user-count-${s.label.toLowerCase()}`}>
-            <p className="text-2xl font-bold">{s.count}</p>
-            <p className="text-xs text-muted-foreground">{s.label}</p>
-          </div>
-        ))}
-      </div>
-      <Input
-        placeholder="Search users..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        className="max-w-sm"
-        data-testid="input-user-search"
-      />
-      <div className="rounded-xl border overflow-hidden">
-        <table className="w-full text-sm" data-testid="users-table">
-          <thead className="bg-muted/50">
-            <tr>
-              {["Name", "Email", "Role", "Tier", "Status", "Joined", "Actions"].map(h => (
-                <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={7} className="text-center py-12 text-muted-foreground text-sm">
-                  No users registered yet. Use the "Add User" button to invite the first user.
-                </td>
-              </tr>
-            )}
-            {filtered.map((u, i) => {
-              const origIdx = users.findIndex(x => x === u);
-              return (
-                <tr key={i} className="border-t hover:bg-muted/20" data-testid={`user-row-${i}`}>
-                  <td className="px-4 py-3 font-medium">{u.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">{u.email}</td>
-                  <td className="px-4 py-3">
-                    <Badge className={`text-xs capitalize ${ROLE_COLORS[u.role] ?? "bg-muted"}`}>{u.role}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{u.tier}</td>
-                  <td className="px-4 py-3">
-                    <span className="flex items-center gap-1.5 text-xs text-green-700 font-medium">
-                      <CheckCircle className="h-3.5 w-3.5" /> {u.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{u.joined}</td>
-                  <td className="px-4 py-3">
-                    <Button
-                      size="sm" variant="outline" className="rounded-full text-xs h-6 px-2"
-                      data-testid={`button-edit-user-${i}`}
-                      onClick={() => { setEditUser({ ...u }); setEditIndex(origIdx); }}
-                    >Edit</Button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Add User Modal */}
-      <Dialog open={addOpen} onOpenChange={v => { setAddOpen(v); if (!v) setInviteSent(false); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-primary" /> Invite New User
-            </DialogTitle>
-          </DialogHeader>
-          {inviteSent ? (
-            <div className="py-8 text-center space-y-2">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto">
-                <CheckCircle className="h-7 w-7 text-green-600" />
-              </div>
-              <p className="font-semibold">Invitation Sent!</p>
-              <p className="text-sm text-muted-foreground">{newUser.email} will receive an invite link.</p>
-            </div>
-          ) : (
-            <div className="space-y-4 py-2">
-              <div className="space-y-1.5">
-                <Label>Full Name</Label>
-                <Input value={newUser.name} onChange={e => setNewUser(u => ({ ...u, name: e.target.value }))} placeholder="e.g. Dr. Juan dela Cruz" data-testid="input-new-user-name" />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Email Address</Label>
-                <Input type="email" value={newUser.email} onChange={e => setNewUser(u => ({ ...u, email: e.target.value }))} placeholder="user@example.com" data-testid="input-new-user-email" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>Role</Label>
-                  <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={newUser.role} onChange={e => setNewUser(u => ({ ...u, role: e.target.value }))} data-testid="select-new-user-role">
-                    {["parent", "doctor", "therapist", "school", "admin"].map(r => <option key={r} value={r} className="capitalize">{r}</option>)}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Subscription Tier</Label>
-                  <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={newUser.tier} onChange={e => setNewUser(u => ({ ...u, tier: e.target.value }))} data-testid="select-new-user-tier">
-                    {["Starter Care", "Care Plus", "Care Family Pro", "Clinic SaaS", "School License"].map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-          {!inviteSent && (
-            <DialogFooter className="gap-2">
-              <Button variant="outline" className="rounded-full" onClick={() => setAddOpen(false)}>Cancel</Button>
-              <Button className="rounded-full gap-1.5" onClick={handleInvite} disabled={inviting || !newUser.name || !newUser.email} data-testid="button-send-invite">
-                <Mail className="h-4 w-4" />
-                {inviting ? "Sending..." : "Send Invitation"}
-              </Button>
-            </DialogFooter>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit User Modal */}
-      <Dialog open={!!editUser} onOpenChange={v => { if (!v) { setEditUser(null); setEditIndex(null); } }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" /> Edit User
-            </DialogTitle>
-          </DialogHeader>
-          {editUser && (
-            <div className="space-y-4 py-2">
-              <div className="space-y-1.5">
-                <Label>Full Name</Label>
-                <Input value={editUser.name} onChange={e => setEditUser(u => u ? { ...u, name: e.target.value } : u)} data-testid="input-edit-user-name" />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Email</Label>
-                <Input value={editUser.email} onChange={e => setEditUser(u => u ? { ...u, email: e.target.value } : u)} data-testid="input-edit-user-email" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>Role</Label>
-                  <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={editUser.role} onChange={e => setEditUser(u => u ? { ...u, role: e.target.value } : u)}>
-                    {["parent", "doctor", "therapist", "school", "admin"].map(r => <option key={r} value={r} className="capitalize">{r}</option>)}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Status</Label>
-                  <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={editUser.status} onChange={e => setEditUser(u => u ? { ...u, status: e.target.value } : u)}>
-                    {["active", "suspended", "pending"].map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Subscription Tier</Label>
-                <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={editUser.tier} onChange={e => setEditUser(u => u ? { ...u, tier: e.target.value } : u)}>
-                  {["Starter Care", "Care Plus", "Care Family Pro", "Clinic SaaS", "School License"].map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-            </div>
-          )}
-          <DialogFooter className="gap-2">
-            <Button variant="outline" className="rounded-full" onClick={() => { setEditUser(null); setEditIndex(null); }}>Cancel</Button>
-            <Button className="rounded-full" onClick={handleSaveEdit} data-testid="button-save-edit-user">Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-function SubscriptionsTab() {
-  const [selected, setSelected] = useState<typeof SUBSCRIPTIONS[number] | null>(null);
-  const [exported, setExported] = useState(false);
-  const totalRevenue = SUBSCRIPTIONS.reduce((sum, s) => {
-    const val = parseInt(s.revenue.replace(/[₱,]/g, ""));
-    return sum + val;
-  }, 0);
-
-  const handleExport = () => {
-    setExported(true);
-    setTimeout(() => setExported(false), 2000);
-  };
-
-  return (
-    <div className="p-6 lg:p-8 space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Subscriptions</h1>
-          <p className="text-sm text-muted-foreground">Revenue breakdown by subscription tier</p>
-        </div>
-        <Button variant="outline" className="rounded-full gap-2" onClick={handleExport} data-testid="button-export-subs">
-          <Download className="h-4 w-4" />
-          {exported ? "Exported!" : "Export CSV"}
-        </Button>
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-5 pb-4 px-5">
-            <p className="text-sm text-muted-foreground">Total MRR</p>
-            <p className="text-2xl font-bold">₱326,278</p>
-            <p className="text-xs text-green-700 font-medium mt-1">+18.4% vs last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-5 pb-4 px-5">
-            <p className="text-sm text-muted-foreground">Active Subscriptions</p>
-            <p className="text-2xl font-bold">{SUBSCRIPTIONS.reduce((s, t) => s + t.users, 0)}</p>
-            <p className="text-xs text-muted-foreground mt-1">Across all tiers</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-5 pb-4 px-5">
-            <p className="text-sm text-muted-foreground">Churn Rate</p>
-            <p className="text-2xl font-bold">1.8%</p>
-            <p className="text-xs text-green-700 font-medium mt-1">Below 2% target</p>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="space-y-3">
-        {SUBSCRIPTIONS.map((sub, i) => (
-          <div key={i} className="rounded-xl border bg-card px-5 py-4 flex items-center gap-4" data-testid={`subscription-tier-${i}`}>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold">{sub.name}</span>
-                <Badge className={`text-xs ${sub.color}`}>{sub.price}</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">{sub.users} subscribers</p>
-            </div>
-            <div className="text-right shrink-0">
-              <p className="font-bold text-foreground">{sub.revenue}</p>
-              <p className="text-xs text-muted-foreground">monthly revenue</p>
-            </div>
-            <div className="w-24 shrink-0">
-              <Progress value={(sub.users / 250) * 100} className="h-1.5" />
-            </div>
-            <Button
-              size="sm" variant="outline" className="rounded-full text-xs h-7 shrink-0"
-              data-testid={`button-manage-tier-${i}`}
-              onClick={() => setSelected(sub)}
-            >
-              Manage
-            </Button>
-          </div>
-        ))}
-      </div>
-
-      <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Manage Tier — {selected?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="rounded-xl bg-muted/50 border p-4 grid grid-cols-2 gap-3 text-sm">
-              <div><p className="text-xs text-muted-foreground">Price</p><p className="font-semibold">{selected?.price}</p></div>
-              <div><p className="text-xs text-muted-foreground">Subscribers</p><p className="font-semibold">{selected?.users}</p></div>
-              <div><p className="text-xs text-muted-foreground">Monthly Revenue</p><p className="font-semibold">{selected?.revenue}</p></div>
-              <div><p className="text-xs text-muted-foreground">Utilization</p><p className="font-semibold">{Math.round(((selected?.users ?? 0) / 250) * 100)}%</p></div>
-            </div>
-            <div className="space-y-2">
-              <p className="text-sm font-semibold">Quick Actions</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="rounded-full text-xs h-8" onClick={() => setSelected(null)}>
-                  <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Sync Billing
-                </Button>
-                <Button variant="outline" className="rounded-full text-xs h-8" onClick={() => setSelected(null)}>
-                  <Download className="h-3.5 w-3.5 mr-1.5" /> Export Users
-                </Button>
-                <Button variant="outline" className="rounded-full text-xs h-8" onClick={() => setSelected(null)}>
-                  <Mail className="h-3.5 w-3.5 mr-1.5" /> Email Cohort
-                </Button>
-                <Button variant="outline" className="rounded-full text-xs h-8 text-red-600 hover:text-red-700" onClick={() => setSelected(null)}>
-                  <X className="h-3.5 w-3.5 mr-1.5" /> Suspend Tier
-                </Button>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button className="rounded-full" onClick={() => setSelected(null)}>Done</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-function AIMonitoringTab() {
-  const [exported, setExported] = useState(false);
-  const [resolving, setResolving] = useState(false);
-  const [resolved, setResolved] = useState(false);
-
-  const aiStats = [
-    { metric: "Screenings Processed (30d)", value: "1,247", status: "normal" },
-    { metric: "AI Reports Generated (30d)", value: "423", status: "normal" },
-    { metric: "Video Sessions Analyzed (30d)", value: "89", status: "normal" },
-    { metric: "Avg Processing Time", value: "2.3s", status: "normal" },
-    { metric: "Model Accuracy Score", value: "94.2%", status: "normal" },
-    { metric: "Flagged for Review", value: resolved ? "0" : "7", status: resolved ? "normal" : "warning" },
-    { metric: "API Error Rate", value: "0.03%", status: "normal" },
-    { metric: "Queue Depth", value: "0", status: "normal" },
-  ];
-
-  const usageData = [
-    { feature: "AI Clinical Reports", used: 423, cost: "₱6,345", unit: "@₱15" },
-    { feature: "Video Behavioral Analysis", used: 89, cost: "₱4,450", unit: "@₱50" },
-    { feature: "Advanced ML Pattern", used: 67, cost: "₱1,005", unit: "@₱15" },
-  ];
-
-  const handleExport = () => {
-    setExported(true);
-    setTimeout(() => setExported(false), 2000);
-  };
-
-  const handleResolveAll = async () => {
-    setResolving(true);
-    await new Promise(r => setTimeout(r, 800));
-    setResolving(false);
-    setResolved(true);
-  };
-
-  return (
-    <div className="p-6 lg:p-8 space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">AI Monitoring</h1>
-          <p className="text-sm text-muted-foreground">System health, model performance, and usage analytics</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {!resolved && (
-            <Button variant="outline" className="rounded-full gap-2 text-orange-600 border-orange-300 hover:bg-orange-50" onClick={handleResolveAll} disabled={resolving} data-testid="button-resolve-flagged">
-              <AlertTriangle className="h-4 w-4" />
-              {resolving ? "Resolving..." : "Resolve Flagged (7)"}
-            </Button>
-          )}
-          <Button variant="outline" className="rounded-full gap-2" onClick={handleExport} data-testid="button-export-ai">
-            <Download className="h-4 w-4" />
-            {exported ? "Exported!" : "Export Report"}
-          </Button>
-        </div>
-      </div>
-      {resolved && (
-        <div className="rounded-xl border bg-green-50 border-green-200 p-3 flex items-center gap-2 text-green-800 text-sm">
-          <CheckCircle className="h-4 w-4 shrink-0" />
-          All 7 flagged items have been reviewed and cleared.
-        </div>
-      )}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {aiStats.map((s, i) => (
-          <div
-            key={i}
-            className={`rounded-xl border p-4 ${s.status === "warning" ? "border-orange-200 bg-orange-50" : "bg-card"}`}
-            data-testid={`ai-stat-${i}`}
-          >
-            <p className="text-xs text-muted-foreground mb-1">{s.metric}</p>
-            <p className={`text-xl font-bold ${s.status === "warning" ? "text-orange-700" : "text-foreground"}`}>{s.value}</p>
-            {s.status === "warning" && <Badge className="text-xs bg-orange-100 text-orange-700 mt-1">Needs Review</Badge>}
-            {s.metric === "Flagged for Review" && resolved && <Badge className="text-xs bg-green-100 text-green-700 mt-1">All Clear</Badge>}
-          </div>
-        ))}
-      </div>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Usage-Based Billing (This Month)</CardTitle>
-            <Button size="sm" variant="outline" className="rounded-full text-xs gap-1.5" onClick={handleExport} data-testid="button-export-billing">
-              <Download className="h-3.5 w-3.5" /> Export
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {usageData.map((u, i) => (
-              <div key={i} className="flex items-center gap-4" data-testid={`ai-usage-${i}`}>
-                <div className="flex-1">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="font-medium">{u.feature}</span>
-                    <span className="text-muted-foreground">{u.used} uses {u.unit}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Progress value={(u.used / 500) * 100} className="flex-1 h-2" />
-                    <span className="text-sm font-bold text-foreground w-20 text-right">{u.cost}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <div className="border-t pt-3 flex justify-between text-sm font-semibold">
-              <span>Total AI Usage Fees (May 2026)</span>
-              <span className="text-foreground">₱11,800</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function OnboardingTab() {
-  const [orgs, setOrgs] = useState<OrgEntry[]>(INITIAL_CLINICS);
-  const [open, setOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ name: "", type: "Clinic", tier: "Clinic Starter", contactEmail: "", notes: "" });
-
-  const handleAdd = async () => {
-    if (!form.name) return;
-    setSubmitting(true);
-    await new Promise(r => setTimeout(r, 600));
-    setOrgs(os => [...os, {
-      name: form.name,
-      type: form.type,
-      doctors: form.type === "Clinic" ? 0 : undefined,
-      patients: form.type === "Clinic" ? 0 : undefined,
-      students: form.type === "School" ? 0 : undefined,
-      tier: form.tier,
-      status: "pending",
-    }]);
-    setSubmitting(false);
-    setOpen(false);
-    setForm({ name: "", type: "Clinic", tier: "Clinic Starter", contactEmail: "", notes: "" });
-  };
-
-  return (
-    <div className="p-6 lg:p-8 space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Clinic & School Onboarding</h1>
-          <p className="text-sm text-muted-foreground">B2B client management and onboarding pipeline</p>
-        </div>
-        <Button className="rounded-full gap-2" data-testid="button-new-onboarding" onClick={() => setOpen(true)}>
-          <Building2 className="h-4 w-4" /> Add Org
-        </Button>
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { label: "Active Clinics", value: orgs.filter(o => o.type === "Clinic" && o.status === "active").length, icon: Stethoscope },
-          { label: "School Licenses", value: orgs.filter(o => o.type === "School" && o.status === "active").length, icon: GraduationCap },
-          { label: "Pending Approval", value: orgs.filter(o => o.status === "pending").length, icon: Clock },
-        ].map(s => (
-          <Card key={s.label} data-testid={`onboard-stat-${s.label.toLowerCase().replace(/ /g, "-")}`}>
-            <CardContent className="pt-5 pb-4 px-5 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15">
-                <s.icon className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <div className="space-y-3">
-        {orgs.map((c, i) => (
-          <div key={i} className="rounded-xl border bg-card px-5 py-4 flex items-center gap-4" data-testid={`clinic-row-${i}`}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15 shrink-0">
-              {c.type === "School" ? <GraduationCap className="h-5 w-5 text-primary" /> : <Stethoscope className="h-5 w-5 text-primary" />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">{c.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {c.type === "School" ? `${c.students ?? 0} students` : `${c.doctors ?? 0} doctors · ${c.patients ?? 0} patients`}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <Badge variant="outline" className="text-xs">{c.tier}</Badge>
-              <Badge className={`text-xs capitalize ${c.status === "active" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>{c.status}</Badge>
-              {c.status === "pending" && (
-                <Button
-                  size="sm" variant="outline" className="rounded-full text-xs h-7"
-                  onClick={() => setOrgs(os => os.map((o, j) => j === i ? { ...o, status: "active" } : o))}
-                  data-testid={`button-approve-org-${i}`}
-                >
-                  Approve
-                </Button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary" /> Add New Organization
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>Organization Name</Label>
-              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Makati Children's Clinic" data-testid="input-org-name" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Type</Label>
-                <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} data-testid="select-org-type">
-                  <option value="Clinic">Clinic</option>
-                  <option value="School">School</option>
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>License Tier</Label>
-                <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={form.tier} onChange={e => setForm(f => ({ ...f, tier: e.target.value }))} data-testid="select-org-tier">
-                  {["Clinic Starter", "Clinic Pro", "Clinic SaaS", "School License"].map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Contact Email</Label>
-              <Input type="email" value={form.contactEmail} onChange={e => setForm(f => ({ ...f, contactEmail: e.target.value }))} placeholder="admin@clinic.com" data-testid="input-org-email" />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Notes (optional)</Label>
-              <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Onboarding notes, referral source..." rows={2} data-testid="input-org-notes" />
-            </div>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" className="rounded-full" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button className="rounded-full gap-1.5" onClick={handleAdd} disabled={submitting || !form.name} data-testid="button-submit-org">
-              <Plus className="h-4 w-4" />
-              {submitting ? "Adding..." : "Add Organization"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-function AnalyticsTab() {
+function PopulationAnalyticsTab() {
   const { data: children } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
 
   const monthlyScreenings = [
-    { month: "Nov", screenings: 48 }, { month: "Dec", screenings: 62 }, { month: "Jan", screenings: 79 },
-    { month: "Feb", screenings: 94 }, { month: "Mar", screenings: 118 }, { month: "Apr", screenings: 143 }, { month: "May", screenings: 165 },
+    { month: "Nov", screenings: 980 }, { month: "Dec", screenings: 1120 }, { month: "Jan", screenings: 1240 },
+    { month: "Feb", screenings: 1480 }, { month: "Mar", screenings: 1720 }, { month: "Apr", screenings: 1960 }, { month: "May", screenings: 2184 },
   ];
 
   const riskTrend = [
@@ -752,19 +194,29 @@ function AnalyticsTab() {
     { month: "May", low: 58, moderate: 28, high: 10, critical: 4 },
   ];
 
+  const provinces = [
+    { city: "Quezon City", patients: 642, risk: "moderate" },
+    { city: "Marikina", patients: 389, risk: "high" },
+    { city: "Malabon", patients: 276, risk: "moderate" },
+    { city: "BGC / Taguig", patients: 531, risk: "low" },
+    { city: "Pasig", patients: 318, risk: "moderate" },
+    { city: "Caloocan", patients: 420, risk: "high" },
+  ];
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">System Analytics</h1>
-        <p className="text-sm text-muted-foreground">Platform-wide developmental data insights</p>
+        <h1 className="text-2xl font-bold">Population Analytics</h1>
+        <p className="text-sm text-muted-foreground">Anonymized developmental health data across all regions — compliant with RA 10173</p>
       </div>
+
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><CardTitle className="text-base">Monthly Screenings Volume</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Monthly Screenings Volume (National)</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={monthlyScreenings}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Bar dataKey="screenings" fill="hsl(var(--secondary))" radius={4} />
@@ -774,7 +226,7 @@ function AnalyticsTab() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle className="text-base">Risk Distribution Trend (Rolling)</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Risk Distribution Trend (Rolling Average)</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={riskTrend}>
@@ -792,21 +244,17 @@ function AnalyticsTab() {
           </CardContent>
         </Card>
       </div>
+
       <Card>
-        <CardHeader><CardTitle className="text-base">Regional Overview (Metro Manila)</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Regional Coverage Map — Metro Manila</CardTitle></CardHeader>
         <CardContent>
-          <div className="grid sm:grid-cols-4 gap-4">
-            {[
-              { city: "Quezon City", patients: 142, risk: "moderate" },
-              { city: "Marikina", patients: 89, risk: "high" },
-              { city: "Malabon", patients: 76, risk: "moderate" },
-              { city: "BGC / Taguig", patients: 231, risk: "low" },
-            ].map(r => (
+          <div className="grid sm:grid-cols-3 gap-4">
+            {provinces.map(r => (
               <div key={r.city} className="rounded-xl border bg-muted/30 p-4 text-center" data-testid={`region-${r.city.toLowerCase().replace(/ /g, "-")}`}>
                 <Globe className="h-5 w-5 mx-auto mb-2 text-primary" />
                 <p className="font-semibold text-sm">{r.city}</p>
                 <p className="text-xl font-bold">{r.patients}</p>
-                <p className="text-xs text-muted-foreground">patients</p>
+                <p className="text-xs text-muted-foreground">children screened</p>
                 <Badge className={`text-xs capitalize mt-1 ${
                   r.risk === "low" ? "bg-green-100 text-green-800" :
                   r.risk === "moderate" ? "bg-yellow-100 text-yellow-800" :
@@ -817,143 +265,159 @@ function AnalyticsTab() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="rounded-xl border bg-muted/30 p-5">
+        <p className="text-sm font-semibold mb-4">National Health Indicators</p>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {[
+            { label: "National Screening Coverage", value: 62, unit: "%" },
+            { label: "Early Intervention Reach", value: 44, unit: "%" },
+            { label: "At-Risk Children Referred", value: 87, unit: "%" },
+            { label: "Province-Level Compliance", value: 78, unit: "%" },
+          ].map(kpi => (
+            <div key={kpi.label}>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="font-medium">{kpi.label}</span>
+                <span className="text-muted-foreground font-mono">{kpi.value}{kpi.unit}</span>
+              </div>
+              <Progress value={kpi.value} className="h-2" />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-function SupportTab() {
-  const [tickets, setTickets] = useState<SupportTicket[]>(INITIAL_TICKETS);
-  const [activeTicket, setActiveTicket] = useState<SupportTicket | null>(null);
-  const [reply, setReply] = useState("");
-  const [sending, setSending] = useState(false);
+type RegionProgram = { name: string; region: string; type: string; beneficiaries: number; status: string; budget: string };
 
-  const PRIORITY_COLORS: Record<string, string> = {
-    critical: "bg-red-100 text-red-800",
-    high: "bg-orange-100 text-orange-800",
-    medium: "bg-yellow-100 text-yellow-800",
-    low: "bg-green-100 text-green-800",
-  };
+function RegionalProgramsTab() {
+  const [programs, setPrograms] = useState<RegionProgram[]>([
+    { name: "Barangay Dev Screening Rollout", region: "NCR — Quezon City", type: "Screening", beneficiaries: 1200, status: "active", budget: "₱3.2M" },
+    { name: "SPED Integration — Public Schools", region: "Region IV-A (CALABARZON)", type: "School", beneficiaries: 4500, status: "active", budget: "₱8.5M" },
+    { name: "RHU Early Intervention Training", region: "NCR — Malabon/Navotas", type: "Capacity Building", beneficiaries: 280, status: "ongoing", budget: "₱1.1M" },
+  ]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", region: "", type: "Screening", beneficiaries: "", status: "planning", budget: "" });
+  const [saving, setSaving] = useState(false);
+
   const STATUS_COLORS: Record<string, string> = {
-    open: "bg-blue-100 text-blue-800",
-    in_progress: "bg-purple-100 text-purple-800",
-    resolved: "bg-green-100 text-green-800",
+    planning: "bg-gray-100 text-gray-700",
+    active: "bg-green-100 text-green-800",
+    ongoing: "bg-blue-100 text-blue-800",
+    completed: "bg-purple-100 text-purple-800",
+    suspended: "bg-red-100 text-red-800",
   };
 
-  const handleRespond = async () => {
-    if (!reply.trim() || !activeTicket) return;
-    setSending(true);
-    await new Promise(r => setTimeout(r, 600));
-    setTickets(ts => ts.map(t => t.id === activeTicket.id ? { ...t, status: "resolved" } : t));
-    setSending(false);
-    setReply("");
-    setActiveTicket(null);
+  const handleAdd = async () => {
+    if (!form.name || !form.region) return;
+    setSaving(true);
+    await new Promise(r => setTimeout(r, 500));
+    setPrograms(p => [...p, { ...form, beneficiaries: Number(form.beneficiaries) || 0 }]);
+    setSaving(false);
+    setOpen(false);
+    setForm({ name: "", region: "", type: "Screening", beneficiaries: "", status: "planning", budget: "" });
   };
-
-  const openCount = tickets.filter(t => t.status !== "resolved").length;
-  const resolvedCount = tickets.filter(t => t.status === "resolved").length;
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold">Support Tickets</h1>
-        <p className="text-sm text-muted-foreground">{openCount} open · {resolvedCount} resolved</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Regional Programs</h1>
+          <p className="text-sm text-muted-foreground">Government-funded early intervention and screening programs across regions</p>
+        </div>
+        <Button className="rounded-full gap-2" onClick={() => setOpen(true)} data-testid="button-add-program">
+          <Plus className="h-4 w-4" /> Add Program
+        </Button>
       </div>
-      <div className="grid grid-cols-3 gap-4">
+
+      <div className="grid sm:grid-cols-3 gap-4">
         {[
-          { label: "Open", count: tickets.filter(t => t.status === "open").length, color: "bg-blue-100 text-blue-800 border-blue-200" },
-          { label: "In Progress", count: tickets.filter(t => t.status === "in_progress").length, color: "bg-purple-100 text-purple-800 border-purple-200" },
-          { label: "Resolved", count: tickets.filter(t => t.status === "resolved").length, color: "bg-green-100 text-green-800 border-green-200" },
+          { label: "Active Programs", value: programs.filter(p => p.status === "active" || p.status === "ongoing").length, icon: Activity },
+          { label: "Total Beneficiaries", value: programs.reduce((s, p) => s + p.beneficiaries, 0).toLocaleString(), icon: Users },
+          { label: "Regions Covered", value: new Set(programs.map(p => p.region.split(" — ")[0])).size, icon: MapPin },
         ].map(s => (
-          <div key={s.label} className={`rounded-xl border p-4 text-center ${s.color}`} data-testid={`ticket-stat-${s.label.toLowerCase().replace(/ /g, "-")}`}>
-            <p className="text-2xl font-bold">{s.count}</p>
-            <p className="text-sm font-medium">{s.label}</p>
-          </div>
-        ))}
-      </div>
-      {tickets.length === 0 && (
-        <Card className="border-dashed">
-          <CardContent className="py-16 text-center space-y-3">
-            <LifeBuoy className="h-12 w-12 text-muted-foreground mx-auto" />
-            <div>
-              <p className="font-semibold text-lg">No support tickets</p>
-              <p className="text-sm text-muted-foreground mt-1">Support requests submitted by users will appear here.</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      <div className="space-y-3">
-        {tickets.map((t, i) => (
-          <Card key={i} data-testid={`ticket-${t.id}`}>
-            <CardContent className="p-4 flex items-start gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="font-mono text-xs text-muted-foreground">{t.id}</span>
-                  <span className="font-medium text-sm">{t.user}</span>
-                  <Badge className={`text-xs capitalize ${PRIORITY_COLORS[t.priority]}`}>{t.priority}</Badge>
-                  <Badge className={`text-xs capitalize ${STATUS_COLORS[t.status]}`}>{t.status.replace("_", " ")}</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">{t.issue}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t.created}</p>
+          <Card key={s.label}>
+            <CardContent className="pt-5 pb-4 px-5 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15">
+                <s.icon className="h-5 w-5 text-primary" />
               </div>
-              <Button
-                size="sm" variant="outline" className="rounded-full text-xs h-7 shrink-0"
-                data-testid={`button-ticket-${t.id}`}
-                onClick={() => { setActiveTicket(t); setReply(""); }}
-              >
-                {t.status === "resolved" ? "View" : "Respond"}
-              </Button>
+              <div>
+                <p className="text-2xl font-bold">{s.value}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <Dialog open={!!activeTicket} onOpenChange={v => { if (!v) setActiveTicket(null); }}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <LifeBuoy className="h-5 w-5 text-primary" />
-              {activeTicket?.id} — {activeTicket?.user}
-            </DialogTitle>
-          </DialogHeader>
-          {activeTicket && (
-            <div className="space-y-4 py-2">
-              <div className="rounded-xl bg-muted/50 border p-4 space-y-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge className={`text-xs capitalize ${PRIORITY_COLORS[activeTicket.priority]}`}>{activeTicket.priority} priority</Badge>
-                  <Badge className={`text-xs capitalize ${STATUS_COLORS[activeTicket.status]}`}>{activeTicket.status.replace("_", " ")}</Badge>
-                  <span className="text-xs text-muted-foreground ml-auto">{activeTicket.created}</span>
-                </div>
-                <p className="text-sm font-medium">{activeTicket.issue}</p>
-              </div>
-              {activeTicket.status !== "resolved" ? (
-                <div className="space-y-1.5">
-                  <Label>Reply to {activeTicket.user}</Label>
-                  <Textarea
-                    value={reply}
-                    onChange={e => setReply(e.target.value)}
-                    placeholder="Type your response to the user..."
-                    rows={4}
-                    data-testid="input-ticket-reply"
-                  />
-                </div>
-              ) : (
-                <div className="rounded-xl border bg-green-50 border-green-200 p-3 flex items-center gap-2 text-green-800 text-sm">
-                  <CheckCircle className="h-4 w-4 shrink-0" />
-                  This ticket has been resolved.
-                </div>
-              )}
+      <div className="space-y-3">
+        {programs.map((p, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl border bg-card p-5 flex items-center gap-4"
+            data-testid={`program-${i}`}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+              <Globe className="h-5 w-5 text-primary" />
             </div>
-          )}
-          <DialogFooter className="gap-2">
-            <Button variant="outline" className="rounded-full" onClick={() => setActiveTicket(null)}>
-              {activeTicket?.status === "resolved" ? "Close" : "Cancel"}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                <span className="font-semibold text-sm">{p.name}</span>
+                <Badge className="text-xs bg-primary/10 text-primary">{p.type}</Badge>
+                <Badge className={`text-xs capitalize ${STATUS_COLORS[p.status] ?? "bg-muted"}`}>{p.status}</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">{p.region} · {p.beneficiaries.toLocaleString()} beneficiaries · {p.budget}</p>
+            </div>
+            <Button size="sm" variant="outline" className="rounded-full text-xs h-7 shrink-0">Manage</Button>
+          </motion.div>
+        ))}
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Add Regional Program</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Program Name</Label>
+              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Barangay Early Detection Drive" data-testid="input-program-name" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Region / LGU</Label>
+                <Input value={form.region} onChange={e => setForm(f => ({ ...f, region: e.target.value }))} placeholder="e.g. NCR — Taguig City" data-testid="input-program-region" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Program Type</Label>
+                <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+                  {["Screening", "School", "Capacity Building", "Research", "RHU Integration"].map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Estimated Beneficiaries</Label>
+                <Input type="number" value={form.beneficiaries} onChange={e => setForm(f => ({ ...f, beneficiaries: e.target.value }))} placeholder="0" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Budget Allocation</Label>
+                <Input value={form.budget} onChange={e => setForm(f => ({ ...f, budget: e.target.value }))} placeholder="₱0.0M" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Status</Label>
+              <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                {["planning", "active", "ongoing", "completed", "suspended"].map(s => <option key={s} value={s} className="capitalize">{s}</option>)}
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-full" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button className="rounded-full" onClick={handleAdd} disabled={saving || !form.name || !form.region} data-testid="button-save-program">
+              {saving ? "Saving..." : "Add Program"}
             </Button>
-            {activeTicket?.status !== "resolved" && (
-              <Button className="rounded-full gap-1.5" onClick={handleRespond} disabled={sending || !reply.trim()} data-testid="button-send-reply">
-                <Mail className="h-4 w-4" />
-                {sending ? "Sending..." : "Send & Resolve"}
-              </Button>
-            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -961,122 +425,510 @@ function SupportTab() {
   );
 }
 
-function FeesTab() {
-  const qc = useQueryClient();
-  const { data: fees, isLoading } = useListSpecialtyFees({ query: { queryKey: getListSpecialtyFeesQueryKey() } });
-  const upsertFee = useUpsertSpecialtyFee();
-  const [editing, setEditing] = useState<Record<string, string>>({});
-  const [saving, setSaving] = useState<string | null>(null);
-  const [saved, setSaved] = useState<string | null>(null);
+type OrgEntry = { name: string; type: string; region: string; count?: number; tier: string; status: string };
+const INITIAL_ORGS: OrgEntry[] = [];
 
-  const LABELS: Record<string, string> = {
-    developmental_pediatrician: "Developmental Pediatrician",
-    psychologist: "Child Psychologist",
-    psychiatrist: "Child Psychiatrist",
-    speech_therapist: "Speech-Language Therapist",
-    occupational_therapist: "Occupational Therapist",
-    behavioral_therapist: "Behavioral Therapist",
+function PartnerOrganizationsTab() {
+  const [orgs, setOrgs] = useState<OrgEntry[]>(INITIAL_ORGS);
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ name: "", type: "Clinic", region: "", tier: "Clinic SaaS", contactEmail: "", notes: "" });
+
+  const handleAdd = async () => {
+    if (!form.name) return;
+    setSubmitting(true);
+    await new Promise(r => setTimeout(r, 600));
+    setOrgs(os => [...os, { name: form.name, type: form.type, region: form.region, tier: form.tier, status: "pending" }]);
+    setSubmitting(false);
+    setOpen(false);
+    setForm({ name: "", type: "Clinic", region: "", tier: "Clinic SaaS", contactEmail: "", notes: "" });
   };
 
-  async function handleSave(specialistType: string) {
-    const val = editing[specialistType];
-    if (!val) return;
-    setSaving(specialistType);
-    await upsertFee.mutateAsync({
-      specialistType,
-      data: { feeAmount: Number(val), currency: "PHP" },
-    });
-    await qc.invalidateQueries({ queryKey: getListSpecialtyFeesQueryKey() });
-    setSaving(null);
-    setSaved(specialistType);
-    setTimeout(() => setSaved(null), 2000);
-    setEditing(e => { const n = { ...e }; delete n[specialistType]; return n; });
-  }
+  return (
+    <div className="p-6 lg:p-8 space-y-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Partner Organizations</h1>
+          <p className="text-sm text-muted-foreground">Clinics, schools, RHUs, and LGU health units connected to NEOBRAIN</p>
+        </div>
+        <Button className="rounded-full gap-2" data-testid="button-new-org" onClick={() => setOpen(true)}>
+          <Building2 className="h-4 w-4" /> Add Partner
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: "Partner Clinics", value: orgs.filter(o => o.type === "Clinic" && o.status === "active").length, icon: Stethoscope },
+          { label: "Partner Schools", value: orgs.filter(o => o.type === "School" && o.status === "active").length, icon: GraduationCap },
+          { label: "RHU / LGU Units", value: orgs.filter(o => o.type === "RHU/LGU" && o.status === "active").length, icon: MapPin },
+        ].map(s => (
+          <Card key={s.label} data-testid={`org-stat-${s.label.toLowerCase().replace(/ /g, "-")}`}>
+            <CardContent className="pt-5 pb-4 px-5 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15">
+                <s.icon className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{s.value}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="space-y-3">
+        {orgs.length === 0 && (
+          <div className="rounded-xl border border-dashed p-12 flex flex-col items-center gap-3 text-center">
+            <Building2 className="h-10 w-10 text-muted-foreground/40" />
+            <p className="font-semibold">No partner organizations yet</p>
+            <p className="text-sm text-muted-foreground">Add clinics, schools, and RHUs to connect them to NEOBRAIN's network.</p>
+          </div>
+        )}
+        {orgs.map((c, i) => (
+          <div key={i} className="rounded-xl border bg-card px-5 py-4 flex items-center gap-4" data-testid={`org-row-${i}`}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15 shrink-0">
+              {c.type === "School" ? <GraduationCap className="h-5 w-5 text-primary" /> :
+               c.type === "RHU/LGU" ? <MapPin className="h-5 w-5 text-primary" /> :
+               <Stethoscope className="h-5 w-5 text-primary" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">{c.name}</p>
+              <p className="text-xs text-muted-foreground">{c.region} · {c.type}</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Badge variant="outline" className="text-xs">{c.tier}</Badge>
+              <Badge className={`text-xs capitalize ${c.status === "active" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>{c.status}</Badge>
+              {c.status === "pending" && (
+                <Button
+                  size="sm" variant="outline" className="rounded-full text-xs h-7"
+                  onClick={() => setOrgs(os => os.map((o, j) => j === i ? { ...o, status: "active" } : o))}
+                  data-testid={`button-approve-org-${i}`}
+                >Approve</Button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" /> Add Partner Organization
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Organization Name</Label>
+              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Makati Children's Clinic" data-testid="input-org-name" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Type</Label>
+                <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} data-testid="select-org-type">
+                  <option value="Clinic">Clinic</option>
+                  <option value="School">School</option>
+                  <option value="RHU/LGU">RHU / LGU Health Unit</option>
+                  <option value="DOH Partner">DOH Partner</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>License / Agreement</Label>
+                <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={form.tier} onChange={e => setForm(f => ({ ...f, tier: e.target.value }))} data-testid="select-org-tier">
+                  {["Clinic SaaS", "School License", "Government Contract", "Pilot Agreement"].map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Region / Province</Label>
+              <Input value={form.region} onChange={e => setForm(f => ({ ...f, region: e.target.value }))} placeholder="e.g. NCR — Makati City" data-testid="input-org-region" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Contact Email</Label>
+              <Input type="email" value={form.contactEmail} onChange={e => setForm(f => ({ ...f, contactEmail: e.target.value }))} placeholder="admin@org.gov.ph" data-testid="input-org-email" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Notes (optional)</Label>
+              <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Onboarding notes..." rows={2} data-testid="input-org-notes" />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" className="rounded-full" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button className="rounded-full gap-1.5" onClick={handleAdd} disabled={submitting || !form.name} data-testid="button-submit-org">
+              <Plus className="h-4 w-4" />
+              {submitting ? "Adding..." : "Add Organization"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function ResearchDataTab() {
+  const [exported, setExported] = useState<string | null>(null);
+
+  const DATASETS = [
+    { name: "Developmental Screening Outcomes — NCR 2025", scope: "Regional", records: "12,480", consent: "Anonymized", access: "available" },
+    { name: "ADHD Prevalence Study — Metro Manila", scope: "Research", records: "3,200", consent: "IRB Approved", access: "available" },
+    { name: "Early Intervention Efficacy — CALABARZON", scope: "Research", records: "5,740", consent: "Anonymized", access: "restricted" },
+    { name: "Autism Spectrum — Barangay Level Survey", scope: "DOH", records: "8,910", consent: "DPA Compliant", access: "available" },
+    { name: "School Behavioral Data — DepEd Integration", scope: "DepEd", records: "22,000", consent: "Anonymized", access: "restricted" },
+  ];
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
       <div>
-        <h1 className="text-2xl font-bold">Consultation Fees</h1>
-        <p className="text-sm text-muted-foreground">Set the consultation fee (PHP) for each specialist type</p>
+        <h1 className="text-2xl font-bold">Research Data Access</h1>
+        <p className="text-sm text-muted-foreground">Anonymized population datasets for government research — all data governed by RA 10173 and IRB protocols</p>
       </div>
-      {isLoading ? (
-        <div className="space-y-3">{Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
-      ) : (
-        <div className="space-y-3">
-          {(fees ?? []).map(fee => (
-            <div key={fee.specialistType} className="flex items-center gap-4 rounded-xl border bg-card px-5 py-4">
-              <div className="flex-1">
-                <p className="font-semibold text-sm">{LABELS[fee.specialistType] ?? fee.specialistType}</p>
-                <p className="text-xs text-muted-foreground capitalize">{fee.specialistType.replace(/_/g, " ")}</p>
-              </div>
-              {saved === fee.specialistType ? (
-                <span className="text-sm text-green-700 font-medium flex items-center gap-1">
-                  <CheckCircle className="h-4 w-4" /> Saved
-                </span>
-              ) : editing[fee.specialistType] !== undefined ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-muted-foreground">₱</span>
-                  <Input
-                    className="w-28 h-8 text-sm"
-                    type="number"
-                    min={0}
-                    value={editing[fee.specialistType]}
-                    onChange={e => setEditing(p => ({ ...p, [fee.specialistType]: e.target.value }))}
-                  />
-                  <Button
-                    size="sm"
-                    className="h-8 bg-[#0038A8] text-white hover:bg-[#1e4a00]"
-                    disabled={saving === fee.specialistType}
-                    onClick={() => handleSave(fee.specialistType)}
-                  >
-                    {saving === fee.specialistType ? "…" : "Save"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-8"
-                    onClick={() => setEditing(e => { const n = { ...e }; delete n[fee.specialistType]; return n; })}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-bold text-[#0038A8]">₱{fee.feeAmount.toLocaleString()}</span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 text-xs"
-                    onClick={() => setEditing(p => ({ ...p, [fee.specialistType]: String(fee.feeAmount) }))}
-                  >
-                    Edit
-                  </Button>
-                </div>
-              )}
+
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
+        <p className="font-semibold text-primary mb-1">Data Privacy Compliance</p>
+        <p className="text-primary/80">All research data is de-identified before export. Child names and contact information are never included. Access logs are maintained for audit purposes. NEOBRAIN operates under a National Privacy Commission-registered system.</p>
+      </div>
+
+      <div className="space-y-3">
+        {DATASETS.map((d, i) => (
+          <div key={i} className="rounded-xl border bg-card p-5 flex items-center gap-4" data-testid={`dataset-${i}`}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15 shrink-0">
+              <FlaskConical className="h-5 w-5 text-primary" />
             </div>
-          ))}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                <p className="font-semibold text-sm">{d.name}</p>
+                <Badge className="text-xs bg-primary/10 text-primary">{d.scope}</Badge>
+                <Badge className={`text-xs ${d.access === "available" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>{d.access}</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">{d.records} records · {d.consent}</p>
+            </div>
+            <Button
+              size="sm" variant="outline" className="rounded-full gap-1.5 shrink-0"
+              disabled={d.access === "restricted"}
+              data-testid={`button-export-dataset-${i}`}
+              onClick={() => { setExported(d.name); setTimeout(() => setExported(null), 2000); }}
+            >
+              <Download className="h-3.5 w-3.5" />
+              {exported === d.name ? "Exported!" : d.access === "restricted" ? "Restricted" : "Export CSV"}
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DevelopmentalIntelligenceTab() {
+  const [exported, setExported] = useState(false);
+  const [resolving, setResolving] = useState(false);
+  const [resolved, setResolved] = useState(false);
+
+  const aiStats = [
+    { metric: "Screenings Processed (30d)", value: "12,847", status: "normal" },
+    { metric: "AI Reports Generated (30d)", value: "4,230", status: "normal" },
+    { metric: "Video Sessions Analyzed (30d)", value: "890", status: "normal" },
+    { metric: "Avg Processing Time", value: "2.3s", status: "normal" },
+    { metric: "Model Accuracy Score", value: "94.2%", status: "normal" },
+    { metric: "Flagged for Clinical Review", value: resolved ? "0" : "47", status: resolved ? "normal" : "warning" },
+    { metric: "Offline Sync Pending", value: "12", status: "normal" },
+    { metric: "API Error Rate", value: "0.03%", status: "normal" },
+  ];
+
+  const forecastData = [
+    { month: "Jun", predicted: 2400, baseline: 2184 },
+    { month: "Jul", predicted: 2620, baseline: 2300 },
+    { month: "Aug", predicted: 2800, baseline: 2420 },
+    { month: "Sep", predicted: 2950, baseline: 2530 },
+    { month: "Oct", predicted: 3100, baseline: 2640 },
+  ];
+
+  return (
+    <div className="p-6 lg:p-8 space-y-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Developmental Intelligence</h1>
+          <p className="text-sm text-muted-foreground">AI model health, early warning systems, and intervention forecasting</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {!resolved && (
+            <Button variant="outline" className="rounded-full gap-2 text-orange-600 border-orange-300 hover:bg-orange-50" onClick={async () => { setResolving(true); await new Promise(r => setTimeout(r, 800)); setResolving(false); setResolved(true); }} disabled={resolving} data-testid="button-resolve-flagged">
+              <AlertTriangle className="h-4 w-4" />
+              {resolving ? "Resolving..." : "Review Flagged (47)"}
+            </Button>
+          )}
+          <Button variant="outline" className="rounded-full gap-2" onClick={() => { setExported(true); setTimeout(() => setExported(false), 2000); }} data-testid="button-export-ai">
+            <Download className="h-4 w-4" />
+            {exported ? "Exported!" : "Export Report"}
+          </Button>
+        </div>
+      </div>
+      {resolved && (
+        <div className="rounded-xl border bg-green-50 border-green-200 p-3 flex items-center gap-2 text-green-800 text-sm">
+          <CheckCircle className="h-4 w-4 shrink-0" />
+          All 47 flagged items have been reviewed and cleared.
         </div>
       )}
-      <p className="text-xs text-muted-foreground">All fees are in Philippine Peso (PHP) and apply to all appointments booked on the platform.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {aiStats.map((s, i) => (
+          <div key={i} className={`rounded-xl border p-4 ${s.status === "warning" ? "border-orange-200 bg-orange-50" : "bg-card"}`} data-testid={`ai-stat-${i}`}>
+            <p className="text-xs text-muted-foreground mb-1">{s.metric}</p>
+            <p className={`text-xl font-bold ${s.status === "warning" ? "text-orange-700" : "text-foreground"}`}>{s.value}</p>
+            {s.status === "warning" && <Badge className="text-xs bg-orange-100 text-orange-700 mt-1">Needs Review</Badge>}
+            {s.metric === "Flagged for Clinical Review" && resolved && <Badge className="text-xs bg-green-100 text-green-700 mt-1">All Clear</Badge>}
+          </div>
+        ))}
+      </div>
+      <Card>
+        <CardHeader><CardTitle className="text-base">Early Intervention Forecasting (Next 5 Months)</CardTitle></CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={forecastData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
+              <Bar dataKey="predicted" name="AI Forecast" fill="#0038A8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="baseline" name="Baseline Trend" fill="#9FE870" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function DOHReportingTab() {
+  const [exported, setExported] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState<string | null>(null);
+
+  const REPORTS = [
+    { name: "Q1 2026 — National Developmental Health Report", to: "DOH / NNC", period: "Jan–Mar 2026", status: "ready", due: "May 30" },
+    { name: "SPED Learner Population Report", to: "DepEd SPED Division", period: "SY 2025–2026", status: "ready", due: "Jun 1" },
+    { name: "PhilHealth Developmental Benefit Utilization", to: "PhilHealth", period: "Q2 2026", status: "draft", due: "Jun 15" },
+    { name: "LGU Barangay Health Worker Screening Coverage", to: "DOH Regional Offices", period: "May 2026", status: "ready", due: "Jun 5" },
+    { name: "Early Intervention Program Outcomes Report", to: "DSWD", period: "Q2 2026", status: "draft", due: "Jun 30" },
+  ];
+
+  return (
+    <div className="p-6 lg:p-8 space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold">DOH & PhilHealth Integration</h1>
+        <p className="text-sm text-muted-foreground">Submit mandatory government reports and integrate with DOH / PhilHealth / DSWD workflows</p>
+      </div>
+
+      <div className="grid sm:grid-cols-3 gap-4">
+        {[
+          { label: "Reports Due", value: REPORTS.filter(r => r.status === "ready").length, color: "text-primary" },
+          { label: "In Draft", value: REPORTS.filter(r => r.status === "draft").length, color: "text-yellow-700" },
+          { label: "Submitted YTD", value: 8, color: "text-green-700" },
+        ].map(s => (
+          <Card key={s.label}>
+            <CardContent className="pt-5 pb-4 px-5">
+              <p className="text-sm text-muted-foreground">{s.label}</p>
+              <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="space-y-3">
+        {REPORTS.map((r, i) => (
+          <div key={i} className="rounded-xl border bg-card p-5 flex items-center gap-4" data-testid={`doh-report-${i}`}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/15 shrink-0">
+              <Shield className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                <p className="font-semibold text-sm truncate">{r.name}</p>
+                <Badge className={`text-xs shrink-0 ${r.status === "ready" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>{r.status}</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">To: {r.to} · {r.period} · Due: {r.due}</p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <Button
+                size="sm" variant="outline" className="rounded-full gap-1.5 text-xs h-7"
+                disabled={r.status === "draft"}
+                onClick={() => { setExported(r.name); setTimeout(() => setExported(null), 2000); }}
+              >
+                <Download className="h-3 w-3" />
+                {exported === r.name ? "Done" : "PDF"}
+              </Button>
+              <Button
+                size="sm" className="rounded-full text-xs h-7 gap-1"
+                disabled={r.status === "draft"}
+                data-testid={`button-submit-report-${i}`}
+                onClick={() => { setSubmitted(r.name); setTimeout(() => setSubmitted(null), 2000); }}
+              >
+                {submitted === r.name ? <><CheckCircle className="h-3 w-3" /> Sent</> : "Submit"}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LGUCoordinationTab() {
+  const [partners, setPartners] = useState<LGUPartner[]>(INITIAL_PARTNERS);
+  const [search, setSearch] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
+  const [inviting, setInviting] = useState(false);
+  const [inviteSent, setInviteSent] = useState(false);
+  const [newPartner, setNewPartner] = useState({ name: "", email: "", type: "LGU Health Unit", region: "" });
+
+  const filtered = partners.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.region.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleInvite = async () => {
+    if (!newPartner.name || !newPartner.email) return;
+    setInviting(true);
+    await new Promise(r => setTimeout(r, 700));
+    setPartners(ps => [...ps, { ...newPartner, status: "active", joined: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }), children: 0 }]);
+    setInviting(false);
+    setInviteSent(true);
+    setTimeout(() => { setInviteSent(false); setAddOpen(false); setNewPartner({ name: "", email: "", type: "LGU Health Unit", region: "" }); }, 1500);
+  };
+
+  return (
+    <div className="p-6 lg:p-8 space-y-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">LGU Coordination</h1>
+          <p className="text-sm text-muted-foreground">{partners.length} LGU partner units enrolled in NEOBRAIN's network</p>
+        </div>
+        <Button className="rounded-full gap-2" data-testid="button-invite-lgu" onClick={() => setAddOpen(true)}>
+          <Plus className="h-4 w-4" /> Invite LGU Partner
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          { label: "LGU Units", count: partners.filter(p => p.type === "LGU Health Unit").length, icon: MapPin },
+          { label: "RHUs", count: partners.filter(p => p.type === "RHU").length, icon: Activity },
+          { label: "DOH Partners", count: partners.filter(p => p.type === "DOH Partner").length, icon: Shield },
+          { label: "Active", count: partners.filter(p => p.status === "active").length, icon: CheckCircle },
+        ].map(s => (
+          <div key={s.label} className="rounded-xl border bg-card p-4 text-center" data-testid={`lgu-count-${s.label.toLowerCase()}`}>
+            <p className="text-2xl font-bold">{s.count}</p>
+            <p className="text-xs text-muted-foreground">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <Input placeholder="Search LGU partners..." value={search} onChange={e => setSearch(e.target.value)} className="max-w-sm" />
+
+      <div className="rounded-xl border overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50">
+            <tr>
+              {["Organization", "Type", "Region", "Status", "Joined", "Actions"].map(h => (
+                <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={6} className="text-center py-12 text-muted-foreground text-sm">
+                  No LGU partners enrolled yet. Use "Invite LGU Partner" to onboard your first partner unit.
+                </td>
+              </tr>
+            )}
+            {filtered.map((p, i) => (
+              <tr key={i} className="border-t hover:bg-muted/20">
+                <td className="px-4 py-3 font-medium">{p.name}</td>
+                <td className="px-4 py-3">
+                  <Badge className="text-xs bg-primary/10 text-primary">{p.type}</Badge>
+                </td>
+                <td className="px-4 py-3 text-xs text-muted-foreground">{p.region}</td>
+                <td className="px-4 py-3">
+                  <span className="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+                    <CheckCircle className="h-3.5 w-3.5" /> {p.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-xs text-muted-foreground">{p.joined}</td>
+                <td className="px-4 py-3">
+                  <Button size="sm" variant="outline" className="rounded-full text-xs h-6 px-2">Manage</Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <Dialog open={addOpen} onOpenChange={v => { setAddOpen(v); if (!v) setInviteSent(false); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" /> Invite LGU Partner
+            </DialogTitle>
+          </DialogHeader>
+          {inviteSent ? (
+            <div className="py-8 text-center space-y-2">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto">
+                <CheckCircle className="h-7 w-7 text-green-600" />
+              </div>
+              <p className="font-semibold">Invitation Sent!</p>
+              <p className="text-sm text-muted-foreground">{newPartner.email} will receive an access link.</p>
+            </div>
+          ) : (
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
+                <Label>Organization Name</Label>
+                <Input value={newPartner.name} onChange={e => setNewPartner(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Quezon City Health Office" data-testid="input-lgu-name" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Official Email</Label>
+                <Input type="email" value={newPartner.email} onChange={e => setNewPartner(p => ({ ...p, email: e.target.value }))} placeholder="health@lgu.gov.ph" data-testid="input-lgu-email" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Unit Type</Label>
+                  <select className="w-full h-9 rounded-lg border bg-background px-3 text-sm" value={newPartner.type} onChange={e => setNewPartner(p => ({ ...p, type: e.target.value }))} data-testid="select-lgu-type">
+                    {["LGU Health Unit", "RHU", "DOH Partner", "PhilHealth", "DSWD", "DepEd Division"].map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Region / Province</Label>
+                  <Input value={newPartner.region} onChange={e => setNewPartner(p => ({ ...p, region: e.target.value }))} placeholder="e.g. NCR — QC" data-testid="input-lgu-region" />
+                </div>
+              </div>
+            </div>
+          )}
+          {!inviteSent && (
+            <DialogFooter className="gap-2">
+              <Button variant="outline" className="rounded-full" onClick={() => setAddOpen(false)}>Cancel</Button>
+              <Button className="rounded-full gap-1.5" onClick={handleInvite} disabled={inviting || !newPartner.name || !newPartner.email} data-testid="button-send-invite">
+                <Mail className="h-4 w-4" />
+                {inviting ? "Sending..." : "Send Invitation"}
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
-  overview: PlatformOverviewTab,
-  users: UserManagementTab,
-  subscriptions: SubscriptionsTab,
-  fees: FeesTab,
-  "ai-monitoring": AIMonitoringTab,
-  onboarding: OnboardingTab,
-  analytics: AnalyticsTab,
-  support: SupportTab,
+  overview: NationalOverviewTab,
+  analytics: PopulationAnalyticsTab,
+  programs: RegionalProgramsTab,
+  partners: PartnerOrganizationsTab,
+  research: ResearchDataTab,
+  "ai-intelligence": DevelopmentalIntelligenceTab,
+  "doh-reporting": DOHReportingTab,
+  coordination: LGUCoordinationTab,
 };
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  const TabView: TabComponent = TABS[activeTab] ?? PlatformOverviewTab;
+  const TabView: TabComponent = TABS[activeTab] ?? NationalOverviewTab;
   return (
     <RoleDashboardLayout navItems={NAV} activeTab={activeTab} onTabChange={setActiveTab}>
       <TabView />
