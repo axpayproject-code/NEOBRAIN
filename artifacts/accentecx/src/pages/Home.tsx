@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -483,7 +483,7 @@ function PricingSection() {
                       </li>
                     ))}
                   </ul>
-                  <Link href={`/onboarding?plan=${PLAN_SLUGS[tier.name] ?? "care-plus"}`}>
+                  <Link href={`/onboarding?role=family&plan=${PLAN_SLUGS[tier.name] ?? "care-plus"}`}>
                     <Button
                       className={`w-full rounded-full ${tier.highlight ? "bg-secondary text-secondary-foreground hover:bg-secondary/90" : ""}`}
                       variant={tier.highlight ? "default" : "outline"}
@@ -825,6 +825,7 @@ function PricingSection() {
 }
 
 export default function Home() {
+  const [, navigate] = useLocation();
   const [demoModal, setDemoModal] = useState<{ open: boolean; audience: SalesAudience }>({ open: false, audience: "clinics" });
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraError, setCameraError] = useState(false);
@@ -1956,7 +1957,7 @@ export default function Home() {
                 <p className="text-xs text-muted-foreground mt-0.5">We welcome MOU discussions with any agency or organization aligned with child developmental health in the Philippines.</p>
               </div>
               <Button size="sm" className="rounded-full shrink-0 bg-[#0038A8] text-white hover:bg-[#002990] gap-1.5"
-                onClick={() => { setGovModal(false); }}>
+                onClick={() => { setGovModal(false); navigate("/contact"); }}>
                 Contact Us <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </div>

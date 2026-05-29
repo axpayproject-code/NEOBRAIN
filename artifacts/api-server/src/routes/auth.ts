@@ -20,7 +20,7 @@ function verifyPassword(password: string, stored: string): boolean {
   }
 }
 
-const VALID_ROLES = ["parent", "doctor", "therapist", "admin"] as const;
+const VALID_ROLES = ["family", "clinic", "school", "government", "superadmin"] as const;
 type Role = (typeof VALID_ROLES)[number];
 
 function isValidRole(r: unknown): r is Role {
@@ -38,7 +38,7 @@ router.post("/auth/signup", async (req, res) => {
   if (!password || typeof password !== "string" || password.length < 6) {
     return res.status(400).json({ error: "Password must be at least 6 characters." });
   }
-  const role: Role = isValidRole(roleRaw) ? roleRaw : "parent";
+  const role: Role = isValidRole(roleRaw) ? roleRaw : "family";
 
   const [existing] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
   if (existing) {
@@ -77,7 +77,7 @@ router.post("/auth/login", async (req, res) => {
   if (!email || typeof email !== "string" || !password || typeof password !== "string") {
     return res.status(400).json({ error: "Email and password are required." });
   }
-  const role: Role = isValidRole(roleRaw) ? roleRaw : "parent";
+  const role: Role = isValidRole(roleRaw) ? roleRaw : "family";
 
   const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
   if (!user || !verifyPassword(password, user.passwordHash)) {
