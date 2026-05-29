@@ -1121,10 +1121,7 @@ export default function Home() {
                     </button>
                   ))}
                   <div className="ml-auto flex items-center gap-2 shrink-0">
-                    <motion.div animate={{ opacity: [1, 0.2, 1] }} transition={{ duration: 1.2, repeat: Infinity }}
-                      className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                    <span className="text-xs font-semibold text-red-600 uppercase tracking-wider">Live</span>
-                    <Badge className="bg-secondary/20 text-primary border-secondary/30 text-xs hidden sm:flex">AI Active</Badge>
+                    <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">Simulation</Badge>
                   </div>
                 </div>
 
@@ -1201,9 +1198,9 @@ export default function Home() {
                         <div className="flex items-center gap-2">
                           <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                             className="h-4 w-4 rounded-full border-2 border-[#FCD116] border-t-transparent" />
-                          <span className="text-xs text-muted-foreground">Analyzing behavioral markers…</span>
+                          <span className="text-xs text-muted-foreground">Simulated behavioral analysis</span>
                         </div>
-                        <div className="text-xs font-mono text-primary font-semibold">5 domains · 12 indicators</div>
+                        <div className="text-xs font-mono text-muted-foreground/70">5 domains · 12 indicators</div>
                       </div>
                     </motion.div>
                   )}
@@ -1270,9 +1267,9 @@ export default function Home() {
                         <div className="flex items-center gap-2">
                           <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                             className="h-3.5 w-3.5 rounded-full border-2 border-primary border-t-transparent" />
-                          <span className="text-xs text-muted-foreground">AI scoring in real-time…</span>
+                          <span className="text-xs text-muted-foreground">Simulated screening data</span>
                         </div>
-                        <span className="text-xs font-mono text-primary font-semibold">Domain: Social · Q8/15</span>
+                        <span className="text-xs font-mono text-muted-foreground/70">Domain: Social · Q8/15</span>
                       </div>
                     </motion.div>
                   )}
@@ -1342,9 +1339,9 @@ export default function Home() {
                         <div className="flex items-center gap-2">
                           <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                             className="h-3.5 w-3.5 rounded-full border-2 border-primary border-t-transparent" />
-                          <span className="text-xs text-muted-foreground">AI updating progress…</span>
+                          <span className="text-xs text-muted-foreground">Simulated therapy data</span>
                         </div>
-                        <span className="text-xs font-mono text-primary font-semibold">75% plan complete</span>
+                        <span className="text-xs font-mono text-muted-foreground/70">75% plan complete</span>
                       </div>
                     </motion.div>
                   )}
@@ -1352,6 +1349,16 @@ export default function Home() {
                 </AnimatePresence>
               </div>
             </motion.div>
+
+            {/* Simulation disclaimer + CTA to real demo */}
+            <motion.p variants={fadeUp} custom={6} initial="hidden" animate="visible"
+              className="text-center text-xs text-muted-foreground/60 px-4">
+              Simulated preview — sample data only.{" "}
+              <a href="#live-demo" className="text-primary underline underline-offset-2 hover:text-primary/80 font-medium transition-colors">
+                Try the real AI demo ↓
+              </a>
+            </motion.p>
+
           </div>
         </section>
 
