@@ -6,7 +6,7 @@ import {
   BarChart3, TrendingUp, Server, AlertTriangle,
   CheckCircle, Clock, Globe, GraduationCap, Stethoscope,
   Plus, Download, RefreshCw, X, Mail, Shield,
-  MapPin, FileText, Activity, FlaskConical, UserPlus, Eye, EyeOff, Settings
+  MapPin, FileText, Activity, FlaskConical, UserPlus, Eye, EyeOff, Settings, CreditCard, Zap
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -1174,6 +1174,83 @@ function GovSettingsTab() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Billing & Usage */}
+      {(() => {
+        const GOV_PLANS = [
+          { id: "provincial", name: "Provincial", price: "₱9,999", tagline: "For provincial health offices & LGUs", features: ["Up to 50 LGU partners", "Up to 10,000 children in network", "Unlimited screenings", "10 DOH reports/month", "Population analytics dashboard"], limits: { partners: 50, children: 10000, reports: 10 } },
+          { id: "regional", name: "Regional", price: "₱24,999", tagline: "For regional government deployments", features: ["Up to 300 LGU partners", "Up to 100,000 children", "Unlimited screenings & reports", "PhilHealth API integration", "AI population intelligence", "Priority DOH data pipeline"], limits: { partners: 300, children: 100000, reports: Infinity } },
+          { id: "national", name: "National", price: "Custom", tagline: "For DOH national-level access", features: ["Unlimited LGU partners", "National-scale child registry", "All Regional features", "Dedicated data engineering", "Custom API integrations", "Dedicated government liaison"], limits: { partners: Infinity, children: Infinity, reports: Infinity } },
+        ];
+        const activePlan = GOV_PLANS[0];
+        const usage = { partners: 23, children: 4218, reports: 6 };
+        const bars: { label: string; used: number; max: number | null }[] = [
+          { label: "LGU / partner organizations", used: usage.partners, max: activePlan.limits.partners === Infinity ? null : activePlan.limits.partners },
+          { label: "Children in network", used: usage.children, max: activePlan.limits.children === Infinity ? null : activePlan.limits.children },
+          { label: "DOH reports this month", used: usage.reports, max: activePlan.limits.reports === Infinity ? null : activePlan.limits.reports },
+        ];
+        return (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-base flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> Billing & Usage</CardTitle>
+              <Badge className="text-xs rounded-full bg-primary/10 text-primary border-0">{activePlan.name}</Badge>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-lg">{activePlan.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{activePlan.tagline}</p>
+                  <p className="text-xs text-green-700 font-medium mt-1">Active · Annual government contract</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-2xl font-bold text-primary">{activePlan.price}</p>
+                  <p className="text-xs text-muted-foreground">/month</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm font-semibold">Current Network Usage</p>
+                {bars.map(({ label, used, max }) => {
+                  const pct = max === null ? 0 : Math.min(100, Math.round((used / max) * 100));
+                  const warn = max !== null && pct >= 80;
+                  return (
+                    <div key={label} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{label}</span>
+                        <span className={`font-medium ${warn ? "text-orange-600" : ""}`}>{max === null ? `${used.toLocaleString()} · Unlimited` : `${used.toLocaleString()} / ${max.toLocaleString()}`}</span>
+                      </div>
+                      {max !== null && <Progress value={pct} className={`h-1.5 ${warn ? "[&>div]:bg-orange-500" : ""}`} />}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-semibold">Plan Includes</p>
+                <ul className="space-y-1">
+                  {activePlan.features.map(f => (
+                    <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CheckCircle className="h-3 w-3 text-primary shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-xl bg-muted/40 border p-3 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Upgrade Options</p>
+                {GOV_PLANS.slice(1).map(plan => (
+                  <div key={plan.id} className="flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium">{plan.name}</p>
+                      <p className="text-xs text-muted-foreground">{plan.tagline}</p>
+                    </div>
+                    <Button size="sm" variant="outline" className="rounded-full text-xs h-7 shrink-0 gap-1">
+                      <Zap className="h-3 w-3" /> {plan.price}{plan.price !== "Custom" ? "/mo" : ""}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
     </div>
   );
 }

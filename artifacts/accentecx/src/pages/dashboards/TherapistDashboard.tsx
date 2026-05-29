@@ -4,7 +4,7 @@ import {
   Users, GraduationCap, ClipboardList, BookOpen,
   MessageSquare, LayoutDashboard, CheckCircle,
   Clock, AlertTriangle, Plus, BarChart3, FileText,
-  Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff, Gamepad2, Settings
+  Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1120,6 +1120,84 @@ function SchoolSettingsTab() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Billing & Usage */}
+      {(() => {
+        const SCHOOL_PLANS = [
+          { id: "starter", name: "School Starter", price: "₱1,499", tagline: "For single-school deployments", features: ["Up to 200 students", "20 screenings/month", "5 active IEP plans", "2 DepEd reports/month", "Parent portal access"], limits: { students: 200, screenings: 20, iep: 5, reports: 2 } },
+          { id: "pro", name: "School Pro", price: "₱3,999", tagline: "For schools with active SPED programs", features: ["Unlimited students", "Unlimited screenings", "Unlimited IEP plans", "Unlimited DepEd reports", "Games Assessment module", "Advanced analytics"], limits: { students: Infinity, screenings: Infinity, iep: Infinity, reports: Infinity } },
+          { id: "district", name: "District License", price: "Custom", tagline: "Multi-school & division deployments", features: ["All School Pro features", "Division-wide dashboard", "DepEd API integration", "Dedicated training & support", "Custom data export"], limits: { students: Infinity, screenings: Infinity, iep: Infinity, reports: Infinity } },
+        ];
+        const activePlan = SCHOOL_PLANS[0];
+        const usage = { students: 127, screenings: 11, iep: 3, reports: 1 };
+        const bars: { label: string; used: number; max: number | null }[] = [
+          { label: "Students enrolled", used: usage.students, max: activePlan.limits.students === Infinity ? null : activePlan.limits.students },
+          { label: "Screenings this month", used: usage.screenings, max: activePlan.limits.screenings === Infinity ? null : activePlan.limits.screenings },
+          { label: "Active IEP plans", used: usage.iep, max: activePlan.limits.iep === Infinity ? null : activePlan.limits.iep },
+          { label: "DepEd reports generated", used: usage.reports, max: activePlan.limits.reports === Infinity ? null : activePlan.limits.reports },
+        ];
+        return (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-base flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> Billing & Usage</CardTitle>
+              <Badge className="text-xs rounded-full bg-primary/10 text-primary border-0">{activePlan.name}</Badge>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-lg">{activePlan.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{activePlan.tagline}</p>
+                  <p className="text-xs text-green-700 font-medium mt-1">Active · Renews monthly</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-2xl font-bold text-primary">{activePlan.price}</p>
+                  <p className="text-xs text-muted-foreground">/month</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm font-semibold">This Month's Usage</p>
+                {bars.map(({ label, used, max }) => {
+                  const pct = max === null ? 0 : Math.min(100, Math.round((used / max) * 100));
+                  const warn = max !== null && pct >= 80;
+                  return (
+                    <div key={label} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{label}</span>
+                        <span className={`font-medium ${warn ? "text-orange-600" : ""}`}>{max === null ? `${used} · Unlimited` : `${used} / ${max}`}</span>
+                      </div>
+                      {max !== null && <Progress value={pct} className={`h-1.5 ${warn ? "[&>div]:bg-orange-500" : ""}`} />}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-semibold">Plan Includes</p>
+                <ul className="space-y-1">
+                  {activePlan.features.map(f => (
+                    <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CheckCircle className="h-3 w-3 text-primary shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-xl bg-muted/40 border p-3 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Upgrade Options</p>
+                {SCHOOL_PLANS.slice(1).map(plan => (
+                  <div key={plan.id} className="flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium">{plan.name}</p>
+                      <p className="text-xs text-muted-foreground">{plan.tagline}</p>
+                    </div>
+                    <Button size="sm" variant="outline" className="rounded-full text-xs h-7 shrink-0 gap-1">
+                      <Zap className="h-3 w-3" /> {plan.price}{plan.price !== "Custom" ? "/mo" : ""}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import {
   Users, ClipboardList, Video, Stethoscope, FileText,
   HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2,
   CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck,
-  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2, Settings
+  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
@@ -1520,6 +1520,84 @@ function ClinicSettingsTab() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Billing & Usage */}
+      {(() => {
+        const CLINIC_PLANS = [
+          { id: "starter", name: "Clinic Starter", price: "₱2,999", tagline: "For small clinics up to 5 providers", features: ["50 active patients", "20 screenings/month", "5 telehealth sessions/month", "10 AI reports/month", "Basic analytics"], limits: { patients: 50, screenings: 20, telehealth: 5, reports: 10 } },
+          { id: "pro", name: "Clinic Pro", price: "₱7,999", tagline: "For growing multi-specialty clinics", features: ["Unlimited patients", "100 screenings/month", "30 telehealth sessions/month", "Unlimited AI reports", "Advanced analytics + export"], limits: { patients: Infinity, screenings: 100, telehealth: 30, reports: Infinity } },
+          { id: "enterprise", name: "Enterprise", price: "Custom", tagline: "Hospital systems & multi-branch networks", features: ["All Clinic Pro features", "White-label option", "Dedicated account manager", "SLA & priority support", "Custom integrations"], limits: { patients: Infinity, screenings: Infinity, telehealth: Infinity, reports: Infinity } },
+        ];
+        const activePlan = CLINIC_PLANS[0];
+        const usage = { patients: 18, screenings: 9, telehealth: 3, reports: 4 };
+        const bars: { label: string; used: number; max: number | null }[] = [
+          { label: "Active patients", used: usage.patients, max: activePlan.limits.patients === Infinity ? null : activePlan.limits.patients },
+          { label: "Screenings this month", used: usage.screenings, max: activePlan.limits.screenings === Infinity ? null : activePlan.limits.screenings },
+          { label: "Telehealth sessions", used: usage.telehealth, max: activePlan.limits.telehealth === Infinity ? null : activePlan.limits.telehealth },
+          { label: "AI reports generated", used: usage.reports, max: activePlan.limits.reports === Infinity ? null : activePlan.limits.reports },
+        ];
+        return (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-base flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> Billing & Usage</CardTitle>
+              <Badge className="text-xs rounded-full bg-primary/10 text-primary border-0">{activePlan.name}</Badge>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-lg">{activePlan.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{activePlan.tagline}</p>
+                  <p className="text-xs text-green-700 font-medium mt-1">Active · Renews monthly</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-2xl font-bold text-primary">{activePlan.price}</p>
+                  <p className="text-xs text-muted-foreground">/month</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm font-semibold">This Month's Usage</p>
+                {bars.map(({ label, used, max }) => {
+                  const pct = max === null ? 0 : Math.min(100, Math.round((used / max) * 100));
+                  const warn = max !== null && pct >= 80;
+                  return (
+                    <div key={label} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{label}</span>
+                        <span className={`font-medium ${warn ? "text-orange-600" : ""}`}>{max === null ? `${used} · Unlimited` : `${used} / ${max}`}</span>
+                      </div>
+                      {max !== null && <Progress value={pct} className={`h-1.5 ${warn ? "[&>div]:bg-orange-500" : ""}`} />}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-semibold">Plan Includes</p>
+                <ul className="space-y-1">
+                  {activePlan.features.map(f => (
+                    <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CheckCircle className="h-3 w-3 text-primary shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-xl bg-muted/40 border p-3 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Upgrade Options</p>
+                {CLINIC_PLANS.slice(1).map(plan => (
+                  <div key={plan.id} className="flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium">{plan.name}</p>
+                      <p className="text-xs text-muted-foreground">{plan.tagline}</p>
+                    </div>
+                    <Button size="sm" variant="outline" className="rounded-full text-xs h-7 shrink-0 gap-1">
+                      <Zap className="h-3 w-3" /> {plan.price}{plan.price !== "Custom" ? "/mo" : ""}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
     </div>
   );
 }

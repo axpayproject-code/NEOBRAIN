@@ -1205,28 +1205,95 @@ function SettingsTab() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle className="text-base">Subscription</CardTitle></CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <p className="font-medium">{billingStatus?.planName ?? "Free"}</p>
-              <p className="text-sm text-muted-foreground">
-                {billingStatus?.status === "pending_verification"
-                  ? "Payment pending verification"
-                  : billingStatus?.paidUntil
-                  ? `Valid until ${new Date(billingStatus.paidUntil).toLocaleDateString("en-PH")}`
-                  : "Free plan — upgrade anytime"}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              className="rounded-full gap-1.5"
-              data-testid="button-manage-subscription"
-              onClick={() => document.dispatchEvent(new CustomEvent("neobrain-navigate-tab", { detail: "billing" }))}
-            >
-              <CreditCard className="h-3.5 w-3.5" /> Manage Plan
-            </Button>
-          </div>
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <CardTitle className="text-base flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> Billing & Usage</CardTitle>
+          <Badge className="text-xs rounded-full bg-primary/10 text-primary border-0">{billingStatus?.planName ?? "Free"}</Badge>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {(() => {
+            const features = getPlanFeatures(user?.tier);
+            const planName = billingStatus?.planName ?? features.planName;
+            const PLAN_PRICES: Record<string, string> = { Free: "₱0", "Starter Care": "₱200", "Care Plus": "₱799", "Care Family Pro": "₱1,999" };
+            const statusText = billingStatus?.status === "pending_verification"
+              ? "Payment pending verification"
+              : billingStatus?.paidUntil
+              ? `Valid until ${new Date(billingStatus.paidUntil).toLocaleDateString("en-PH")}`
+              : "Free plan — upgrade anytime";
+            const usedChildren = 1;
+            const usedScreenings = 1;
+            const usedVideo = 0;
+            return (
+              <>
+                <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-lg">{planName}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{statusText}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-2xl font-bold text-primary">{PLAN_PRICES[planName] ?? "₱0"}</p>
+                    <p className="text-xs text-muted-foreground">/month</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold">Current Period Usage</p>
+                  {[
+                    { label: "Child profiles", used: usedChildren, max: features.maxChildren },
+                    { label: "Screenings", used: usedScreenings, max: features.screeningsPerYear === Infinity ? null : features.screeningsPerYear, suffix: features.screeningsPerYear === Infinity ? " · Unlimited" : "/yr" },
+                    ...(features.videoPerMonth > 0 || features.videoAnalysis ? [{ label: "Video sessions", used: usedVideo, max: features.videoPerMonth === Infinity ? null : features.videoPerMonth, suffix: features.videoPerMonth === Infinity ? " · Unlimited" : "/mo" }] : []),
+                  ].map(({ label, used, max, suffix = "" }) => {
+                    const pct = max === null ? 100 : Math.min(100, Math.round((used / max) * 100));
+                    return (
+                      <div key={label} className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground">{label}</span>
+                          <span className="font-medium">{max === null ? `${used}${suffix}` : `${used} / ${max}${suffix}`}</span>
+                        </div>
+                        {max !== null && <Progress value={pct} className="h-1.5" />}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">Plan Includes</p>
+                  <ul className="space-y-1">
+                    {[
+                      `${features.maxChildren === 1 ? "1 child profile" : `Up to ${features.maxChildren} child profiles`}`,
+                      `${features.screeningsPerYear === Infinity ? "Unlimited screenings" : `${features.screeningsPerYear} screening${features.screeningsPerYear > 1 ? "s" : ""}/year`}`,
+                      features.gamesAssessment ? "Games Assessment (5 mini-games)" : null,
+                      features.videoAnalysis ? `Video analysis (${features.videoPerMonth === Infinity ? "unlimited" : `${features.videoPerMonth}/mo`})` : null,
+                      features.therapyTracking ? "Therapy plan tracking" : null,
+                      features.specialistMessaging ? "Specialist messaging" : null,
+                      features.fullAIReports ? "Full AI clinical reports" : null,
+                    ].filter(Boolean).map(f => (
+                      <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CheckCircle className="h-3 w-3 text-primary shrink-0" /> {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {features.upgradeLabel !== "You're on the top plan" && (
+                  <div className="flex gap-2">
+                    <Button
+                      className="rounded-full gap-1.5 flex-1"
+                      data-testid="button-manage-subscription"
+                      onClick={() => document.dispatchEvent(new CustomEvent("neobrain-navigate-tab", { detail: "billing" }))}
+                    >
+                      <CreditCard className="h-3.5 w-3.5" /> Upgrade Plan
+                    </Button>
+                    <Button variant="outline" className="rounded-full" onClick={() => document.dispatchEvent(new CustomEvent("neobrain-navigate-tab", { detail: "billing" }))}>
+                      View All Plans
+                    </Button>
+                  </div>
+                )}
+                {features.upgradeLabel === "You're on the top plan" && (
+                  <p className="text-xs text-center text-primary font-medium">You're on the Care Family Pro plan — all features unlocked.</p>
+                )}
+              </>
+            );
+          })()}
         </CardContent>
       </Card>
     </div>
