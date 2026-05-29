@@ -20,6 +20,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
   clinic: "Clinical System",
   school: "School System",
   government: "Government Panel",
+  superadmin: "Platform Admin",
 };
 
 const ROLE_COLORS: Record<UserRole, string> = {
@@ -27,6 +28,7 @@ const ROLE_COLORS: Record<UserRole, string> = {
   clinic: "bg-blue-100 text-blue-800",
   school: "bg-purple-100 text-purple-800",
   government: "bg-orange-100 text-orange-800",
+  superadmin: "bg-gray-100 text-gray-800",
 };
 
 const PLAN_COLORS: Record<string, string> = {

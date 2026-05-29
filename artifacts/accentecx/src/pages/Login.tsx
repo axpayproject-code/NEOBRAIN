@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Users, Stethoscope, GraduationCap, Globe,
-  ChevronRight, Shield, ArrowRight, Check, AlertCircle
+  ChevronRight, Shield, ArrowRight, Check, AlertCircle, Lock
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, type UserRole, ROLE_TIERS, roleDefaultRoute } from "@/contexts/AuthContext";
@@ -273,6 +273,23 @@ export default function Login() {
                     Create account
                   </button>
                 </p>
+
+                <div className="mt-6 pt-5 border-t border-border text-center">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRole("superadmin" as UserRole)}
+                    className={`inline-flex items-center gap-1.5 text-xs transition-colors ${selectedRole === "superadmin" ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"}`}
+                    data-testid="role-select-superadmin"
+                  >
+                    <Lock className="h-3 w-3" />
+                    Platform Admin Access
+                  </button>
+                  {selectedRole === "superadmin" && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Authorized ACCENTECX AI personnel only. All access is logged.
+                    </p>
+                  )}
+                </div>
               </motion.div>
             )}
 

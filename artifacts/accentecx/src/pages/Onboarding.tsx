@@ -950,6 +950,7 @@ const ROLE_META: Record<UserRole, { label: string; icon: typeof Heart; subtitle:
   clinic: { label: "For Clinics", icon: Stethoscope, subtitle: "Clinician / Doctor onboarding", badge: "Clinics", badgeColor: "bg-blue-100 text-blue-700" },
   school: { label: "For Schools", icon: GraduationCap, subtitle: "School / Educator onboarding", badge: "Schools", badgeColor: "bg-amber-100 text-amber-700" },
   government: { label: "For Government", icon: Globe, subtitle: "Government / LGU onboarding", badge: "Government", badgeColor: "bg-slate-100 text-slate-700" },
+  superadmin: { label: "Platform Admin", icon: Globe, subtitle: "Internal admin onboarding", badge: "Admin", badgeColor: "bg-gray-100 text-gray-700" },
 };
 
 // ── MAIN EXPORT ───────────────────────────────────────────────────────────────
@@ -972,11 +973,12 @@ export default function Onboarding() {
     clinic: ["Clinic Info", "Your Details", "Welcome"],
     school: ["Join Method", "Your Details", "Welcome"],
     government: ["Access Code", "Admin Profile", "Welcome"],
+    superadmin: ["Access Code", "Admin Profile", "Welcome"],
   };
 
   function handleComplete(name: string, email: string, tier?: string, userId?: string) {
     const ROLE_DEFAULT_ROUTES: Record<UserRole, string> = {
-      family: "/family", clinic: "/clinic", school: "/school", government: "/government",
+      family: "/family", clinic: "/clinic", school: "/school", government: "/government", superadmin: "/admin",
     };
     if (!userId) return;
     login({ id: userId, name: name || `${meta.label} User`, email: email || `user@accentecx.ph`, role, tier });

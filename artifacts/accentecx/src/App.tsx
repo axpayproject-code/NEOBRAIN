@@ -15,6 +15,7 @@ import ParentDashboard from "@/pages/dashboards/ParentDashboard";    // For Fami
 import DoctorDashboard from "@/pages/dashboards/DoctorDashboard";    // For Clinics
 import TherapistDashboard from "@/pages/dashboards/TherapistDashboard"; // For Schools
 import AdminDashboard from "@/pages/dashboards/AdminDashboard";       // For Government
+import SuperAdminDashboard from "@/pages/dashboards/SuperAdminDashboard"; // Platform Super Admin
 
 // Platform pages
 import FamilyCare from "@/pages/platform/FamilyCare";
@@ -79,6 +80,9 @@ function AppRoutes() {
       </Route>
       <Route path="/government">
         <ProtectedRoute requiredRole="government"><AdminDashboard /></ProtectedRoute>
+      </Route>
+      <Route path="/admin">
+        <ProtectedRoute requiredRole="superadmin"><SuperAdminDashboard /></ProtectedRoute>
       </Route>
 
       {/* ── Platform pages ── */}

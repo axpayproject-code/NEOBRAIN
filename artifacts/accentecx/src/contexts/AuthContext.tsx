@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
 
-export type UserRole = "family" | "clinic" | "school" | "government";
+export type UserRole = "family" | "clinic" | "school" | "government" | "superadmin";
 
 export interface AuthUser {
   id: string;
@@ -114,6 +114,7 @@ export function roleDefaultRoute(role: UserRole): string {
     case "clinic": return "/clinic";
     case "school": return "/school";
     case "government": return "/government";
+    case "superadmin": return "/admin";
   }
 }
 
@@ -122,4 +123,5 @@ export const ROLE_TIERS: Record<UserRole, string> = {
   clinic: "Clinic SaaS Pro",
   school: "School License",
   government: "Government Access",
+  superadmin: "Platform Admin",
 };
