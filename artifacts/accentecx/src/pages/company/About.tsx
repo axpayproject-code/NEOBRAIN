@@ -143,7 +143,7 @@ const HOW_TO_HELP = [
     title: "Start with your child today",
     desc: "Early screening changes everything. Create a free account, build your child's developmental profile, and get AI-powered insights reviewed by real clinicians — in days, not months.",
     cta: "Start Free Assessment",
-    href: "/onboarding?role=parent",
+    href: "/onboarding?role=family",
   },
   {
     icon: Stethoscope,
@@ -452,7 +452,7 @@ export default function About() {
               We are not waiting for a government mandate, a foreign philanthropist, or perfect conditions. We are building now — for every child already in the wait queue, every parent who doesn't know who to call, every teacher who suspects something but has no system to report to.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/onboarding?role=parent">
+              <Link href="/onboarding?role=family">
                 <Button size="lg" className="rounded-full px-10 h-13 gap-2 bg-[#0038A8] text-white hover:bg-[#1e4a00]">
                   Join the Mission <ArrowRight className="h-4 w-4" />
                 </Button>

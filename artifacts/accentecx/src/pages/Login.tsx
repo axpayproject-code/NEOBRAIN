@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  User, Stethoscope, ActivitySquare, Settings,
+  Users, Stethoscope, GraduationCap, Globe,
   ChevronRight, Shield, ArrowRight, Check, AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,41 +15,41 @@ const ROLES: {
   id: UserRole;
   label: string;
   subLabel: string;
-  icon: typeof User;
+  icon: typeof Users;
   tier: string;
   description: string;
 }[] = [
   {
-    id: "parent",
-    label: "Parent / Guardian",
+    id: "family",
+    label: "For Families",
     subLabel: "Family Care",
-    icon: User,
+    icon: Users,
     tier: "B2C Subscription",
     description: "Track your child's developmental journey, complete screenings, book specialists, and follow AI-guided therapy plans.",
   },
   {
-    id: "doctor",
-    label: "Clinician / Doctor",
+    id: "clinic",
+    label: "For Clinics",
     subLabel: "Clinical System",
     icon: Stethoscope,
     tier: "Clinic SaaS",
     description: "Manage your practice with AI-assisted intake, patient risk triage, telehealth tools, and clinical reporting.",
   },
   {
-    id: "therapist",
-    label: "Therapist / Educator",
-    subLabel: "Therapy System",
-    icon: ActivitySquare,
-    tier: "Clinic SaaS",
-    description: "Manage your caseload, create therapy plans, track progress, and collaborate with clinics and families.",
+    id: "school",
+    label: "For Schools",
+    subLabel: "School System",
+    icon: GraduationCap,
+    tier: "School License",
+    description: "Screen students, track developmental milestones, file teacher reports, and coordinate with clinics and families.",
   },
   {
-    id: "admin",
-    label: "Platform Admin",
-    subLabel: "Admin Dashboard",
-    icon: Settings,
-    tier: "Admin Access",
-    description: "Monitor platform health, manage clinics and schools, view population-level risk analytics, and control access.",
+    id: "government",
+    label: "For Government",
+    subLabel: "Government Panel",
+    icon: Globe,
+    tier: "Government Access",
+    description: "Monitor population-level developmental risk, allocate early intervention resources, and drive national health policy.",
   },
 ];
 
@@ -60,7 +60,7 @@ export default function Login() {
   const { login } = useAuth();
 
   const [mode, setMode] = useState<Mode>("signin");
-  const [selectedRole, setSelectedRole] = useState<UserRole>("parent");
+  const [selectedRole, setSelectedRole] = useState<UserRole>("family");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 

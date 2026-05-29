@@ -179,7 +179,7 @@ function AddChildDialog({ onSuccess, maxChildren, currentCount }: { onSuccess: (
               Upgrade to add more children to your account.
             </p>
             <Button className="w-full rounded-full gap-2" asChild>
-              <a href="/onboarding?role=parent&plan=care-plus">
+              <a href="/onboarding?role=family&plan=care-plus">
                 <Star className="h-4 w-4" /> Upgrade to Care Plus
               </a>
             </Button>
@@ -482,7 +482,7 @@ function ChildrenTab() {
             <p className="text-xs text-muted-foreground mt-0.5">
               {currentCount} / {maxChildren} profile{maxChildren === 1 ? "" : "s"} used
               {currentCount >= maxChildren && (
-                <a href="/onboarding?role=parent&plan=care-plus" className="ml-2 text-primary font-medium hover:underline">Upgrade for more →</a>
+                <a href="/onboarding?role=family&plan=care-plus" className="ml-2 text-primary font-medium hover:underline">Upgrade for more →</a>
               )}
             </p>
           )}
@@ -1036,7 +1036,7 @@ function TherapyTab() {
       allowed={features.therapyTracking}
       title="Therapy Tracking"
       description={`Therapy plan tracking is included in Care Plus and Care Family Pro. Upgrade to monitor your child's speech, OT, behavioral, and other therapy programs with progress tracking.`}
-      upgradeHref="/onboarding?role=parent&plan=care-plus"
+      upgradeHref="/onboarding?role=family&plan=care-plus"
       currentPlan={features.planName}
     >
     <div className="p-6 lg:p-8 space-y-5">
@@ -1234,7 +1234,7 @@ function VideoTab() {
       allowed={features.videoAnalysis}
       title="Video Assessment"
       description={`Video behavioral analysis is available on Care Plus and Care Family Pro plans. Your ${features.planName} plan includes text-based AI summaries. Upgrade to submit behavioral video for AI analysis.`}
-      upgradeHref="/onboarding?role=parent&plan=care-plus"
+      upgradeHref="/onboarding?role=family&plan=care-plus"
       currentPlan={features.planName}
     >
       <div className="p-6 lg:p-8 space-y-5">

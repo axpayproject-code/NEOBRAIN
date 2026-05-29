@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2, ArrowRight, ArrowLeft, Loader2, Heart, Shield,
   Video, Brain, Calendar, Users, Stethoscope, FileText, Star, Check, X,
-  ActivitySquare, Settings, GraduationCap, Building2, ClipboardList,
+  GraduationCap, Globe, Building2, ClipboardList, ActivitySquare, Settings,
   BarChart3, UserCheck, Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -133,7 +133,7 @@ function ParentOnboarding({ planKey, onComplete }: { planKey: PlanKey; onComplet
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role: "parent" }),
+        body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role: "family" }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Signup failed");
@@ -191,7 +191,7 @@ function ParentOnboarding({ planKey, onComplete }: { planKey: PlanKey; onComplet
             <p className="text-xs font-semibold text-muted-foreground mb-3">CHANGE PLAN</p>
             <div className="grid grid-cols-3 gap-2">
               {(Object.entries(FAMILY_PLANS) as [PlanKey, typeof FAMILY_PLANS[PlanKey]][]).map(([key, p]) => (
-                <a key={key} href={`/onboarding?role=parent&plan=${key}`}
+                <a key={key} href={`/onboarding?role=family&plan=${key}`}
                   className={`rounded-lg border p-3 text-center transition-all ${planKey === key ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
                   <p className="text-xs font-bold text-foreground">{p.name}</p>
                   <p className="text-xs text-muted-foreground">{p.price}/mo</p>
@@ -946,10 +946,10 @@ function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: str
 // ── ROLE META ────────────────────────────────────────────────────────────────
 
 const ROLE_META: Record<UserRole, { label: string; icon: typeof Heart; subtitle: string; badge: string; badgeColor: string }> = {
-  parent: { label: "Family Care", icon: Heart, subtitle: "Parent / Guardian onboarding", badge: "B2C", badgeColor: "bg-secondary/15 text-primary" },
-  doctor: { label: "Clinic SaaS", icon: Stethoscope, subtitle: "Clinician / Doctor onboarding", badge: "Clinical", badgeColor: "bg-blue-100 text-blue-700" },
-  therapist: { label: "Therapy System", icon: ActivitySquare, subtitle: "Therapist / Educator onboarding", badge: "Therapy", badgeColor: "bg-amber-100 text-amber-700" },
-  admin: { label: "Admin Dashboard", icon: Settings, subtitle: "Platform Admin onboarding", badge: "Admin", badgeColor: "bg-slate-100 text-slate-700" },
+  family: { label: "For Families", icon: Heart, subtitle: "Parent / Guardian onboarding", badge: "Families", badgeColor: "bg-secondary/15 text-primary" },
+  clinic: { label: "For Clinics", icon: Stethoscope, subtitle: "Clinician / Doctor onboarding", badge: "Clinics", badgeColor: "bg-blue-100 text-blue-700" },
+  school: { label: "For Schools", icon: GraduationCap, subtitle: "School / Educator onboarding", badge: "Schools", badgeColor: "bg-amber-100 text-amber-700" },
+  government: { label: "For Government", icon: Globe, subtitle: "Government / LGU onboarding", badge: "Government", badgeColor: "bg-slate-100 text-slate-700" },
 };
 
 // ── MAIN EXPORT ───────────────────────────────────────────────────────────────
@@ -959,8 +959,8 @@ export default function Onboarding() {
   const { login } = useAuth();
 
   const params = new URLSearchParams(window.location.search);
-  const rawRole = params.get("role") ?? "parent";
-  const role: UserRole = (["parent", "doctor", "therapist", "admin"].includes(rawRole) ? rawRole : "parent") as UserRole;
+  const rawRole = params.get("role") ?? "family";
+  const role: UserRole = (["family", "clinic", "school", "government"].includes(rawRole) ? rawRole : "family") as UserRole;
   const rawPlan = params.get("plan") ?? "care-plus";
   const planKey: PlanKey = rawPlan in FAMILY_PLANS ? (rawPlan as PlanKey) : "care-plus";
 
@@ -968,15 +968,15 @@ export default function Onboarding() {
   const Icon = meta.icon;
 
   const ROLE_STEP_LABELS: Record<UserRole, [string, string, string]> = {
-    parent: ["Review Plan", "Account Setup", "Welcome"],
-    doctor: ["Clinic Info", "Your Details", "Welcome"],
-    therapist: ["Join Method", "Your Details", "Welcome"],
-    admin: ["Access Code", "Admin Profile", "Welcome"],
+    family: ["Review Plan", "Account Setup", "Welcome"],
+    clinic: ["Clinic Info", "Your Details", "Welcome"],
+    school: ["Join Method", "Your Details", "Welcome"],
+    government: ["Access Code", "Admin Profile", "Welcome"],
   };
 
   function handleComplete(name: string, email: string, tier?: string, userId?: string) {
     const ROLE_DEFAULT_ROUTES: Record<UserRole, string> = {
-      parent: "/parent", doctor: "/doctor", therapist: "/therapist", admin: "/admin",
+      family: "/family", clinic: "/clinic", school: "/school", government: "/government",
     };
     if (!userId) return;
     login({ id: userId, name: name || `${meta.label} User`, email: email || `user@accentecx.ph`, role, tier });
@@ -1007,23 +1007,23 @@ export default function Onboarding() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-10">
-        {role === "parent" && (
+        {role === "family" && (
           <ParentOnboarding
             planKey={planKey}
             onComplete={(name, email, tier, userId) => handleComplete(name, email, tier, userId)}
           />
         )}
-        {role === "doctor" && (
+        {role === "clinic" && (
           <DoctorOnboarding
             onComplete={(name, email, userId) => handleComplete(name, email, undefined, userId)}
           />
         )}
-        {role === "therapist" && (
+        {role === "school" && (
           <TherapistOnboarding
             onComplete={(name, email, userId) => handleComplete(name, email, undefined, userId)}
           />
         )}
-        {role === "admin" && (
+        {role === "government" && (
           <AdminOnboarding
             onComplete={(name, email, userId) => handleComplete(name, email, undefined, userId)}
           />

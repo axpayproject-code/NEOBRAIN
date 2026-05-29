@@ -10,11 +10,11 @@ import Demo from "@/pages/Demo";
 import Login from "@/pages/Login";
 import Onboarding from "@/pages/Onboarding";
 
-// Role-based dashboard pages
-import ParentDashboard from "@/pages/dashboards/ParentDashboard";
-import DoctorDashboard from "@/pages/dashboards/DoctorDashboard";
-import TherapistDashboard from "@/pages/dashboards/TherapistDashboard";
-import AdminDashboard from "@/pages/dashboards/AdminDashboard";
+// Role-based dashboard pages (aligned to 4 business types)
+import ParentDashboard from "@/pages/dashboards/ParentDashboard";    // For Families
+import DoctorDashboard from "@/pages/dashboards/DoctorDashboard";    // For Clinics
+import TherapistDashboard from "@/pages/dashboards/TherapistDashboard"; // For Schools
+import AdminDashboard from "@/pages/dashboards/AdminDashboard";       // For Government
 
 // Platform pages
 import FamilyCare from "@/pages/platform/FamilyCare";
@@ -67,18 +67,18 @@ function AppRoutes() {
       </Route>
       <Route path="/onboarding" component={Onboarding} />
 
-      {/* ── Role-based dashboards ── */}
-      <Route path="/parent">
-        <ProtectedRoute requiredRole="parent"><ParentDashboard /></ProtectedRoute>
+      {/* ── Role-based dashboards (4 business types) ── */}
+      <Route path="/family">
+        <ProtectedRoute requiredRole="family"><ParentDashboard /></ProtectedRoute>
       </Route>
-      <Route path="/doctor">
-        <ProtectedRoute requiredRole="doctor"><DoctorDashboard /></ProtectedRoute>
+      <Route path="/clinic">
+        <ProtectedRoute requiredRole="clinic"><DoctorDashboard /></ProtectedRoute>
       </Route>
-      <Route path="/therapist">
-        <ProtectedRoute requiredRole="therapist"><TherapistDashboard /></ProtectedRoute>
+      <Route path="/school">
+        <ProtectedRoute requiredRole="school"><TherapistDashboard /></ProtectedRoute>
       </Route>
-      <Route path="/admin">
-        <ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>
+      <Route path="/government">
+        <ProtectedRoute requiredRole="government"><AdminDashboard /></ProtectedRoute>
       </Route>
 
       {/* ── Platform pages ── */}

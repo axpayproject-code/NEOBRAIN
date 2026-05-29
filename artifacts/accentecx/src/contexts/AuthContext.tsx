@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
 
-export type UserRole = "parent" | "doctor" | "therapist" | "admin";
+export type UserRole = "family" | "clinic" | "school" | "government";
 
 export interface AuthUser {
   id: string;
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshTier = useCallback(async (currentUser?: AuthUser | null) => {
     const u = currentUser ?? user;
-    if (!u?.id || u.role !== "parent") return;
+    if (!u?.id || u.role !== "family") return;
     try {
       const base = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
       const res = await fetch(`${base}/api/billing/status`, {
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   useEffect(() => {
-    if (user?.id && user.role === "parent") {
+    if (user?.id && user.role === "family") {
       refreshTier(user);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = (newUser: AuthUser) => {
     localStorage.setItem("accentecx_user", JSON.stringify(newUser));
     setUser(newUser);
-    if (newUser.role === "parent") {
+    if (newUser.role === "family") {
       setTimeout(() => refreshTier(newUser), 500);
     }
   };
@@ -110,16 +110,16 @@ export function useAuth() {
 
 export function roleDefaultRoute(role: UserRole): string {
   switch (role) {
-    case "parent": return "/parent";
-    case "doctor": return "/doctor";
-    case "therapist": return "/therapist";
-    case "admin": return "/admin";
+    case "family": return "/family";
+    case "clinic": return "/clinic";
+    case "school": return "/school";
+    case "government": return "/government";
   }
 }
 
 export const ROLE_TIERS: Record<UserRole, string> = {
-  parent: "B2C Subscription",
-  doctor: "Clinic SaaS Pro",
-  therapist: "Clinic SaaS",
-  admin: "Platform Admin",
+  family: "B2C Subscription",
+  clinic: "Clinic SaaS Pro",
+  school: "School License",
+  government: "Government Access",
 };

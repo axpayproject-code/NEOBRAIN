@@ -16,17 +16,17 @@ export interface NavItem {
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
-  parent: "Family Care",
-  doctor: "Clinical System",
-  therapist: "Therapy System",
-  admin: "Admin Panel",
+  family: "Family Care",
+  clinic: "Clinical System",
+  school: "School System",
+  government: "Government Panel",
 };
 
 const ROLE_COLORS: Record<UserRole, string> = {
-  parent: "bg-secondary/20 text-primary",
-  doctor: "bg-blue-100 text-blue-800",
-  therapist: "bg-purple-100 text-purple-800",
-  admin: "bg-orange-100 text-orange-800",
+  family: "bg-secondary/20 text-primary",
+  clinic: "bg-blue-100 text-blue-800",
+  school: "bg-purple-100 text-purple-800",
+  government: "bg-orange-100 text-orange-800",
 };
 
 const PLAN_COLORS: Record<string, string> = {
@@ -105,13 +105,13 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
     ? user.name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase()
     : "?";
 
-  const planName = user?.role === "parent"
+  const planName = user?.role === "family"
     ? getPlanFeatures(user.tier).planName
-    : ROLE_LABELS[user?.role ?? "parent"];
+    : ROLE_LABELS[user?.role ?? "family"];
 
-  const badgeColor = user?.role === "parent"
-    ? (PLAN_COLORS[planName] ?? ROLE_COLORS["parent"])
-    : ROLE_COLORS[user?.role ?? "parent"];
+  const badgeColor = user?.role === "family"
+    ? (PLAN_COLORS[planName] ?? ROLE_COLORS["family"])
+    : ROLE_COLORS[user?.role ?? "family"];
 
   return (
     <div className="flex min-h-[100dvh] w-full">

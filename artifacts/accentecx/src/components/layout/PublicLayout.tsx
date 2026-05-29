@@ -71,7 +71,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
 
           <div className="hidden md:flex items-center gap-3">
             <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Sign in</Link>
-            <Link href="/onboarding?role=parent&plan=care-plus">
+            <Link href="/onboarding?role=family&plan=care-plus">
               <Button size="sm" className="rounded-full px-5 bg-primary text-primary-foreground">Get Started</Button>
             </Link>
           </div>
@@ -88,7 +88,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             ))}
             <div className="pt-2 border-t border-border flex flex-col gap-2">
               <Link href="/login" className="text-sm text-muted-foreground" onClick={() => setMenuOpen(false)}>Sign in</Link>
-              <Link href="/onboarding?role=parent&plan=care-plus" onClick={() => setMenuOpen(false)}>
+              <Link href="/onboarding?role=family&plan=care-plus" onClick={() => setMenuOpen(false)}>
                 <Button size="sm" className="rounded-full w-full bg-primary text-primary-foreground">Get Started</Button>
               </Link>
             </div>

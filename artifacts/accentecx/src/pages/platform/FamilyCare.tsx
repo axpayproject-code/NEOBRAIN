@@ -21,9 +21,9 @@ const FEATURES = [
 ];
 
 const PLANS = [
-  { name: "Starter Care", price: "₱200/mo", features: ["1 child profile", "Basic screenings 2×/year", "AI text summary", "Email support"], href: "/onboarding?role=parent&plan=starter-care" },
-  { name: "Care Plus", price: "₱799/mo", highlight: true, features: ["4 child profiles", "Unlimited screenings", "Video analysis 3×/mo", "Therapy tracking", "Specialist messaging"], href: "/onboarding?role=parent&plan=care-plus" },
-  { name: "Care Family Pro", price: "₱1,999/mo", features: ["Up to 6 children", "Priority AI processing", "Full video analytics", "Dedicated support manager"], href: "/onboarding?role=parent&plan=care-family-pro" },
+  { name: "Starter Care", price: "₱200/mo", features: ["1 child profile", "Basic screenings 2×/year", "AI text summary", "Email support"], href: "/onboarding?role=family&plan=starter-care" },
+  { name: "Care Plus", price: "₱799/mo", highlight: true, features: ["4 child profiles", "Unlimited screenings", "Video analysis 3×/mo", "Therapy tracking", "Specialist messaging"], href: "/onboarding?role=family&plan=care-plus" },
+  { name: "Care Family Pro", price: "₱1,999/mo", features: ["Up to 6 children", "Priority AI processing", "Full video analytics", "Dedicated support manager"], href: "/onboarding?role=family&plan=care-family-pro" },
 ];
 
 export default function FamilyCare() {
@@ -44,7 +44,7 @@ export default function FamilyCare() {
               The ACCENTECX Family Care System gives Filipino parents a complete developmental intelligence platform — from daily screening to specialist booking, all in one place.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/onboarding?role=parent&plan=care-plus">
+              <Link href="/onboarding?role=family&plan=care-plus">
                 <Button size="lg" className="rounded-full px-10 h-13 text-base bg-primary text-primary-foreground">
                   Start Free — ₱200/mo <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>

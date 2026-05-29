@@ -216,7 +216,7 @@ export default function Contact() {
             <div className="rounded-2xl border bg-primary p-6 text-center">
               <p className="text-primary-foreground font-bold mb-2">Need it faster?</p>
               <p className="text-primary-foreground/70 text-sm mb-4">For families, create a free account and start your first screening today — no sales call needed.</p>
-              <a href="/onboarding?role=parent&plan=starter-care">
+              <a href="/onboarding?role=family&plan=starter-care">
                 <Button className="rounded-full bg-secondary text-secondary-foreground w-full font-bold">Start Free — ₱200/mo</Button>
               </a>
             </div>

@@ -173,7 +173,7 @@ function UserManagementTab() {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [inviting, setInviting] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
-  const [newUser, setNewUser] = useState({ name: "", email: "", role: "parent", tier: "Starter Care" });
+  const [newUser, setNewUser] = useState({ name: "", email: "", role: "family", tier: "Starter Care" });
 
   const filtered = users.filter(u =>
     u.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -187,7 +187,7 @@ function UserManagementTab() {
     setUsers(us => [...us, { ...newUser, status: "active", joined: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }) }]);
     setInviting(false);
     setInviteSent(true);
-    setTimeout(() => { setInviteSent(false); setAddOpen(false); setNewUser({ name: "", email: "", role: "parent", tier: "Starter Care" }); }, 1500);
+    setTimeout(() => { setInviteSent(false); setAddOpen(false); setNewUser({ name: "", email: "", role: "family", tier: "Starter Care" }); }, 1500);
   };
 
   const handleSaveEdit = () => {
@@ -210,10 +210,10 @@ function UserManagementTab() {
       </div>
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Parents", count: users.filter(u => u.role === "parent").length, icon: Users },
-          { label: "Doctors", count: users.filter(u => u.role === "doctor").length, icon: Stethoscope },
-          { label: "Therapists", count: users.filter(u => u.role === "therapist").length, icon: TrendingUp },
+          { label: "Families", count: users.filter(u => u.role === "family").length, icon: Users },
+          { label: "Clinics", count: users.filter(u => u.role === "clinic").length, icon: Stethoscope },
           { label: "Schools", count: users.filter(u => u.role === "school").length, icon: GraduationCap },
+          { label: "Government", count: users.filter(u => u.role === "government").length, icon: TrendingUp },
         ].map(s => (
           <div key={s.label} className="rounded-xl border bg-card p-4 text-center" data-testid={`user-count-${s.label.toLowerCase()}`}>
             <p className="text-2xl font-bold">{s.count}</p>
