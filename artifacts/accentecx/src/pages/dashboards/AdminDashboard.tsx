@@ -279,6 +279,7 @@ type RegionProgram = { name: string; region: string; type: string; beneficiaries
 function RegionalProgramsTab() {
   const [programs, setPrograms] = useState<RegionProgram[]>([]);
   const [open, setOpen] = useState(false);
+  const [editProgram, setEditProgram] = useState<number | null>(null);
   const [form, setForm] = useState({ name: "", region: "", type: "Screening", beneficiaries: "", status: "planning", budget: "" });
   const [saving, setSaving] = useState(false);
 
@@ -294,7 +295,12 @@ function RegionalProgramsTab() {
     if (!form.name || !form.region) return;
     setSaving(true);
     await new Promise(r => setTimeout(r, 500));
-    setPrograms(p => [...p, { ...form, beneficiaries: Number(form.beneficiaries) || 0 }]);
+    if (editProgram !== null) {
+      setPrograms(prev => prev.map((item, idx) => idx === editProgram ? { ...form, beneficiaries: Number(form.beneficiaries) || 0 } : item));
+      setEditProgram(null);
+    } else {
+      setPrograms(p => [...p, { ...form, beneficiaries: Number(form.beneficiaries) || 0 }]);
+    }
     setSaving(false);
     setOpen(false);
     setForm({ name: "", region: "", type: "Screening", beneficiaries: "", status: "planning", budget: "" });
@@ -352,14 +358,14 @@ function RegionalProgramsTab() {
               </div>
               <p className="text-xs text-muted-foreground">{p.region} · {p.beneficiaries.toLocaleString()} beneficiaries · {p.budget}</p>
             </div>
-            <Button size="sm" variant="outline" className="rounded-full text-xs h-7 shrink-0">Manage</Button>
+            <Button size="sm" variant="outline" className="rounded-full text-xs h-7 shrink-0" onClick={() => { setEditProgram(i); setForm({ ...p, beneficiaries: String(p.beneficiaries) }); setOpen(true); }}>Manage</Button>
           </motion.div>
         ))}
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={v => { setOpen(v); if (!v) { setEditProgram(null); setForm({ name: "", region: "", type: "Screening", beneficiaries: "", status: "planning", budget: "" }); } }}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Add Regional Program</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editProgram !== null ? "Edit Program" : "Add Regional Program"}</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label>Program Name</Label>
@@ -755,6 +761,7 @@ function LGUCoordinationTab() {
   const [partners, setPartners] = useState<LGUPartner[]>(INITIAL_PARTNERS);
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [managedPartner, setManagedPartner] = useState<LGUPartner | null>(null);
   const [inviting, setInviting] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
   const [newPartner, setNewPartner] = useState({ name: "", email: "", type: "LGU Health Unit", region: "" });
@@ -833,13 +840,52 @@ function LGUCoordinationTab() {
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">{p.joined}</td>
                 <td className="px-4 py-3">
-                  <Button size="sm" variant="outline" className="rounded-full text-xs h-6 px-2">Manage</Button>
+                  <Button size="sm" variant="outline" className="rounded-full text-xs h-6 px-2" onClick={() => setManagedPartner(p)}>Manage</Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      <Dialog open={!!managedPartner} onOpenChange={v => !v && setManagedPartner(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>LGU Partner Details</DialogTitle></DialogHeader>
+          {managedPartner && (
+            <div className="space-y-4 py-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+                  <MapPin className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold">{managedPartner.name}</p>
+                  <p className="text-sm text-muted-foreground">{managedPartner.type} · {managedPartner.region}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-muted/50 p-3 text-center">
+                  <p className="text-xs text-muted-foreground mb-1">Status</p>
+                  <span className="text-xs font-semibold capitalize text-green-700">{managedPartner.status}</span>
+                </div>
+                <div className="rounded-xl bg-muted/50 p-3 text-center">
+                  <p className="text-xs text-muted-foreground mb-1">Joined</p>
+                  <span className="text-xs font-semibold">{managedPartner.joined}</span>
+                </div>
+                <div className="rounded-xl bg-muted/50 p-3 text-center col-span-2">
+                  <p className="text-xs text-muted-foreground mb-1">Children Enrolled</p>
+                  <span className="text-2xl font-bold text-primary">{managedPartner.children}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" className="rounded-full" onClick={() => setManagedPartner(null)}>Close</Button>
+            <Button className="rounded-full gap-1.5" onClick={() => setManagedPartner(null)}>
+              <Mail className="h-3.5 w-3.5" /> Send Message
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={addOpen} onOpenChange={v => { setAddOpen(v); if (!v) setInviteSent(false); }}>
         <DialogContent className="max-w-md">

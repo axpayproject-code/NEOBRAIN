@@ -267,7 +267,7 @@ function ChildDomainCard({ childId, childName }: { childId: number; childName: s
 
 // ── Tab views ──────────────────────────────────────────────────────────────────
 
-function WelcomeEmptyState({ onAddChild, onStartScreening, onBook }: { onAddChild: () => void; onStartScreening: () => void; onBook: () => void }) {
+function WelcomeEmptyState({ onAddChild, onStartScreening, onBook, onAIAnalysis }: { onAddChild: () => void; onStartScreening: () => void; onBook: () => void; onAIAnalysis: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -311,7 +311,7 @@ function WelcomeEmptyState({ onAddChild, onStartScreening, onBook }: { onAddChil
         {[
           { icon: ClipboardList, label: "Screening", color: "bg-blue-50 text-blue-700", action: onStartScreening },
           { icon: Calendar, label: "Appointment", color: "bg-purple-50 text-purple-700", action: onBook },
-          { icon: Brain, label: "AI Analysis", color: "bg-lime-50 text-lime-700", action: () => {} },
+          { icon: Brain, label: "AI Analysis", color: "bg-lime-50 text-lime-700", action: onAIAnalysis },
         ].map(({ icon: Icon, label, color, action }) => (
           <button key={label} onClick={action}
             className={`flex flex-col items-center gap-2 rounded-2xl p-4 ${color} transition-opacity hover:opacity-80`}>
@@ -344,6 +344,7 @@ function OverviewTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
           onAddChild={() => onNavigate?.("children")}
           onStartScreening={() => onNavigate?.("screening")}
           onBook={() => onNavigate?.("appointments")}
+          onAIAnalysis={() => onNavigate?.("ai-results")}
         />
       ) : (
         <>
@@ -1174,6 +1175,7 @@ function ReportsTab() {
 
 function SettingsTab() {
   const { user } = useAuth();
+  const [saved, setSaved] = useState(false);
   const [billingStatus, setBillingStatus] = useState<{ planName: string; status: string; paidUntil: string | null } | null>(null);
 
   useEffect(() => {
@@ -1197,7 +1199,9 @@ function SettingsTab() {
             <div className="space-y-1.5"><Label>Name</Label><Input defaultValue={user?.name} data-testid="settings-name" /></div>
             <div className="space-y-1.5"><Label>Email</Label><Input defaultValue={user?.email} data-testid="settings-email" /></div>
           </div>
-          <Button className="rounded-full" data-testid="button-save-settings">Save Changes</Button>
+          <Button className="rounded-full gap-1.5" data-testid="button-save-settings" onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2500); }}>
+            {saved ? <><CheckCircle className="h-3.5 w-3.5" /> Saved!</> : "Save Changes"}
+          </Button>
         </CardContent>
       </Card>
       <Card>

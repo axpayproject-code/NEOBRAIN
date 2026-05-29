@@ -178,6 +178,7 @@ function StudentRosterTab() {
   const { data: children, isLoading } = useListChildren({ query: { queryKey: ["children-school-roster"] } });
   const { data: screenings } = useListScreenings({}, { query: { queryKey: ["screenings-school-roster"] } });
   const [search, setSearch] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState<{ id: number; name: string; grade: string; age: number; risk: string; screened: boolean; sped: boolean } | null>(null);
 
   const students = (children ?? []).map(c => ({
     id: c.id,
@@ -233,7 +234,7 @@ function StudentRosterTab() {
                     {s.sped ? <Badge className="text-xs bg-purple-100 text-purple-800">SPED</Badge> : <span className="text-xs text-muted-foreground">—</span>}
                   </td>
                   <td className="px-4 py-3">
-                    <Button size="sm" variant="outline" className="rounded-full text-xs h-6 px-2">View</Button>
+                    <Button size="sm" variant="outline" className="rounded-full text-xs h-6 px-2" onClick={() => setSelectedStudent(s)}>View</Button>
                   </td>
                 </tr>
               ))}
@@ -241,6 +242,44 @@ function StudentRosterTab() {
           </table>
         </div>
       )}
+
+      <Dialog open={!!selectedStudent} onOpenChange={v => !v && setSelectedStudent(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Student Profile</DialogTitle></DialogHeader>
+          {selectedStudent && (
+            <div className="space-y-4 py-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xl shrink-0">
+                  {selectedStudent.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-semibold text-lg">{selectedStudent.name}</p>
+                  <p className="text-sm text-muted-foreground">{selectedStudent.grade} · {selectedStudent.age} yrs old</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-muted/50 p-3 text-center">
+                  <p className="text-xs text-muted-foreground mb-1">Risk Level</p>
+                  <Badge className={`text-xs capitalize ${RISK_COLORS[selectedStudent.risk] ?? "bg-muted text-foreground"}`}>{selectedStudent.risk ?? "unknown"}</Badge>
+                </div>
+                <div className="rounded-xl bg-muted/50 p-3 text-center">
+                  <p className="text-xs text-muted-foreground mb-1">Screening</p>
+                  <span className={`text-xs font-semibold ${selectedStudent.screened ? "text-green-700" : "text-orange-600"}`}>{selectedStudent.screened ? "Completed" : "Pending"}</span>
+                </div>
+                <div className="rounded-xl bg-muted/50 p-3 text-center">
+                  <p className="text-xs text-muted-foreground mb-1">SPED</p>
+                  <span className="text-xs font-semibold">{selectedStudent.sped ? "Enrolled" : "Not enrolled"}</span>
+                </div>
+                <div className="rounded-xl bg-muted/50 p-3 text-center">
+                  <p className="text-xs text-muted-foreground mb-1">School / Grade</p>
+                  <span className="text-xs font-semibold truncate block">{selectedStudent.grade}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter><Button variant="outline" className="rounded-full" onClick={() => setSelectedStudent(null)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -372,6 +411,7 @@ function SpedIepTab() {
   const [addOpen, setAddOpen] = useState(false);
   const [newEntry, setNewEntry] = useState<Partial<IEPEntry>>({ studentName: "", grade: "Grade 1", disability: "", goals: "", status: "active", reviewDate: "" });
   const [saving, setSaving] = useState(false);
+  const [editIdx, setEditIdx] = useState<number | null>(null);
 
   const STATUS_COLORS: Record<string, string> = {
     active: "bg-green-100 text-green-800",
@@ -384,7 +424,12 @@ function SpedIepTab() {
     if (!newEntry.studentName || !newEntry.disability) return;
     setSaving(true);
     await new Promise(r => setTimeout(r, 500));
-    setEntries(e => [...e, newEntry as IEPEntry]);
+    if (editIdx !== null) {
+      setEntries(prev => prev.map((item, idx) => idx === editIdx ? newEntry as IEPEntry : item));
+      setEditIdx(null);
+    } else {
+      setEntries(e => [...e, newEntry as IEPEntry]);
+    }
     setSaving(false);
     setAddOpen(false);
     setNewEntry({ studentName: "", grade: "Grade 1", disability: "", goals: "", status: "active", reviewDate: "" });
@@ -442,7 +487,7 @@ function SpedIepTab() {
               </div>
             </div>
             <div className="flex gap-2 pt-1">
-              <Button size="sm" variant="outline" className="rounded-full text-xs h-7 px-3">Edit IEP</Button>
+              <Button size="sm" variant="outline" className="rounded-full text-xs h-7 px-3" onClick={() => { setEditIdx(i); setNewEntry(e); setAddOpen(true); }}>Edit IEP</Button>
               <Button size="sm" variant="outline" className="rounded-full text-xs h-7 px-3">
                 <Download className="h-3 w-3 mr-1.5" /> Export
               </Button>
@@ -508,6 +553,7 @@ function ReferralsTab() {
   const [form, setForm] = useState<Partial<ReferralEntry>>({ studentName: "", referralType: "Clinic", specialistType: "", reason: "", status: "draft", date: new Date().toLocaleDateString() });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [trackedReferral, setTrackedReferral] = useState<ReferralEntry | null>(null);
 
   const STATUS_COLORS: Record<string, string> = {
     draft: "bg-gray-100 text-gray-700",
@@ -551,7 +597,7 @@ function ReferralsTab() {
               <p className="text-sm text-muted-foreground">{r.reason}</p>
               <p className="text-xs text-muted-foreground">Referred: {r.date}</p>
             </div>
-            <Button size="sm" variant="outline" className="rounded-full text-xs h-7 shrink-0">Track</Button>
+            <Button size="sm" variant="outline" className="rounded-full text-xs h-7 shrink-0" onClick={() => setTrackedReferral(r)}>Track</Button>
           </div>
         ))}
       </div>
@@ -600,6 +646,34 @@ function ReferralsTab() {
               </Button>
             </DialogFooter>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!trackedReferral} onOpenChange={v => !v && setTrackedReferral(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Referral Status</DialogTitle></DialogHeader>
+          {trackedReferral && (
+            <div className="space-y-4 py-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg shrink-0">
+                  {trackedReferral.studentName.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-semibold">{trackedReferral.studentName}</p>
+                  <p className="text-sm text-muted-foreground">{trackedReferral.referralType} · {trackedReferral.specialistType}</p>
+                </div>
+              </div>
+              <div className="rounded-xl bg-muted/50 p-4 space-y-2.5">
+                <div className="flex justify-between text-sm"><span className="text-muted-foreground">Status</span><Badge className={`text-xs capitalize ${STATUS_COLORS[trackedReferral.status]}`}>{trackedReferral.status}</Badge></div>
+                <div className="flex justify-between text-sm"><span className="text-muted-foreground">Date Referred</span><span>{trackedReferral.date}</span></div>
+                {trackedReferral.reason && <div className="flex justify-between text-sm gap-3"><span className="text-muted-foreground shrink-0">Reason</span><span className="text-right text-xs">{trackedReferral.reason}</span></div>}
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                {trackedReferral.status === "sent" ? "Awaiting specialist response — usually within 2 business days." : trackedReferral.status === "accepted" ? "Specialist accepted. Coordinate to schedule a session." : trackedReferral.status === "declined" ? "Referral declined. Consider an alternative specialist." : "Draft — not yet submitted to a specialist."}
+              </p>
+            </div>
+          )}
+          <DialogFooter><Button variant="outline" className="rounded-full" onClick={() => setTrackedReferral(null)}>Close</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
