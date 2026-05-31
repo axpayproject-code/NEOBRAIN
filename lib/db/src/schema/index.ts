@@ -18,3 +18,4 @@ export * from "./developmental_milestones";
 export * from "./risk_history";
 export * from "./screening_responses";
 export * from "./documents";
+export * from "./tickets";

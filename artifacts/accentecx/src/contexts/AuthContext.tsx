@@ -9,6 +9,13 @@ export interface AuthUser {
   name: string;
   email: string;
   tier?: string;
+  subscriptionStatus?: string;
+  trialExpiresAt?: string | null;
+  inTrial?: boolean;
+  trialDaysLeft?: number;
+  orgName?: string;
+  region?: string;
+  phone?: string;
   profilePhoto?: string;
 }
 
@@ -16,7 +23,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   login: (user: AuthUser) => void;
   logout: () => void;
-  updateProfile: (data: Partial<Pick<AuthUser, "name" | "email" | "profilePhoto" | "tier">>) => void;
+  updateProfile: (data: Partial<Pick<AuthUser, "name" | "email" | "profilePhoto" | "tier" | "subscriptionStatus" | "trialExpiresAt" | "inTrial" | "trialDaysLeft" | "orgName" | "region" | "phone">>) => void;
   isAuthenticated: boolean;
   refreshTier: () => Promise<void>;
 }
@@ -58,26 +65,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshTier = useCallback(async (currentUser?: AuthUser | null) => {
     const u = currentUser ?? user;
-    if (!u?.id || u.role !== "family") return;
+    if (!u?.id) return;
     try {
       const base = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
       const res = await fetch(`${base}/api/billing/status`, {
         headers: { Authorization: `Bearer ${u.id}` },
       });
       if (!res.ok) return;
-      const data = await res.json();
-      if (data.tier && data.tier !== u.tier) {
-        const updated = { ...u, tier: data.tier as string };
-        localStorage.setItem("accentecx_user", JSON.stringify(updated));
-        setUser(updated);
-      }
+      const data = await res.json() as {
+        tier?: string;
+        status?: string;
+        trialExpiresAt?: string | null;
+        inTrial?: boolean;
+        trialDaysLeft?: number;
+      };
+      const updated: AuthUser = {
+        ...u,
+        tier: data.tier ?? u.tier,
+        subscriptionStatus: data.status ?? u.subscriptionStatus,
+        trialExpiresAt: data.trialExpiresAt ?? u.trialExpiresAt,
+        inTrial: data.inTrial ?? u.inTrial,
+        trialDaysLeft: data.trialDaysLeft ?? u.trialDaysLeft,
+      };
+      localStorage.setItem("accentecx_user", JSON.stringify(updated));
+      setUser(updated);
     } catch {
       // silently ignore
     }
   }, [user]);
 
   useEffect(() => {
-    if (user?.id && user.role === "family") {
+    if (user?.id) {
       refreshTier(user);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,9 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = (newUser: AuthUser) => {
     localStorage.setItem("accentecx_user", JSON.stringify(newUser));
     setUser(newUser);
-    if (newUser.role === "family") {
-      setTimeout(() => refreshTier(newUser), 500);
-    }
+    setTimeout(() => refreshTier(newUser), 500);
   };
 
   const logout = () => {
@@ -96,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
-  const updateProfile = (data: Partial<Pick<AuthUser, "name" | "email" | "profilePhoto" | "tier">>) => {
+  const updateProfile = (data: Partial<Pick<AuthUser, "name" | "email" | "profilePhoto" | "tier" | "subscriptionStatus" | "trialExpiresAt" | "inTrial" | "trialDaysLeft" | "orgName" | "region" | "phone">>) => {
     setUser(prev => {
       if (!prev) return prev;
       const updated = { ...prev, ...data };

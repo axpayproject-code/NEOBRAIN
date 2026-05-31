@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashboardLayout";
 import {
@@ -7,8 +7,9 @@ import {
   CheckCircle, Clock, Globe, GraduationCap, Stethoscope,
   Plus, Download, RefreshCw, X, Mail, Shield,
   MapPin, FileText, Activity, FlaskConical, UserPlus, Eye, EyeOff, Settings, CreditCard, Zap,
-  Check, Copy, BadgeCheck, AlertCircle, Send
+  Check, Copy, BadgeCheck, AlertCircle, Send, Ticket, Ban, Trash2, Search, Phone, Building
 } from "lucide-react";
+import { CollaborationPanel } from "@/components/CollaborationPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,9 @@ const NAV: NavItem[] = [
   { id: "doh-reporting", label: "DOH / PhilHealth", icon: FileText },
   { id: "coordination", label: "LGU Coordination", icon: Users },
   { id: "team", label: "Manage Team", icon: UserPlus },
+  { id: "user-management", label: "User Management", icon: Users },
+  { id: "billing-control", label: "Billing Control", icon: Shield },
+  { id: "collaboration", label: "Collaboration", icon: Ticket },
   { id: "billing", label: "Billing & Plans", icon: CreditCard },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -1354,6 +1358,275 @@ function GovBillingTab() {
   );
 }
 
+const ADMIN_BASE = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
+
+type BillingUser = {
+  id: string; name: string; email: string; role: string;
+  phone?: string | null; orgName?: string | null; region?: string | null;
+  subscriptionTier: string; subscriptionStatus: string;
+  subscriptionRef?: string | null; inTrial: boolean; trialDaysLeft: number;
+  trialExpiresAt?: string | null; createdAt: string;
+};
+
+const BILLING_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  active: { label: "Active", color: "bg-green-100 text-green-700" },
+  pending_verification: { label: "Pending", color: "bg-amber-100 text-amber-700" },
+  suspended: { label: "Suspended", color: "bg-red-100 text-red-700" },
+  trial: { label: "Trial", color: "bg-blue-100 text-blue-700" },
+  inactive: { label: "Inactive", color: "bg-gray-100 text-gray-600" },
+};
+
+const USER_ROLE_GROUPS: Record<string, string> = {
+  family: "Family",
+  clinic: "Clinic / Doctor",
+  school: "School / Therapist",
+  government: "Government Admin",
+};
+
+function useBillingUsers(adminId: string | undefined) {
+  const [users, setUsers] = useState<BillingUser[]>([]);
+  const [loading, setLoading] = useState(false);
+  const refetch = useCallback(async () => {
+    if (!adminId) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${ADMIN_BASE}/api/billing/users`, { headers: { Authorization: `Bearer ${adminId}` } });
+      if (res.ok) setUsers(await res.json() as BillingUser[]);
+    } finally { setLoading(false); }
+  }, [adminId]);
+  useEffect(() => { void refetch(); }, [refetch]);
+  return { users, loading, refetch };
+}
+
+function BillingControlTab() {
+  const { user } = useAuth();
+  const { users, loading, refetch } = useBillingUsers(user?.id);
+  const [actioning, setActioning] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<BillingUser | null>(null);
+
+  const doAction = useCallback(async (targetUserId: string, action: "activate" | "suspend" | "downgrade" | "delete") => {
+    if (!user?.id) return;
+    setActioning(targetUserId);
+    try {
+      if (action === "delete") {
+        await fetch(`${ADMIN_BASE}/api/billing/users/${targetUserId}`, { method: "DELETE", headers: { Authorization: `Bearer ${user.id}` } });
+      } else {
+        const endpoint = action === "activate" ? "activate" : action === "suspend" ? "suspend" : "downgrade";
+        await fetch(`${ADMIN_BASE}/api/billing/${endpoint}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.id}` },
+          body: JSON.stringify({ targetUserId }),
+        });
+      }
+      await refetch();
+    } finally { setActioning(null); setConfirmDelete(null); }
+  }, [user?.id, refetch]);
+
+  const grouped: Record<string, BillingUser[]> = {
+    pending_verification: users.filter(u => u.subscriptionStatus === "pending_verification"),
+    trial: users.filter(u => u.subscriptionStatus === "trial"),
+    active: users.filter(u => u.subscriptionStatus === "active" && u.subscriptionTier !== "free"),
+    free: users.filter(u => u.subscriptionStatus === "active" && u.subscriptionTier === "free"),
+    suspended: users.filter(u => u.subscriptionStatus === "suspended"),
+  };
+
+  const GROUPS = [
+    { key: "pending_verification", label: "⏳ Pending Verification", desc: "Awaiting admin approval" },
+    { key: "trial", label: "🎯 On Trial", desc: "14-day free trial" },
+    { key: "active", label: "✅ Active Subscribers", desc: "Paid and active" },
+    { key: "free", label: "🆓 Free Plan", desc: "Free tier" },
+    { key: "suspended", label: "🚫 Suspended", desc: "Access suspended" },
+  ];
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Billing Control</h2>
+          <p className="text-sm text-muted-foreground">Approve, suspend, or manage all user subscriptions</p>
+        </div>
+        <Button size="sm" variant="outline" onClick={refetch} disabled={loading}>
+          <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />Refresh
+        </Button>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        {GROUPS.map(g => (
+          <Card key={g.key}><CardContent className="pt-4 pb-3 px-4">
+            <p className="text-2xl font-bold">{grouped[g.key]?.length ?? 0}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{g.label.replace(/^[^\s]+ /, "")}</p>
+          </CardContent></Card>
+        ))}
+      </div>
+      {loading && <div className="space-y-3">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>}
+      {GROUPS.map(g => {
+        const gu = grouped[g.key] ?? [];
+        if (!gu.length) return null;
+        return (
+          <div key={g.key}>
+            <div className="flex items-center gap-2 mb-3">
+              <h3 className="font-semibold text-sm">{g.label}</h3>
+              <Badge variant="outline">{gu.length}</Badge>
+              <span className="text-xs text-muted-foreground">{g.desc}</span>
+            </div>
+            <div className="space-y-2">
+              {gu.map(u => (
+                <Card key={u.id} className={`border ${g.key === "pending_verification" ? "border-amber-200 bg-amber-50/50" : g.key === "suspended" ? "border-red-200" : ""}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between flex-wrap gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-sm">{u.name}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${BILLING_STATUS_CONFIG[u.subscriptionStatus]?.color ?? "bg-gray-100 text-gray-600"}`}>
+                            {BILLING_STATUS_CONFIG[u.subscriptionStatus]?.label ?? u.subscriptionStatus}
+                          </span>
+                          <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full capitalize">{USER_ROLE_GROUPS[u.role] ?? u.role}</span>
+                          {u.subscriptionTier !== "free" && u.subscriptionTier !== "trial" && (
+                            <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full">{u.subscriptionTier}</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{u.email}{u.phone ? ` · ${u.phone}` : ""}{u.orgName ? ` · ${u.orgName}` : ""}{u.region ? ` · ${u.region}` : ""}</p>
+                        {u.subscriptionRef && <p className="text-xs mt-1"><span className="font-medium text-amber-700">Ref:</span> {u.subscriptionRef}</p>}
+                        {u.inTrial && <p className="text-xs text-blue-600 mt-0.5">{u.trialDaysLeft} days of trial remaining</p>}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                        {u.subscriptionStatus === "pending_verification" && (
+                          <Button size="sm" className="bg-green-600 text-white hover:bg-green-700 h-7 text-xs" disabled={actioning === u.id} onClick={() => doAction(u.id, "activate")}>
+                            <CheckCircle className="h-3 w-3 mr-1" />Approve
+                          </Button>
+                        )}
+                        {(u.subscriptionStatus === "active" || u.subscriptionStatus === "trial") && (
+                          <Button size="sm" variant="outline" className="h-7 text-xs border-orange-300 text-orange-700 hover:bg-orange-50" disabled={actioning === u.id} onClick={() => doAction(u.id, "suspend")}>
+                            <Ban className="h-3 w-3 mr-1" />Suspend
+                          </Button>
+                        )}
+                        {u.subscriptionStatus === "suspended" && (
+                          <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700 h-7 text-xs" disabled={actioning === u.id} onClick={() => doAction(u.id, "activate")}>Reactivate</Button>
+                        )}
+                        {u.subscriptionTier !== "free" && (
+                          <Button size="sm" variant="outline" className="h-7 text-xs text-gray-600" disabled={actioning === u.id} onClick={() => doAction(u.id, "downgrade")}>Downgrade Free</Button>
+                        )}
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => setConfirmDelete(u)}>
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle className="flex items-center gap-2 text-red-600"><AlertTriangle className="h-5 w-5" />Delete User Account</DialogTitle></DialogHeader>
+          <div className="py-2">
+            <p className="text-sm text-gray-700">Permanently delete <strong>{confirmDelete?.name}</strong>'s account ({confirmDelete?.email})?</p>
+            <p className="text-xs text-red-600 mt-2">This cannot be undone. All user data will be removed.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+            <Button className="bg-red-600 text-white hover:bg-red-700" disabled={actioning === confirmDelete?.id} onClick={() => confirmDelete && doAction(confirmDelete.id, "delete")}>
+              <Trash2 className="h-4 w-4 mr-1.5" />Delete Account
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function UserManagementTab() {
+  const { user } = useAuth();
+  const { users, loading, refetch } = useBillingUsers(user?.id);
+  const [search, setSearch] = useState("");
+  const [filterRole, setFilterRole] = useState("all");
+
+  const filtered = users.filter(u => {
+    const matchRole = filterRole === "all" || u.role === filterRole;
+    const q = search.toLowerCase();
+    const matchSearch = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || (u.orgName ?? "").toLowerCase().includes(q) || (u.region ?? "").toLowerCase().includes(q);
+    return matchRole && matchSearch;
+  });
+
+  const grouped: Record<string, BillingUser[]> = {};
+  for (const u of filtered) {
+    const grp = USER_ROLE_GROUPS[u.role] ?? u.role;
+    if (!grouped[grp]) grouped[grp] = [];
+    grouped[grp].push(u);
+  }
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">User Management</h2>
+          <p className="text-sm text-muted-foreground">All registered users grouped by role and organization</p>
+        </div>
+        <Button size="sm" variant="outline" onClick={refetch} disabled={loading}><RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />Refresh</Button>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {Object.entries(USER_ROLE_GROUPS).map(([role, label]) => (
+          <button key={role} onClick={() => setFilterRole(filterRole === role ? "all" : role)} className={`rounded-xl border p-4 text-left transition-colors ${filterRole === role ? "border-[#0038A8] bg-[#0038A8]/5" : "hover:bg-gray-50"}`}>
+            <p className="text-2xl font-bold">{users.filter(u => u.role === role).length}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">{label}</p>
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input placeholder="Search name, email, org, or region..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        </div>
+        <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none">
+          <option value="all">All Roles</option>
+          {Object.entries(USER_ROLE_GROUPS).map(([role, label]) => <option key={role} value={role}>{label}</option>)}
+        </select>
+      </div>
+      {loading && <div className="space-y-3">{Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>}
+      {Object.entries(grouped).map(([groupLabel, groupUsers]) => (
+        <div key={groupLabel} className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-sm text-gray-900">{groupLabel}</h3>
+            <Badge variant="outline">{groupUsers.length} user{groupUsers.length !== 1 ? "s" : ""}</Badge>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {groupUsers.map(u => (
+              <Card key={u.id} className="border hover:border-[#0038A8]/30 transition-colors">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                    <span className="font-semibold text-sm">{u.name}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${BILLING_STATUS_CONFIG[u.subscriptionStatus]?.color ?? "bg-gray-100 text-gray-600"}`}>
+                      {u.inTrial ? `Trial (${u.trialDaysLeft}d left)` : (BILLING_STATUS_CONFIG[u.subscriptionStatus]?.label ?? u.subscriptionStatus)}
+                    </span>
+                    {u.subscriptionTier !== "free" && (
+                      <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full">{u.subscriptionTier}</span>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Mail className="h-3 w-3 shrink-0" /><span className="truncate">{u.email}</span></div>
+                    {u.phone && <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Phone className="h-3 w-3 shrink-0" /><span>{u.phone}</span></div>}
+                    {u.orgName && <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Building className="h-3 w-3 shrink-0" /><span>{u.orgName}</span></div>}
+                    {u.region && <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" /><span>{u.region}</span></div>}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">Joined {new Date(u.createdAt).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
+      {!loading && filtered.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground"><Users className="h-10 w-10 mx-auto mb-3 opacity-30" /><p>No users found</p></div>
+      )}
+    </div>
+  );
+}
+
+function AdminCollaborationTab() {
+  return <div className="p-6 lg:p-8"><CollaborationPanel /></div>;
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   overview: NationalOverviewTab,
@@ -1365,6 +1638,9 @@ const TABS: Record<string, TabComponent> = {
   "doh-reporting": DOHReportingTab,
   coordination: LGUCoordinationTab,
   team: GovTeamTab,
+  "user-management": UserManagementTab,
+  "billing-control": BillingControlTab,
+  collaboration: AdminCollaborationTab,
   billing: GovBillingTab,
   settings: GovSettingsTab,
 };

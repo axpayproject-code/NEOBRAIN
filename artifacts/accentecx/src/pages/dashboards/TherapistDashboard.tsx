@@ -5,9 +5,11 @@ import {
   MessageSquare, LayoutDashboard, CheckCircle,
   Clock, AlertTriangle, Plus, BarChart3, FileText,
   Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap,
-  Check, Copy, BadgeCheck, AlertCircle
+  Check, Copy, BadgeCheck, AlertCircle, Camera, Ticket, Video
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
+import { CollaborationPanel } from "@/components/CollaborationPanel";
+import VideoProtocol from "@/components/screening/VideoProtocol";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,7 @@ const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "students", label: "Student Roster", icon: Users },
   { id: "screening-forms", label: "Screening Forms", icon: ClipboardList },
+  { id: "camera-observation", label: "Camera Observation", icon: Camera },
   { id: "games", label: "Games Assessment", icon: Gamepad2 },
   { id: "sped-iep", label: "SPED / IEP", icon: GraduationCap },
   { id: "referrals", label: "Referrals", icon: Link },
@@ -35,6 +38,7 @@ const NAV: NavItem[] = [
   { id: "reports", label: "DepEd Reports", icon: FileText },
   { id: "analytics", label: "School Analytics", icon: BarChart3 },
   { id: "team", label: "Manage Team", icon: UserPlus },
+  { id: "collaboration", label: "Collaboration", icon: Ticket },
   { id: "billing", label: "Billing & Plans", icon: CreditCard },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -1348,6 +1352,26 @@ function SchoolBillingTab() {
   );
 }
 
+function CameraObservationTab() {
+  return (
+    <div className="p-6 lg:p-8 space-y-4">
+      <div>
+        <h2 className="text-xl font-bold flex items-center gap-2"><Camera className="h-5 w-5 text-[#0038A8]" />Camera Observation</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">Record and AI-analyze behavioral observations of students</p>
+      </div>
+      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+        <p className="text-sm font-semibold text-blue-900 flex items-center gap-1.5"><Video className="h-4 w-4" />School Observer Mode</p>
+        <p className="text-xs text-blue-800 mt-1">Record structured observations of student behavior. The AI engine analyzes attention, social interaction, communication, and motor patterns to support IEP planning and developmental referrals.</p>
+      </div>
+      <VideoProtocol />
+    </div>
+  );
+}
+
+function TherapistCollaborationTab() {
+  return <div className="p-6 lg:p-8"><CollaborationPanel /></div>;
+}
+
 export default function TherapistDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -1355,6 +1379,7 @@ export default function TherapistDashboard() {
     "overview": <OverviewTab />,
     "students": <StudentRosterTab />,
     "screening-forms": <ScreeningFormsTab />,
+    "camera-observation": <CameraObservationTab />,
     "games": <GamesAssessment />,
     "sped-iep": <SpedIepTab />,
     "referrals": <ReferralsTab />,
@@ -1362,6 +1387,7 @@ export default function TherapistDashboard() {
     "reports": <DepEdReportsTab />,
     "analytics": <SchoolAnalyticsTab />,
     "team": <SchoolTeamTab />,
+    "collaboration": <TherapistCollaborationTab />,
     "billing": <SchoolBillingTab />,
     "settings": <SchoolSettingsTab />,
   };

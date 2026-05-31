@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PH_REGIONS } from "@/lib/philippineRegions";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -156,11 +157,6 @@ const THERAPY_TYPES = [
   "Physical Therapy", "Cognitive Behavioral Therapy", "Play Therapy", "Special Education",
 ];
 
-const PROVINCES = [
-  "Metro Manila", "Cebu", "Davao", "Laguna", "Batangas", "Rizal", "Bulacan", "Pampanga",
-  "Cavite", "Zambales", "Iloilo", "Cagayan de Oro", "Zamboanga", "Palawan", "Benguet",
-  "Negros Occidental", "Leyte", "Albay", "Pangasinan", "Nueva Ecija", "Other",
-];
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
@@ -467,8 +463,8 @@ function DoctorOnboarding({ onComplete }: { onComplete: (name: string, email: st
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold">Province / Region <span className="text-red-500">*</span></Label>
                   <select name="province" value={org.province} onChange={hOrg} className={`w-full h-11 rounded-md border px-3 text-sm bg-background ${orgErrors.province ? "border-red-400" : "border-input"}`}>
-                    <option value="">Select province…</option>
-                    {PROVINCES.map(p => <option key={p}>{p}</option>)}
+                    <option value="">Select region / province…</option>
+                    {PH_REGIONS.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                   </select>
                   {orgErrors.province && <p className="text-red-500 text-xs">{orgErrors.province}</p>}
                 </div>
@@ -753,23 +749,7 @@ function TherapistOnboarding({ onComplete }: { onComplete: (name: string, email:
                   <Label className="text-xs font-semibold">DepEd Region <span className="text-red-500">*</span></Label>
                   <select name="depedRegion" value={org.depedRegion} onChange={hOrg} className={`w-full h-11 rounded-md border px-3 text-sm bg-background ${orgErrors.depedRegion ? "border-red-400" : "border-input"}`}>
                     <option value="">Select region…</option>
-                    <option>NCR — National Capital Region</option>
-                    <option>Region I — Ilocos</option>
-                    <option>Region II — Cagayan Valley</option>
-                    <option>Region III — Central Luzon</option>
-                    <option>Region IV-A — CALABARZON</option>
-                    <option>Region IV-B — MIMAROPA</option>
-                    <option>Region V — Bicol</option>
-                    <option>Region VI — Western Visayas</option>
-                    <option>Region VII — Central Visayas</option>
-                    <option>Region VIII — Eastern Visayas</option>
-                    <option>Region IX — Zamboanga Peninsula</option>
-                    <option>Region X — Northern Mindanao</option>
-                    <option>Region XI — Davao</option>
-                    <option>Region XII — SOCCSKSARGEN</option>
-                    <option>Region XIII — Caraga</option>
-                    <option>CAR — Cordillera Administrative Region</option>
-                    <option>BARMM — Bangsamoro</option>
+                    {PH_REGIONS.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                   </select>
                   {orgErrors.depedRegion && <p className="text-red-500 text-xs">{orgErrors.depedRegion}</p>}
                 </div>
@@ -1075,23 +1055,7 @@ function AdminOnboarding({ onComplete }: { onComplete: (name: string, email: str
                   <Label className="text-xs font-semibold">Region <span className="text-red-500">*</span></Label>
                   <select name="region" value={org.region} onChange={hOrg} className={`w-full h-11 rounded-md border px-3 text-sm bg-background ${orgErrors.region ? "border-red-400" : "border-input"}`}>
                     <option value="">Select region…</option>
-                    <option>NCR — National Capital Region</option>
-                    <option>Region I — Ilocos</option>
-                    <option>Region II — Cagayan Valley</option>
-                    <option>Region III — Central Luzon</option>
-                    <option>Region IV-A — CALABARZON</option>
-                    <option>Region IV-B — MIMAROPA</option>
-                    <option>Region V — Bicol</option>
-                    <option>Region VI — Western Visayas</option>
-                    <option>Region VII — Central Visayas</option>
-                    <option>Region VIII — Eastern Visayas</option>
-                    <option>Region IX — Zamboanga Peninsula</option>
-                    <option>Region X — Northern Mindanao</option>
-                    <option>Region XI — Davao</option>
-                    <option>Region XII — SOCCSKSARGEN</option>
-                    <option>Region XIII — Caraga</option>
-                    <option>CAR — Cordillera Administrative Region</option>
-                    <option>BARMM — Bangsamoro</option>
+                    {PH_REGIONS.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                   </select>
                   {orgErrors.region && <p className="text-red-500 text-xs">{orgErrors.region}</p>}
                 </div>

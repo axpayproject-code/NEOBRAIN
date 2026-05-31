@@ -5,9 +5,10 @@ import {
   HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2,
   CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck,
   BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap,
-  Check, Copy, BadgeCheck, AlertCircle
+  Check, Copy, BadgeCheck, AlertCircle, Ticket
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
+import { CollaborationPanel } from "@/components/CollaborationPanel";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import AvailabilityManagerWidget from "@/components/appointments/AvailabilityManager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,6 +44,7 @@ const NAV: NavItem[] = [
   { id: "therapy-planning", label: "Therapy Planning", icon: HeartPulse },
   { id: "history", label: "Patient History", icon: History },
   { id: "parent-portal", label: "Parent Portal", icon: MessageSquare },
+  { id: "collaboration", label: "Collaboration", icon: Ticket },
   { id: "analytics", label: "Clinic Analytics", icon: BarChart3 },
   { id: "calendar", label: "My Availability", icon: CalendarDays },
   { id: "team", label: "Manage Team", icon: UserPlus },
@@ -1746,6 +1748,14 @@ function ClinicBillingTab() {
   );
 }
 
+function DoctorCollaborationTab() {
+  return (
+    <div className="p-6 lg:p-8">
+      <CollaborationPanel />
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   queue: PatientQueueTab,
@@ -1758,6 +1768,7 @@ const TABS: Record<string, TabComponent> = {
   "therapy-planning": TherapyPlanningTab,
   history: PatientHistoryTab,
   "parent-portal": ClinicParentPortalTab,
+  collaboration: DoctorCollaborationTab,
   analytics: ClinicAnalyticsTab,
   billing: ClinicBillingTab,
   calendar: DoctorAvailabilityTab,

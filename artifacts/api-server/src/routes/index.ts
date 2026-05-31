@@ -20,6 +20,7 @@ import developmentalMilestonesRouter from "./developmental_milestones";
 import riskHistoryRouter from "./risk_history";
 import screeningResponsesRouter from "./screening_responses";
 import documentsRouter from "./documents";
+import ticketsRouter from "./tickets";
 
 const router: IRouter = Router();
 
@@ -44,5 +45,6 @@ router.use(developmentalMilestonesRouter);
 router.use(riskHistoryRouter);
 router.use(screeningResponsesRouter);
 router.use(documentsRouter);
+router.use(ticketsRouter);
 
 export default router;

@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, timestamp, boolean } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -11,6 +11,12 @@ export const usersTable = pgTable("users", {
   subscriptionStatus: text("subscription_status").notNull().default("active"),
   subscriptionPaidUntil: timestamp("subscription_paid_until", { withTimezone: true }),
   subscriptionRef: text("subscription_ref"),
+  trialStartedAt: timestamp("trial_started_at", { withTimezone: true }),
+  trialExpiresAt: timestamp("trial_expires_at", { withTimezone: true }),
+  trialUsed: boolean("trial_used").notNull().default(false),
+  orgName: text("org_name"),
+  region: text("region"),
+  phone: text("phone"),
 });
 
 export type User = typeof usersTable.$inferSelect;

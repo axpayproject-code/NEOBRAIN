@@ -1,0 +1,3 @@
+- [NEOBRAIN dashboard architecture](neobrain-dashboards.md) — 4 roles use different render patterns; Admin/Parent/Doctor use TABS Record, Therapist uses TAB_CONTENT inline
+- [NEOBRAIN API auth pattern](neobrain-api-auth.md) — admin billing routes expect `Authorization: Bearer <userId>` header (not JWT); userId from useAuth()
+- [PH_REGIONS source of truth](ph-regions.md) — all Philippine region/province selects must use PH_REGIONS from @/lib/philippineRegions; never hardcode province lists

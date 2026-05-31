@@ -4,9 +4,10 @@ import {
   LayoutDashboard, Users, ClipboardList, Brain, Calendar,
   HeartPulse, FileText, Settings, Plus, ChevronRight,
   AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star, CreditCard,
-  Trash2, Download, Pencil, MessageSquare, Heart, BookOpen, ThumbsUp, Gamepad2
+  Trash2, Download, Pencil, MessageSquare, Heart, BookOpen, ThumbsUp, Gamepad2, Ticket
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
+import { CollaborationPanel } from "@/components/CollaborationPanel";
 import { getPlanFeatures } from "@/lib/planFeatures";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import { Button } from "@/components/ui/button";
@@ -72,6 +73,7 @@ const NAV: NavItem[] = [
   { id: "therapy", label: "Therapy Tracking", icon: HeartPulse },
   { id: "reports", label: "Reports", icon: FileText },
   { id: "community", label: "Community", icon: MessageSquare },
+  { id: "collaboration", label: "Collaboration", icon: Ticket },
   { id: "billing", label: "Billing", icon: CreditCard },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -1508,6 +1510,14 @@ function GamesTab() {
   );
 }
 
+function ParentCollaborationTab() {
+  return (
+    <div className="p-6 lg:p-8">
+      <CollaborationPanel />
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   children: ChildrenTab,
@@ -1519,6 +1529,7 @@ const TABS: Record<string, TabComponent> = {
   therapy: TherapyTab,
   reports: ReportsTab,
   community: CommunityTab,
+  collaboration: ParentCollaborationTab,
   billing: BillingPage,
   settings: SettingsTab,
 };

@@ -28,7 +28,7 @@ function isValidRole(r: unknown): r is Role {
 }
 
 router.post("/auth/signup", async (req, res) => {
-  const { email, name, password, role: roleRaw } = req.body as Record<string, unknown>;
+  const { email, name, password, role: roleRaw, orgName, region, phone } = req.body as Record<string, unknown>;
   if (!email || typeof email !== "string" || !email.includes("@")) {
     return res.status(400).json({ error: "Valid email is required." });
   }
@@ -46,11 +46,23 @@ router.post("/auth/signup", async (req, res) => {
   }
 
   const passwordHash = hashPassword(password);
+
+  const now = new Date();
+  const trialExpiresAt = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+
   const [user] = await db.insert(usersTable).values({
     email: email.toLowerCase(),
     name,
     role,
     passwordHash,
+    subscriptionTier: "free",
+    subscriptionStatus: "trial",
+    trialStartedAt: now,
+    trialExpiresAt,
+    trialUsed: true,
+    orgName: typeof orgName === "string" && orgName.trim() ? orgName.trim() : null,
+    region: typeof region === "string" && region.trim() ? region.trim() : null,
+    phone: typeof phone === "string" && phone.trim() ? phone.trim() : null,
   }).returning({
     id: usersTable.id,
     email: usersTable.email,
@@ -58,10 +70,11 @@ router.post("/auth/signup", async (req, res) => {
     role: usersTable.role,
     subscriptionTier: usersTable.subscriptionTier,
     subscriptionStatus: usersTable.subscriptionStatus,
+    trialExpiresAt: usersTable.trialExpiresAt,
     createdAt: usersTable.createdAt,
   });
 
-  req.log.info({ userId: user.id }, "User created");
+  req.log.info({ userId: user.id }, "User created with 14-day trial");
   return res.status(201).json({
     id: user.id,
     email: user.email,
@@ -69,6 +82,7 @@ router.post("/auth/signup", async (req, res) => {
     role: user.role,
     subscriptionTier: user.subscriptionTier,
     subscriptionStatus: user.subscriptionStatus,
+    trialExpiresAt: user.trialExpiresAt?.toISOString() ?? null,
   });
 });
 
@@ -84,15 +98,62 @@ router.post("/auth/login", async (req, res) => {
     return res.status(401).json({ error: "Invalid email or password." });
   }
 
+  const now = new Date();
+  let finalStatus = user.subscriptionStatus;
+  let finalTier = user.subscriptionTier;
+
+  if (user.subscriptionStatus === "trial" && user.trialExpiresAt && user.trialExpiresAt < now) {
+    await db
+      .update(usersTable)
+      .set({ subscriptionStatus: "active", subscriptionTier: "free" })
+      .where(eq(usersTable.id, user.id));
+    finalStatus = "active";
+    finalTier = "free";
+  }
+
+  const inTrial = finalStatus === "trial" && !!user.trialExpiresAt && user.trialExpiresAt > now;
+  const trialDaysLeft = inTrial && user.trialExpiresAt
+    ? Math.max(0, Math.ceil((user.trialExpiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
   req.log.info({ userId: user.id }, "User logged in");
   return res.json({
     id: user.id,
     email: user.email,
     name: user.name,
     role: isValidRole(roleRaw) ? role : user.role,
-    subscriptionTier: user.subscriptionTier,
-    subscriptionStatus: user.subscriptionStatus,
+    subscriptionTier: finalTier,
+    subscriptionStatus: finalStatus,
+    trialExpiresAt: user.trialExpiresAt?.toISOString() ?? null,
+    inTrial,
+    trialDaysLeft,
   });
+});
+
+// PATCH /auth/profile — update user profile fields
+router.patch("/auth/profile", async (req, res) => {
+  const auth = req.headers.authorization;
+  const userId = typeof auth === "string" && auth.startsWith("Bearer ") ? auth.slice(7).trim() : null;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  const { name, orgName, region, phone } = req.body as Record<string, unknown>;
+
+  const updates: Partial<{ name: string; orgName: string | null; region: string | null; phone: string | null }> = {};
+  if (typeof name === "string" && name.trim()) updates.name = name.trim();
+  if (typeof orgName === "string") updates.orgName = orgName.trim() || null;
+  if (typeof region === "string") updates.region = region.trim() || null;
+  if (typeof phone === "string") updates.phone = phone.trim() || null;
+
+  if (!Object.keys(updates).length) return res.status(400).json({ error: "No valid fields to update" });
+
+  const [updated] = await db
+    .update(usersTable)
+    .set(updates)
+    .where(eq(usersTable.id, userId))
+    .returning({ id: usersTable.id, name: usersTable.name, orgName: usersTable.orgName, region: usersTable.region, phone: usersTable.phone });
+
+  if (!updated) return res.status(404).json({ error: "User not found" });
+  return res.json({ success: true, ...updated });
 });
 
 export default router;
