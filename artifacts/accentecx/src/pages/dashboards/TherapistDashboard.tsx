@@ -5,8 +5,10 @@ import {
   MessageSquare, LayoutDashboard, CheckCircle,
   Clock, AlertTriangle, Plus, BarChart3, FileText,
   Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap,
-  Check, Copy, BadgeCheck, AlertCircle, Camera, Ticket, Video
+  Check, Copy, BadgeCheck, AlertCircle, Camera, Ticket, Video, Target
 } from "lucide-react";
+import { ClassManagementTab } from "@/components/school/ClassManagementTab";
+import { InterventionTrackingTab } from "@/components/school/InterventionTrackingTab";
 import GamesAssessment from "@/pages/GamesAssessment";
 import { CollaborationPanel } from "@/components/CollaborationPanel";
 import VideoProtocol from "@/components/screening/VideoProtocol";
@@ -29,10 +31,12 @@ import { useAuth } from "@/contexts/AuthContext";
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "students", label: "Student Roster", icon: Users },
+  { id: "classes", label: "Classes", icon: BookOpen },
   { id: "screening-forms", label: "Screening Forms", icon: ClipboardList },
   { id: "camera-observation", label: "Camera Observation", icon: Camera },
   { id: "games", label: "Games Assessment", icon: Gamepad2 },
   { id: "sped-iep", label: "SPED / IEP", icon: GraduationCap },
+  { id: "interventions", label: "Interventions", icon: Target },
   { id: "referrals", label: "Referrals", icon: Link },
   { id: "parent-portal", label: "Parent Portal", icon: MessageSquare },
   { id: "reports", label: "DepEd Reports", icon: FileText },
@@ -1381,7 +1385,9 @@ export default function TherapistDashboard() {
     "screening-forms": <ScreeningFormsTab />,
     "camera-observation": <CameraObservationTab />,
     "games": <GamesAssessment />,
+    "classes": <ClassManagementTab />,
     "sped-iep": <SpedIepTab />,
+    "interventions": <InterventionTrackingTab />,
     "referrals": <ReferralsTab />,
     "parent-portal": <ParentPortalTab />,
     "reports": <DepEdReportsTab />,

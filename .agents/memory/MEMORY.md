@@ -1,3 +1,5 @@
 - [NEOBRAIN dashboard architecture](neobrain-dashboards.md) — 4 roles use different render patterns; Admin/Parent/Doctor use TABS Record, Therapist uses TAB_CONTENT inline
 - [NEOBRAIN API auth pattern](neobrain-api-auth.md) — admin billing routes expect `Authorization: Bearer <userId>` header (not JWT); userId from useAuth()
 - [PH_REGIONS source of truth](ph-regions.md) — all Philippine region/province selects must use PH_REGIONS from @/lib/philippineRegions; never hardcode province lists
+- [Type field corrections](type-field-corrections.md) — TimelineEvent uses `occurredAt` not `createdAt`; Report has no `status`, use `urgencyLevel`; Screening has no `screenedBy` or `notes`; Appointment has no `appointmentType`, use `telehealth` boolean.
+- [Lucide icon gaps](lucide-icon-gaps.md) — `FilePdf` does not exist in lucide-react; use `FileText`/`FileJson`/`Database` for document type icons.

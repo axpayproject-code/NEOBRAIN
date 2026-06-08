@@ -35,6 +35,9 @@ const NAV: NavItem[] = [
   { id: "overview", label: "National Overview", icon: LayoutDashboard },
   { id: "analytics", label: "Population Analytics", icon: BarChart3 },
   { id: "programs", label: "Regional Programs", icon: Globe },
+  { id: "health-programs", label: "Health Programs", icon: Activity },
+  { id: "geo-drilldown", label: "Geographic Drill-down", icon: MapPin },
+  { id: "resource-mapping", label: "Resource Mapping", icon: Building2 },
   { id: "partners", label: "Partner Organizations", icon: Building2 },
   { id: "research", label: "Research Data", icon: FlaskConical },
   { id: "ai-intelligence", label: "Developmental Intelligence", icon: Brain },
@@ -280,6 +283,13 @@ function PopulationAnalyticsTab() {
     </div>
   );
 }
+
+import { HealthProgramsTab } from "@/components/government/HealthProgramsTab";
+import { GeographicDrilldown } from "@/components/government/GeographicDrilldown";
+import { ResourceMappingTab } from "@/components/government/ResourceMappingTab";
+function HealthProgramsTabWrapper() { return <HealthProgramsTab />; }
+function GeoDrilldownWrapper() { return <GeographicDrilldown />; }
+function ResourceMappingWrapper() { return <ResourceMappingTab />; }
 
 type RegionProgram = { name: string; region: string; type: string; beneficiaries: number; status: string; budget: string };
 
@@ -1651,6 +1661,9 @@ const TABS: Record<string, TabComponent> = {
   overview: NationalOverviewTab,
   analytics: PopulationAnalyticsTab,
   programs: RegionalProgramsTab,
+  "health-programs": HealthProgramsTabWrapper,
+  "geo-drilldown": GeoDrilldownWrapper,
+  "resource-mapping": ResourceMappingWrapper,
   partners: PartnerOrganizationsTab,
   research: ResearchDataTab,
   "ai-intelligence": DevelopmentalIntelligenceTab,

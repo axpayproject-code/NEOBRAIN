@@ -8,6 +8,8 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Home from "@/pages/Home";
 import Demo from "@/pages/Demo";
 import Login from "@/pages/Login";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import Onboarding from "@/pages/Onboarding";
 
 // Role-based dashboard pages (aligned to 4 business types)
@@ -67,6 +69,8 @@ function AppRoutes() {
       <Route path="/login">
         {user ? <Redirect to={`/${user.role}`} /> : <Login />}
       </Route>
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/onboarding" component={Onboarding} />
 
       {/* ── Role-based dashboards (4 business types) ── */}

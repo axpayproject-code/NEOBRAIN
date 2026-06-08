@@ -4,9 +4,16 @@ import {
   Users, ClipboardList, Video, Stethoscope, FileText,
   HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2,
   CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck,
-  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap,
-  Check, Copy, BadgeCheck, AlertCircle, Ticket
+  BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap, Brain,
+  Check, Copy, BadgeCheck, AlertCircle, Ticket, NotebookPen, ListChecks
 } from "lucide-react";
+import { PatientIntakeTab } from "@/components/clinic/PatientIntakeTab";
+import { SoapNotesTab } from "@/components/clinic/SoapNotesTab";
+import { QueueManagementTab } from "@/components/clinic/QueueManagementTab";
+import { AITriageTab } from "@/components/clinic/AITriageTab";
+import { EHRExportTab } from "@/components/clinic/EHRExportTab";
+import { AssessmentScoringEngine } from "@/components/AssessmentScoringEngine";
+import { RecommendationEngine } from "@/components/RecommendationEngine";
 import GamesAssessment from "@/pages/GamesAssessment";
 import { CollaborationPanel } from "@/components/CollaborationPanel";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
@@ -35,6 +42,9 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const NAV: NavItem[] = [
   { id: "queue", label: "Patient Queue", icon: Users },
+  { id: "ai-triage", label: "AI Triage", icon: Zap },
+  { id: "intake", label: "Patient Intake", icon: ClipboardList },
+  { id: "soap-notes", label: "SOAP Notes", icon: NotebookPen },
   { id: "appointments", label: "Appointments", icon: CalendarCheck },
   { id: "ai-summaries", label: "AI Summaries", icon: ClipboardList },
   { id: "games", label: "Games Assessment", icon: Gamepad2 },
@@ -45,6 +55,9 @@ const NAV: NavItem[] = [
   { id: "history", label: "Patient History", icon: History },
   { id: "parent-portal", label: "Parent Portal", icon: MessageSquare },
   { id: "collaboration", label: "Collaboration", icon: Ticket },
+  { id: "ehr-export", label: "EHR Export", icon: Download },
+  { id: "assessment", label: "Scoring Engine", icon: BarChart3 },
+  { id: "recommendations", label: "Recommendations", icon: Brain },
   { id: "analytics", label: "Clinic Analytics", icon: BarChart3 },
   { id: "calendar", label: "My Availability", icon: CalendarDays },
   { id: "team", label: "Manage Team", icon: UserPlus },
@@ -1758,7 +1771,10 @@ function DoctorCollaborationTab() {
 
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
-  queue: PatientQueueTab,
+  queue: QueueManagementTab,
+  "ai-triage": AITriageTab,
+  intake: PatientIntakeTab,
+  "soap-notes": SoapNotesTab,
   appointments: AppointmentsTab,
   "ai-summaries": AISummariesTab,
   games: GamesTab,
@@ -1769,6 +1785,9 @@ const TABS: Record<string, TabComponent> = {
   history: PatientHistoryTab,
   "parent-portal": ClinicParentPortalTab,
   collaboration: DoctorCollaborationTab,
+  "ehr-export": EHRExportTab,
+  assessment: AssessmentScoringEngine,
+  recommendations: RecommendationEngine,
   analytics: ClinicAnalyticsTab,
   billing: ClinicBillingTab,
   calendar: DoctorAvailabilityTab,

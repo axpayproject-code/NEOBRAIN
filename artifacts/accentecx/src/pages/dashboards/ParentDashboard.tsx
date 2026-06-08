@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
 import { CollaborationPanel } from "@/components/CollaborationPanel";
+import { BrainGymTab } from "@/components/BrainGymTab";
+import { ChildProfileModal } from "@/components/ChildProfileModal";
 import { getPlanFeatures } from "@/lib/planFeatures";
 import TelehealthCallModal, { type TelehealthAppt } from "@/components/telehealth/TelehealthCallModal";
 import { Button } from "@/components/ui/button";
@@ -28,7 +30,7 @@ import {
   useGetChildDomainScores, useGetChildTimeline,
   useRequestReschedule, getListAppointmentsQueryKey
 } from "@workspace/api-client-react";
-import type { Appointment } from "@workspace/api-client-react";
+import type { Appointment, Child } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { motion } from "framer-motion";
@@ -66,6 +68,7 @@ const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "children", label: "My Children", icon: Users },
   { id: "screening", label: "Screenings", icon: ClipboardList },
+  { id: "brain-gym", label: "Brain Gym", icon: Brain },
   { id: "games", label: "Games Assessment", icon: Gamepad2 },
   { id: "ai-results", label: "AI Results", icon: Brain },
   { id: "video", label: "Video Assessment", icon: Video },
@@ -472,6 +475,7 @@ function ChildrenTab() {
   const { data: children, isLoading } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const currentCount = children?.length ?? 0;
   const maxChildren = features.maxChildren;
+  const [profileChild, setProfileChild] = useState<Child | null>(null);
 
   const handleDeleteChild = async (childId: number) => {
     if (!window.confirm("Delete this child profile? This will also remove all related records.")) return;
@@ -531,11 +535,23 @@ function ChildrenTab() {
                   <p className="text-xs text-muted-foreground line-clamp-2 border-t pt-2">{child.diagnosisNotes}</p>
                 )}
                 <ChildDomainCard childId={child.id} childName={child.fullName.split(" ")[0]} />
+                <Button
+                  size="sm" variant="outline"
+                  className="w-full rounded-xl text-xs gap-1.5 mt-1"
+                  onClick={() => setProfileChild(child)}
+                >
+                  <ChevronRight className="h-3.5 w-3.5" /> View Full Profile
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+      <ChildProfileModal
+        child={profileChild}
+        open={!!profileChild}
+        onClose={() => setProfileChild(null)}
+      />
     </div>
   );
 }
@@ -1558,9 +1574,11 @@ export default function ParentDashboard() {
     <RoleDashboardLayout navItems={nav} activeTab={activeTab} onTabChange={setActiveTab}>
       {activeTab === "overview"
         ? <OverviewTab onNavigate={setActiveTab} />
-        : TabView
-          ? <TabView />
-          : <OverviewTab onNavigate={setActiveTab} />
+        : activeTab === "brain-gym"
+          ? <BrainGymTab children={children ?? []} />
+          : TabView
+            ? <TabView />
+            : <OverviewTab onNavigate={setActiveTab} />
       }
     </RoleDashboardLayout>
   );

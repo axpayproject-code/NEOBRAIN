@@ -240,6 +240,7 @@ export default function Login() {
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="password" className="text-sm">Password</Label>
+                        <a href="/forgot-password" className="text-xs text-primary hover:underline">Forgot password?</a>
                       </div>
                       <Input
                         id="password" name="password" type="password" required placeholder="Your password"

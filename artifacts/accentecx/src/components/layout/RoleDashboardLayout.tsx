@@ -8,6 +8,8 @@ import { getPlanFeatures } from "@/lib/planFeatures";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrialBanner } from "@/components/TrialBanner";
+import { NotificationBell } from "@/components/NotificationBell";
+import { AIChatAssistant } from "@/components/AIChatAssistant";
 
 export interface NavItem {
   id: string;
@@ -117,6 +119,7 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
     : ROLE_COLORS[user?.role ?? "family"];
 
   return (
+    <>
     <div className="flex min-h-[100dvh] w-full">
       <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
 
@@ -211,11 +214,13 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
           <Link href="/">
             <NeoBrainLogo size="xs" variant="sidebar" />
           </Link>
-          <button
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Open menu"
-            className="relative h-9 w-9 rounded-full overflow-hidden"
-          >
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open menu"
+              className="relative h-9 w-9 rounded-full overflow-hidden"
+            >
             {user?.profilePhoto ? (
               <img src={user.profilePhoto} alt="Profile" className="h-9 w-9 object-cover" />
             ) : (
@@ -224,6 +229,7 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
               </div>
             )}
           </button>
+          </div>
         </header>
 
         {/* Scrollable content */}
@@ -374,5 +380,7 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
       </div>
 
     </div>
+    <AIChatAssistant />
+    </>
   );
 }

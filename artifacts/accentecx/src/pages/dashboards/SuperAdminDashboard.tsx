@@ -11,6 +11,7 @@ import {
   Building
 } from "lucide-react";
 import { CollaborationPanel } from "@/components/CollaborationPanel";
+import { FeatureFlagsTab } from "@/components/admin/FeatureFlagsTab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,7 @@ const NAV: NavItem[] = [
   { id: "security",      label: "Security & Audit",    icon: Shield },
   { id: "billing",       label: "Billing Control",     icon: CreditCard },
   { id: "user-mgmt",    label: "User Management",     icon: UserCheck },
+  { id: "feature-flags", label: "Feature Flags",        icon: Key },
   { id: "collaboration", label: "Collaboration",        icon: Ticket },
 ];
 
@@ -1551,6 +1553,7 @@ const TABS: Record<string, TabComponent> = {
   security:     SecurityTab,
   billing:      SABillingControlTab,
   "user-mgmt":  SAUserManagementTab,
+  "feature-flags": FeatureFlagsTab,
   collaboration: SACollaborationTab,
 };
 
