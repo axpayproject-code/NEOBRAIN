@@ -1386,21 +1386,30 @@ const USER_ROLE_GROUPS: Record<string, string> = {
 function useBillingUsers(adminId: string | undefined) {
   const [users, setUsers] = useState<BillingUser[]>([]);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const refetch = useCallback(async () => {
     if (!adminId) return;
     setLoading(true);
+    setFetchError(null);
     try {
       const res = await fetch(`${ADMIN_BASE}/api/billing/users`, { headers: { Authorization: `Bearer ${adminId}` } });
-      if (res.ok) setUsers(await res.json() as BillingUser[]);
+      if (res.ok) {
+        setUsers(await res.json() as BillingUser[]);
+      } else {
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        setFetchError(body.error ?? `Server error (${res.status})`);
+      }
+    } catch {
+      setFetchError("Network error — check your connection");
     } finally { setLoading(false); }
   }, [adminId]);
   useEffect(() => { void refetch(); }, [refetch]);
-  return { users, loading, refetch };
+  return { users, loading, fetchError, refetch };
 }
 
 function BillingControlTab() {
   const { user } = useAuth();
-  const { users, loading, refetch } = useBillingUsers(user?.id);
+  const { users, loading, fetchError, refetch } = useBillingUsers(user?.id);
   const [actioning, setActioning] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<BillingUser | null>(null);
 
@@ -1457,6 +1466,16 @@ function BillingControlTab() {
           </CardContent></Card>
         ))}
       </div>
+      {fetchError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-red-700">Access Denied</p>
+            <p className="text-xs text-red-600 mt-0.5">{fetchError}</p>
+            <p className="text-xs text-red-500 mt-1">Your account must have <strong>Government Admin</strong> or <strong>Super Admin</strong> role to manage billing.</p>
+          </div>
+        </div>
+      )}
       {loading && <div className="space-y-3">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>}
       {GROUPS.map(g => {
         const gu = grouped[g.key] ?? [];
@@ -1538,7 +1557,7 @@ function BillingControlTab() {
 
 function UserManagementTab() {
   const { user } = useAuth();
-  const { users, loading, refetch } = useBillingUsers(user?.id);
+  const { users, loading, fetchError, refetch } = useBillingUsers(user?.id);
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
 

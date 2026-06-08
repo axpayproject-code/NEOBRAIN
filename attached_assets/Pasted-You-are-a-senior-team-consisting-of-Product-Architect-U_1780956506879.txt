@@ -1,0 +1,602 @@
+You are a senior team consisting of:
+
+* Product Architect
+* UX/UI Designer
+* Pediatric Development Platform Architect
+* SaaS Architect
+* Enterprise Software Architect
+* AI Systems Architect
+* Full Stack Engineer
+* Security Engineer
+* Data Privacy Officer
+* DevOps Engineer
+
+Your task is to design and build a production-scale SaaS platform called NEOBRAIN.
+
+⸻
+
+Product Overview
+
+NEOBRAIN is a multi-tenant developmental intelligence platform serving four customer types:
+
+1. Families (B2C Subscription)
+
+Parents track children’s developmental progress, complete assessments, receive AI-generated insights, manage therapy plans, communicate with specialists, and coordinate care.
+
+2. Clinics (Clinic SaaS)
+
+Doctors, psychologists, therapists, and staff manage patients, review developmental timelines, conduct assessments, triage cases, monitor therapy, and generate reports.
+
+3. Schools (School License)
+
+Teachers, SPED coordinators, principals, and administrators monitor student development, submit observations, manage interventions, coordinate with parents, and generate school reports.
+
+4. Government (LGU / Public Health)
+
+Barangays, RHUs, LGUs, provincial offices, and national agencies monitor anonymized population-level developmental trends and resource planning.
+
+⸻
+
+PRIMARY DESIGN PRINCIPLES
+
+The platform must:
+
+* Use one unified developmental record per child.
+* Maintain a longitudinal timeline.
+* Be consent-driven.
+* Be non-diagnostic.
+* Support role-based access.
+* Support web and mobile responsive interfaces.
+* Support multi-tenancy.
+* Support future AI integrations.
+
+⸻
+
+REQUIRED OUTPUTS
+
+Before coding, generate:
+
+Product Architecture
+
+Complete system architecture.
+
+Database Design
+
+Full database schema.
+
+User Roles
+
+Complete RBAC model.
+
+Screen Inventory
+
+Every screen.
+
+Navigation Structure
+
+All menus.
+
+API Specifications
+
+REST APIs.
+
+Event System
+
+All events.
+
+Notification System
+
+All triggers.
+
+Subscription Logic
+
+All plans.
+
+⸻
+
+USER ROLES
+
+Parent
+
+Guardian
+
+Child
+
+Teacher
+
+SPED Coordinator
+
+School Administrator
+
+Principal
+
+Doctor
+
+Psychologist
+
+Therapist
+
+Clinic Staff
+
+Clinic Administrator
+
+Barangay Health Worker
+
+RHU Staff
+
+LGU Administrator
+
+Government Analyst
+
+Super Admin
+
+⸻
+
+FAMILY PORTAL
+
+Design every screen and action.
+
+⸻
+
+Authentication
+
+Login
+
+Register
+
+OTP
+
+Forgot Password
+
+Two-Factor Authentication
+
+⸻
+
+Family Dashboard
+
+Widgets:
+
+* Child cards
+* Daily tasks
+* Progress summary
+* Notifications
+* Appointments
+* Messages
+* Reports
+
+⸻
+
+Child Profile
+
+Tabs:
+
+* Overview
+* Timeline
+* Assessments
+* Milestones
+* Reports
+* School
+* Therapy
+* Clinics
+* Documents
+* Videos
+* Settings
+
+⸻
+
+Assessments
+
+Age-adaptive assessments.
+
+Support:
+
+* 0–2
+* 3–5
+* 6–12
+* 13–17
+
+Assessment types:
+
+* Questionnaires
+* Interactive games
+* Parent forms
+* Development checklists
+
+⸻
+
+Brain Gym
+
+Activities
+
+Games
+
+Challenges
+
+Rewards
+
+Badges
+
+Progress
+
+⸻
+
+Milestone Tracking
+
+Age-based milestones.
+
+Progress indicators.
+
+Achievement history.
+
+⸻
+
+AI Insights
+
+Development summaries.
+
+Trend analysis.
+
+Recommendations.
+
+Risk indicators.
+
+Action plans.
+
+⸻
+
+Video Analysis
+
+Upload
+
+Processing
+
+Review
+
+Historical comparison
+
+⸻
+
+Therapy Tracking
+
+Goals
+
+Tasks
+
+Sessions
+
+Progress
+
+Notes
+
+⸻
+
+Specialist Messaging
+
+Chat
+
+Attachments
+
+Notifications
+
+History
+
+⸻
+
+Appointments
+
+Calendar
+
+Booking
+
+Reminders
+
+Attendance
+
+⸻
+
+Reports
+
+Weekly
+
+Monthly
+
+Quarterly
+
+Annual
+
+Export PDF
+
+⸻
+
+SCHOOL PORTAL
+
+Teacher Dashboard
+
+Student Dashboard
+
+Observation Forms
+
+Class Management
+
+Intervention Tracking
+
+SPED Module
+
+Parent Communication
+
+Analytics
+
+Reports
+
+Multi-campus Support
+
+⸻
+
+CLINIC PORTAL
+
+Patient Intake
+
+Patient Timeline
+
+AI Triage
+
+Queue Management
+
+Appointments
+
+SOAP Notes
+
+Therapy Plans
+
+Video Review
+
+Reporting
+
+Telehealth
+
+EHR Export
+
+⸻
+
+GOVERNMENT PORTAL
+
+Barangay Dashboard
+
+Municipal Dashboard
+
+Provincial Dashboard
+
+National Dashboard
+
+Population Analytics
+
+Resource Mapping
+
+Program Monitoring
+
+Forecasting
+
+Offline Data Collection
+
+⸻
+
+CHILD TIMELINE ENGINE
+
+Every activity creates timeline events.
+
+Examples:
+
+* Assessment completed
+* Teacher observation submitted
+* Therapy goal updated
+* Video uploaded
+* Report generated
+* Appointment completed
+
+Timeline must support filtering.
+
+⸻
+
+CONSENT MANAGEMENT SYSTEM
+
+Consent categories:
+
+* Platform use
+* School sharing
+* Clinic sharing
+* Research participation
+* Government aggregation
+
+Track:
+
+* Consent version
+* Timestamp
+* Parent approval
+* Revocation
+
+⸻
+
+SUBSCRIPTIONS
+
+Free
+
+Starter Care
+
+Care Plus
+
+Family Pro
+
+Implement entitlement system.
+
+⸻
+
+CLINIC TIERS
+
+Solo
+
+Small Clinic
+
+Multi-Doctor
+
+Hospital
+
+⸻
+
+SCHOOL TIERS
+
+Small
+
+Medium
+
+Large
+
+Network
+
+⸻
+
+GOVERNMENT CONTRACTS
+
+Pilot
+
+Province
+
+National
+
+⸻
+
+NOTIFICATION SYSTEM
+
+Daily
+
+Weekly
+
+Monthly
+
+Event-driven
+
+Push
+
+Email
+
+SMS
+
+In-app
+
+⸻
+
+ADMIN PANEL
+
+User management
+
+Subscription management
+
+Content management
+
+Assessment management
+
+School management
+
+Clinic management
+
+Government management
+
+Analytics
+
+Audit logs
+
+Feature flags
+
+System settings
+
+⸻
+
+SECURITY
+
+RBAC
+
+Audit logs
+
+Encryption
+
+Consent enforcement
+
+Session management
+
+Password reset
+
+Account recovery
+
+Rate limiting
+
+Data privacy compliance
+
+⸻
+
+AI MODULES
+
+Assessment Scoring Engine
+
+Recommendation Engine
+
+Video Analysis Pipeline
+
+Trend Analysis Engine
+
+Parent Assistant Chat
+
+School Assistant
+
+Clinical Assistant
+
+Government Analytics Assistant
+
+All AI outputs must clearly state:
+
+“Informational only. Not a diagnosis.”
+
+⸻
+
+TECHNICAL REQUIREMENTS
+
+Generate:
+
+* Complete folder structure
+* Database migrations
+* Backend architecture
+* Frontend architecture
+* API contracts
+* State management
+* Authentication flow
+* Deployment architecture
+* Monitoring architecture
+
+Use:
+
+* React / Next.js frontend
+* TypeScript
+* PostgreSQL
+* Prisma ORM
+* Node.js backend
+* Role-based permissions
+* Multi-tenant architecture
+
+⸻
+
+FINAL DELIVERABLE
+
+Generate:
+
+1. Complete architecture.
+2. Complete database schema.
+3. Complete API specification.
+4. Complete screen inventory.
+5. Wireframes for every screen.
+6. Navigation flows.
+7. User journeys.
+8. Backend implementation plan.
+9. Frontend implementation plan.
+10. Production deployment plan.
+
+Do not skip any screens, buttons, forms, permissions, workflows, edge cases, onboarding flows, subscription logic, consent logic, notifications, reporting, timeline functionality, school workflows, clinic workflows, or government workflows.
+
+Design the platform as a mature enterprise-grade SaaS product capable of serving families, clinics, schools, and government agencies from a single codebase and unified developmental record system.
