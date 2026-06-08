@@ -12,6 +12,7 @@ import { SoapNotesTab } from "@/components/clinic/SoapNotesTab";
 import { QueueManagementTab } from "@/components/clinic/QueueManagementTab";
 import { AITriageTab } from "@/components/clinic/AITriageTab";
 import { EHRExportTab } from "@/components/clinic/EHRExportTab";
+import { VideoAnalysisTab } from "@/components/clinic/VideoAnalysisTab";
 import { AssessmentScoringEngine } from "@/components/AssessmentScoringEngine";
 import { RecommendationEngine } from "@/components/RecommendationEngine";
 import GamesAssessment from "@/pages/GamesAssessment";
@@ -1778,7 +1779,7 @@ const TABS: Record<string, TabComponent> = {
   appointments: AppointmentsTab,
   "ai-summaries": AISummariesTab,
   games: GamesTab,
-  "video-review": VideoReviewTab,
+  "video-review": VideoAnalysisTab,
   consultation: ConsultationRoomTab,
   diagnosis: DiagnosisNotesTab,
   "therapy-planning": TherapyPlanningTab,
