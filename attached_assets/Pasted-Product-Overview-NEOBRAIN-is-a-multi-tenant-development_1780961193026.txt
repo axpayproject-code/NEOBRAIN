@@ -1,0 +1,290 @@
+Product Overview
+
+NEOBRAIN is a multi-tenant developmental intelligence platform serving four customer types:
+
+1. Families (B2C Subscription)
+
+Parents track children’s developmental progress, complete assessments, receive AI-generated insights, manage therapy plans, communicate with specialists, and coordinate care.
+
+2. Clinics (Clinic SaaS)
+
+Doctors, psychologists, therapists, and staff manage patients, review developmental timelines, conduct assessments, triage cases, monitor therapy, and generate reports.
+
+3. Schools (School License)
+
+Teachers, SPED coordinators, principals, and administrators monitor student development, submit observations, manage interventions, coordinate with parents, and generate school reports.
+
+4. Government (LGU / Public Health)
+
+Barangays, RHUs, LGUs, provincial offices, and national agencies monitor anonymized population-level developmental trends and resource planning.
+
+⸻
+
+PRIMARY DESIGN PRINCIPLES
+
+The platform must:
+
+* Use one unified developmental record per child.
+* Maintain a longitudinal timeline.
+* Be consent-driven.
+* Be non-diagnostic.
+* Support role-based access.
+* Support web and mobile responsive interfaces.
+* Support multi-tenancy.
+* Support future AI integrations.
+
+⸻
+
+REQUIRED OUTPUTS
+
+Before coding, generate:
+
+Product Architecture
+
+Complete system architecture.
+
+Database Design
+
+Full database schema.
+
+User Roles
+
+Complete RBAC model.
+
+Screen Inventory
+
+Every screen.
+
+Navigation Structure
+
+All menus.
+
+API Specifications
+
+REST APIs.
+
+Event System
+
+All events.
+
+Notification System
+
+All triggers.
+
+Subscription Logic
+
+All plans.
+
+⸻
+
+USER ROLES
+
+Parent
+
+Guardian
+
+Child
+
+Teacher
+
+SPED Coordinator
+
+School Administrator
+
+Principal
+
+Doctor
+
+Psychologist
+
+Therapist
+
+Clinic Staff
+
+Clinic Administrator
+
+Barangay Health Worker
+
+RHU Staff
+
+LGU Administrator
+
+Government Analyst
+
+Super Admin
+
+⸻
+
+FAMILY PORTAL
+
+Design every screen and action.
+
+⸻
+
+Authentication
+
+Login
+
+Register
+
+OTP
+
+Forgot Password
+
+Two-Factor Authentication
+
+⸻
+
+Family Dashboard
+
+Widgets:
+
+* Child cards
+* Daily tasks
+* Progress summary
+* Notifications
+* Appointments
+* Messages
+* Reports
+
+⸻
+
+Child Profile
+
+Tabs:
+
+* Overview
+* Timeline
+* Assessments
+* Milestones
+* Reports
+* School
+* Therapy
+* Clinics
+* Documents
+* Videos
+* Settings
+
+⸻
+
+Assessments
+
+Age-adaptive assessments.
+
+Support:
+
+* 0–2
+* 3–5
+* 6–12
+* 13–17
+
+Assessment types:
+
+* Questionnaires
+* Interactive games
+* Parent forms
+* Development checklists
+
+⸻
+
+Brain Gym
+
+Activities
+
+Games
+
+Challenges
+
+Rewards
+
+Badges
+
+Progress
+
+⸻
+
+Milestone Tracking
+
+Age-based milestones.
+
+Progress indicators.
+
+Achievement history.
+
+⸻
+
+AI Insights
+
+Development summaries.
+
+Trend analysis.
+
+Recommendations.
+
+Risk indicators.
+
+Action plans.
+
+⸻
+
+Video Analysis
+
+Upload
+
+Processing
+
+Review
+
+Historical comparison
+
+⸻
+
+Therapy Tracking
+
+Goals
+
+Tasks
+
+Sessions
+
+Progress
+
+Notes
+
+⸻
+
+Specialist Messaging
+
+Chat
+
+Attachments
+
+Notifications
+
+History
+
+⸻
+
+Appointments
+
+Calendar
+
+Booking
+
+Reminders
+
+Attendance
+
+⸻
+
+Reports
+
+Weekly
+
+Monthly
+
+Quarterly
+
+Annual
+
+Export PDF

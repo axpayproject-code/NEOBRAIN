@@ -13,6 +13,7 @@ import { QueueManagementTab } from "@/components/clinic/QueueManagementTab";
 import { AITriageTab } from "@/components/clinic/AITriageTab";
 import { EHRExportTab } from "@/components/clinic/EHRExportTab";
 import { VideoAnalysisTab } from "@/components/clinic/VideoAnalysisTab";
+import { SpecialistMessagingTab } from "@/components/messaging/SpecialistMessagingTab";
 import { AssessmentScoringEngine } from "@/components/AssessmentScoringEngine";
 import { RecommendationEngine } from "@/components/RecommendationEngine";
 import GamesAssessment from "@/pages/GamesAssessment";
@@ -1118,101 +1119,6 @@ function AppointmentsTab() {
   );
 }
 
-type ParentMessage = { from: string; childName: string; body: string; date: string; read: boolean; type: string };
-
-function ClinicParentPortalTab() {
-  const { data: children } = useListChildren({ query: { queryKey: ["children-portal"] } });
-  const [messages, setMessages] = useState<ParentMessage[]>([
-    { from: "Maria Santos", childName: "Aaliyah Santos", body: "We noticed Aaliyah has been having difficulty sleeping. Could this be related to the behavioral findings from last week's session?", date: "May 28", read: false, type: "question" },
-    { from: "Rodrigo Cruz", childName: "Bienvenido Cruz", body: "Thank you for the therapy plan — we've started the exercises at home. His focus does seem better in the evenings.", date: "May 26", read: true, type: "update" },
-    { from: "Elena Reyes", childName: "Carmela Reyes", body: "Requesting a reschedule for June 3 — we have a school event. Can we move to June 5 afternoon instead?", date: "May 25", read: false, type: "reschedule" },
-  ]);
-  const [selected, setSelected] = useState<ParentMessage | null>(null);
-  const [reply, setReply] = useState("");
-  const [sending, setSending] = useState(false);
-
-  const TYPE_COLORS: Record<string, string> = {
-    question: "bg-blue-100 text-blue-800",
-    update: "bg-green-100 text-green-800",
-    reschedule: "bg-orange-100 text-orange-800",
-    concern: "bg-red-100 text-red-800",
-  };
-
-  const handleSend = async () => {
-    if (!reply.trim() || !selected) return;
-    setSending(true);
-    await new Promise(r => setTimeout(r, 600));
-    setMessages(ms => ms.map(m => m === selected ? { ...m, read: true } : m));
-    setSending(false);
-    setReply("");
-    setSelected(null);
-  };
-
-  const unread = messages.filter(m => !m.read).length;
-
-  return (
-    <div className="p-6 lg:p-8 space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold">Parent Portal</h1>
-        <p className="text-sm text-muted-foreground">
-          Direct communication with families — {unread > 0 ? `${unread} unread message${unread > 1 ? "s" : ""}` : "all messages read"}
-        </p>
-      </div>
-
-      <div className="grid lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-2 space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Messages from Families</p>
-          {messages.map((m, i) => (
-            <button
-              key={i}
-              onClick={() => { setSelected(m); setReply(""); }}
-              className={`w-full text-left rounded-xl border p-4 transition-colors ${selected === m ? "bg-primary/5 border-primary/30" : "bg-card hover:bg-muted/30"}`}
-              data-testid={`portal-msg-${i}`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold text-sm">{m.from}</span>
-                {!m.read && <span className="flex h-2 w-2 rounded-full bg-primary shrink-0" />}
-                <Badge className={`text-xs ml-auto ${TYPE_COLORS[m.type] ?? "bg-muted"}`}>{m.type}</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">Re: {m.childName} · {m.date}</p>
-              <p className="text-xs text-muted-foreground truncate mt-1">{m.body}</p>
-            </button>
-          ))}
-        </div>
-
-        <div className="lg:col-span-3">
-          {selected ? (
-            <div className="rounded-xl border bg-card p-6 space-y-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold">{selected.from}</span>
-                  <Badge className={`text-xs ${TYPE_COLORS[selected.type] ?? "bg-muted"}`}>{selected.type}</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">Re: {selected.childName} · {selected.date}</p>
-              </div>
-              <div className="rounded-lg bg-muted/30 border p-4 text-sm text-foreground leading-relaxed">
-                {selected.body}
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold">Clinical Response to {selected.from}</Label>
-                <Textarea rows={4} value={reply} onChange={e => setReply(e.target.value)} placeholder="Type your clinical response. This will be sent directly to the family's app..." data-testid="input-portal-reply" />
-                <Button className="rounded-full gap-2" onClick={handleSend} disabled={sending || !reply.trim()} data-testid="button-portal-send">
-                  <Send className="h-4 w-4" />
-                  {sending ? "Sending..." : "Send to Family"}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-border h-full min-h-[200px] flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">Select a message to respond to a family</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function ClinicAnalyticsTab() {
   const { data: children } = useListChildren({ query: { queryKey: ["children-clinic-analytics"] } });
   const { data: appointments } = useListAppointments({}, { query: { queryKey: ["appts-clinic-analytics"] } });
@@ -1784,7 +1690,7 @@ const TABS: Record<string, TabComponent> = {
   diagnosis: DiagnosisNotesTab,
   "therapy-planning": TherapyPlanningTab,
   history: PatientHistoryTab,
-  "parent-portal": ClinicParentPortalTab,
+  "parent-portal": () => <SpecialistMessagingTab role="doctor" />,
   collaboration: DoctorCollaborationTab,
   "ehr-export": EHRExportTab,
   assessment: AssessmentScoringEngine,

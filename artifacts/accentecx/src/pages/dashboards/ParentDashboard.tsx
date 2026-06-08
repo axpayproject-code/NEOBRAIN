@@ -4,9 +4,10 @@ import {
   LayoutDashboard, Users, ClipboardList, Brain, Calendar,
   HeartPulse, FileText, Settings, Plus, ChevronRight,
   AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star, CreditCard,
-  Trash2, Download, Pencil, MessageSquare, Heart, BookOpen, ThumbsUp, Gamepad2, Ticket
+  Trash2, Download, Pencil, MessageSquare, Heart, BookOpen, ThumbsUp, Gamepad2, Ticket, Mail
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
+import { SpecialistMessagingTab } from "@/components/messaging/SpecialistMessagingTab";
 import { CollaborationPanel } from "@/components/CollaborationPanel";
 import { BrainGymTab } from "@/components/BrainGymTab";
 import { ChildProfileModal } from "@/components/ChildProfileModal";
@@ -75,6 +76,7 @@ const NAV: NavItem[] = [
   { id: "appointments", label: "Appointments", icon: Calendar },
   { id: "therapy", label: "Therapy Tracking", icon: HeartPulse },
   { id: "reports", label: "Reports", icon: FileText },
+  { id: "messages", label: "Messages", icon: Mail },
   { id: "community", label: "Community", icon: MessageSquare },
   { id: "collaboration", label: "Collaboration", icon: Ticket },
   { id: "billing", label: "Billing", icon: CreditCard },
@@ -1343,19 +1345,46 @@ function VideoTab() {
   );
 }
 
-type CommunityPost = { id: number; author: string; avatar: string; title: string; body: string; category: string; likes: number; replies: number; time: string; liked: boolean };
+type CommunityPost = { id: number; authorName: string; title: string; body: string; category: string; likes: number; replyCount: number; createdAt: string; liked: boolean };
+
+function timeAgo(iso: string) {
+  const d = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(d / 60000);
+  if (m < 1) return "Just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+const SEED_POSTS: CommunityPost[] = [
+  { id: 1, authorName: "Maria S.", title: "Speech delay at 2.5 years — when did your child start catching up?", body: "Our daughter was flagged for a speech delay at her 2-year screening. We've started speech therapy but I'm wondering about other families' timelines. Any encouragement helps!", category: "Speech & Language", likes: 24, replyCount: 11, createdAt: new Date(Date.now() - 2 * 60 * 60000).toISOString(), liked: false },
+  { id: 2, authorName: "Rodrigo C.", title: "Tip: Visual schedule cards made a huge difference for us", body: "We printed simple picture cards for our son's morning routine — eat, brush, dress, bag. After 2 weeks, he went from daily meltdowns to calm transitions. Sharing because it cost ₱0 to try!", category: "Parent Tips", likes: 41, replyCount: 8, createdAt: new Date(Date.now() - 5 * 60 * 60000).toISOString(), liked: false },
+  { id: 3, authorName: "Ana T.", title: "Sensory processing — how do you handle supermarket trips?", body: "Our 4-year-old has sensory sensitivities and grocery shopping is a nightmare. We've tried noise-canceling headphones but he keeps pulling them off. What's worked for your family?", category: "Sensory", likes: 17, replyCount: 14, createdAt: new Date(Date.now() - 24 * 60 * 60000).toISOString(), liked: false },
+  { id: 4, authorName: "Jun M.", title: "NEOBRAIN AI report helped us get an earlier clinic slot", body: "Sharing this because it might help others — I showed the AI risk summary to our pediatrician and she prioritized our referral. The report was well-organized and the doctor took it seriously.", category: "Platform Tips", likes: 33, replyCount: 5, createdAt: new Date(Date.now() - 48 * 60 * 60000).toISOString(), liked: false },
+];
 
 function CommunityTab() {
-  const [posts, setPosts] = useState<CommunityPost[]>([
-    { id: 1, author: "Maria S.", avatar: "M", title: "Speech delay at 2.5 years — when did your child start catching up?", body: "Our daughter was flagged for a speech delay at her 2-year screening. We've started speech therapy but I'm wondering about other families' timelines. Any encouragement helps!", category: "Speech & Language", likes: 24, replies: 11, time: "2 hrs ago", liked: false },
-    { id: 2, author: "Rodrigo C.", avatar: "R", title: "Tip: Visual schedule cards made a huge difference for us", body: "We printed simple picture cards for our son's morning routine — eat, brush, dress, bag. After 2 weeks, he went from daily meltdowns to calm transitions. Sharing because it cost ₱0 to try!", category: "Parent Tips", likes: 41, replies: 8, time: "5 hrs ago", liked: false },
-    { id: 3, author: "Ana T.", avatar: "A", title: "Sensory processing — how do you handle supermarket trips?", body: "Our 4-year-old has sensory sensitivities and grocery shopping is a nightmare. We've tried noise-canceling headphones but he keeps pulling them off. What's worked for your family?", category: "Sensory", likes: 17, replies: 14, time: "1 day ago", liked: false },
-    { id: 4, author: "Jun M.", avatar: "J", title: "NEOBRAIN AI report helped us get an earlier clinic slot", body: "Sharing this because it might help others — I showed the AI risk summary to our pediatrician and she prioritized our referral. The report was well-organized and the doctor took it seriously.", category: "Platform Tips", likes: 33, replies: 5, time: "2 days ago", liked: false },
-  ]);
+  const { user } = useAuth();
+  const [posts, setPosts] = useState<CommunityPost[]>(SEED_POSTS);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  void loadingPosts;
 
   const [newPost, setNewPost] = useState({ title: "", body: "", category: "General" });
   const [composing, setComposing] = useState(false);
   const [posting, setPosting] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/community/posts")
+      .then(r => r.ok ? r.json() : null)
+      .then((data: Array<{ id: number; authorName: string; title: string; body: string; category: string; likes: number; replyCount: number; createdAt: string }> | null) => {
+        if (data && Array.isArray(data) && data.length > 0) {
+          setPosts(data.map(p => ({ ...p, liked: false })));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingPosts(false));
+  }, []);
 
   const CATEGORIES = ["General", "Speech & Language", "Sensory", "Behavioral", "OT", "Parent Tips", "Platform Tips", "School Support"];
 
@@ -1371,20 +1400,36 @@ function CommunityTab() {
   };
 
   const handlePost = async () => {
-    if (!newPost.title.trim() || !newPost.body.trim()) return;
+    if (!newPost.title.trim() || !newPost.body.trim() || !user) return;
     setPosting(true);
-    await new Promise(r => setTimeout(r, 600));
-    setPosts(p => [{
-      id: Date.now(), author: "You", avatar: "Y", title: newPost.title, body: newPost.body,
-      category: newPost.category, likes: 0, replies: 0, time: "Just now", liked: false,
-    }, ...p]);
+    try {
+      const res = await fetch("/api/community/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.id}` },
+        body: JSON.stringify({ title: newPost.title, body: newPost.body, category: newPost.category }),
+      });
+      if (res.ok) {
+        const created: { id: number; authorName: string; title: string; body: string; category: string; likes: number; replyCount: number; createdAt: string } = await res.json();
+        setPosts(p => [{ ...created, liked: false }, ...p]);
+      }
+    } catch {}
     setPosting(false);
     setComposing(false);
     setNewPost({ title: "", body: "", category: "General" });
   };
 
-  const handleLike = (id: number) => {
-    setPosts(ps => ps.map(p => p.id === id ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p));
+  const handleLike = async (id: number) => {
+    const post = posts.find(p => p.id === id);
+    if (!post) return;
+    const increment = !post.liked;
+    setPosts(ps => ps.map(p => p.id === id ? { ...p, liked: increment, likes: increment ? p.likes + 1 : p.likes - 1 } : p));
+    try {
+      await fetch(`/api/community/posts/${id}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ increment }),
+      });
+    } catch {}
   };
 
   const RESOURCES = [
@@ -1445,13 +1490,13 @@ function CommunityTab() {
             <div key={post.id} className="rounded-xl border bg-card p-5 space-y-3" data-testid={`post-${post.id}`}>
               <div className="flex items-start gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shrink-0">
-                  {post.avatar}
+                  {post.authorName[0] ?? "?"}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                    <span className="font-semibold text-sm">{post.author}</span>
+                    <span className="font-semibold text-sm">{post.authorName}</span>
                     <Badge className={`text-xs ${CAT_COLORS[post.category] ?? "bg-muted"}`}>{post.category}</Badge>
-                    <span className="text-xs text-muted-foreground ml-auto">{post.time}</span>
+                    <span className="text-xs text-muted-foreground ml-auto">{timeAgo(post.createdAt)}</span>
                   </div>
                   <p className="font-medium text-sm leading-snug">{post.title}</p>
                 </div>
@@ -1466,7 +1511,7 @@ function CommunityTab() {
                   <ThumbsUp className="h-3.5 w-3.5" /> {post.likes}
                 </button>
                 <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-                  <MessageSquare className="h-3.5 w-3.5" /> {post.replies} replies
+                  <MessageSquare className="h-3.5 w-3.5" /> {post.replyCount} replies
                 </button>
               </div>
             </div>
@@ -1544,6 +1589,7 @@ const TABS: Record<string, TabComponent> = {
   appointments: AppointmentsTab,
   therapy: TherapyTab,
   reports: ReportsTab,
+  messages: () => <SpecialistMessagingTab role="parent" />,
   community: CommunityTab,
   collaboration: ParentCollaborationTab,
   billing: BillingPage,

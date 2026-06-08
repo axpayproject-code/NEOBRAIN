@@ -34,6 +34,9 @@ import observationsRouter from "./observations";
 import iepPlansRouter from "./iep_plans";
 import interventionsRouter from "./interventions";
 import healthProgramsRouter from "./health_programs";
+import messagingRouter from "./messaging";
+import communityRouter from "./community";
+import otpRouter from "./otp";
 
 const router: IRouter = Router();
 
@@ -72,5 +75,8 @@ router.use(observationsRouter);
 router.use(iepPlansRouter);
 router.use(interventionsRouter);
 router.use(healthProgramsRouter);
+router.use(messagingRouter);
+router.use(communityRouter);
+router.use(otpRouter);
 
 export default router;

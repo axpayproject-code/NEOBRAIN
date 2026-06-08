@@ -53,7 +53,9 @@ const ROLES: {
   },
 ];
 
-type Mode = "signin" | "signup";
+type Mode = "signin" | "signup" | "otp";
+
+interface PendingUser { id: string; email: string; name: string; role: string; tier: string }
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -63,6 +65,11 @@ export default function Login() {
   const [selectedRole, setSelectedRole] = useState<UserRole>("family");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // OTP state
+  const [pendingUser, setPendingUser] = useState<PendingUser | null>(null);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpDevCode, setOtpDevCode] = useState<string | null>(null);
 
   // ── Sign In ──────────────────────────────────────────────────────────────
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -105,11 +112,52 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Signup failed");
-      login({ id: data.id, email: data.email, name: data.name, role: data.role, tier: data.subscriptionTier ?? "free" });
-      setLocation(roleDefaultRoute(data.role));
+
+      // Store pending user and send OTP
+      setPendingUser({ id: data.id, email: data.email, name: data.name, role: data.role, tier: data.subscriptionTier ?? "free" });
+      const otpRes = await fetch("/api/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email, purpose: "verify" }),
+      });
+      if (otpRes.ok) {
+        const otpData = await otpRes.json() as { code?: string };
+        if (otpData.code) setOtpDevCode(otpData.code); // dev mode: show code
+      }
+      setMode("otp");
+      setOtpCode("");
+      setLoading(false);
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Signup failed. Please try again.");
       setLoading(false);
+    }
+  };
+
+  // ── OTP Verify ───────────────────────────────────────────────────────────
+  const handleOTPVerify = async () => {
+    if (!pendingUser || !otpCode.trim()) return;
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      const res = await fetch("/api/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: pendingUser.email, code: otpCode.trim(), purpose: "verify" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Invalid code");
+      login({ ...pendingUser, role: pendingUser.role as UserRole });
+      setLocation(roleDefaultRoute(pendingUser.role as UserRole));
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Verification failed");
+      setLoading(false);
+    }
+  };
+
+  const handleSkipOTP = () => {
+    if (pendingUser) {
+      login({ ...pendingUser, role: pendingUser.role as UserRole });
+      setLocation(roleDefaultRoute(pendingUser.role as UserRole));
     }
   };
 
@@ -397,6 +445,93 @@ export default function Login() {
                     Sign in
                   </button>
                 </p>
+              </motion.div>
+            )}
+            {/* ── OTP VERIFICATION MODE ─────────────────────────────── */}
+            {mode === "otp" && (
+              <motion.div
+                key="otp"
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -12 }}
+                transition={{ duration: 0.22 }}
+              >
+                <div className="mb-6">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 mb-4">
+                    <Lock className="h-6 w-6 text-primary" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-foreground mb-1">Verify your email</h1>
+                  <p className="text-muted-foreground text-sm">
+                    We sent a 6-digit code to <span className="font-semibold text-foreground">{pendingUser?.email}</span>
+                  </p>
+                </div>
+
+                {otpDevCode && (
+                  <div className="mb-4 rounded-xl bg-amber-50 border border-amber-200 p-3 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
+                    <p className="text-xs text-amber-800">Dev mode — OTP code: <span className="font-mono font-bold tracking-widest">{otpDevCode}</span></p>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp-code" className="text-sm font-semibold">Verification code</Label>
+                    <Input
+                      id="otp-code"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      placeholder="000000"
+                      value={otpCode}
+                      onChange={e => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                      className="h-14 rounded-xl text-center text-2xl font-mono tracking-[0.4em]"
+                      data-testid="input-otp-code"
+                    />
+                  </div>
+
+                  {errorMsg && (
+                    <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3">
+                      <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+                      <p className="text-sm text-destructive">{errorMsg}</p>
+                    </div>
+                  )}
+
+                  <Button
+                    className="w-full h-12 rounded-xl gap-2"
+                    onClick={handleOTPVerify}
+                    disabled={loading || otpCode.length < 6}
+                    data-testid="button-verify-otp"
+                  >
+                    {loading ? "Verifying..." : "Verify & Enter Platform"}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <button
+                      onClick={handleSkipOTP}
+                      className="text-muted-foreground hover:text-foreground hover:underline"
+                    >
+                      Skip for now
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!pendingUser) return;
+                        const r = await fetch("/api/otp/send", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ email: pendingUser.email, purpose: "verify" }),
+                        });
+                        if (r.ok) {
+                          const d = await r.json() as { code?: string };
+                          if (d.code) setOtpDevCode(d.code);
+                        }
+                      }}
+                      className="text-primary hover:underline"
+                    >
+                      Resend code
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
