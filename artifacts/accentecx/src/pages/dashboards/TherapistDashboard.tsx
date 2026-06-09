@@ -77,7 +77,7 @@ function OverviewTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">School Overview</h1>
@@ -212,7 +212,7 @@ function StudentRosterTab() {
   const filtered = students.filter(s => s.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Student Roster</h1>
@@ -326,7 +326,7 @@ function ScreeningFormsTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Teacher Behavioral Observation Forms</h1>
@@ -455,7 +455,7 @@ function SpedIepTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">SPED / IEP Tracking</h1>
@@ -592,7 +592,7 @@ function ReferralsTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Referral Engine</h1>
@@ -707,7 +707,7 @@ function ParentPortalTab() {
   const [selected, setSelected] = useState<Message | null>(null);
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Parent Portal — School Coordination</h1>
         <p className="text-sm text-muted-foreground">Communicate with parents about their child's school-based developmental screening</p>
@@ -781,7 +781,7 @@ function DepEdReportsTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">DepEd & DOH Report Templates</h1>
         <p className="text-sm text-muted-foreground">Generate, download, and submit required reports to DepEd and the Department of Health</p>
@@ -843,7 +843,7 @@ function SchoolAnalyticsTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">School Analytics Dashboard</h1>
         <p className="text-sm text-muted-foreground">Aggregate developmental health metrics across all grade levels</p>
@@ -943,7 +943,7 @@ function ManageTeamTab({ orgRole, orgLabel }: { orgRole: string; orgLabel: strin
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold">Manage Team</h1>
@@ -1049,7 +1049,7 @@ function SchoolSettingsTab() {
   const savePw = () => { setPwSaved(true); setPw({ current: "", newPw: "", confirm: "" }); setTimeout(() => setPwSaved(false), 2500); };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-3xl">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-3xl">
       <div>
         <h1 className="text-2xl font-bold">Account Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your profile, school information, and notification preferences</p>
@@ -1366,7 +1366,7 @@ function SchoolBillingTab() {
 
 function CameraObservationTab() {
   return (
-    <div className="p-6 lg:p-8 space-y-4">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4">
       <div>
         <h2 className="text-xl font-bold flex items-center gap-2"><Camera className="h-5 w-5 text-[#0038A8]" />Camera Observation</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Record and AI-analyze behavioral observations of students</p>
@@ -1381,7 +1381,7 @@ function CameraObservationTab() {
 }
 
 function TherapistCollaborationTab() {
-  return <div className="p-6 lg:p-8"><CollaborationPanel /></div>;
+  return <div className="p-4 sm:p-6 lg:p-8"><CollaborationPanel /></div>;
 }
 
 export default function TherapistDashboard() {

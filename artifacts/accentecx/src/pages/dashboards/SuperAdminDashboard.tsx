@@ -150,7 +150,7 @@ function OverviewTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Platform Overview</h1>
@@ -275,7 +275,7 @@ function UsersTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">All Users</h1>
@@ -286,13 +286,14 @@ function UsersTab() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, region…" className="pl-9 h-9 rounded-lg" data-testid="search-users" />
         </div>
+        <div className="flex gap-2">
         <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="h-9 rounded-lg w-36"><SelectValue placeholder="Role" /></SelectTrigger>
+          <SelectTrigger className="h-9 rounded-lg w-32"><SelectValue placeholder="Role" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All roles</SelectItem>
             <SelectItem value="family">Family</SelectItem>
@@ -302,17 +303,19 @@ function UsersTab() {
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-9 rounded-lg w-32"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="h-9 rounded-lg w-28"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="inactive">Inactive</SelectItem>
           </SelectContent>
         </Select>
+        </div>
       </div>
 
       <div className="rounded-xl border overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[560px]">
           <thead className="bg-muted/40 border-b">
             <tr>
               {["User", "Role", "Region", "Tier", "Records", "Last Active", "Status"].map(h => (
@@ -350,6 +353,7 @@ function UsersTab() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
@@ -375,7 +379,7 @@ function ChildrenTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">Children Database</h1>
@@ -406,8 +410,8 @@ function ChildrenTab() {
         })}
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or ID…" className="pl-9 h-9 rounded-lg" data-testid="search-children" />
         </div>
@@ -424,7 +428,8 @@ function ChildrenTab() {
       </div>
 
       <div className="rounded-xl border overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[480px]">
           <thead className="bg-muted/40 border-b">
             <tr>
               {["ID", "Name", "Date of Birth", "Gender", "Risk Level", "Created"].map(h => (
@@ -459,6 +464,7 @@ function ChildrenTab() {
         {!isLoading && filtered.length === 0 && (
           <div className="py-12 text-center text-muted-foreground text-sm">No children match your filters.</div>
         )}
+        </div>
       </div>
     </div>
   );
@@ -506,7 +512,7 @@ function ScreeningsTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">Screenings & Risk</h1>
@@ -552,13 +558,13 @@ function ScreeningsTab() {
         </Card>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by ID or child ID…" className="pl-9 h-9 rounded-lg" />
         </div>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="h-9 rounded-lg w-44"><SelectValue placeholder="Screening type" /></SelectTrigger>
+          <SelectTrigger className="h-9 rounded-lg w-40"><SelectValue placeholder="Screening type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
             {screeningTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
@@ -567,7 +573,8 @@ function ScreeningsTab() {
       </div>
 
       <div className="rounded-xl border overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[480px]">
           <thead className="bg-muted/40 border-b">
             <tr>
               {["ID", "Child ID", "Type", "Status", "Risk Level", "Submitted"].map(h => (
@@ -611,6 +618,7 @@ function ScreeningsTab() {
             Showing first 50 of {filtered.length} results. Use Export CSV to download all.
           </div>
         )}
+        </div>
       </div>
     </div>
   );
@@ -647,7 +655,7 @@ function AppointmentsTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">All Appointments</h1>
@@ -675,13 +683,13 @@ function AppointmentsTab() {
         </CardContent>
       </Card>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by ID, child ID, notes…" className="pl-9 h-9 rounded-lg" />
         </div>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="h-9 rounded-lg w-44"><SelectValue placeholder="Appointment type" /></SelectTrigger>
+          <SelectTrigger className="h-9 rounded-lg w-40"><SelectValue placeholder="Appointment type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
             {apptTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
@@ -690,7 +698,8 @@ function AppointmentsTab() {
       </div>
 
       <div className="rounded-xl border overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[480px]">
           <thead className="bg-muted/40 border-b">
             <tr>
               {["ID", "Child ID", "Type", "Status", "Scheduled At", "Duration"].map(h => (
@@ -725,6 +734,7 @@ function AppointmentsTab() {
         {!isLoading && filtered.length === 0 && (
           <div className="py-12 text-center text-muted-foreground text-sm">No appointments match your filters.</div>
         )}
+        </div>
       </div>
     </div>
   );
@@ -758,7 +768,7 @@ function TherapyTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">Therapy Plans</h1>
@@ -784,20 +794,21 @@ function TherapyTab() {
         </CardContent>
       </Card>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by ID, child ID, type…" className="pl-9 h-9 rounded-lg" />
         </div>
+        <div className="flex gap-2">
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="h-9 rounded-lg w-40"><SelectValue placeholder="Therapy type" /></SelectTrigger>
+          <SelectTrigger className="h-9 rounded-lg w-36"><SelectValue placeholder="Therapy type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
             {therapyTypes.map(t => <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-9 rounded-lg w-32"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="h-9 rounded-lg w-28"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
@@ -805,10 +816,12 @@ function TherapyTab() {
             <SelectItem value="paused">Paused</SelectItem>
           </SelectContent>
         </Select>
+        </div>
       </div>
 
       <div className="rounded-xl border overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[480px]">
           <thead className="bg-muted/40 border-b">
             <tr>
               {["ID", "Child ID", "Therapy Type", "Status", "Start Date", "End Date"].map(h => (
@@ -841,6 +854,7 @@ function TherapyTab() {
         {!isLoading && filtered.length === 0 && (
           <div className="py-12 text-center text-muted-foreground text-sm">No therapy plans match your filters.</div>
         )}
+        </div>
       </div>
     </div>
   );
@@ -872,7 +886,7 @@ function ReportsTab() {
   );
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">AI Reports</h1>
         <p className="text-sm text-muted-foreground">All AI-generated reports across every user role</p>
@@ -912,7 +926,8 @@ function ReportsTab() {
       </div>
 
       <div className="rounded-xl border overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[560px]">
           <thead className="bg-muted/40 border-b">
             <tr>
               {["ID", "Report Type", "Recipient", "Role", "Date", "Size", "Status"].map(h => (
@@ -940,6 +955,7 @@ function ReportsTab() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
@@ -979,7 +995,7 @@ function AnalyticsTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Platform Analytics</h1>
         <p className="text-sm text-muted-foreground">Cross-role growth trends, geographic distribution, and outcome metrics</p>
@@ -1099,7 +1115,7 @@ function ExportTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Data Export</h1>
         <p className="text-sm text-muted-foreground">Download any dataset from the platform — all exports are encrypted and access-logged</p>
@@ -1176,7 +1192,7 @@ function SecurityTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Security & Audit</h1>
         <p className="text-sm text-muted-foreground">Platform security posture, data governance controls, and full access audit log</p>
@@ -1334,7 +1350,7 @@ function SABillingControlTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Billing Control</h2>
@@ -1466,7 +1482,7 @@ function SAUserManagementTab() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">User Management</h2>
@@ -1544,7 +1560,7 @@ function SAUserManagementTab() {
 }
 
 function SACollaborationTab() {
-  return <div className="p-6 lg:p-8"><CollaborationPanel /></div>;
+  return <div className="p-4 sm:p-6 lg:p-8"><CollaborationPanel /></div>;
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────

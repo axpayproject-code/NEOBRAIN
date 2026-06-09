@@ -96,7 +96,7 @@ export function InterventionTrackingTab() {
         <Button onClick={() => setShowNew(true)} className="gap-2"><Plus className="h-4 w-4" /> New Intervention</Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {[
           { label: "Active", value: stats.active, color: "text-green-600" },
           { label: "Completed", value: stats.completed, color: "text-blue-600" },

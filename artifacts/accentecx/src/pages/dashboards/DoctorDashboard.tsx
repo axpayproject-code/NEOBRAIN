@@ -83,7 +83,7 @@ function PatientQueueTab() {
   const sorted = [...(children ?? [])].sort((a, b) => (RISK_ORDER[a.riskLevel] ?? 4) - (RISK_ORDER[b.riskLevel] ?? 4));
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Patient Queue</h1>
         <p className="text-sm text-muted-foreground">All patients ranked by risk level — highest priority at top</p>
@@ -93,7 +93,7 @@ function PatientQueueTab() {
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Search Patient Records</p>
         <ChildSearchBar placeholder="Search patient by name to see full profile, history & active plans…" />
       </div>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {(["critical", "high", "moderate", "low"] as const).map(level => {
           const count = (children ?? []).filter(c => c.riskLevel === level).length;
           return (
@@ -147,7 +147,7 @@ function AISummariesTab() {
   const completed = (screenings ?? []).filter(s => s.status === "completed" || s.status === "reviewed");
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">AI Summaries</h1>
         <p className="text-sm text-muted-foreground">AI-generated structured intake summaries for clinical review</p>
@@ -227,7 +227,7 @@ function VideoReviewTab() {
   const [selected, setSelected] = useState<VideoSession | null>(null);
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Video Review Panel</h1>
         <p className="text-sm text-muted-foreground">Behavioral video sessions for clinical analysis</p>
@@ -359,7 +359,7 @@ function ConsultationRoomTab() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Consultation Room</h1>
         <p className="text-sm text-muted-foreground">Telehealth sessions and upcoming consultations</p>
@@ -460,7 +460,7 @@ function DoctorAvailabilityTab() {
   const { user } = useAuth();
   const practitionerName = user?.name ?? "Dr. You";
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       <AvailabilityManagerWidget practitionerName={practitionerName} specialistType="developmental_pediatrician" />
     </div>
   );
@@ -505,7 +505,7 @@ function DiagnosisNotesTab() {
   const allNotes = [...sessionNotes, ...existingNotes.filter(n => !savedNotes[n.id])];
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Diagnosis Notes</h1>
         <p className="text-sm text-muted-foreground">Manual clinical notes — only licensed clinicians may enter formal diagnosis documentation</p>
@@ -605,7 +605,7 @@ function TherapyPlanningTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Therapy Planning</h1>
         <p className="text-sm text-muted-foreground">Create and assign therapy programs for patients</p>
@@ -718,7 +718,7 @@ function PatientHistoryTab() {
   ] : [];
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Patient History</h1>
         <p className="text-sm text-muted-foreground">Complete developmental timeline for each patient</p>
@@ -868,7 +868,7 @@ function AppointmentsTab() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Appointments</h1>
         <p className="text-sm text-muted-foreground">Verify payments and set up appointment details for your patients</p>
@@ -1147,7 +1147,7 @@ function ClinicAnalyticsTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Clinic Analytics</h1>
@@ -1258,7 +1258,7 @@ function ManageTeamTab({ orgRole, orgLabel }: { orgRole: string; orgLabel: strin
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold">Manage Team</h1>
@@ -1365,7 +1365,7 @@ function ClinicSettingsTab() {
   const savePw = () => { setPwSaved(true); setPw({ current: "", newPw: "", confirm: "" }); setTimeout(() => setPwSaved(false), 2500); };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-3xl">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-3xl">
       <div>
         <h1 className="text-2xl font-bold">Account Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your profile, clinic information, and preferences</p>
@@ -1675,7 +1675,7 @@ function ClinicBillingTab() {
 
 function DoctorCollaborationTab() {
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       <CollaborationPanel />
     </div>
   );

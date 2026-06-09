@@ -130,7 +130,7 @@ function UpgradeGate({ allowed, title, description, upgradeHref, currentPlan, ch
 }) {
   if (allowed) return <>{children}</>;
   return (
-    <div className="p-6 lg:p-8 flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center">
+    <div className="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center">
       <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
         <Lock className="h-10 w-10 text-muted-foreground" />
       </div>
@@ -729,7 +729,7 @@ function ChildrenTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl lg:text-2xl font-bold">My Children</h1>
@@ -867,7 +867,7 @@ function ScreeningTab() {
 
   if (mode === "wizard") {
     return (
-      <div className="p-6 lg:p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <ScreeningWizard
           onComplete={(r) => { setResult(r); setMode("result"); }}
           onCancel={() => setMode("list")}
@@ -879,7 +879,7 @@ function ScreeningTab() {
   if (mode === "result" && result) {
     if (scheduleAfter) {
       return (
-        <div className="p-6 lg:p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           <AppointmentScheduler
             onSuccess={() => { setScheduleAfter(false); setMode("list"); }}
             onCancel={() => setScheduleAfter(false)}
@@ -888,7 +888,7 @@ function ScreeningTab() {
       );
     }
     return (
-      <div className="p-6 lg:p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <ScreeningResultDisplay
           result={result}
           onNewScreening={() => { setResult(null); setMode("wizard"); }}
@@ -899,7 +899,7 @@ function ScreeningTab() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">Assessments</h1>
@@ -967,7 +967,8 @@ function ScreeningTab() {
 
       {(isLoading || filteredScreenings.length > 0) && (
         <div className="rounded-xl border overflow-hidden">
-          <table className="w-full text-sm" data-testid="screenings-table">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]" data-testid="screenings-table">
             <thead className="bg-muted/50">
               <tr>
                 {["Child", "Type", "Status", "Risk Level", "Domain Scores", "Date", "Actions"].map(h => (
@@ -1014,6 +1015,7 @@ function ScreeningTab() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>
@@ -1085,7 +1087,7 @@ function AIInsightsTab() {
     : (children ?? []);
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">AI Insights</h1>
@@ -1311,7 +1313,7 @@ function MilestonesTab() {
   const domains = [...new Set(current.map(m => m.domain))];
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Milestone Tracking</h1>
         <p className="text-sm text-muted-foreground">Age-based developmental milestones with progress indicators and achievement history</p>
@@ -1621,7 +1623,7 @@ function AppointmentsTab() {
 
   if (scheduling) {
     return (
-      <div className="p-6 lg:p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <AppointmentScheduler
           onSuccess={() => setScheduling(false)}
           onCancel={() => setScheduling(false)}
@@ -1634,7 +1636,7 @@ function AppointmentsTab() {
   const past = (appointments ?? []).filter(a => a.status === "completed" || a.status === "cancelled");
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Appointments</h1>
@@ -1727,7 +1729,7 @@ function TherapyTab() {
       upgradeHref="/onboarding?role=family&plan=care-plus"
       currentPlan={features.planName}
     >
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Therapy Tracking</h1>
         <p className="text-sm text-muted-foreground">Active and completed therapy programs for your children</p>
@@ -1975,7 +1977,7 @@ function ReportsTab() {
     : (reports ?? []).filter(r => (PERIOD_MAP[selectedPeriod] ?? []).includes(r.reportType));
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">Reports</h1>
@@ -2060,7 +2062,7 @@ function SettingsTab() {
   }, [user]);
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <h1 className="text-2xl font-bold">Account Settings</h1>
       <Card>
         <CardHeader>
@@ -2183,7 +2185,7 @@ function VideoTab() {
       upgradeHref="/onboarding?role=family&plan=care-plus"
       currentPlan={features.planName}
     >
-      <div className="p-6 lg:p-8 space-y-5">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-5">
         <div>
           <h1 className="text-2xl font-bold">Video Assessment</h1>
           <p className="text-sm text-muted-foreground">
@@ -2292,7 +2294,7 @@ function CommunityTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Community</h1>
@@ -2425,7 +2427,7 @@ function GamesTab() {
 
 function ParentCollaborationTab() {
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       <CollaborationPanel />
     </div>
   );

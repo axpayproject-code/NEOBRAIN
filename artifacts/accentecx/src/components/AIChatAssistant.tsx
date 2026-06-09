@@ -160,7 +160,7 @@ export function AIChatAssistant() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl flex items-center justify-center transition-shadow"
+            className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl flex items-center justify-center transition-shadow"
             aria-label="Open AI Assistant"
           >
             <Brain className="h-6 w-6" />
@@ -177,7 +177,7 @@ export function AIChatAssistant() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 16 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className="fixed bottom-6 right-6 z-50 w-[min(380px,calc(100vw-2rem))] h-[520px] rounded-2xl shadow-2xl bg-card border flex flex-col overflow-hidden"
+            className="fixed bottom-[88px] right-2 sm:bottom-6 sm:right-6 z-50 w-[min(380px,calc(100vw-1rem))] h-[min(520px,calc(100dvh-140px))] rounded-2xl shadow-2xl bg-card border flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground shrink-0">

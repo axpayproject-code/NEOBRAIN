@@ -506,7 +506,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
             <div className="space-y-2">
               <Label>Available Time Slots</Label>
               {slotsLoading ? (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-10 rounded-lg" />)}
                 </div>
               ) : !allGenerated ? (
@@ -521,7 +521,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
                   <p className="text-sm text-muted-foreground">All slots are booked for this date</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {availableSlots.map(slot => (
                     <button
                       key={slot.time}

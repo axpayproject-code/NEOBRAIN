@@ -74,7 +74,7 @@ export function AdminAnalyticsTab() {
 
       {loading ? (
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
           <div className="grid grid-cols-2 gap-4">{Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-64 rounded-xl" />)}</div>
         </div>
       ) : data ? (

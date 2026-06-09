@@ -130,7 +130,7 @@ export function QueueManagementTab() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <Card className="border-0 shadow-sm text-center">
           <CardContent className="p-4">
             <p className="text-3xl font-bold text-blue-600">{waitingCount}</p>

@@ -89,7 +89,7 @@ function NationalOverviewTab() {
   ] : [];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">National Overview</h1>
         <p className="text-sm text-muted-foreground">Population-level developmental health intelligence for the Philippines</p>
@@ -206,7 +206,7 @@ function PopulationAnalyticsTab() {
   const provinces: { city: string; patients: number; risk: string }[] = [];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Population Analytics</h1>
         <p className="text-sm text-muted-foreground">Anonymized developmental health data across all regions — compliant with RA 10173</p>
@@ -331,7 +331,7 @@ function RegionalProgramsTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Regional Programs</h1>
@@ -456,7 +456,7 @@ function PartnerOrganizationsTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Partner Organizations</h1>
@@ -467,7 +467,7 @@ function PartnerOrganizationsTab() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { label: "Partner Clinics", value: orgs.filter(o => o.type === "Clinic" && o.status === "active").length, icon: Stethoscope },
           { label: "Partner Schools", value: orgs.filter(o => o.type === "School" && o.status === "active").length, icon: GraduationCap },
@@ -588,7 +588,7 @@ function ResearchDataTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">Research Data Access</h1>
         <p className="text-sm text-muted-foreground">Anonymized population datasets for government research — all data governed by RA 10173 and IRB protocols</p>
@@ -654,7 +654,7 @@ function DevelopmentalIntelligenceTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Developmental Intelligence</h1>
@@ -722,7 +722,7 @@ function DOHReportingTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">DOH & PhilHealth Integration</h1>
         <p className="text-sm text-muted-foreground">Submit mandatory government reports and integrate with DOH / PhilHealth / DSWD workflows</p>
@@ -806,7 +806,7 @@ function LGUCoordinationTab() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">LGU Coordination</h1>
@@ -817,7 +817,7 @@ function LGUCoordinationTab() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "LGU Units", count: partners.filter(p => p.type === "LGU Health Unit").length, icon: MapPin },
           { label: "RHUs", count: partners.filter(p => p.type === "RHU").length, icon: Activity },
@@ -1002,7 +1002,7 @@ function ManageTeamTab({ orgRole, orgLabel }: { orgRole: string; orgLabel: strin
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold">Manage Team</h1>
@@ -1108,7 +1108,7 @@ function GovSettingsTab() {
   const savePw = () => { setPwSaved(true); setPw({ current: "", newPw: "", confirm: "" }); setTimeout(() => setPwSaved(false), 2500); };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-3xl">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-3xl">
       <div>
         <h1 className="text-2xl font-bold">Account Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your government profile, agency information, and alert preferences</p>
@@ -1465,7 +1465,7 @@ function BillingControlTab() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Billing Control</h2>
@@ -1593,7 +1593,7 @@ function UserManagementTab() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">User Management</h2>
@@ -1660,7 +1660,7 @@ function UserManagementTab() {
 }
 
 function AdminCollaborationTab() {
-  return <div className="p-6 lg:p-8"><CollaborationPanel /></div>;
+  return <div className="p-4 sm:p-6 lg:p-8"><CollaborationPanel /></div>;
 }
 
 type TabComponent = () => React.ReactElement;
