@@ -54,9 +54,9 @@ router.patch("/nutrition/profile/:childId", async (req, res) => {
   const childId = Number(req.params.childId);
   if (isNaN(childId)) return res.status(400).json({ error: "Invalid childId" });
   const userId = getUserId(req);
-  const updates = { ...req.body as Record<string, unknown>, updatedBy: userId ?? undefined };
-  delete updates.childId;
-  const [profile] = await db.update(nutritionProfilesTable).set(updates as Parameters<typeof db.update>[0]).where(eq(nutritionProfilesTable.childId, childId)).returning();
+  const { childId: _cid, id: _id, createdAt: _ca, ...rest } = req.body as Record<string, unknown>;
+  const updates = { ...rest, updatedBy: userId ?? undefined };
+  const [profile] = await db.update(nutritionProfilesTable).set(updates).where(eq(nutritionProfilesTable.childId, childId)).returning();
   if (!profile) return res.status(404).json({ error: "Not found" });
   return res.json({ ...profile, createdAt: profile.createdAt.toISOString(), updatedAt: profile.updatedAt?.toISOString() ?? null });
 });

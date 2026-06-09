@@ -11,7 +11,8 @@ import {
   Users, Search, RefreshCw, Edit2, Trash2, AlertTriangle,
   Mail, Phone, Building, MapPin, Shield, Download, Eye,
   CheckCircle, Baby, Calendar, ClipboardList, Brain,
-  HeartPulse, Activity, GraduationCap, TrendingUp, Clock
+  HeartPulse, Activity, GraduationCap, TrendingUp, Clock,
+  UserPlus, EyeOff, Key
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -296,6 +297,10 @@ export function AdminUserManagementTab() {
   const [familyUserId, setFamilyUserId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", email: "", role: "", phone: "", orgName: "", region: "", subscriptionTier: "", subscriptionStatus: "" });
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({ name: "", email: "", password: "", role: "clinic", phone: "", orgName: "", region: "", subscriptionTier: "professional" });
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [showCreatePwd, setShowCreatePwd] = useState(false);
 
   const fetch_ = useCallback(async () => {
     if (!user?.id) return;
@@ -343,6 +348,27 @@ export function AdminUserManagementTab() {
     finally { setSaving(false); }
   };
 
+  const createAdmin = async () => {
+    if (!user?.id) return;
+    if (!createForm.name.trim() || !createForm.email.trim() || !createForm.password) {
+      setCreateError("Name, email, and password are required."); return;
+    }
+    if (createForm.password.length < 6) { setCreateError("Password must be at least 6 characters."); return; }
+    setSaving(true); setCreateError(null);
+    try {
+      const r = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${user.id}`, "Content-Type": "application/json" },
+        body: JSON.stringify(createForm),
+      });
+      if (!r.ok) { const e = await r.json(); throw new Error(e.error ?? "Create failed"); }
+      setCreateOpen(false);
+      setCreateForm({ name: "", email: "", password: "", role: "clinic", phone: "", orgName: "", region: "", subscriptionTier: "professional" });
+      await fetch_();
+    } catch (e: any) { setCreateError(e.message); }
+    finally { setSaving(false); }
+  };
+
   const exportCSV = () => {
     const rows = filtered.map(u => `"${u.id}","${u.name}","${u.email}","${u.role}","${u.orgName ?? ""}","${u.region ?? ""}","${u.subscriptionTier}","${u.subscriptionStatus}","${u.createdAt}"`);
     const csv = ["ID,Name,Email,Role,Org,Region,Tier,Status,Joined", ...rows].join("\n");
@@ -366,7 +392,8 @@ export function AdminUserManagementTab() {
           <h1 className="text-2xl font-bold">User Management</h1>
           <p className="text-sm text-muted-foreground">{filtered.length} of {users.length} users — full CRUD across all roles</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button size="sm" className="gap-1.5" onClick={() => setCreateOpen(true)}><UserPlus className="h-3.5 w-3.5" />Create Admin</Button>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={exportCSV}><Download className="h-3.5 w-3.5" />Export CSV</Button>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={fetch_} disabled={loading}><RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />Refresh</Button>
         </div>
@@ -463,6 +490,92 @@ export function AdminUserManagementTab() {
 
       {/* Family detail deep view */}
       {familyUserId && <FamilyDetailDialog userId={familyUserId} onClose={() => setFamilyUserId(null)} />}
+
+      {/* Create Admin dialog */}
+      <Dialog open={createOpen} onOpenChange={v => { setCreateOpen(v); setCreateError(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4" /> Create New Admin Account
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-2">
+            <div className="space-y-1.5 col-span-2">
+              <Label>Full Name <span className="text-red-500">*</span></Label>
+              <Input placeholder="e.g. Dr. Maria Santos" value={createForm.name} onChange={e => setCreateForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5 col-span-2">
+              <Label>Email Address <span className="text-red-500">*</span></Label>
+              <Input type="email" placeholder="admin@example.com" value={createForm.email} onChange={e => setCreateForm(f => ({ ...f, email: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5 col-span-2">
+              <Label>Password <span className="text-red-500">*</span></Label>
+              <div className="relative">
+                <Input
+                  type={showCreatePwd ? "text" : "password"}
+                  placeholder="Min 6 characters"
+                  value={createForm.password}
+                  onChange={e => setCreateForm(f => ({ ...f, password: e.target.value }))}
+                  className="pr-10"
+                />
+                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setShowCreatePwd(v => !v)}>
+                  {showCreatePwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground flex items-center gap-1"><Key className="h-3 w-3" /> Share this password securely with the new admin. It cannot be recovered after creation.</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Role <span className="text-red-500">*</span></Label>
+              <Select value={createForm.role} onValueChange={v => setCreateForm(f => ({ ...f, role: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {ROLES.map(r => (
+                    <SelectItem key={r} value={r}>
+                      <span className="capitalize">{r === "superadmin" ? "⚡ Super Admin" : r}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Subscription Tier</Label>
+              <Select value={createForm.subscriptionTier} onValueChange={v => setCreateForm(f => ({ ...f, subscriptionTier: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{TIERS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5 col-span-2">
+              <Label>Organization Name</Label>
+              <Input placeholder="e.g. Makati Medical Center" value={createForm.orgName} onChange={e => setCreateForm(f => ({ ...f, orgName: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Region</Label>
+              <Select value={createForm.region} onValueChange={v => setCreateForm(f => ({ ...f, region: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select region" /></SelectTrigger>
+                <SelectContent>{PH_REGIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Phone</Label>
+              <Input placeholder="+63 917…" value={createForm.phone} onChange={e => setCreateForm(f => ({ ...f, phone: e.target.value }))} />
+            </div>
+          </div>
+
+          {createError && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-500 shrink-0" />
+              <p className="text-sm text-red-700">{createError}</p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setCreateOpen(false); setCreateError(null); }}>Cancel</Button>
+            <Button disabled={saving || !createForm.name.trim() || !createForm.email.trim() || !createForm.password} onClick={createAdmin}>
+              {saving ? "Creating…" : "Create Account"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit dialog */}
       <Dialog open={!!editUser} onOpenChange={() => setEditUser(null)}>

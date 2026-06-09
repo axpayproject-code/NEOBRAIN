@@ -1,6 +1,13 @@
 import { Router } from "express";
 import { db, usersTable, childrenTable, screeningsTable, brainGymActivitiesTable, auditLogsTable, appointmentsTable, therapyPlansTable } from "@workspace/db";
 import { eq, desc, asc, and, inArray, sql } from "drizzle-orm";
+import { randomBytes, scryptSync } from "crypto";
+
+function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const hash = scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${hash}`;
+}
 
 const router = Router();
 
@@ -55,6 +62,46 @@ router.get("/admin/users", requireSuperAdmin, async (req, res) => {
     trialExpiresAt: u.trialExpiresAt?.toISOString() ?? null,
     createdAt: u.createdAt.toISOString(),
   })));
+});
+
+// POST /admin/users — superadmin creates a new user with any role
+router.post("/admin/users", requireSuperAdmin, async (req, res) => {
+  const { name, email, password, role, phone, orgName, region, subscriptionTier } = req.body as Record<string, unknown>;
+
+  if (!name || typeof name !== "string" || !name.trim()) return res.status(400).json({ error: "Name is required." });
+  if (!email || typeof email !== "string" || !email.includes("@")) return res.status(400).json({ error: "Valid email is required." });
+  if (!password || typeof password !== "string" || password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters." });
+
+  const VALID_ROLES = ["family", "clinic", "school", "government", "superadmin"];
+  const safeRole = (typeof role === "string" && VALID_ROLES.includes(role)) ? role : "family";
+  const safeEmail = email.toLowerCase().trim();
+
+  const [existing] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, safeEmail));
+  if (existing) return res.status(409).json({ error: "An account with this email already exists." });
+
+  const passwordHash = hashPassword(password);
+  const safeTier = (typeof subscriptionTier === "string" && subscriptionTier) ? subscriptionTier : "professional";
+
+  const [created] = await db.insert(usersTable).values({
+    email: safeEmail,
+    name: name.trim(),
+    role: safeRole,
+    passwordHash,
+    subscriptionTier: safeTier,
+    subscriptionStatus: "active",
+    trialUsed: false,
+    orgName: typeof orgName === "string" && orgName.trim() ? orgName.trim() : null,
+    region: typeof region === "string" && region.trim() ? region.trim() : null,
+    phone: typeof phone === "string" && phone.trim() ? phone.trim() : null,
+  }).returning({
+    id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role,
+    subscriptionTier: usersTable.subscriptionTier, subscriptionStatus: usersTable.subscriptionStatus,
+    orgName: usersTable.orgName, region: usersTable.region, phone: usersTable.phone,
+    createdAt: usersTable.createdAt,
+  });
+
+  await logAdminAction((req as any).adminId, "create_user", "user", created.id, {}, { name: created.name, email: created.email, role: created.role });
+  return res.status(201).json({ ...created, createdAt: created.createdAt.toISOString() });
 });
 
 // GET /admin/users/:id/payment-proof — return proof image for a specific pending user
