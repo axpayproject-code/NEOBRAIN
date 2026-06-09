@@ -39,6 +39,7 @@ import {
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
+import { ChildSearchBar } from "@/components/shared/ChildSearchBar";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -86,6 +87,11 @@ function PatientQueueTab() {
       <div>
         <h1 className="text-2xl font-bold">Patient Queue</h1>
         <p className="text-sm text-muted-foreground">All patients ranked by risk level — highest priority at top</p>
+      </div>
+      {/* Cross-role patient search */}
+      <div className="rounded-xl border bg-white p-4 space-y-2">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Search Patient Records</p>
+        <ChildSearchBar placeholder="Search patient by name to see full profile, history & active plans…" />
       </div>
       <div className="grid grid-cols-4 gap-3">
         {(["critical", "high", "moderate", "low"] as const).map(level => {

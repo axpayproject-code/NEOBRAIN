@@ -1,2 +1,4 @@
 - [Payment system](payment-system.md) — manual GCash/BPI proof-upload flow; DB cols paymentProofUrl/requestedPlan/requestedBillingCycle on usersTable; activate applies requestedPlan; reject endpoint reverts to free
 - [Child ownership](child-ownership.md) — only family + superadmin can POST/DELETE /children; school/clinic/govt can read/contribute but not own
+- [Org approval flow](org-approval-flow.md) — clinic/school/gov signup sets pending_org_activation; admin activates via POST /admin/orgs/:id/activate; PendingApproval page gates access; billing/status refreshes status on reload
+- [Child search](child-search.md) — GET /api/children/search?q= is role-aware (all roles see name-matched results, family scoped to own children); ChildSearchBar at src/components/shared/ChildSearchBar.tsx used in school/clinic/gov dashboards

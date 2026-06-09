@@ -513,4 +513,66 @@ router.post("/admin/appointments/:id/reject-payment", requireSuperAdmin, async (
   return res.json({ success: true, message: "Payment rejected. Appointment reset to unpaid." });
 });
 
+// ── Organisation Account Activation ──────────────────────────────────────────
+
+// GET /admin/orgs/pending — list clinic/school/gov accounts pending admin activation
+router.get("/admin/orgs/pending", requireSuperAdmin, async (_req, res) => {
+  const orgs = await db
+    .select({
+      id: usersTable.id, name: usersTable.name, email: usersTable.email,
+      role: usersTable.role, orgName: usersTable.orgName, region: usersTable.region,
+      phone: usersTable.phone, subscriptionStatus: usersTable.subscriptionStatus,
+      createdAt: usersTable.createdAt,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.subscriptionStatus, "pending_org_activation"))
+    .orderBy(desc(usersTable.createdAt));
+
+  return res.json(orgs.map(u => ({ ...u, createdAt: u.createdAt.toISOString() })));
+});
+
+// POST /admin/orgs/:id/activate — approve and activate an org account
+router.post("/admin/orgs/:id/activate", requireSuperAdmin, async (req, res) => {
+  const { id } = req.params;
+  const [u] = await db.select({ name: usersTable.name, email: usersTable.email, role: usersTable.role })
+    .from(usersTable).where(eq(usersTable.id, id));
+  if (!u) return res.status(404).json({ error: "User not found" });
+
+  await db.update(usersTable)
+    .set({ subscriptionStatus: "active" })
+    .where(eq(usersTable.id, id));
+
+  // Notify the org
+  const { sendEmail: se, notificationEmail: ne } = await import("../lib/email");
+  se(ne(
+    u.name, u.email,
+    "Your NEOBRAIN Account Has Been Activated",
+    `Welcome to NEOBRAIN! Your ${u.role} account has been reviewed and activated by our team. You can now log in and access your full dashboard at neobrain.app.`,
+  )).catch(() => {});
+
+  return res.json({ success: true, message: `${u.name}'s account activated.` });
+});
+
+// POST /admin/orgs/:id/reject — reject an org account registration
+router.post("/admin/orgs/:id/reject", requireSuperAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body as { reason?: string };
+
+  const [u] = await db.select({ name: usersTable.name, email: usersTable.email, role: usersTable.role })
+    .from(usersTable).where(eq(usersTable.id, id));
+  if (!u) return res.status(404).json({ error: "User not found" });
+
+  // Delete the account so they can re-register if needed
+  await db.delete(usersTable).where(eq(usersTable.id, id));
+
+  const { sendEmail: se, notificationEmail: ne } = await import("../lib/email");
+  se(ne(
+    u.name, u.email,
+    "NEOBRAIN Account Registration Update",
+    `Thank you for your interest in NEOBRAIN. Unfortunately, we were unable to approve your ${u.role} account registration at this time${reason ? `: ${reason}` : ". Please contact us at info@accentecxai.com for more information"}.`,
+  )).catch(() => {});
+
+  return res.json({ success: true, message: `${u.name}'s registration rejected and removed.` });
+});
+
 export default router;

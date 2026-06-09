@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
 import Home from "@/pages/Home";
+import PendingApproval from "@/pages/PendingApproval";
 import Demo from "@/pages/Demo";
 import Login from "@/pages/Login";
 import ForgotPassword from "@/pages/ForgotPassword";
@@ -67,6 +68,8 @@ function roleHome(role: string): string {
 function ProtectedRoute({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) {
   const { user } = useAuth();
   if (!user) return <Redirect to="/login" />;
+  // Org accounts awaiting admin activation cannot access dashboards
+  if (user.subscriptionStatus === "pending_org_activation") return <Redirect to="/pending-approval" />;
   if (requiredRole && user.role !== requiredRole) return <Redirect to={roleHome(user.role)} />;
   return <>{children}</>;
 }
@@ -89,6 +92,7 @@ function AppRoutes() {
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route path="/onboarding" component={Onboarding} />
+      <Route path="/pending-approval" component={PendingApproval} />
 
       {/* ── Role-based dashboards (4 business types) ── */}
       <Route path="/family">

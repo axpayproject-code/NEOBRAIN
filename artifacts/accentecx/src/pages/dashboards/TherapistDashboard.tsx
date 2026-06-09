@@ -27,6 +27,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { ChildSearchBar } from "@/components/shared/ChildSearchBar";
 
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -77,9 +78,17 @@ function OverviewTab() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">School Overview</h1>
-        <p className="text-sm text-muted-foreground">Welcome, {user?.name?.split(" ")[0]} — here's your school's developmental health snapshot</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold">School Overview</h1>
+          <p className="text-sm text-muted-foreground">Welcome, {user?.name?.split(" ")[0]} — here's your school's developmental health snapshot</p>
+        </div>
+      </div>
+
+      {/* Cross-role child search */}
+      <div className="rounded-xl border bg-white p-4 space-y-2">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Find a Student</p>
+        <ChildSearchBar placeholder="Search student by name to see their full profile…" />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

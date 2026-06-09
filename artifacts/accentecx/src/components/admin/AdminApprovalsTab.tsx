@@ -56,7 +56,13 @@ const ROLE_META: Record<string, { label: string; icon: typeof Users; color: stri
 
 const BASE = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
 
-type ActiveTab = "subscriptions" | "appointments";
+type ActiveTab = "subscriptions" | "appointments" | "organizations";
+
+interface PendingOrg {
+  id: string; name: string; email: string; role: string;
+  orgName: string | null; region: string | null; phone: string | null;
+  subscriptionStatus: string; createdAt: string;
+}
 
 export function AdminApprovalsTab() {
   const { user } = useAuth();
@@ -86,6 +92,15 @@ export function AdminApprovalsTab() {
   const [rejectApptReason, setRejectApptReason] = useState("");
   const [recentlyActionedAppts, setRecentlyActionedAppts] = useState<{ appt: PendingAppt; action: "approved" | "rejected" }[]>([]);
 
+  // Org account activation queue state
+  const [pendingOrgs, setPendingOrgs] = useState<PendingOrg[]>([]);
+  const [loadingOrgs, setLoadingOrgs] = useState(true);
+  const [errorOrgs, setErrorOrgs] = useState<string | null>(null);
+  const [actioningOrg, setActioningOrg] = useState<string | null>(null);
+  const [rejectOrgTarget, setRejectOrgTarget] = useState<PendingOrg | null>(null);
+  const [rejectOrgReason, setRejectOrgReason] = useState("");
+  const [recentlyActionedOrgs, setRecentlyActionedOrgs] = useState<{ org: PendingOrg; action: "activated" | "rejected" }[]>([]);
+
   const fetchSubs = useCallback(async () => {
     if (!user?.id) return;
     setLoadingSubs(true); setErrorSubs(null);
@@ -109,7 +124,18 @@ export function AdminApprovalsTab() {
     finally { setLoadingAppts(false); }
   }, [user?.id]);
 
-  useEffect(() => { fetchSubs(); fetchAppts(); }, [fetchSubs, fetchAppts]);
+  const fetchOrgs = useCallback(async () => {
+    if (!user?.id) return;
+    setLoadingOrgs(true); setErrorOrgs(null);
+    try {
+      const r = await fetch(`${BASE}/api/admin/orgs/pending`, { headers: { Authorization: `Bearer ${user.id}` } });
+      if (!r.ok) throw new Error((await r.json()).error ?? "Fetch failed");
+      setPendingOrgs(await r.json());
+    } catch (e: any) { setErrorOrgs(e.message); }
+    finally { setLoadingOrgs(false); }
+  }, [user?.id]);
+
+  useEffect(() => { fetchSubs(); fetchAppts(); fetchOrgs(); }, [fetchSubs, fetchAppts, fetchOrgs]);
 
   async function viewUserProof(target: PendingUser) {
     if (!user?.id) return;
@@ -212,7 +238,39 @@ export function AdminApprovalsTab() {
     ...acc, [r]: pending.filter(u => u.role === r).length,
   }), {} as Record<string, number>);
 
-  const totalPending = pending.length + pendingAppts.length;
+  const totalPending = pending.length + pendingAppts.length + pendingOrgs.length;
+
+  async function activateOrg(org: PendingOrg) {
+    if (!user?.id) return;
+    setActioningOrg(org.id);
+    try {
+      const r = await fetch(`${BASE}/api/admin/orgs/${org.id}/activate`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${user.id}` },
+      });
+      if (!r.ok) throw new Error((await r.json()).error ?? "Action failed");
+      setPendingOrgs(p => p.filter(o => o.id !== org.id));
+      setRecentlyActionedOrgs(r2 => [{ org, action: "activated" }, ...r2]);
+    } catch (e: any) { alert(e.message); }
+    finally { setActioningOrg(null); }
+  }
+
+  async function rejectOrg(org: PendingOrg) {
+    if (!user?.id) return;
+    setActioningOrg(org.id);
+    try {
+      const r = await fetch(`${BASE}/api/admin/orgs/${org.id}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.id}` },
+        body: JSON.stringify({ reason: rejectOrgReason }),
+      });
+      if (!r.ok) throw new Error((await r.json()).error ?? "Action failed");
+      setPendingOrgs(p => p.filter(o => o.id !== org.id));
+      setRecentlyActionedOrgs(r2 => [{ org, action: "rejected" }, ...r2]);
+      setRejectOrgTarget(null); setRejectOrgReason("");
+    } catch (e: any) { alert(e.message); }
+    finally { setActioningOrg(null); }
+  }
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -220,14 +278,14 @@ export function AdminApprovalsTab() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <UserCheck className="h-6 w-6 text-primary" />
-            Payment Approval Queue
+            Approval Queue
           </h1>
           <p className="text-sm text-muted-foreground">
-            {totalPending} payment{totalPending !== 1 ? "s" : ""} awaiting verification
+            {totalPending} item{totalPending !== 1 ? "s" : ""} awaiting review
           </p>
         </div>
-        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { fetchSubs(); fetchAppts(); }} disabled={loadingSubs || loadingAppts}>
-          <RefreshCw className={`h-3.5 w-3.5 ${(loadingSubs || loadingAppts) ? "animate-spin" : ""}`} />Refresh
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { fetchSubs(); fetchAppts(); fetchOrgs(); }} disabled={loadingSubs || loadingAppts || loadingOrgs}>
+          <RefreshCw className={`h-3.5 w-3.5 ${(loadingSubs || loadingAppts || loadingOrgs) ? "animate-spin" : ""}`} />Refresh
         </Button>
       </div>
 
@@ -251,6 +309,16 @@ export function AdminApprovalsTab() {
           Appointments
           {pendingAppts.length > 0 && (
             <span className="ml-1 rounded-full bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 leading-none">{pendingAppts.length}</span>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab("organizations")}
+          className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-semibold transition-all ${activeTab === "organizations" ? "bg-white shadow text-[#163300]" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          <Building className="h-4 w-4" />
+          Organizations
+          {pendingOrgs.length > 0 && (
+            <span className="ml-1 rounded-full bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 leading-none">{pendingOrgs.length}</span>
           )}
         </button>
       </div>
@@ -510,6 +578,127 @@ export function AdminApprovalsTab() {
           )}
         </div>
       )}
+
+      {/* ── Organizations Tab ───────────────────────────────────── */}
+      {activeTab === "organizations" && (
+        <div className="space-y-4">
+          {errorOrgs && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
+              <p className="text-sm text-red-700">{errorOrgs}</p>
+            </div>
+          )}
+
+          <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 flex items-start gap-3">
+            <Shield className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-blue-900">Organization Account Activation</p>
+              <p className="text-xs text-blue-700 mt-0.5">
+                Clinic, School, and Government accounts require manual activation before they can access their dashboards.
+                Review their details below and activate or reject their registration.
+              </p>
+            </div>
+          </div>
+
+          {loadingOrgs ? (
+            <div className="space-y-3">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}</div>
+          ) : pendingOrgs.length === 0 ? (
+            <div className="text-center py-20 text-muted-foreground">
+              <CheckCircle className="h-14 w-14 mx-auto mb-4 text-green-300" />
+              <p className="text-lg font-semibold text-green-700">No pending registrations</p>
+              <p className="text-sm mt-1">All organization accounts have been reviewed.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Pending Activation ({pendingOrgs.length})</h2>
+              {pendingOrgs.map(org => {
+                const meta = ROLE_META[org.role] ?? ROLE_META.family;
+                const Icon = meta.icon;
+                return (
+                  <Card key={org.id} className="border-2 border-blue-200 bg-blue-50/30 hover:bg-blue-50/60 transition-colors">
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div className="flex items-start gap-4 flex-1 min-w-0">
+                          <div className={`flex h-10 w-10 items-center justify-center rounded-xl border-2 shrink-0 ${meta.bg}`}>
+                            <Icon className={`h-5 w-5 ${meta.color}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <span className="font-bold text-sm">{org.name}</span>
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${meta.bg} ${meta.color}`}>{meta.label}</span>
+                              <span className="flex items-center gap-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+                                <Clock className="h-3 w-3" />Awaiting Activation
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0.5">
+                              <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Mail className="h-3 w-3 shrink-0" />{org.email}</span>
+                              {org.phone && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Phone className="h-3 w-3 shrink-0" />{org.phone}</span>}
+                              {org.orgName && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Building className="h-3 w-3 shrink-0" />{org.orgName}</span>}
+                              {org.region && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><MapPin className="h-3 w-3 shrink-0" />{org.region}</span>}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1.5">
+                              Registered {new Date(org.createdAt).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 shrink-0 flex-col sm:flex-row">
+                          <Button size="sm" className="bg-[#163300] hover:bg-[#163300]/90 text-[#9FE870] h-9 px-4 gap-1.5" disabled={actioningOrg === org.id} onClick={() => activateOrg(org)}>
+                            <CheckCircle className="h-3.5 w-3.5" />{actioningOrg === org.id ? "Activating…" : "Activate"}
+                          </Button>
+                          <Button size="sm" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 h-9 px-4 gap-1.5" disabled={actioningOrg === org.id} onClick={() => { setRejectOrgTarget(org); setRejectOrgReason(""); }}>
+                            <XCircle className="h-3.5 w-3.5" />Reject
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          {recentlyActionedOrgs.length > 0 && (
+            <div className="space-y-2">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Actions This Session</h2>
+              {recentlyActionedOrgs.map((item, i) => (
+                <div key={i} className={`flex items-center gap-3 rounded-xl border px-4 py-2.5 ${item.action === "activated" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+                  {item.action === "activated" ? <CheckCircle className="h-4 w-4 text-green-600 shrink-0" /> : <XCircle className="h-4 w-4 text-red-500 shrink-0" />}
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium">{item.org.name}</span>
+                    {item.org.orgName && <span className="text-xs text-muted-foreground ml-2">— {item.org.orgName}</span>}
+                  </div>
+                  <span className={`text-xs font-semibold uppercase ${item.action === "activated" ? "text-green-700" : "text-red-600"}`}>{item.action}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Reject org dialog ────────────────────────────────────── */}
+      <Dialog open={!!rejectOrgTarget} onOpenChange={() => { setRejectOrgTarget(null); setRejectOrgReason(""); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <XCircle className="h-5 w-5" />Reject Organization Registration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-2 space-y-3">
+            <p className="text-sm">Reject registration for <strong>{rejectOrgTarget?.orgName ?? rejectOrgTarget?.name}</strong>?</p>
+            <p className="text-xs text-muted-foreground">The account will be deleted. The applicant will be notified and can re-register if the issue is resolved.</p>
+            <div>
+              <Label className="text-xs font-semibold text-muted-foreground">Rejection reason (optional — included in email)</Label>
+              <Textarea className="mt-1.5 text-sm" rows={3} placeholder="e.g. Unable to verify clinic license…" value={rejectOrgReason} onChange={e => setRejectOrgReason(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setRejectOrgTarget(null); setRejectOrgReason(""); }}>Cancel</Button>
+            <Button className="bg-red-600 text-white hover:bg-red-700" disabled={actioningOrg === rejectOrgTarget?.id} onClick={() => rejectOrgTarget && rejectOrg(rejectOrgTarget)}>
+              {actioningOrg === rejectOrgTarget?.id ? "Rejecting…" : "Reject & Remove Account"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ── Proof photo modal ───────────────────────────────────── */}
       <Dialog open={!!proofModal} onOpenChange={() => { setProofModal(null); setProofImage(null); }}>

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db, childrenTable, screeningsTable, appointmentsTable, therapyPlansTable, reportsTable, timelineEventsTable } from "@workspace/db";
-import { eq, desc, and, isNull, or } from "drizzle-orm";
+import { db, childrenTable, screeningsTable, appointmentsTable, therapyPlansTable, reportsTable, timelineEventsTable, usersTable } from "@workspace/db";
+import { eq, desc, and, isNull, or, ilike } from "drizzle-orm";
 import { CreateChildBody, UpdateChildBody, GetChildParams, DeleteChildParams, GetChildDomainScoresParams, GetChildTimelineParams } from "@workspace/api-zod";
 
 const router = Router();
@@ -161,6 +161,65 @@ router.get("/children/:id/timeline", async (req, res) => {
       occurredAt: e.occurredAt.toISOString(),
     }))
   );
+});
+
+// GET /children/search?q= — cross-role child search (scoped by role)
+router.get("/children/search", async (req, res) => {
+  const userId = getUserId(req);
+  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  if (!q || q.length < 2) return res.json([]);
+
+  // Determine user role for visibility scoping
+  let userRole: string | null = null;
+  if (userId) {
+    const [u] = await db.select({ role: usersTable.role }).from(usersTable).where(eq(usersTable.id, userId));
+    userRole = u?.role ?? null;
+  }
+
+  const nameFilter = ilike(childrenTable.fullName, `%${q}%`);
+
+  let rows;
+  if (userRole === "superadmin") {
+    // Superadmin sees all children
+    rows = await db.select().from(childrenTable).where(nameFilter).orderBy(childrenTable.fullName).limit(20);
+  } else if (userRole === "clinic") {
+    // Clinic sees children who have had appointments (any appointment links child to clinic user's org)
+    // For now: all children matching name (clinics need broad visibility for intake)
+    rows = await db.select().from(childrenTable).where(nameFilter).orderBy(childrenTable.fullName).limit(20);
+  } else if (userRole === "school") {
+    // School sees children where schoolName matches their orgName or any children matching name
+    rows = await db.select().from(childrenTable).where(nameFilter).orderBy(childrenTable.fullName).limit(20);
+  } else if (userRole === "government") {
+    // Government sees all children for population analytics
+    rows = await db.select().from(childrenTable).where(nameFilter).orderBy(childrenTable.fullName).limit(20);
+  } else if (userId) {
+    // Family: only their own children
+    rows = await db.select().from(childrenTable)
+      .where(and(eq(childrenTable.userId, userId), nameFilter))
+      .orderBy(childrenTable.fullName).limit(20);
+  } else {
+    return res.json([]);
+  }
+
+  // Enrich with latest screening and appointments
+  const enriched = await Promise.all(rows.map(async (child) => {
+    const [latestScreening] = await db.select({ riskLevel: screeningsTable.riskLevel, screeningType: screeningsTable.screeningType, createdAt: screeningsTable.createdAt })
+      .from(screeningsTable).where(eq(screeningsTable.childId, child.id)).orderBy(desc(screeningsTable.createdAt)).limit(1);
+    const [latestAppt] = await db.select({ specialistName: appointmentsTable.specialistName, specialistType: appointmentsTable.specialistType, scheduledAt: appointmentsTable.scheduledAt })
+      .from(appointmentsTable).where(eq(appointmentsTable.childId, child.id)).orderBy(desc(appointmentsTable.scheduledAt)).limit(1);
+    const [activePlan] = await db.select({ therapyType: therapyPlansTable.therapyType, title: therapyPlansTable.title, status: therapyPlansTable.status })
+      .from(therapyPlansTable).where(and(eq(therapyPlansTable.childId, child.id), eq(therapyPlansTable.status, "active"))).limit(1);
+    return {
+      ...child,
+      createdAt: child.createdAt.toISOString(),
+      updatedAt: child.updatedAt?.toISOString() ?? null,
+      latestScreening: latestScreening ? { ...latestScreening, createdAt: latestScreening.createdAt.toISOString() } : null,
+      latestAppointment: latestAppt ? { ...latestAppt, scheduledAt: latestAppt.scheduledAt.toISOString() } : null,
+      activeTherapyPlan: activePlan ?? null,
+    };
+  }));
+
+  return res.json(enriched);
 });
 
 export default router;

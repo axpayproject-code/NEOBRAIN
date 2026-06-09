@@ -30,6 +30,7 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { ChildSearchBar } from "@/components/shared/ChildSearchBar";
 
 const NAV: NavItem[] = [
   { id: "overview", label: "National Overview", icon: LayoutDashboard },
@@ -94,10 +95,16 @@ function NationalOverviewTab() {
         <p className="text-sm text-muted-foreground">Population-level developmental health intelligence for the Philippines</p>
       </div>
 
+      {/* Cross-role population search */}
+      <div className="rounded-xl border bg-white p-4 space-y-2">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Population Search</p>
+        <ChildSearchBar placeholder="Search any child by name to view their developmental profile…" />
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />) : [
-          { label: "Children Screened", value: summary?.totalChildren ?? 2184, icon: Users, delta: "+12% this month" },
-          { label: "At-Risk Population", value: summary?.activeTherapyPlans ?? 641, icon: AlertTriangle, delta: `${summary?.completedScreeningsThisMonth ?? 560} referred this month`, color: "text-orange-600" },
+          { label: "Children Screened", value: summary?.totalChildren ?? "—", icon: Users, delta: summary ? "+12% this month" : "Loading data…" },
+          { label: "At-Risk Population", value: summary?.activeTherapyPlans ?? "—", icon: AlertTriangle, delta: summary?.completedScreeningsThisMonth != null ? `${summary.completedScreeningsThisMonth} referred this month` : "Loading data…", color: "text-orange-600" },
           { label: "LGU Partners", value: "—", icon: MapPin, delta: "Connect via Partner Organizations" },
           { label: "System Uptime", value: "Live", icon: Server, delta: "All systems nominal" },
         ].map(s => (
