@@ -12,6 +12,13 @@ import {
 } from "lucide-react";
 import { CollaborationPanel } from "@/components/CollaborationPanel";
 import { FeatureFlagsTab } from "@/components/admin/FeatureFlagsTab";
+import { AdminUserManagementTab } from "@/components/admin/AdminUserManagementTab";
+import { AdminContentTab } from "@/components/admin/AdminContentTab";
+import { AdminAssessmentTab } from "@/components/admin/AdminAssessmentTab";
+import { AdminSchoolTab, AdminClinicTab, AdminGovernmentTab } from "@/components/admin/AdminOrganizationTab";
+import { AdminAnalyticsTab } from "@/components/admin/AdminAnalyticsTab";
+import { AdminAuditLogsTab } from "@/components/admin/AdminAuditLogsTab";
+import { AdminSystemSettingsTab } from "@/components/admin/AdminSystemSettingsTab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,20 +41,20 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV: NavItem[] = [
-  { id: "overview",   label: "Platform Overview",  icon: LayoutDashboard },
-  { id: "users",      label: "All Users",           icon: Users },
-  { id: "children",   label: "Children Database",   icon: Baby },
-  { id: "screenings", label: "Screenings & Risk",   icon: ClipboardList },
-  { id: "appointments", label: "Appointments",      icon: CalendarCheck },
-  { id: "therapy",    label: "Therapy Plans",       icon: HeartPulse },
-  { id: "reports",    label: "AI Reports",          icon: FileText },
-  { id: "analytics",  label: "Platform Analytics",  icon: BarChart3 },
-  { id: "export",        label: "Data Export",         icon: Download },
-  { id: "security",      label: "Security & Audit",    icon: Shield },
-  { id: "billing",       label: "Billing Control",     icon: CreditCard },
-  { id: "user-mgmt",    label: "User Management",     icon: UserCheck },
-  { id: "feature-flags", label: "Feature Flags",        icon: Key },
-  { id: "collaboration", label: "Collaboration",        icon: Ticket },
+  { id: "overview",             label: "Platform Overview",       icon: LayoutDashboard },
+  { id: "user-management",      label: "User Management",         icon: Users },
+  { id: "subscription-mgmt",    label: "Subscription Management", icon: CreditCard },
+  { id: "content-management",   label: "Content Management",      icon: FileText },
+  { id: "assessment-management",label: "Assessment Management",   icon: ClipboardList },
+  { id: "schools",              label: "School Management",       icon: GraduationCap },
+  { id: "clinics",              label: "Clinic Management",       icon: Stethoscope },
+  { id: "government",           label: "Government Management",   icon: Globe },
+  { id: "children",             label: "Children Database",       icon: Baby },
+  { id: "analytics",            label: "Analytics",               icon: BarChart3 },
+  { id: "audit-logs",           label: "Audit Logs",              icon: Shield },
+  { id: "feature-flags",        label: "Feature Flags",           icon: Key },
+  { id: "system-settings",      label: "System Settings",         icon: Server },
+  { id: "collaboration",        label: "Collaboration",           icon: Ticket },
 ];
 
 const RISK_COLORS: Record<string, string> = {
@@ -1541,20 +1548,20 @@ function SACollaborationTab() {
 // ─── Main export ──────────────────────────────────────────────────────────────
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
-  overview:     OverviewTab,
-  users:        UsersTab,
-  children:     ChildrenTab,
-  screenings:   ScreeningsTab,
-  appointments: AppointmentsTab,
-  therapy:      TherapyTab,
-  reports:      ReportsTab,
-  analytics:    AnalyticsTab,
-  export:       ExportTab,
-  security:     SecurityTab,
-  billing:      SABillingControlTab,
-  "user-mgmt":  SAUserManagementTab,
-  "feature-flags": FeatureFlagsTab,
-  collaboration: SACollaborationTab,
+  overview:                OverviewTab,
+  "user-management":       AdminUserManagementTab,
+  "subscription-mgmt":     SABillingControlTab,
+  "content-management":    AdminContentTab,
+  "assessment-management": AdminAssessmentTab,
+  schools:                 AdminSchoolTab,
+  clinics:                 AdminClinicTab,
+  government:              AdminGovernmentTab,
+  children:                ChildrenTab,
+  analytics:               AdminAnalyticsTab,
+  "audit-logs":            AdminAuditLogsTab,
+  "feature-flags":         FeatureFlagsTab,
+  "system-settings":       AdminSystemSettingsTab,
+  collaboration:           SACollaborationTab,
 };
 
 export default function SuperAdminDashboard() {

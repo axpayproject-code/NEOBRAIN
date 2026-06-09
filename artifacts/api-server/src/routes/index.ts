@@ -37,6 +37,7 @@ import healthProgramsRouter from "./health_programs";
 import messagingRouter from "./messaging";
 import communityRouter from "./community";
 import otpRouter from "./otp";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -78,5 +79,6 @@ router.use(healthProgramsRouter);
 router.use(messagingRouter);
 router.use(communityRouter);
 router.use(otpRouter);
+router.use(adminRouter);
 
 export default router;
