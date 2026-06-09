@@ -17,6 +17,9 @@ export const usersTable = pgTable("users", {
   orgName: text("org_name"),
   region: text("region"),
   phone: text("phone"),
+  paymentProofUrl: text("payment_proof_url"),
+  requestedPlan: text("requested_plan"),
+  requestedBillingCycle: text("requested_billing_cycle"),
 });
 
 export type User = typeof usersTable.$inferSelect;

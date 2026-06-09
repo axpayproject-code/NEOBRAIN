@@ -38,6 +38,9 @@ router.get("/admin/users", requireSuperAdmin, async (req, res) => {
     subscriptionStatus: usersTable.subscriptionStatus,
     subscriptionPaidUntil: usersTable.subscriptionPaidUntil,
     subscriptionRef: usersTable.subscriptionRef,
+    paymentProofUrl: usersTable.paymentProofUrl,
+    requestedPlan: usersTable.requestedPlan,
+    requestedBillingCycle: usersTable.requestedBillingCycle,
     trialStartedAt: usersTable.trialStartedAt,
     trialExpiresAt: usersTable.trialExpiresAt,
     createdAt: usersTable.createdAt,
@@ -45,11 +48,23 @@ router.get("/admin/users", requireSuperAdmin, async (req, res) => {
 
   return res.json(users.map(u => ({
     ...u,
+    hasPaymentProof: !!u.paymentProofUrl,
+    paymentProofUrl: undefined,
     subscriptionPaidUntil: u.subscriptionPaidUntil?.toISOString() ?? null,
     trialStartedAt: u.trialStartedAt?.toISOString() ?? null,
     trialExpiresAt: u.trialExpiresAt?.toISOString() ?? null,
     createdAt: u.createdAt.toISOString(),
   })));
+});
+
+// GET /admin/users/:id/payment-proof — return proof image for a specific pending user
+router.get("/admin/users/:id/payment-proof", requireSuperAdmin, async (req, res) => {
+  const { id } = req.params;
+  const [user] = await db.select({ paymentProofUrl: usersTable.paymentProofUrl })
+    .from(usersTable).where(eq(usersTable.id, id));
+  if (!user) return res.status(404).json({ error: "User not found" });
+  if (!user.paymentProofUrl) return res.status(404).json({ error: "No proof on file" });
+  return res.json({ proof: user.paymentProofUrl });
 });
 
 router.put("/admin/users/:id", requireSuperAdmin, async (req, res) => {

@@ -29,13 +29,21 @@ router.get("/children", async (req, res) => {
   );
 });
 
-// Create a child
+// Create a child — only family and superadmin can create child profiles
 router.post("/children", async (req, res) => {
   const parsed = CreateChildBody.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid input", details: parsed.error.issues });
   }
   const userId = getUserId(req);
+  if (userId) {
+    const { usersTable } = await import("@workspace/db");
+    const { eq: eqFn } = await import("drizzle-orm");
+    const [creator] = await db.select({ role: usersTable.role }).from(usersTable).where(eqFn(usersTable.id, userId));
+    if (creator && creator.role !== "family" && creator.role !== "superadmin") {
+      return res.status(403).json({ error: "Only family accounts and administrators can create child profiles." });
+    }
+  }
   const [child] = await db.insert(childrenTable).values({ ...parsed.data, userId }).returning();
   // Add timeline event
   await db.insert(timelineEventsTable).values({
@@ -90,10 +98,20 @@ router.patch("/children/:id", async (req, res) => {
   });
 });
 
-// Delete a child
+// Delete a child — only family (owner) and superadmin can delete
 router.delete("/children/:id", async (req, res) => {
   const parsed = DeleteChildParams.safeParse({ id: Number(req.params.id) });
   if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+
+  const userId = getUserId(req);
+  if (userId) {
+    const { usersTable } = await import("@workspace/db");
+    const { eq: eqFn } = await import("drizzle-orm");
+    const [actor] = await db.select({ role: usersTable.role }).from(usersTable).where(eqFn(usersTable.id, userId));
+    if (actor && actor.role !== "family" && actor.role !== "superadmin") {
+      return res.status(403).json({ error: "Only family accounts and administrators can delete child profiles." });
+    }
+  }
 
   await db.delete(childrenTable).where(eq(childrenTable.id, parsed.data.id));
   return res.status(204).send();

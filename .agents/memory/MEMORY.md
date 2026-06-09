@@ -1,7 +1,2 @@
-- [NEOBRAIN dashboard architecture](neobrain-dashboards.md) — 4 roles use different render patterns; Admin/Parent/Doctor use TABS Record, Therapist uses TAB_CONTENT inline
-- [NEOBRAIN API auth pattern](neobrain-api-auth.md) — admin billing routes expect `Authorization: Bearer <userId>` header (not JWT); userId from useAuth()
-- [PH_REGIONS source of truth](ph-regions.md) — all Philippine region/province selects must use PH_REGIONS from @/lib/philippineRegions; never hardcode province lists
-- [Type field corrections](type-field-corrections.md) — TimelineEvent uses `occurredAt` not `createdAt`; Report has no `status`, use `urgencyLevel`; Screening has no `screenedBy` or `notes`; Appointment has no `appointmentType`, use `telehealth` boolean.
-- [Lucide icon gaps](lucide-icon-gaps.md) — `FilePdf` does not exist in lucide-react; use `FileText`/`FileJson`/`Database` for document type icons.
-- [BrainGym timer pattern](braingym-timer.md) — BrainGymTab uses useRef+useEffect interval for live countdown; completeActivity no longer requires selectedChild (childId=null fallback allowed).
-- [Billing payment UI](billing-payment-ui.md) — Payment section uses AXPay Remit-style gradient cards (GCash blue, BPI red); TXN ref auto-generated as TXN-YYYYMMDD-5CHARUID; no external payment gateway.
+- [Payment system](payment-system.md) — manual GCash/BPI proof-upload flow; DB cols paymentProofUrl/requestedPlan/requestedBillingCycle on usersTable; activate applies requestedPlan; reject endpoint reverts to free
+- [Child ownership](child-ownership.md) — only family + superadmin can POST/DELETE /children; school/clinic/govt can read/contribute but not own
