@@ -51,10 +51,23 @@ import FloatingChat from "@/components/ui/FloatingChat";
 
 const queryClient = new QueryClient();
 
+// Maps each role to its canonical dashboard path
+const ROLE_HOME: Record<string, string> = {
+  family:     "/family",
+  clinic:     "/clinic",
+  school:     "/school",
+  government: "/government",
+  superadmin: "/admin",
+};
+
+function roleHome(role: string): string {
+  return ROLE_HOME[role] ?? `/${role}`;
+}
+
 function ProtectedRoute({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) {
   const { user } = useAuth();
   if (!user) return <Redirect to="/login" />;
-  if (requiredRole && user.role !== requiredRole) return <Redirect to={`/${user.role}`} />;
+  if (requiredRole && user.role !== requiredRole) return <Redirect to={roleHome(user.role)} />;
   return <>{children}</>;
 }
 
@@ -67,7 +80,11 @@ function AppRoutes() {
       <Route path="/" component={Home} />
       <Route path="/demo" component={Demo} />
       <Route path="/login">
-        {user ? <Redirect to={`/${user.role}`} /> : <Login />}
+        {user ? <Redirect to={roleHome(user.role)} /> : <Login />}
+      </Route>
+      {/* Safety redirect — old /superadmin path → /admin */}
+      <Route path="/superadmin">
+        <Redirect to="/admin" />
       </Route>
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
