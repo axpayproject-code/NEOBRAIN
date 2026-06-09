@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { db, appointmentsTable, childrenTable, timelineEventsTable } from "@workspace/db";
+import { db, appointmentsTable, childrenTable, timelineEventsTable, usersTable } from "@workspace/db";
 import { eq, desc, and } from "drizzle-orm";
 import { CreateAppointmentBody, GetAppointmentParams, ListAppointmentsQueryParams, UpdateAppointmentBody, UpdateAppointmentParams } from "@workspace/api-zod";
+import { sendEmail, notificationEmail } from "../lib/email";
 
 const router = Router();
 
@@ -129,6 +130,56 @@ router.patch("/appointments/:id", async (req, res) => {
     childName: null,
     scheduledAt: updated.scheduledAt.toISOString(),
     createdAt: updated.createdAt.toISOString(),
+  });
+});
+
+// POST /appointments/:id/pay — submit payment proof for a booked appointment
+router.post("/appointments/:id/pay", async (req, res) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
+  const userId = getUserId(req);
+  const { paymentMethod, referenceNumber, proofImageBase64, amount } = req.body as {
+    paymentMethod: string;
+    referenceNumber: string;
+    proofImageBase64?: string;
+    amount?: number;
+  };
+
+  if (!paymentMethod) return res.status(400).json({ error: "Payment method is required." });
+  if (!referenceNumber || referenceNumber.trim().length < 3) return res.status(400).json({ error: "A valid transaction reference is required." });
+  if (!proofImageBase64 || typeof proofImageBase64 !== "string") return res.status(400).json({ error: "A photo proof of payment is required." });
+  if (proofImageBase64.length > 5_000_000) return res.status(400).json({ error: "Proof image is too large. Please compress below 3MB." });
+
+  const [appt] = await db.select().from(appointmentsTable).where(eq(appointmentsTable.id, id));
+  if (!appt) return res.status(404).json({ error: "Appointment not found" });
+
+  const [updated] = await db.update(appointmentsTable).set({
+    paymentStatus: "pending_verification",
+    paymentRef: referenceNumber.trim(),
+    paymentProofUrl: proofImageBase64,
+    feeAmount: amount ?? appt.feeAmount ?? 0,
+  }).where(eq(appointmentsTable.id, id)).returning();
+
+  if (!updated) return res.status(404).json({ error: "Not found" });
+
+  // Send notification email if user info available
+  if (userId) {
+    const [userInfo] = await db.select({ name: usersTable.name, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, userId));
+    if (userInfo) {
+      sendEmail(notificationEmail(
+        userInfo.name, userInfo.email,
+        "Appointment Payment Submitted",
+        `Your payment proof for your appointment with ${appt.specialistName} has been submitted. Our team will verify it within 1–4 business hours and confirm your booking.`,
+      )).catch(() => {});
+    }
+  }
+
+  return res.json({
+    success: true,
+    paymentStatus: updated.paymentStatus,
+    ref: updated.paymentRef,
+    message: "Payment proof received. Appointment will be confirmed within 1–4 business hours.",
   });
 });
 

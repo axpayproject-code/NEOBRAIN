@@ -18,6 +18,8 @@ export const appointmentsTable = pgTable("appointments", {
   location: text("location"),
   regionId: text("region_id"),
   province: text("province"),
+  paymentRef: text("payment_ref"),
+  paymentProofUrl: text("payment_proof_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

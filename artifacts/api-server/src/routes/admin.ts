@@ -404,4 +404,113 @@ router.get("/admin/users/:id/family-details", requireSuperAdmin, async (req, res
   });
 });
 
+// ── Appointment Payment Management ────────────────────────────────────────────
+
+// GET /admin/appointments/pending-payment — list appointments awaiting payment verification
+router.get("/admin/appointments/pending-payment", requireSuperAdmin, async (req, res) => {
+  const rows = await db
+    .select({
+      appointment: appointmentsTable,
+      childName: childrenTable.fullName,
+      userId: childrenTable.userId,
+    })
+    .from(appointmentsTable)
+    .leftJoin(childrenTable, eq(appointmentsTable.childId, childrenTable.id))
+    .where(eq(appointmentsTable.paymentStatus, "pending_verification"))
+    .orderBy(desc(appointmentsTable.createdAt));
+
+  // Fetch parent name/email for each
+  const userIds = [...new Set(rows.map(r => r.userId).filter(Boolean))] as string[];
+  const users = userIds.length > 0
+    ? await db.select({ id: usersTable.id, name: usersTable.name, email: usersTable.email })
+        .from(usersTable).where(inArray(usersTable.id, userIds))
+    : [];
+  const userMap = Object.fromEntries(users.map(u => [u.id, u]));
+
+  return res.json(rows.map(r => ({
+    ...r.appointment,
+    scheduledAt: r.appointment.scheduledAt.toISOString(),
+    createdAt: r.appointment.createdAt.toISOString(),
+    childName: r.childName ?? null,
+    hasPaymentProof: !!r.appointment.paymentProofUrl,
+    paymentProofUrl: undefined,
+    parentName: r.userId ? (userMap[r.userId]?.name ?? null) : null,
+    parentEmail: r.userId ? (userMap[r.userId]?.email ?? null) : null,
+  })));
+});
+
+// GET /admin/appointments/:id/payment-proof — return proof image for a specific appointment
+router.get("/admin/appointments/:id/payment-proof", requireSuperAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  const [appt] = await db.select({ paymentProofUrl: appointmentsTable.paymentProofUrl })
+    .from(appointmentsTable).where(eq(appointmentsTable.id, id));
+  if (!appt) return res.status(404).json({ error: "Appointment not found" });
+  if (!appt.paymentProofUrl) return res.status(404).json({ error: "No proof on file" });
+  return res.json({ proof: appt.paymentProofUrl });
+});
+
+// POST /admin/appointments/:id/approve-payment — admin confirms payment, marks appointment active
+router.post("/admin/appointments/:id/approve-payment", requireSuperAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
+  const [appt] = await db.select().from(appointmentsTable).where(eq(appointmentsTable.id, id));
+  if (!appt) return res.status(404).json({ error: "Appointment not found" });
+
+  const [updated] = await db.update(appointmentsTable).set({
+    paymentStatus: "paid",
+    paymentProofUrl: null,
+    status: "scheduled",
+  }).where(eq(appointmentsTable.id, id)).returning();
+
+  // Notify family
+  const [child] = await db.select({ userId: childrenTable.userId }).from(childrenTable).where(eq(childrenTable.id, appt.childId));
+  if (child?.userId) {
+    const [u] = await db.select({ name: usersTable.name, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, child.userId));
+    if (u) {
+      const { sendEmail: se, notificationEmail: ne } = await import("../lib/email");
+      se(ne(
+        u.name, u.email,
+        "Appointment Confirmed — Payment Verified",
+        `Your payment for your appointment with ${appt.specialistName} on ${appt.scheduledAt.toLocaleDateString("en-PH")} has been verified. Your booking is now confirmed. The specialist will send you the session details shortly.`,
+      )).catch(() => {});
+    }
+  }
+
+  return res.json({ success: true, paymentStatus: updated.paymentStatus, status: updated.status });
+});
+
+// POST /admin/appointments/:id/reject-payment — admin rejects, resets to unpaid
+router.post("/admin/appointments/:id/reject-payment", requireSuperAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  const { reason } = req.body as { reason?: string };
+
+  const [appt] = await db.select().from(appointmentsTable).where(eq(appointmentsTable.id, id));
+  if (!appt) return res.status(404).json({ error: "Appointment not found" });
+
+  await db.update(appointmentsTable).set({
+    paymentStatus: "unpaid",
+    paymentRef: null,
+    paymentProofUrl: null,
+  }).where(eq(appointmentsTable.id, id));
+
+  // Notify family
+  const [child] = await db.select({ userId: childrenTable.userId }).from(childrenTable).where(eq(childrenTable.id, appt.childId));
+  if (child?.userId) {
+    const [u] = await db.select({ name: usersTable.name, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, child.userId));
+    if (u) {
+      const { sendEmail: se, notificationEmail: ne } = await import("../lib/email");
+      se(ne(
+        u.name, u.email,
+        "Appointment Payment Verification Unsuccessful",
+        `We were unable to verify your payment for your appointment with ${appt.specialistName}${reason ? `: ${reason}` : ". The reference or proof provided could not be confirmed."}  Please resubmit your payment proof or contact us at info@accentecxai.com.`,
+      )).catch(() => {});
+    }
+  }
+
+  return res.json({ success: true, message: "Payment rejected. Appointment reset to unpaid." });
+});
+
 export default router;

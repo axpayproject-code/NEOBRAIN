@@ -245,102 +245,125 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
 
   // ── Payment ───────────────────────────────────────────────────
   if (step === "payment") {
+    const txnRef = createdApptId
+      ? `APPT-${form.specialistType.replace(/_/g, "").toUpperCase().slice(0, 6)}-${form.date.replace(/-/g, "")}-${String(createdApptId).padStart(4, "0")}`
+      : "";
+
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-[#0038A8]" />
-            Manual Payment
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-[#163300]">
+            <ShieldCheck className="w-5 h-5 text-[#9FE870]" />
+            Pay Consultation Fee
           </CardTitle>
-          <CardDescription>Pay via GCash, Maya, or bank transfer then upload your proof</CardDescription>
+          <CardDescription>Pay via GCash or BPI then upload your proof to confirm the booking</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Order summary */}
-          <div className="rounded-xl bg-[#0038A8]/5 border border-[#0038A8]/20 p-4 space-y-2">
-            <p className="text-sm font-semibold text-[#0038A8]">Order Summary</p>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{selectedSpecialist?.name}, {selectedSpecialist?.credentials}</span>
-              <span className="font-bold text-[#0038A8]">₱{feeAmount.toLocaleString()}</span>
+          <div className="rounded-xl bg-[#163300] p-4 space-y-2 text-white">
+            <p className="text-xs font-semibold text-[#9FE870] uppercase tracking-wider">Order Summary</p>
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="font-semibold text-sm">{selectedSpecialist?.name}</p>
+                <p className="text-xs text-white/70">{selectedSpecialist?.credentials}</p>
+              </div>
+              <p className="text-xl font-bold text-[#9FE870]">₱{feeAmount.toLocaleString()}</p>
             </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-white/60 border-t border-white/10 pt-2">
               <span>{new Date(`${form.date}T${form.time}`).toLocaleDateString("en-PH", { dateStyle: "medium" })} · {fmt12h(form.time)}</span>
-              <Badge className={`text-xs ${form.telehealth ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"}`}>{form.telehealth ? "Telehealth" : "In-Person"}</Badge>
+              <Badge className={`text-xs ${form.telehealth ? "bg-blue-500/20 text-blue-200 border-blue-400/30" : "bg-green-500/20 text-green-200 border-green-400/30"}`}>
+                {form.telehealth ? "Telehealth" : "In-Person"}
+              </Badge>
             </div>
           </div>
 
-          {/* Step 1: Select payment channel */}
+          {/* TXN Reference */}
+          {txnRef && (
+            <div className="rounded-xl border border-[#163300]/20 bg-[#163300]/5 p-3 space-y-1">
+              <p className="text-xs font-semibold text-[#163300] uppercase tracking-wide">Your Reference Code</p>
+              <p className="font-mono text-base font-bold text-[#163300] tracking-widest">{txnRef}</p>
+              <p className="text-xs text-muted-foreground">Use this as your payment remark/notes when sending. Include it in the screenshot.</p>
+            </div>
+          )}
+
+          {/* Step 1: Choose payment channel */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold">1. Choose Payment Channel</Label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <Label className="text-sm font-semibold text-[#163300]">1. Choose Payment Channel</Label>
+            <div className="grid grid-cols-2 gap-3">
               {PAYMENT_CHANNELS.map(ch => (
                 <button
                   key={ch.id}
                   onClick={() => setPaymentMethod(ch.id)}
-                  className={`rounded-xl border px-3 py-3 text-left transition-all ${
+                  className={`rounded-xl border-2 p-0 overflow-hidden text-left transition-all ${
                     paymentMethod === ch.id
-                      ? "border-[#0038A8] bg-[#0038A8]/5 ring-1 ring-[#0038A8]"
-                      : "border-gray-200 hover:border-gray-400"
+                      ? "border-[#163300] ring-2 ring-[#9FE870] ring-offset-1"
+                      : "border-gray-200 hover:border-[#163300]/40"
                   }`}
                 >
-                  <div className="text-xl mb-1">{ch.icon}</div>
-                  <p className="text-xs font-semibold leading-tight">{ch.name}</p>
+                  <div className={`bg-gradient-to-br ${ch.gradient} px-4 py-3 flex items-center gap-3`}>
+                    <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center font-black text-white text-lg">{ch.logo}</div>
+                    <div>
+                      <p className="text-sm font-bold text-white leading-tight">{ch.name}</p>
+                      <p className="text-[10px] text-white/80">{ch.label}</p>
+                    </div>
+                  </div>
+                  <div className="px-3 py-2 bg-white">
+                    <p className="text-[10px] text-muted-foreground font-medium">Account Name</p>
+                    <p className="text-xs font-semibold leading-tight truncate">{ch.accountName}</p>
+                    <p className="text-[10px] text-muted-foreground font-medium mt-1">Account Number</p>
+                    <p className="text-sm font-mono font-bold text-[#163300]">{ch.accountNumber}</p>
+                  </div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Step 2: Payment instructions */}
+          {/* Step 2: Transfer instructions */}
           {selectedChannel && (
-            <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 space-y-2">
-              <p className="text-sm font-semibold text-blue-900">{selectedChannel.icon} {selectedChannel.name} Instructions</p>
-              <div className="flex justify-between text-sm">
-                <span className="text-blue-700 font-medium">Account Name</span>
-                <span className="font-bold text-blue-900">{selectedChannel.accountName}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-blue-700 font-medium">Account Number</span>
-                <span className="font-mono font-bold text-blue-900 text-base">{selectedChannel.accountNumber}</span>
-              </div>
-              <div className="border-t border-blue-200 pt-2">
-                <p className="text-xs text-blue-700">{selectedChannel.instructions}</p>
-              </div>
-              <div className="flex justify-between font-bold text-sm border-t border-blue-200 pt-2">
-                <span className="text-blue-800">Amount to send</span>
-                <span className="text-[#0038A8] text-base">₱{feeAmount.toLocaleString()}</span>
+            <div className="rounded-xl border border-[#163300]/20 bg-[#f6fff0] p-4 space-y-2">
+              <p className="text-xs font-bold text-[#163300] uppercase tracking-wide">How to Pay via {selectedChannel.name}</p>
+              <ol className="space-y-1.5">
+                {selectedChannel.steps.map((step, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-xs text-[#163300]/80">
+                    <span className="flex-shrink-0 w-4 h-4 rounded-full bg-[#9FE870] text-[#163300] font-bold text-[10px] flex items-center justify-center mt-0.5">{i + 1}</span>
+                    {step}
+                  </li>
+                ))}
+              </ol>
+              <div className="flex justify-between items-center font-bold text-sm border-t border-[#163300]/10 pt-2 mt-1">
+                <span className="text-[#163300]">Send exactly</span>
+                <span className="text-lg text-[#163300]">₱{feeAmount.toLocaleString()}</span>
               </div>
             </div>
           )}
 
-          {/* Step 3: Enter reference number */}
+          {/* Step 3: Reference number */}
           {paymentMethod && (
             <div className="space-y-1">
-              <Label className="text-sm font-semibold">2. Enter Transaction Reference Number</Label>
+              <Label className="text-sm font-semibold text-[#163300]">2. Paste Your Transaction Reference</Label>
               <Input
-                placeholder="e.g. 0917-888-6328 → 0917-555-1234 / TXN-202506281045"
+                placeholder="Copy from your payment app confirmation screen"
                 value={referenceNumber}
                 onChange={e => setReferenceNumber(e.target.value)}
+                className="font-mono"
               />
-              <p className="text-xs text-muted-foreground">Copy the reference or confirmation number from your payment app.</p>
+              <p className="text-xs text-muted-foreground">The 12–20 digit reference or confirmation number shown after payment.</p>
             </div>
           )}
 
-          {/* Step 4: Upload proof */}
+          {/* Step 4: Upload proof (required) */}
           {paymentMethod && (
             <div className="space-y-2">
-              <Label className="text-sm font-semibold">3. Upload Proof Screenshot <span className="text-muted-foreground font-normal">(recommended)</span></Label>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleProofUpload}
-              />
+              <Label className="text-sm font-semibold text-[#163300]">
+                3. Upload Payment Screenshot <span className="text-red-500">*</span>
+              </Label>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleProofUpload} />
               {proofBase64 ? (
-                <div className="rounded-xl border border-green-300 bg-green-50 p-3 flex items-center gap-3">
-                  <img src={proofBase64} alt="Proof" className="h-14 w-14 rounded-lg object-cover border" />
+                <div className="rounded-xl border-2 border-[#9FE870] bg-green-50 p-3 flex items-center gap-3">
+                  <img src={proofBase64} alt="Proof" className="h-14 w-14 rounded-lg object-cover border border-green-200" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-green-800 truncate">{proofFileName}</p>
-                    <p className="text-xs text-green-600">Screenshot uploaded successfully</p>
+                    <p className="text-sm font-semibold text-green-800 truncate">{proofFileName}</p>
+                    <p className="text-xs text-green-600">Screenshot uploaded — ready to submit</p>
                   </div>
                   <button onClick={() => { setProofBase64(null); setProofFileName(null); }} className="text-gray-400 hover:text-gray-600">
                     <X className="h-4 w-4" />
@@ -349,29 +372,29 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
               ) : (
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="w-full rounded-xl border-2 border-dashed border-gray-300 hover:border-[#0038A8]/40 p-5 flex flex-col items-center gap-2 text-muted-foreground transition-colors"
+                  className="w-full rounded-xl border-2 border-dashed border-[#163300]/30 hover:border-[#163300]/60 hover:bg-[#163300]/5 p-5 flex flex-col items-center gap-2 text-muted-foreground transition-colors"
                 >
-                  <Upload className="h-6 w-6" />
-                  <span className="text-sm">Click to upload screenshot</span>
+                  <Upload className="h-6 w-6 text-[#163300]/40" />
+                  <span className="text-sm font-medium text-[#163300]">Click to upload screenshot</span>
                   <span className="text-xs">PNG, JPG, WEBP — max 5MB</span>
                 </button>
               )}
             </div>
           )}
 
-          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">{error}</p>}
+          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>}
 
-          <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 flex items-start gap-2 text-xs text-gray-600">
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 flex items-start gap-2 text-xs text-amber-800">
             <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-            <span>Your payment will be verified by a NEOBRAIN staff member within 1–4 business hours. Your appointment is secured once verified.</span>
+            <span>A NEOBRAIN staff member will verify your payment within 1–4 business hours. Your appointment slot is held during verification.</span>
           </div>
 
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1" onClick={() => setStep("review")} disabled={isSubmitting}>Back</Button>
             <Button
               onClick={handleSubmitPayment}
-              disabled={!paymentValid || isSubmitting}
-              className="flex-1 bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2"
+              disabled={!paymentValid || !proofBase64 || isSubmitting}
+              className="flex-1 bg-[#163300] hover:bg-[#163300]/90 text-[#9FE870] gap-2"
             >
               <ImageIcon className="w-4 h-4" />
               {isSubmitting ? "Submitting…" : "Submit Payment Proof"}
@@ -420,7 +443,7 @@ export default function AppointmentScheduler({ onSuccess, onCancel, defaultSpeci
               <ShieldCheck className="h-5 w-5 text-amber-700 shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-amber-900">Consultation Fee: ₱{feeAmount.toLocaleString()}</p>
-                <p className="text-xs text-amber-700">You will pay via GCash, Maya, or bank transfer on the next step</p>
+                <p className="text-xs text-amber-700">You will pay via GCash or BPI on the next step</p>
               </div>
             </div>
           ) : (
