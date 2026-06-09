@@ -15,6 +15,8 @@ export const childrenTable = pgTable("children", {
   riskLevel: text("risk_level").notNull().default("low"),
   diagnosisNotes: text("diagnosis_notes"),
   therapistId: integer("therapist_id"),
+  clinicName: text("clinic_name"),
+  assignedDoctor: text("assigned_doctor"),
   userId: uuid("user_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),

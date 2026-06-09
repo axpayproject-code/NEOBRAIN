@@ -155,11 +155,11 @@ function AddChildDialog({ onSuccess, maxChildren, currentCount }: { onSuccess: (
   const atLimit = maxChildren !== Infinity && currentCount >= maxChildren;
   const createChild = useCreateChild();
   const { register, handleSubmit, setValue, reset, formState: { isSubmitting } } = useForm({
-    defaultValues: { fullName: "", dateOfBirth: "", gender: "male", parentName: "", schoolName: "" }
+    defaultValues: { fullName: "", dateOfBirth: "", gender: "male", parentName: "", schoolName: "", clinicName: "", assignedDoctor: "" }
   });
 
-  const onSubmit = async (data: { fullName: string; dateOfBirth: string; gender: string; parentName: string; schoolName: string }) => {
-    await createChild.mutateAsync({ data: { fullName: data.fullName, dateOfBirth: data.dateOfBirth, gender: data.gender as "male" | "female" | "other", parentName: data.parentName, schoolName: data.schoolName } });
+  const onSubmit = async (data: { fullName: string; dateOfBirth: string; gender: string; parentName: string; schoolName: string; clinicName: string; assignedDoctor: string }) => {
+    await createChild.mutateAsync({ data: { fullName: data.fullName, dateOfBirth: data.dateOfBirth, gender: data.gender as "male" | "female" | "other", parentName: data.parentName, schoolName: data.schoolName || undefined, clinicName: data.clinicName || undefined, assignedDoctor: data.assignedDoctor || undefined } });
     reset();
     setOpen(false);
     onSuccess();
@@ -231,8 +231,19 @@ function AddChildDialog({ onSuccess, maxChildren, currentCount }: { onSuccess: (
             <Input {...register("parentName")} placeholder="Your name" data-testid="input-parent-name" />
           </div>
           <div className="space-y-1.5">
-            <Label>School Name (optional)</Label>
-            <Input {...register("schoolName")} placeholder="Child's school" data-testid="input-school-name" />
+            <Label>School Attending <span className="text-muted-foreground font-normal">(optional)</span></Label>
+            <Input {...register("schoolName")} placeholder="e.g. Ateneo de Manila Grade School" data-testid="input-school-name" />
+          </div>
+          <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">Care Team</p>
+            <div className="space-y-1.5">
+              <Label>Clinic / Hospital <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Input {...register("clinicName")} placeholder="e.g. St. Luke's Developmental Pediatrics" data-testid="input-clinic-name" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Attending Doctor / Therapist <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Input {...register("assignedDoctor")} placeholder="e.g. Dr. Maria Santos, DPSP" data-testid="input-assigned-doctor" />
+            </div>
           </div>
           <Button type="submit" className="w-full rounded-full" disabled={isSubmitting} data-testid="button-submit-child">
             {isSubmitting ? "Saving..." : "Create Profile"}

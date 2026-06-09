@@ -16,6 +16,8 @@ export interface ChildUpdate {
   parentEmail?: string;
   parentPhone?: string;
   schoolName?: string;
+  clinicName?: string;
+  assignedDoctor?: string;
   riskLevel?: ChildUpdateRiskLevel;
   diagnosisNotes?: string;
 }

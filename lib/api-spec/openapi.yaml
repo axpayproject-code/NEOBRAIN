@@ -1253,6 +1253,10 @@ components:
           type: ["string", "null"]
         therapistId:
           type: ["integer", "null"]
+        clinicName:
+          type: ["string", "null"]
+        assignedDoctor:
+          type: ["string", "null"]
         createdAt:
           type: string
         updatedAt:
@@ -1277,6 +1281,10 @@ components:
           type: string
         schoolName:
           type: string
+        clinicName:
+          type: string
+        assignedDoctor:
+          type: string
         diagnosisNotes:
           type: string
 
@@ -1297,6 +1305,10 @@ components:
         parentPhone:
           type: string
         schoolName:
+          type: string
+        clinicName:
+          type: string
+        assignedDoctor:
           type: string
         riskLevel:
           type: string

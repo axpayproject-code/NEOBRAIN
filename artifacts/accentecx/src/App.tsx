@@ -48,7 +48,6 @@ import TherapyPlansList from "@/pages/TherapyPlansList";
 import ReportsList from "@/pages/ReportsList";
 import Settings from "@/pages/Settings";
 import GamesAssessment from "@/pages/GamesAssessment";
-import FloatingChat from "@/components/ui/FloatingChat";
 
 const queryClient = new QueryClient();
 
@@ -172,7 +171,6 @@ function App() {
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <AppRoutes />
           </WouterRouter>
-          <FloatingChat />
           <Toaster />
         </AuthProvider>
       </TooltipProvider>

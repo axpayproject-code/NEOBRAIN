@@ -28,6 +28,10 @@ export interface Child {
   diagnosisNotes?: string | null;
   /** @nullable */
   therapistId?: number | null;
+  /** @nullable */
+  clinicName?: string | null;
+  /** @nullable */
+  assignedDoctor?: string | null;
   createdAt: string;
   /** @nullable */
   updatedAt?: string | null;

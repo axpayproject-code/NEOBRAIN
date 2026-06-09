@@ -15,5 +15,7 @@ export interface ChildInput {
   parentEmail?: string;
   parentPhone?: string;
   schoolName?: string;
+  clinicName?: string;
+  assignedDoctor?: string;
   diagnosisNotes?: string;
 }

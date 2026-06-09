@@ -10,7 +10,7 @@ import {
   X, User, Clock, BarChart3, ClipboardList, Calendar, HeartPulse,
   Brain, Dumbbell, FileText, ImageIcon, ChevronRight, AlertTriangle,
   CheckCircle, Circle, TrendingUp, Zap, Activity, Star, Video,
-  Settings, BookOpen, MapPin, Flag, Play, Upload
+  Settings, BookOpen, MapPin, Flag, Play, Upload, Stethoscope, Building2, GraduationCap, UserRound
 } from "lucide-react";
 import {
   useGetChildDomainScores, useGetChildTimeline,
@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from "framer-motion";
 type Child = {
   id: number; fullName: string; dateOfBirth: string; gender: string;
   parentName?: string | null; schoolName?: string | null;
+  clinicName?: string | null; assignedDoctor?: string | null;
   diagnosisNotes?: string | null; riskLevel: string;
 };
 
@@ -139,6 +140,128 @@ function SummaryTab({ child }: { child: Child }) {
           </CardContent>
         </Card>
       )}
+
+      {/* Care Team */}
+      {(child.clinicName || child.assignedDoctor || child.schoolName || child.parentName) && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm font-semibold mb-3">Care Team</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {child.assignedDoctor && (
+                <div className="flex items-center gap-3 rounded-xl bg-primary/5 p-3">
+                  <div className="h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                    <Stethoscope className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs text-muted-foreground">Attending Physician</div>
+                    <div className="text-sm font-medium truncate">{child.assignedDoctor}</div>
+                  </div>
+                </div>
+              )}
+              {child.clinicName && (
+                <div className="flex items-center gap-3 rounded-xl bg-blue-50 p-3">
+                  <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    <Building2 className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs text-muted-foreground">Clinic / Hospital</div>
+                    <div className="text-sm font-medium truncate">{child.clinicName}</div>
+                  </div>
+                </div>
+              )}
+              {child.schoolName && (
+                <div className="flex items-center gap-3 rounded-xl bg-amber-50 p-3">
+                  <div className="h-9 w-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                    <GraduationCap className="h-4 w-4 text-amber-700" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs text-muted-foreground">School</div>
+                    <div className="text-sm font-medium truncate">{child.schoolName}</div>
+                  </div>
+                </div>
+              )}
+              {child.parentName && (
+                <div className="flex items-center gap-3 rounded-xl bg-green-50 p-3">
+                  <div className="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                    <UserRound className="h-4 w-4 text-green-700" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs text-muted-foreground">Parent / Guardian</div>
+                    <div className="text-sm font-medium truncate">{child.parentName}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Cross-source Latest Situation */}
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <div className="text-sm font-semibold">Latest Situation</div>
+          {/* Latest screening */}
+          {childScreenings.length > 0 ? (() => {
+            const latest = [...childScreenings].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+            return (
+              <div className="flex items-start gap-3 border-b pb-3">
+                <ClipboardList className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-xs text-muted-foreground">Last Assessment</div>
+                  <div className="text-sm font-medium capitalize">{(latest.screeningType ?? "Screening").replace(/_/g, " ")}</div>
+                  <div className="text-xs text-muted-foreground">{new Date(latest.createdAt).toLocaleDateString("en-PH", { dateStyle: "medium" })}</div>
+                </div>
+              </div>
+            );
+          })() : (
+            <div className="flex items-start gap-3 border-b pb-3">
+              <ClipboardList className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div><div className="text-xs text-muted-foreground">Last Assessment</div><div className="text-sm text-muted-foreground italic">No screenings yet</div></div>
+            </div>
+          )}
+          {/* Latest appointment */}
+          {childAppointments.length > 0 ? (() => {
+            const latest = [...childAppointments].sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime())[0];
+            return (
+              <div className="flex items-start gap-3 border-b pb-3">
+                <Calendar className="h-4 w-4 text-purple-600 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-xs text-muted-foreground">Latest Appointment</div>
+                  <div className="text-sm font-medium">{latest.specialistName ?? latest.specialistType}</div>
+                  <div className="text-xs text-muted-foreground">{new Date(latest.scheduledAt).toLocaleDateString("en-PH", { dateStyle: "medium" })} · <span className="capitalize">{latest.status}</span></div>
+                </div>
+              </div>
+            );
+          })() : (
+            <div className="flex items-start gap-3 border-b pb-3">
+              <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div><div className="text-xs text-muted-foreground">Latest Appointment</div><div className="text-sm text-muted-foreground italic">No appointments yet</div></div>
+            </div>
+          )}
+          {/* Active therapy */}
+          {activePlans.length > 0 ? (
+            <div className="flex items-start gap-3">
+              <HeartPulse className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <div className="text-xs text-muted-foreground">Active Therapy</div>
+                <div className="flex flex-wrap gap-1 mt-0.5">
+                  {activePlans.slice(0, 3).map(p => (
+                    <span key={p.id} className="text-xs bg-green-100 text-green-800 rounded-full px-2 py-0.5 capitalize">
+                      {(p.therapyType ?? "therapy").replace(/_/g, " ")}
+                    </span>
+                  ))}
+                  {activePlans.length > 3 && <span className="text-xs text-muted-foreground">+{activePlans.length - 3} more</span>}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start gap-3">
+              <HeartPulse className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div><div className="text-xs text-muted-foreground">Active Therapy</div><div className="text-sm text-muted-foreground italic">No active therapy plans</div></div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Diagnosis notes */}
       {child.diagnosisNotes && (
@@ -769,6 +892,17 @@ function SettingsProfileTab({ child }: { child: Child }) {
             <label className="text-xs font-semibold">Parent / Guardian</label>
             <input defaultValue={child.parentName ?? user?.name ?? ""} className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm" />
           </div>
+          <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-3 space-y-3">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide">Care Team</p>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold">Clinic / Hospital</label>
+              <input defaultValue={child.clinicName ?? ""} placeholder="e.g. St. Luke's Developmental Pediatrics" className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold">Attending Doctor / Therapist</label>
+              <input defaultValue={child.assignedDoctor ?? ""} placeholder="e.g. Dr. Maria Santos, DPSP" className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm" />
+            </div>
+          </div>
           <Button className="rounded-xl w-full gap-2" onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000); }}>
             {saved ? <><CheckCircle className="h-4 w-4" /> Saved!</> : "Save Changes"}
           </Button>
@@ -814,6 +948,8 @@ function DocumentsTab({ child }: { child: Child }) {
             <div className="text-muted-foreground">Gender</div><div className="capitalize">{child.gender}</div>
             <div className="text-muted-foreground">Parent/Guardian</div><div>{child.parentName ?? "—"}</div>
             <div className="text-muted-foreground">School</div><div>{child.schoolName ?? "—"}</div>
+            <div className="text-muted-foreground">Clinic</div><div>{child.clinicName ?? "—"}</div>
+            <div className="text-muted-foreground">Doctor</div><div>{child.assignedDoctor ?? "—"}</div>
           </div>
         </CardContent>
       </Card>

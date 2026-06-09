@@ -52,6 +52,8 @@ export const ListChildrenResponseItem = zod.object({
   "riskLevel": zod.enum(['low', 'moderate', 'high', 'critical']),
   "diagnosisNotes": zod.string().nullish(),
   "therapistId": zod.number().nullish(),
+  "clinicName": zod.string().nullish(),
+  "assignedDoctor": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })
@@ -69,6 +71,8 @@ export const CreateChildBody = zod.object({
   "parentEmail": zod.string().optional(),
   "parentPhone": zod.string().optional(),
   "schoolName": zod.string().optional(),
+  "clinicName": zod.string().optional(),
+  "assignedDoctor": zod.string().optional(),
   "diagnosisNotes": zod.string().optional()
 })
 
@@ -93,6 +97,8 @@ export const GetChildResponse = zod.object({
   "riskLevel": zod.enum(['low', 'moderate', 'high', 'critical']),
   "diagnosisNotes": zod.string().nullish(),
   "therapistId": zod.number().nullish(),
+  "clinicName": zod.string().nullish(),
+  "assignedDoctor": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })
@@ -113,6 +119,8 @@ export const UpdateChildBody = zod.object({
   "parentEmail": zod.string().optional(),
   "parentPhone": zod.string().optional(),
   "schoolName": zod.string().optional(),
+  "clinicName": zod.string().optional(),
+  "assignedDoctor": zod.string().optional(),
   "riskLevel": zod.enum(['low', 'moderate', 'high', 'critical']).optional(),
   "diagnosisNotes": zod.string().optional()
 })
@@ -130,6 +138,8 @@ export const UpdateChildResponse = zod.object({
   "riskLevel": zod.enum(['low', 'moderate', 'high', 'critical']),
   "diagnosisNotes": zod.string().nullish(),
   "therapistId": zod.number().nullish(),
+  "clinicName": zod.string().nullish(),
+  "assignedDoctor": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })

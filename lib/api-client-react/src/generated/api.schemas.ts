@@ -48,6 +48,10 @@ export interface Child {
   diagnosisNotes?: string | null;
   /** @nullable */
   therapistId?: number | null;
+  /** @nullable */
+  clinicName?: string | null;
+  /** @nullable */
+  assignedDoctor?: string | null;
   createdAt: string;
   /** @nullable */
   updatedAt?: string | null;
@@ -70,6 +74,8 @@ export interface ChildInput {
   parentEmail?: string;
   parentPhone?: string;
   schoolName?: string;
+  clinicName?: string;
+  assignedDoctor?: string;
   diagnosisNotes?: string;
 }
 
@@ -100,6 +106,8 @@ export interface ChildUpdate {
   parentEmail?: string;
   parentPhone?: string;
   schoolName?: string;
+  clinicName?: string;
+  assignedDoctor?: string;
   riskLevel?: ChildUpdateRiskLevel;
   diagnosisNotes?: string;
 }
