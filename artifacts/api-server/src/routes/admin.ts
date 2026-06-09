@@ -622,16 +622,4 @@ router.post("/admin/orgs/:id/reject", requireSuperAdmin, async (req, res) => {
   return res.json({ success: true, message: `${u.name}'s registration rejected and removed.` });
 });
 
-// ─── One-time Bootstrap: elevate a user to superadmin (protected by BOOTSTRAP_TOKEN) ───
-router.post("/admin/bootstrap-superadmin", async (req, res) => {
-  const { email, token } = req.body as { email?: string; token?: string };
-  const expected = process.env.BOOTSTRAP_TOKEN;
-  if (!expected || !token || token !== expected) return res.status(403).json({ error: "Invalid token" });
-  if (!email) return res.status(400).json({ error: "email required" });
-  const [user] = await db.select({ id: usersTable.id, role: usersTable.role }).from(usersTable).where(eq(usersTable.email, email));
-  if (!user) return res.status(404).json({ error: "User not found" });
-  await db.update(usersTable).set({ role: "superadmin", subscriptionTier: "enterprise", subscriptionStatus: "active" }).where(eq(usersTable.id, user.id));
-  return res.json({ success: true, message: `${email} is now superadmin` });
-});
-
 export default router;
