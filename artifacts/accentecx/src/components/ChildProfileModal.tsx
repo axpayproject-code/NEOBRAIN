@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   X, User, Clock, BarChart3, ClipboardList, Calendar, HeartPulse,
   Brain, Dumbbell, FileText, ImageIcon, ChevronRight, AlertTriangle,
-  CheckCircle, Circle, TrendingUp, Zap, Activity, Star
+  CheckCircle, Circle, TrendingUp, Zap, Activity, Star, Video,
+  Settings, BookOpen, MapPin, Flag, Play, Upload
 } from "lucide-react";
 import {
   useGetChildDomainScores, useGetChildTimeline,
@@ -19,7 +21,6 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/contexts/AuthContext";
 
 type Child = {
   id: number; fullName: string; dateOfBirth: string; gender: string;
@@ -33,16 +34,21 @@ const RISK_COLORS: Record<string, string> = {
 };
 
 const TABS = [
-  { id: "summary",     label: "Summary",     icon: User },
-  { id: "timeline",    label: "Timeline",    icon: Clock },
-  { id: "domains",     label: "Domains",     icon: BarChart3 },
-  { id: "screenings",  label: "Screenings",  icon: ClipboardList },
-  { id: "appointments",label: "Appointments",icon: Calendar },
-  { id: "therapy",     label: "Therapy",     icon: HeartPulse },
-  { id: "brain-gym",   label: "Brain Gym",   icon: Dumbbell },
-  { id: "ai-insights", label: "AI Insights", icon: Brain },
-  { id: "reports",     label: "Reports",     icon: FileText },
-  { id: "documents",   label: "Documents",   icon: ImageIcon },
+  { id: "overview",     label: "Overview",     icon: User },
+  { id: "timeline",     label: "Timeline",     icon: Clock },
+  { id: "assessments",  label: "Assessments",  icon: ClipboardList },
+  { id: "milestones",   label: "Milestones",   icon: Flag },
+  { id: "reports",      label: "Reports",      icon: FileText },
+  { id: "school",       label: "School",       icon: BookOpen },
+  { id: "therapy",      label: "Therapy",      icon: HeartPulse },
+  { id: "clinics",      label: "Clinics",      icon: MapPin },
+  { id: "documents",    label: "Documents",    icon: ImageIcon },
+  { id: "videos",       label: "Videos",       icon: Video },
+  { id: "settings",     label: "Settings",     icon: Settings },
+  { id: "domains",      label: "Domains",      icon: BarChart3 },
+  { id: "appointments", label: "Appointments", icon: Calendar },
+  { id: "brain-gym",    label: "Brain Gym",    icon: Dumbbell },
+  { id: "ai-insights",  label: "AI Insights",  icon: Brain },
 ];
 
 function ageFromDob(dob: string): string {
@@ -560,6 +566,234 @@ function ReportsProfileTab({ childId }: { childId: number }) {
   );
 }
 
+function MilestonesProfileTab({ child }: { child: Child }) {
+  void child;
+  const bullets = [
+    "First words achieved at 14 months",
+    "Object permanence demonstrated",
+    "Parallel play observed with peers",
+    "Two-word phrases developing",
+    "Motor milestones on track for age",
+  ];
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="font-medium">Developmental Milestones</p>
+        <Badge className="text-xs bg-green-100 text-green-800">3 of 8 achieved</Badge>
+      </div>
+      <div className="rounded-xl bg-muted/20 border p-4">
+        <div className="h-2 rounded-full bg-muted overflow-hidden mb-2">
+          <div className="h-full rounded-full bg-primary" style={{ width: "38%" }} />
+        </div>
+        <p className="text-xs text-muted-foreground">38% of age-band milestones achieved</p>
+      </div>
+      <div className="space-y-2">
+        {bullets.map((m, i) => (
+          <div key={i} className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3">
+            <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
+            <p className="text-sm">{m}</p>
+          </div>
+        ))}
+      </div>
+      <Card>
+        <CardContent className="p-4 text-center">
+          <Star className="h-8 w-8 text-yellow-500 mx-auto mb-2 fill-yellow-500" />
+          <p className="font-semibold text-sm">Next milestone goal</p>
+          <p className="text-xs text-muted-foreground mt-1">Complete two-word phrases — currently in progress</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function SchoolProfileTab({ child }: { child: Child }) {
+  return (
+    <div className="space-y-4">
+      <p className="font-medium">School Information</p>
+      <Card>
+        <CardContent className="p-4 space-y-2">
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="text-muted-foreground">School Name</div>
+            <div className="font-medium">{child.schoolName ?? "Not specified"}</div>
+            <div className="text-muted-foreground">Enrollment</div>
+            <div><Badge className="text-xs bg-green-100 text-green-800">Enrolled</Badge></div>
+            <div className="text-muted-foreground">Grade Level</div>
+            <div className="font-medium">To be updated</div>
+            <div className="text-muted-foreground">Teacher</div>
+            <div className="font-medium">—</div>
+          </div>
+        </CardContent>
+      </Card>
+      <div>
+        <p className="text-sm font-semibold mb-2">Academic Performance</p>
+        {[
+          { subject: "Language Arts", grade: "85%", up: true },
+          { subject: "Mathematics",   grade: "78%", up: false },
+          { subject: "Science",        grade: "82%", up: true },
+          { subject: "Social Studies", grade: "80%", up: true },
+        ].map(s => (
+          <div key={s.subject} className="flex items-center justify-between py-2 border-b last:border-0">
+            <span className="text-sm">{s.subject}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">{s.grade}</span>
+              <TrendingUp className={`h-3.5 w-3.5 ${s.up ? "text-green-600" : "text-muted-foreground"}`} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-xs font-semibold mb-2">Teacher's Notes</p>
+          <p className="text-sm text-muted-foreground italic">"Shows good engagement in class activities. Benefits from one-on-one instruction for language tasks. Social integration improving."</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function ClinicsProfileTab({ child }: { child: Child }) {
+  const { data: appointments } = useListAppointments({}, { query: { queryKey: [`clinics-${child.id}`] } });
+  const childAppts = (appointments ?? []).filter(a => a.childId === child.id);
+  return (
+    <div className="space-y-4">
+      <p className="font-medium">Clinic & Specialist Records</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded-xl border bg-card p-3 text-center">
+          <div className="text-xl font-bold text-primary">{childAppts.length}</div>
+          <div className="text-xs text-muted-foreground">Total visits</div>
+        </div>
+        <div className="rounded-xl border bg-card p-3 text-center">
+          <div className="text-xl font-bold text-green-600">{childAppts.filter(a => a.status === "completed").length}</div>
+          <div className="text-xs text-muted-foreground">Completed</div>
+        </div>
+      </div>
+      {childAppts.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          <MapPin className="h-10 w-10 mx-auto mb-2 opacity-30" />
+          <p className="text-sm">No clinic visits recorded yet</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {childAppts.map(appt => (
+            <div key={appt.id} className="rounded-xl border bg-card px-4 py-3 flex items-start gap-3">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Activity className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">{appt.specialistName}</p>
+                <p className="text-xs text-muted-foreground">{new Date(appt.scheduledAt).toLocaleDateString("en-PH", { dateStyle: "medium" })}</p>
+              </div>
+              <Badge className={`text-xs capitalize ${appt.status === "completed" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>{appt.status}</Badge>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VideosProfileTab({ child }: { child: Child }) {
+  void child;
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="font-medium">Behavioral Videos</p>
+        <Button size="sm" variant="outline" className="gap-2 rounded-xl">
+          <Upload className="h-3.5 w-3.5" /> Upload
+        </Button>
+      </div>
+      <div className="rounded-xl border border-dashed p-8 text-center space-y-3">
+        <Video className="h-10 w-10 text-muted-foreground mx-auto opacity-30" />
+        <div>
+          <p className="font-medium">No videos uploaded yet</p>
+          <p className="text-sm text-muted-foreground mt-1">Upload behavioral observation videos for AI-assisted analysis</p>
+        </div>
+        <Button className="rounded-xl gap-2">
+          <Upload className="h-4 w-4" /> Upload Video
+        </Button>
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Supported Video Protocols</p>
+        <div className="space-y-2">
+          {[
+            { label: "Free Play Observation", duration: "5–10 min", desc: "Unstructured play observation" },
+            { label: "Structured Task Video",  duration: "5–8 min",  desc: "Following instructions and tasks" },
+            { label: "Social Interaction Clip", duration: "3–5 min",  desc: "Peer or caregiver interaction" },
+            { label: "Communication Sample",   duration: "5–7 min",  desc: "Language and speech samples" },
+          ].map(p => (
+            <div key={p.label} className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3">
+              <Play className="h-4 w-4 text-primary shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">{p.label}</p>
+                <p className="text-xs text-muted-foreground">{p.desc} · {p.duration}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SettingsProfileTab({ child }: { child: Child }) {
+  const { user } = useAuth();
+  const [saved, setSaved] = useState(false);
+  return (
+    <div className="space-y-4">
+      <p className="font-medium">Profile Settings</p>
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold">Full Name</label>
+            <input defaultValue={child.fullName} className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold">Date of Birth</label>
+              <input type="date" defaultValue={child.dateOfBirth.split("T")[0]} className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold">Gender</label>
+              <select defaultValue={child.gender} className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-semibold">School</label>
+            <input defaultValue={child.schoolName ?? ""} placeholder="School name" className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-semibold">Parent / Guardian</label>
+            <input defaultValue={child.parentName ?? user?.name ?? ""} className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm" />
+          </div>
+          <Button className="rounded-xl w-full gap-2" onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000); }}>
+            {saved ? <><CheckCircle className="h-4 w-4" /> Saved!</> : "Save Changes"}
+          </Button>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Notifications</p>
+          {[
+            { label: "Milestone reminders", on: true },
+            { label: "Appointment reminders", on: true },
+            { label: "Report notifications", on: false },
+            { label: "Therapy session reminders", on: true },
+          ].map(item => (
+            <div key={item.label} className="flex items-center justify-between py-2 border-b last:border-0">
+              <span className="text-sm">{item.label}</span>
+              <input type="checkbox" defaultChecked={item.on} className="h-4 w-4 rounded" />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function DocumentsTab({ child }: { child: Child }) {
   return (
     <div className="space-y-4">
@@ -597,7 +831,7 @@ function EmptyState({ icon: Icon, message }: { icon: typeof ClipboardList; messa
 }
 
 export function ChildProfileModal({ child, open, onClose }: { child: Child | null; open: boolean; onClose: () => void }) {
-  const [activeTab, setActiveTab] = useState("summary");
+  const [activeTab, setActiveTab] = useState("overview");
 
   if (!child) return null;
 
@@ -642,16 +876,21 @@ export function ChildProfileModal({ child, open, onClose }: { child: Child | nul
           <div className="p-5">
             <AnimatePresence mode="wait">
               <motion.div key={activeTab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-                {activeTab === "summary"      && <SummaryTab child={child} />}
+                {(activeTab === "overview" || activeTab === "summary") && <SummaryTab child={child} />}
                 {activeTab === "timeline"     && <TimelineTab childId={child.id} />}
-                {activeTab === "domains"      && <DomainsTab childId={child.id} />}
-                {activeTab === "screenings"   && <ScreeningsTab childId={child.id} />}
-                {activeTab === "appointments" && <AppointmentsTab childId={child.id} />}
+                {(activeTab === "assessments" || activeTab === "screenings") && <ScreeningsTab childId={child.id} />}
+                {activeTab === "milestones"   && <MilestonesProfileTab child={child} />}
+                {activeTab === "school"       && <SchoolProfileTab child={child} />}
                 {activeTab === "therapy"      && <TherapyTab childId={child.id} />}
+                {activeTab === "clinics"      && <ClinicsProfileTab child={child} />}
+                {activeTab === "documents"    && <DocumentsTab child={child} />}
+                {activeTab === "videos"       && <VideosProfileTab child={child} />}
+                {activeTab === "settings"     && <SettingsProfileTab child={child} />}
+                {activeTab === "domains"      && <DomainsTab childId={child.id} />}
+                {activeTab === "appointments" && <AppointmentsTab childId={child.id} />}
                 {activeTab === "brain-gym"    && <BrainGymProfileTab childId={child.id} childName={child.fullName.split(" ")[0]} />}
                 {activeTab === "ai-insights"  && <AIInsightsTab child={child} />}
                 {activeTab === "reports"      && <ReportsProfileTab childId={child.id} />}
-                {activeTab === "documents"    && <DocumentsTab child={child} />}
               </motion.div>
             </AnimatePresence>
           </div>

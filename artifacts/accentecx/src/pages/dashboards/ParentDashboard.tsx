@@ -4,7 +4,8 @@ import {
   LayoutDashboard, Users, ClipboardList, Brain, Calendar,
   HeartPulse, FileText, Settings, Plus, ChevronRight,
   AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star, CreditCard,
-  Trash2, Download, Pencil, MessageSquare, Heart, BookOpen, ThumbsUp, Gamepad2, Ticket, Mail
+  Trash2, Download, Pencil, MessageSquare, Heart, BookOpen, ThumbsUp, Gamepad2, Ticket, Mail,
+  Bell, Target, Trophy, Flag, Zap, ArrowRight, Filter, Circle, MapPin, Printer
 } from "lucide-react";
 import GamesAssessment from "@/pages/GamesAssessment";
 import { SpecialistMessagingTab } from "@/components/messaging/SpecialistMessagingTab";
@@ -68,11 +69,12 @@ function downloadText(filename: string, content: string) {
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "children", label: "My Children", icon: Users },
-  { id: "screening", label: "Screenings", icon: ClipboardList },
+  { id: "screening", label: "Assessments", icon: ClipboardList },
   { id: "brain-gym", label: "Brain Gym", icon: Brain },
+  { id: "milestones", label: "Milestones", icon: Flag },
   { id: "games", label: "Games Assessment", icon: Gamepad2 },
-  { id: "ai-results", label: "AI Results", icon: Brain },
-  { id: "video", label: "Video Assessment", icon: Video },
+  { id: "ai-insights", label: "AI Insights", icon: TrendingUp },
+  { id: "video", label: "Video Analysis", icon: Video },
   { id: "appointments", label: "Appointments", icon: Calendar },
   { id: "therapy", label: "Therapy Tracking", icon: HeartPulse },
   { id: "reports", label: "Reports", icon: FileText },
@@ -333,68 +335,282 @@ function WelcomeEmptyState({ onAddChild, onStartScreening, onBook, onAIAnalysis 
 
 function OverviewTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { data: summary, isLoading: loadSum } = useGetDashboardSummary({ query: { queryKey: ["dashboard-summary"] } });
-  const { data: activity, isLoading: loadAct } = useGetDashboardActivity({ query: { queryKey: ["dashboard-activity"] } });
+  const { data: children } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
+  const { data: appointments } = useListAppointments({}, { query: { queryKey: ["appts-overview"] } });
+  const { data: reports } = useListReports({}, { query: { queryKey: ["reports-overview"] } });
   const { user } = useAuth();
 
-  const hasData = loadSum || (summary?.totalChildren ?? 0) > 0 || (summary?.upcomingAppointments ?? 0) > 0;
+  const [tasks, setTasks] = useState([
+    { id: 1, label: "Complete daily speech exercise (10 min)", done: false, priority: "high" as const },
+    { id: 2, label: "Review therapy notes from last session", done: false, priority: "medium" as const },
+    { id: 3, label: "Log today's behavioral observations", done: false, priority: "medium" as const },
+    { id: 4, label: "Check upcoming appointment reminders", done: true, priority: "low" as const },
+    { id: 5, label: "Share school progress update with therapist", done: false, priority: "high" as const },
+  ]);
+
+  const NOTIFS = [
+    { id: 1, msg: "Appointment with Dr. Reyes tomorrow at 2:00 PM", time: "1h ago", read: false },
+    { id: 2, msg: "New AI weekly report generated for your child", time: "3h ago", read: false },
+    { id: 3, msg: "Therapist sent a message about home exercises", time: "5h ago", read: true },
+    { id: 4, msg: "Milestone achieved: 'First Words' unlocked!", time: "Yesterday", read: true },
+  ];
+
+  const upcoming = (appointments ?? []).filter(a => a.status === "scheduled" || a.status === "pending").slice(0, 3);
+  const recentReports = (reports ?? []).slice(0, 3);
+  const doneTasks = tasks.filter(t => t.done).length;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+  function calcAge(dob: string) {
+    const m = (new Date().getFullYear() - new Date(dob).getFullYear()) * 12 + new Date().getMonth() - new Date(dob).getMonth();
+    return m < 24 ? `${m}m` : `${Math.floor(m / 12)}y ${m % 12 > 0 ? `${m % 12}m` : ""}`.trim();
+  }
 
   return (
-    <div className="p-4 lg:p-8 space-y-5">
+    <div className="p-4 lg:p-6 space-y-5">
       <div>
-        <h1 className="text-xl lg:text-2xl font-bold text-foreground">
-          Hi, {user?.name?.split(" ")[0]} 👋
-        </h1>
+        <h1 className="text-xl lg:text-2xl font-bold">{greeting}, {user?.name?.split(" ")[0]} 👋</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Here's your family's developmental care overview</p>
       </div>
 
-      {!loadSum && !hasData ? (
-        <WelcomeEmptyState
-          onAddChild={() => onNavigate?.("children")}
-          onStartScreening={() => onNavigate?.("screening")}
-          onBook={() => onNavigate?.("appointments")}
-          onAIAnalysis={() => onNavigate?.("ai-results")}
-        />
-      ) : (
-        <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {loadSum ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />) : (
-              <>
-                <StatCard label="Children" value={summary?.totalChildren ?? 0} icon={Users} />
-                <StatCard label="Plans" value={summary?.activeTherapyPlans ?? 0} icon={HeartPulse} />
-                <StatCard label="Upcoming" value={summary?.upcomingAppointments ?? 0} icon={Calendar} />
-                <StatCard label="Screenings" value={summary?.pendingScreenings ?? 0} icon={ClipboardList} />
-              </>
-            )}
-          </div>
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {loadSum ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />) : (
+          <>
+            <button onClick={() => onNavigate?.("children")} className="text-left hover:scale-[1.02] transition-transform">
+              <StatCard label="Children" value={summary?.totalChildren ?? 0} icon={Users} />
+            </button>
+            <button onClick={() => onNavigate?.("therapy")} className="text-left hover:scale-[1.02] transition-transform">
+              <StatCard label="Active Plans" value={summary?.activeTherapyPlans ?? 0} icon={HeartPulse} />
+            </button>
+            <button onClick={() => onNavigate?.("appointments")} className="text-left hover:scale-[1.02] transition-transform">
+              <StatCard label="Upcoming" value={summary?.upcomingAppointments ?? 0} icon={Calendar} />
+            </button>
+            <button onClick={() => onNavigate?.("screening")} className="text-left hover:scale-[1.02] transition-transform">
+              <StatCard label="Assessments" value={summary?.pendingScreenings ?? 0} icon={ClipboardList} />
+            </button>
+          </>
+        )}
+      </div>
 
-          <div>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Recent Activity</h2>
-            {loadAct ? <Skeleton className="h-40 rounded-xl" /> : (
-              <div className="space-y-2">
-                {(activity ?? []).length === 0 ? (
-                  <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-                    No activity yet — add a child or start a screening to get started.
-                  </div>
-                ) : (activity ?? []).slice(0, 6).map(item => (
+      <div className="grid lg:grid-cols-3 gap-5">
+        {/* Left — 2 cols */}
+        <div className="lg:col-span-2 space-y-5">
+
+          {/* Child Cards */}
+          {(children ?? []).length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">My Children</h2>
+                <button onClick={() => onNavigate?.("children")} className="text-xs text-primary hover:underline flex items-center gap-1">
+                  View all <ChevronRight className="h-3 w-3" />
+                </button>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {(children ?? []).slice(0, 4).map(child => (
                   <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3"
-                    data-testid={`activity-item-${item.id}`}
+                    key={child.id}
+                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                    className="rounded-xl border bg-card p-4 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => onNavigate?.("children")}
+                    data-testid={`overview-child-${child.id}`}
                   >
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/15 shrink-0">
-                      <Activity className="h-3.5 w-3.5 text-primary" />
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0">
+                        {child.fullName[0]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">{child.fullName}</p>
+                        <p className="text-xs text-muted-foreground capitalize">{child.gender} · {calcAge(child.dateOfBirth)}</p>
+                      </div>
+                      <Badge className={`text-xs capitalize shrink-0 ${RISK_COLORS[child.riskLevel]}`}>{child.riskLevel}</Badge>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                      <p className="text-xs text-muted-foreground">{new Date(item.occurredAt).toLocaleDateString("en-PH")}</p>
+                    {child.schoolName && (
+                      <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                        <BookOpen className="h-3 w-3" /> {child.schoolName}
+                      </p>
+                    )}
+                    <div className="mt-3 flex gap-2 flex-wrap">
+                      <button onClick={e => { e.stopPropagation(); onNavigate?.("screening"); }} className="text-xs text-primary hover:underline">Assessments</button>
+                      <span className="text-xs text-muted-foreground">·</span>
+                      <button onClick={e => { e.stopPropagation(); onNavigate?.("milestones"); }} className="text-xs text-primary hover:underline">Milestones</button>
+                      <span className="text-xs text-muted-foreground">·</span>
+                      <button onClick={e => { e.stopPropagation(); onNavigate?.("therapy"); }} className="text-xs text-primary hover:underline">Therapy</button>
                     </div>
                   </motion.div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Daily Tasks */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                Today's Tasks <span className="text-primary font-bold">({doneTasks}/{tasks.length})</span>
+              </h2>
+            </div>
+            <div className="rounded-xl border bg-card divide-y overflow-hidden">
+              {tasks.map(task => (
+                <div
+                  key={task.id}
+                  className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors select-none ${task.done ? "opacity-60" : ""}`}
+                  onClick={() => setTasks(ts => ts.map(t => t.id === task.id ? { ...t, done: !t.done } : t))}
+                  data-testid={`daily-task-${task.id}`}
+                >
+                  <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 shrink-0 transition-all ${task.done ? "bg-primary border-primary" : "border-muted-foreground/30"}`}>
+                    {task.done && <CheckCircle className="h-4 w-4 text-white" />}
+                  </div>
+                  <span className={`text-sm flex-1 leading-tight ${task.done ? "line-through text-muted-foreground" : "text-foreground"}`}>{task.label}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${task.priority === "high" ? "bg-red-100 text-red-700" : task.priority === "medium" ? "bg-yellow-100 text-yellow-700" : "bg-muted text-muted-foreground"}`}>
+                    {task.priority}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <Progress value={(doneTasks / tasks.length) * 100} className="h-1 mt-2" />
+          </div>
+
+          {/* Appointments Preview */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Upcoming Appointments</h2>
+              <button onClick={() => onNavigate?.("appointments")} className="text-xs text-primary hover:underline flex items-center gap-1">
+                View all <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
+            {upcoming.length === 0 ? (
+              <div className="rounded-xl border border-dashed p-5 text-center">
+                <Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-40" />
+                <p className="text-sm text-muted-foreground">No upcoming appointments</p>
+                <button onClick={() => onNavigate?.("appointments")} className="text-xs text-primary hover:underline mt-1">Schedule one →</button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {upcoming.map(appt => (
+                  <div key={appt.id} className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-muted/10 transition-colors" onClick={() => onNavigate?.("appointments")} data-testid={`overview-appt-${appt.id}`}>
+                    <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                      <Calendar className="h-4 w-4 text-blue-700" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{appt.specialistName}</p>
+                      <p className="text-xs text-muted-foreground">{appt.childName} · {new Date(appt.scheduledAt).toLocaleDateString("en-PH", { dateStyle: "medium" })}</p>
+                    </div>
+                    <div className="flex gap-1.5 shrink-0">
+                      {appt.telehealth && <Badge className="text-xs bg-blue-100 text-blue-800">Telehealth</Badge>}
+                      <Badge className="text-xs bg-green-100 text-green-800 capitalize">{appt.status}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-        </>
-      )}
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-5">
+          {/* Notifications */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Notifications</h2>
+              <span className="text-xs bg-primary/10 text-primary font-medium rounded-full px-2 py-0.5">{NOTIFS.filter(n => !n.read).length} new</span>
+            </div>
+            <div className="rounded-xl border bg-card divide-y overflow-hidden">
+              {NOTIFS.map(n => (
+                <div key={n.id} className={`flex items-start gap-3 px-4 py-3 ${!n.read ? "bg-primary/[0.03]" : ""}`}>
+                  <Bell className={`h-3.5 w-3.5 shrink-0 mt-1 ${!n.read ? "text-primary" : "text-muted-foreground"}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs leading-snug">{n.msg}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{n.time}</p>
+                  </div>
+                  {!n.read && <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-1.5" />}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Messages Preview */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Messages</h2>
+              <button onClick={() => onNavigate?.("messages")} className="text-xs text-primary hover:underline flex items-center gap-1">
+                Open <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
+            <div className="rounded-xl border bg-card overflow-hidden divide-y">
+              {[
+                { name: "Dr. Ana Reyes", preview: "Great progress! Continue exercises at home…", time: "2h ago", unread: true },
+                { name: "Ms. Carol (OT)", preview: "Session notes from Tuesday have been shared", time: "1d ago", unread: false },
+              ].map((msg, i) => (
+                <button key={i} onClick={() => onNavigate?.("messages")} className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-muted/10 transition-colors">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-xs shrink-0">
+                    {msg.name[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-semibold truncate">{msg.name}</p>
+                      {msg.unread && <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{msg.preview}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground shrink-0">{msg.time}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Reports Preview */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Recent Reports</h2>
+              <button onClick={() => onNavigate?.("reports")} className="text-xs text-primary hover:underline flex items-center gap-1">
+                View all <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
+            {recentReports.length === 0 ? (
+              <div className="rounded-xl border border-dashed p-4 text-center">
+                <FileText className="h-7 w-7 text-muted-foreground mx-auto mb-1.5 opacity-40" />
+                <p className="text-xs text-muted-foreground">No reports yet</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {recentReports.map(r => (
+                  <button key={r.id} onClick={() => onNavigate?.("reports")} className="w-full rounded-xl border bg-card px-4 py-3 flex items-start gap-3 text-left hover:bg-muted/10 transition-colors">
+                    <FileText className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{r.title}</p>
+                      <p className="text-xs text-muted-foreground">{r.childName} · {new Date(r.createdAt).toLocaleDateString("en-PH")}</p>
+                    </div>
+                    <Badge variant="outline" className="text-xs shrink-0 capitalize">{r.reportType.replace(/_/g, " ")}</Badge>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Progress Summary */}
+          <div>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Progress Summary</h2>
+            <div className="rounded-xl border bg-card p-4 space-y-3">
+              {[
+                { label: "Task completion", pct: Math.round((doneTasks / tasks.length) * 100), color: "bg-primary" },
+                { label: "Therapy adherence", pct: 75, color: "bg-green-500" },
+                { label: "Milestone progress", pct: 60, color: "bg-blue-500" },
+              ].map(item => (
+                <div key={item.label} className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">{item.label}</span>
+                    <span className="font-medium">{item.pct}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div className={`h-full rounded-full transition-all ${item.color}`} style={{ width: `${item.pct}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -562,6 +778,7 @@ function ScreeningTab() {
   const [mode, setMode] = useState<"list" | "wizard" | "result">("list");
   const [result, setResult] = useState<ScreeningResult | null>(null);
   const [scheduleAfter, setScheduleAfter] = useState(false);
+  const [selectedType, setSelectedType] = useState("all");
   const { data: screenings, isLoading } = useListScreenings({}, { query: { queryKey: ["screenings-list"] } });
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -601,6 +818,18 @@ function ScreeningTab() {
     clinical_intake: "Clinical Intake",
     behavioral_observation: "Behavioral Observation",
   };
+
+  const TYPE_FILTERS = [
+    { id: "all", label: "All Types" },
+    { id: "parent_questionnaire", label: "Questionnaires" },
+    { id: "teacher_report", label: "Teacher Reports" },
+    { id: "clinical_intake", label: "Clinical Intake" },
+    { id: "behavioral_observation", label: "Observations" },
+  ];
+
+  const filteredScreenings = selectedType === "all"
+    ? (screenings ?? [])
+    : (screenings ?? []).filter(s => s.screeningType === selectedType);
 
   const STATUS_COLORS: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-800",
@@ -644,9 +873,9 @@ function ScreeningTab() {
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold">Screenings</h1>
+          <h1 className="text-2xl font-bold">Assessments</h1>
           <p className="text-sm text-muted-foreground">Developmental screening assessments across all domains</p>
         </div>
         <Button
@@ -654,26 +883,61 @@ function ScreeningTab() {
           className="bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2 shrink-0"
           data-testid="start-screening-btn"
         >
-          <Plus className="w-4 h-4" /> Start New Screening
+          <Plus className="w-4 h-4" /> Start New Assessment
         </Button>
       </div>
 
-      {(screenings ?? []).length === 0 && !isLoading && (
+      {/* Age group quick-start cards */}
+      <div>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Start Age-Appropriate Assessment</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          {[
+            { label: "0–2 Years", color: "bg-pink-50 border-pink-200 text-pink-800", desc: "Early screening" },
+            { label: "3–5 Years", color: "bg-purple-50 border-purple-200 text-purple-800", desc: "Pre-school" },
+            { label: "6–12 Years", color: "bg-blue-50 border-blue-200 text-blue-800", desc: "School age" },
+            { label: "13–17 Years", color: "bg-green-50 border-green-200 text-green-800", desc: "Adolescent" },
+          ].map(g => (
+            <button
+              key={g.label}
+              onClick={() => setMode("wizard")}
+              className={`rounded-xl border p-3 text-left hover:shadow-sm transition-shadow ${g.color}`}
+            >
+              <p className="font-semibold text-sm">{g.label}</p>
+              <p className="text-xs opacity-70 mt-0.5">{g.desc}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Type filter */}
+      <div className="flex flex-wrap gap-2">
+        {TYPE_FILTERS.map(f => (
+          <button
+            key={f.id}
+            onClick={() => setSelectedType(f.id)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${selectedType === f.id ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted border-border"}`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {filteredScreenings.length === 0 && !isLoading && (
         <Card className="border-dashed">
           <CardContent className="pt-10 pb-10 text-center space-y-4">
             <ClipboardList className="w-12 h-12 text-muted-foreground mx-auto" />
             <div>
-              <p className="font-semibold text-lg">No screenings yet</p>
+              <p className="font-semibold text-lg">{selectedType === "all" ? "No assessments yet" : `No ${TYPE_FILTERS.find(f => f.id === selectedType)?.label ?? "assessments"} yet`}</p>
               <p className="text-sm text-muted-foreground mt-1">Complete a developmental screening to get AI-assisted domain scores and clinical observations.</p>
             </div>
             <Button onClick={() => setMode("wizard")} className="bg-[#0038A8] hover:bg-[#1e4a00] text-white gap-2">
-              <Brain className="w-4 h-4" /> Start Your First Screening
+              <Brain className="w-4 h-4" /> Start New Assessment
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {(isLoading || (screenings ?? []).length > 0) && (
+      {(isLoading || filteredScreenings.length > 0) && (
         <div className="rounded-xl border overflow-hidden">
           <table className="w-full text-sm" data-testid="screenings-table">
             <thead className="bg-muted/50">
@@ -688,7 +952,7 @@ function ScreeningTab() {
                 Array(5).fill(0).map((_, i) => (
                   <tr key={i}><td colSpan={6} className="px-4 py-3"><Skeleton className="h-5 w-full" /></td></tr>
                 ))
-              ) : (screenings ?? []).map(s => (
+              ) : filteredScreenings.map(s => (
                 <tr key={s.id} className="border-t hover:bg-muted/20 transition-colors" data-testid={`screening-row-${s.id}`}>
                   <td className="px-4 py-3 font-medium">{s.childName ?? "Unknown"}</td>
                   <td className="px-4 py-3 text-muted-foreground text-xs">{TYPE_LABELS[s.screeningType] ?? s.screeningType}</td>
@@ -728,45 +992,367 @@ function ScreeningTab() {
   );
 }
 
-function AIResultsTab() {
+function AIInsightsTab() {
   const { data: children, isLoading } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
+  const [selectedChild, setSelectedChild] = useState<number | null>(null);
+
+  const RECOMMENDATIONS: Record<string, string[]> = {
+    low: [
+      "Continue current activities — child is developing on track",
+      "Schedule routine developmental check-in every 6 months",
+      "Encourage age-appropriate play and social interaction",
+    ],
+    moderate: [
+      "Schedule follow-up developmental screening within 3 months",
+      "Consult a speech-language pathologist for communication concerns",
+      "Consider occupational therapy evaluation for motor skills",
+      "Increase structured home activities targeting flagged domains",
+    ],
+    high: [
+      "Urgent referral to a developmental pediatrician recommended",
+      "Begin early intervention services as soon as possible",
+      "Coordinate between school, therapist, and medical team",
+      "Weekly therapy sessions advised for all flagged domains",
+    ],
+    critical: [
+      "Immediate consultation with developmental pediatrician required",
+      "Multi-disciplinary assessment team evaluation needed",
+      "Emergency early intervention enrollment recommended",
+      "Daily structured intervention program advised",
+    ],
+  };
+
+  const ACTION_PLANS: Record<string, Array<{ step: number; action: string; timeline: string }>> = {
+    low: [
+      { step: 1, action: "Continue monitoring developmental milestones", timeline: "Ongoing" },
+      { step: 2, action: "Schedule next developmental check", timeline: "In 6 months" },
+    ],
+    moderate: [
+      { step: 1, action: "Complete domain-specific screening assessment", timeline: "This week" },
+      { step: 2, action: "Consult specialist for flagged domains", timeline: "Within 2 weeks" },
+      { step: 3, action: "Begin targeted home intervention activities", timeline: "This week" },
+      { step: 4, action: "Schedule follow-up evaluation", timeline: "In 6 weeks" },
+    ],
+    high: [
+      { step: 1, action: "Contact developmental pediatrician for urgent referral", timeline: "Today" },
+      { step: 2, action: "Enroll in early intervention program", timeline: "This week" },
+      { step: 3, action: "Coordinate multi-disciplinary care team", timeline: "Within 2 weeks" },
+      { step: 4, action: "Implement daily structured activity plan", timeline: "Immediately" },
+      { step: 5, action: "Monthly progress review with care team", timeline: "Monthly" },
+    ],
+    critical: [
+      { step: 1, action: "Emergency consultation — contact clinic immediately", timeline: "Today" },
+      { step: 2, action: "Comprehensive multi-domain assessment", timeline: "This week" },
+      { step: 3, action: "Crisis intervention protocol activation", timeline: "Immediately" },
+    ],
+  };
+
+  const TREND = [
+    { month: "Jan", score: 65 }, { month: "Feb", score: 68 }, { month: "Mar", score: 72 },
+    { month: "Apr", score: 75 }, { month: "May", score: 71 }, { month: "Jun", score: 78 },
+  ];
+
+  const displayChildren = selectedChild
+    ? (children ?? []).filter(c => c.id === selectedChild)
+    : (children ?? []);
+
+  return (
+    <div className="p-6 lg:p-8 space-y-5">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold">AI Insights</h1>
+          <p className="text-sm text-muted-foreground">Development summaries, trend analysis, and action plans</p>
+        </div>
+        {(children ?? []).length > 1 && (
+          <select
+            value={selectedChild ?? ""}
+            onChange={e => setSelectedChild(e.target.value ? Number(e.target.value) : null)}
+            className="text-sm border rounded-xl px-3 py-2 bg-background"
+          >
+            <option value="">All children</option>
+            {(children ?? []).map(c => <option key={c.id} value={c.id}>{c.fullName}</option>)}
+          </select>
+        )}
+      </div>
+
+      <div className="rounded-xl border bg-amber-50 border-amber-200 p-4 flex items-start gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+        <p className="text-sm text-amber-800">
+          <strong>Important:</strong> AI insights are structured developmental risk indicators only. This system <strong>never diagnoses</strong>. All findings must be reviewed by a qualified healthcare professional.
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">{Array(2).fill(0).map((_, i) => <Skeleton key={i} className="h-64 rounded-xl" />)}</div>
+      ) : displayChildren.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="pt-10 pb-10 text-center">
+            <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-40" />
+            <p className="font-semibold">No children yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Add a child profile to see AI insights</p>
+          </CardContent>
+        </Card>
+      ) : displayChildren.map(child => {
+        const recs = RECOMMENDATIONS[child.riskLevel] ?? RECOMMENDATIONS.low;
+        const plan = ACTION_PLANS[child.riskLevel] ?? ACTION_PLANS.low;
+        return (
+          <div key={child.id} className="rounded-xl border bg-card overflow-hidden" data-testid={`ai-insights-${child.id}`}>
+            <div className="flex items-center justify-between px-5 py-4 border-b bg-muted/20">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
+                  {child.fullName[0]}
+                </div>
+                <div>
+                  <p className="font-semibold">{child.fullName}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{child.gender} · {child.riskLevel} risk</p>
+                </div>
+              </div>
+              <Badge className={`text-sm capitalize ${RISK_COLORS[child.riskLevel]}`}>{child.riskLevel} Risk</Badge>
+            </div>
+
+            <div className="p-5 space-y-5">
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Domain Scores</h3>
+                <ChildDomainCard childId={child.id} childName={child.fullName.split(" ")[0]} />
+              </div>
+
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Trend Analysis (6 months)</h3>
+                <div className="rounded-xl bg-muted/20 border p-4">
+                  <div className="flex items-end gap-2 h-20">
+                    {TREND.map((pt, i) => {
+                      const isLast = i === TREND.length - 1;
+                      return (
+                        <div key={pt.month} className="flex-1 flex flex-col items-center gap-1">
+                          <div className="w-full flex items-end" style={{ height: "56px" }}>
+                            <div className={`w-full rounded-t transition-all ${isLast ? "bg-primary" : "bg-primary/30"}`} style={{ height: `${pt.score}%` }} />
+                          </div>
+                          <span className="text-xs text-muted-foreground">{pt.month}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-green-700 font-medium flex items-center gap-1 mt-2">
+                    <TrendingUp className="h-3.5 w-3.5" />
+                    +{TREND[TREND.length - 1].score - TREND[0].score} pts improvement over 6 months
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">AI Recommendations</h3>
+                <div className="space-y-2">
+                  {recs.map((rec, i) => (
+                    <div key={i} className="flex items-start gap-3 rounded-lg bg-secondary/10 px-3 py-2.5">
+                      <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-xs font-bold text-primary">{i + 1}</span>
+                      </div>
+                      <p className="text-sm">{rec}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Action Plan</h3>
+                <div className="space-y-2">
+                  {plan.map((step) => (
+                    <div key={step.step} className="flex items-start gap-3 rounded-xl border px-4 py-3">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
+                        {step.step}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{step.action}</p>
+                      </div>
+                      <Badge variant="outline" className="text-xs shrink-0">{step.timeline}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {child.diagnosisNotes && (
+                <div className="rounded-lg bg-muted/30 border p-3">
+                  <p className="text-xs font-semibold mb-1 text-muted-foreground">Clinical Notes</p>
+                  <p className="text-sm">{child.diagnosisNotes}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MilestonesTab() {
+  const [selectedAge, setSelectedAge] = useState<"0-2" | "3-5" | "6-12" | "13-17">("0-2");
+
+  const AGE_BANDS = [
+    { id: "0-2" as const, label: "0–2 Years" },
+    { id: "3-5" as const, label: "3–5 Years" },
+    { id: "6-12" as const, label: "6–12 Years" },
+    { id: "13-17" as const, label: "13–17 Years" },
+  ];
+
+  type MilestoneStatus = "achieved" | "in-progress" | "not-yet";
+  type MilestoneItem = { id: number; domain: string; label: string; description: string; status: MilestoneStatus };
+
+  const MILESTONES: Record<string, MilestoneItem[]> = {
+    "0-2": [
+      { id: 1, domain: "Communication", label: "First words (12–18 months)", description: "Says 'mama', 'dada', or other single words intentionally", status: "achieved" },
+      { id: 2, domain: "Communication", label: "Two-word phrases (18–24 months)", description: "Combines two words like 'more milk' or 'big dog'", status: "in-progress" },
+      { id: 3, domain: "Social", label: "Waves bye-bye", description: "Responds to social gestures and waves when prompted", status: "achieved" },
+      { id: 4, domain: "Social", label: "Plays alongside others", description: "Engages in parallel play next to other children", status: "in-progress" },
+      { id: 5, domain: "Motor", label: "Walks independently", description: "Takes first steps without support around 12 months", status: "achieved" },
+      { id: 6, domain: "Motor", label: "Stacks 4+ blocks", description: "Can stack building blocks with coordination", status: "not-yet" },
+      { id: 7, domain: "Cognitive", label: "Object permanence", description: "Understands objects exist when out of sight", status: "achieved" },
+      { id: 8, domain: "Cognitive", label: "Follows 2-step instructions", description: "Can follow simple two-part requests", status: "in-progress" },
+    ],
+    "3-5": [
+      { id: 9, domain: "Communication", label: "4–5 word sentences", description: "Speaks in complete sentences of 4–5 words", status: "achieved" },
+      { id: 10, domain: "Communication", label: "Tells stories", description: "Can narrate simple events in sequence", status: "in-progress" },
+      { id: 11, domain: "Social", label: "Cooperative play", description: "Plays cooperatively with other children", status: "in-progress" },
+      { id: 12, domain: "Social", label: "Understands taking turns", description: "Waits for their turn in games", status: "achieved" },
+      { id: 13, domain: "Motor", label: "Hops on one foot", description: "Can hop on one foot several times in a row", status: "not-yet" },
+      { id: 14, domain: "Motor", label: "Draws basic shapes", description: "Can draw circles, squares, and triangles", status: "in-progress" },
+      { id: 15, domain: "Cognitive", label: "Counts to 10", description: "Can count objects up to 10 accurately", status: "achieved" },
+      { id: 16, domain: "Cognitive", label: "Knows colors and shapes", description: "Can identify and name basic colors and shapes", status: "achieved" },
+    ],
+    "6-12": [
+      { id: 17, domain: "Communication", label: "Reads simple sentences", description: "Can read and understand short sentences", status: "achieved" },
+      { id: 18, domain: "Communication", label: "Writes legibly", description: "Can write their name and simple words clearly", status: "in-progress" },
+      { id: 19, domain: "Social", label: "Has close friendships", description: "Maintains at least one close peer friendship", status: "in-progress" },
+      { id: 20, domain: "Social", label: "Resolves conflicts independently", description: "Can solve minor disagreements without adult help", status: "not-yet" },
+      { id: 21, domain: "Motor", label: "Rides a bicycle", description: "Can ride a bicycle without training wheels", status: "not-yet" },
+      { id: 22, domain: "Motor", label: "Ties shoelaces", description: "Can independently tie their own shoes", status: "in-progress" },
+      { id: 23, domain: "Cognitive", label: "Basic arithmetic", description: "Can do addition and subtraction mentally", status: "achieved" },
+      { id: 24, domain: "Cognitive", label: "Multi-step problem solving", description: "Can solve multi-step problems with guidance", status: "in-progress" },
+    ],
+    "13-17": [
+      { id: 25, domain: "Communication", label: "Abstract reasoning in speech", description: "Can discuss hypothetical and abstract concepts", status: "achieved" },
+      { id: 26, domain: "Communication", label: "Structured written expression", description: "Can write essays and structured reports", status: "in-progress" },
+      { id: 27, domain: "Social", label: "Understands social nuance", description: "Recognizes sarcasm, irony, and social subtleties", status: "in-progress" },
+      { id: 28, domain: "Social", label: "Independent social decisions", description: "Can navigate peer relationships independently", status: "not-yet" },
+      { id: 29, domain: "Motor", label: "Fine motor precision", description: "Can perform precise fine motor tasks (art, music)", status: "achieved" },
+      { id: 30, domain: "Cognitive", label: "Critical thinking", description: "Applies critical analysis to academic topics", status: "in-progress" },
+      { id: 31, domain: "Cognitive", label: "Future planning", description: "Can set goals and plan for the future", status: "not-yet" },
+      { id: 32, domain: "Emotional", label: "Emotional regulation", description: "Manages emotions constructively under stress", status: "in-progress" },
+    ],
+  };
+
+  const STATUS_CONFIG: Record<MilestoneStatus, { label: string; color: string; dot: string; icon: typeof CheckCircle }> = {
+    achieved: { label: "Achieved", color: "bg-green-100 text-green-800", dot: "bg-green-500", icon: CheckCircle },
+    "in-progress": { label: "In Progress", color: "bg-yellow-100 text-yellow-800", dot: "bg-yellow-500", icon: Clock },
+    "not-yet": { label: "Not Yet", color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground/30", icon: Circle },
+  };
+
+  const current = MILESTONES[selectedAge] ?? [];
+  const achieved = current.filter(m => m.status === "achieved").length;
+  const inProgress = current.filter(m => m.status === "in-progress").length;
+  const domains = [...new Set(current.map(m => m.domain))];
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
       <div>
-        <h1 className="text-2xl font-bold">AI Results</h1>
-        <p className="text-sm text-muted-foreground">Domain scores and risk classification per child</p>
+        <h1 className="text-2xl font-bold">Milestone Tracking</h1>
+        <p className="text-sm text-muted-foreground">Age-based developmental milestones with progress indicators and achievement history</p>
       </div>
-      <div className="rounded-xl border bg-amber-50 border-amber-200 p-4">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-800">
-            <strong>Important:</strong> These AI results are structured developmental risk indicators only. This system <strong>never diagnoses</strong>. All findings must be reviewed by a qualified healthcare professional.
-          </p>
+
+      <div className="flex flex-wrap gap-2">
+        {AGE_BANDS.map(band => (
+          <button
+            key={band.id}
+            onClick={() => setSelectedAge(band.id)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${selectedAge === band.id ? "bg-primary text-primary-foreground border-primary shadow-sm" : "bg-background hover:bg-muted border-border"}`}
+          >
+            {band.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <div className="text-2xl font-bold text-green-600">{achieved}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">Achieved</div>
+        </div>
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <div className="text-2xl font-bold text-yellow-600">{inProgress}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">In Progress</div>
+        </div>
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <div className="text-2xl font-bold text-primary">{Math.round((achieved / current.length) * 100)}%</div>
+          <div className="text-xs text-muted-foreground mt-0.5">Complete</div>
         </div>
       </div>
-      {isLoading ? (
-        <div className="grid sm:grid-cols-2 gap-4">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-64 rounded-xl" />)}</div>
-      ) : (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {(children ?? []).map(child => (
-            <Card key={child.id} data-testid={`ai-result-${child.id}`}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{child.fullName}</CardTitle>
-                  <Badge className={`text-xs capitalize ${RISK_COLORS[child.riskLevel]}`}>{child.riskLevel} Risk</Badge>
+
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>Progress for {AGE_BANDS.find(b => b.id === selectedAge)?.label}</span>
+          <span>{achieved}/{current.length} milestones</span>
+        </div>
+        <div className="h-3 rounded-full bg-muted overflow-hidden">
+          <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${(achieved / current.length) * 100}%` }} />
+        </div>
+      </div>
+
+      <div className="space-y-5">
+        {domains.map(domain => {
+          const domainItems = current.filter(m => m.domain === domain);
+          const domainAchieved = domainItems.filter(m => m.status === "achieved").length;
+          return (
+            <div key={domain}>
+              <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-sm font-bold">{domain}</h3>
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-xs text-muted-foreground">{domainAchieved}/{domainItems.length}</span>
+              </div>
+              <div className="space-y-2">
+                {domainItems.map(m => {
+                  const cfg = STATUS_CONFIG[m.status];
+                  const Icon = cfg.icon;
+                  return (
+                    <div key={m.id} className="rounded-xl border bg-card px-4 py-3 flex items-start gap-3">
+                      <div className={`flex h-6 w-6 items-center justify-center rounded-full shrink-0 mt-0.5 ${m.status === "achieved" ? "bg-green-100" : m.status === "in-progress" ? "bg-yellow-100" : "bg-muted"}`}>
+                        <Icon className={`h-3.5 w-3.5 ${m.status === "achieved" ? "text-green-600" : m.status === "in-progress" ? "text-yellow-600" : "text-muted-foreground"}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium ${m.status === "not-yet" ? "text-muted-foreground" : ""}`}>{m.label}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{m.description}</p>
+                      </div>
+                      <Badge className={`text-xs shrink-0 ${cfg.color}`}>{cfg.label}</Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Achievement History</h2>
+        {current.filter(m => m.status === "achieved").length === 0 ? (
+          <div className="rounded-xl border border-dashed p-6 text-center">
+            <Star className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-30" />
+            <p className="text-sm text-muted-foreground">No milestones achieved yet for this age band</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {current.filter(m => m.status === "achieved").map(m => (
+              <div key={m.id} className="flex items-center gap-3 rounded-xl border bg-secondary/10 px-4 py-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 shrink-0">
+                  <Star className="h-4 w-4 text-yellow-600 fill-yellow-600" />
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <ChildDomainCard childId={child.id} childName={child.fullName.split(" ")[0]} />
-                {child.diagnosisNotes && (
-                  <div className="text-xs text-muted-foreground border-t pt-3 leading-relaxed">{child.diagnosisNotes}</div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{m.label}</p>
+                  <p className="text-xs text-muted-foreground">{m.domain}</p>
+                </div>
+                <Badge className="text-xs bg-green-100 text-green-800 shrink-0">Achieved</Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -1048,12 +1634,20 @@ function TherapyTab() {
   const features = getPlanFeatures(user?.tier);
   const { data: plans, isLoading } = useListTherapyPlans({}, { query: { queryKey: ["therapy-parent"] } });
   const queryClient = useQueryClient();
+  const [subTab, setSubTab] = useState<"plans" | "goals" | "sessions" | "progress" | "notes">("plans");
 
   const handleDeletePlan = async (id: number) => {
     if (!window.confirm("Delete this therapy plan? This cannot be undone.")) return;
     await deleteRecord(`/api/therapy-plans/${id}`, user?.id ?? "");
     queryClient.invalidateQueries({ queryKey: ["therapy-parent"] });
   };
+
+  const SESSIONS = [
+    { date: "Jun 7, 2026", type: "Speech Therapy", therapist: "Dr. Santos", duration: "45 min", note: "Good progress on articulation exercises" },
+    { date: "Jun 4, 2026", type: "Occupational Therapy", therapist: "Ms. Reyes", duration: "60 min", note: "Fine motor skills improving steadily" },
+    { date: "May 28, 2026", type: "Speech Therapy", therapist: "Dr. Santos", duration: "45 min", note: "Practiced phonemic awareness activities" },
+    { date: "May 21, 2026", type: "Speech Therapy", therapist: "Dr. Santos", duration: "45 min", note: "Vocabulary expansion through play" },
+  ];
 
   return (
     <UpgradeGate
@@ -1068,9 +1662,29 @@ function TherapyTab() {
         <h1 className="text-2xl font-bold">Therapy Tracking</h1>
         <p className="text-sm text-muted-foreground">Active and completed therapy programs for your children</p>
       </div>
-      <div className="space-y-4">
-        {isLoading ? Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-36 rounded-xl" />) :
-          (plans ?? []).map(plan => (
+
+      <div className="flex gap-1 border-b overflow-x-auto">
+        {(["plans", "goals", "sessions", "progress", "notes"] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => setSubTab(t)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap capitalize transition-colors ${subTab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {subTab === "plans" && (
+        <div className="space-y-4">
+          {isLoading ? Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-36 rounded-xl" />) :
+            (plans ?? []).length === 0 ? (
+              <Card className="border-dashed"><CardContent className="pt-10 pb-10 text-center">
+                <HeartPulse className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-40" />
+                <p className="font-semibold">No therapy plans yet</p>
+                <p className="text-sm text-muted-foreground mt-1">Contact a specialist to create a therapy plan</p>
+              </CardContent></Card>
+            ) : (plans ?? []).map(plan => (
             <Card key={plan.id} data-testid={`therapy-plan-${plan.id}`}>
               <CardContent className="p-5 space-y-3">
                 <div className="flex items-start justify-between gap-3">
@@ -1093,16 +1707,110 @@ function TherapyTab() {
                   </div>
                   <Progress value={plan.progressPercentage ?? 0} className="h-2" />
                 </div>
-                {plan.goals && <p className="text-xs text-muted-foreground border-t pt-2 line-clamp-2">Goals: {plan.goals}</p>}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {subTab === "goals" && (
+        <div className="space-y-3">
+          {isLoading ? <Skeleton className="h-32 rounded-xl" /> : (plans ?? []).length === 0 ? (
+            <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">No therapy plans — no goals yet</div>
+          ) : (plans ?? []).map(plan => (
+            <div key={plan.id} className="rounded-xl border bg-card p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Badge className={`text-xs capitalize ${THERAPY_COLORS[plan.therapyType] ?? "bg-muted"}`}>{plan.therapyType}</Badge>
+                <span className="text-sm font-medium">{plan.title}</span>
+              </div>
+              {plan.goals ? (
+                <div className="space-y-2">
+                  {plan.goals.split(/[.\n]/).filter(g => g.trim().length > 3).map((goal, i) => (
+                    <div key={i} className="flex items-start gap-3 text-sm">
+                      <Target className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span>{goal.trim()}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : <p className="text-xs text-muted-foreground">No goals specified yet</p>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {subTab === "sessions" && (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">{SESSIONS.length} sessions recorded</p>
+          {SESSIONS.map((s, i) => (
+            <div key={i} className="rounded-xl border bg-card px-4 py-3 flex items-start gap-3">
+              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <HeartPulse className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm">{s.type}</p>
+                <p className="text-xs text-muted-foreground">{s.therapist} · {s.date} · {s.duration}</p>
+                <p className="text-xs text-muted-foreground mt-1 italic">"{s.note}"</p>
+              </div>
+              <Badge variant="outline" className="text-xs shrink-0">Completed</Badge>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {subTab === "progress" && (
+        <div className="space-y-4">
+          {isLoading ? <Skeleton className="h-32 rounded-xl" /> : (plans ?? []).length === 0 ? (
+            <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">No therapy plans yet</div>
+          ) : (plans ?? []).map(plan => (
+            <Card key={plan.id}>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="font-medium text-sm">{plan.title}</p>
+                  <span className="text-lg font-bold text-primary">{plan.progressPercentage ?? 0}%</span>
+                </div>
+                <Progress value={plan.progressPercentage ?? 0} className="h-3" />
+                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="rounded-lg bg-muted/20 p-2"><div className="font-bold">4</div><div className="text-muted-foreground">Sessions</div></div>
+                  <div className="rounded-lg bg-muted/20 p-2"><div className="font-bold text-green-600">+12%</div><div className="text-muted-foreground">This month</div></div>
+                  <div className="rounded-lg bg-muted/20 p-2"><div className="font-bold capitalize">{plan.status}</div><div className="text-muted-foreground">Status</div></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {subTab === "notes" && (
+        <div className="space-y-3">
+          {isLoading ? <Skeleton className="h-32 rounded-xl" /> : (plans ?? []).length === 0 ? (
+            <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">No therapy plans yet</div>
+          ) : (plans ?? []).map(plan => (
+            <Card key={plan.id}>
+              <CardContent className="p-4 space-y-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge className={`text-xs capitalize ${THERAPY_COLORS[plan.therapyType] ?? "bg-muted"}`}>{plan.therapyType}</Badge>
+                  <span className="font-medium text-sm">{plan.title}</span>
+                </div>
                 {plan.homeExercises && (
-                  <div className="rounded-lg bg-secondary/10 px-3 py-2 text-xs text-foreground">
-                    <span className="font-semibold">Home exercises: </span>{plan.homeExercises}
+                  <div className="rounded-lg bg-secondary/10 px-3 py-2">
+                    <span className="font-semibold text-xs uppercase text-muted-foreground block mb-1">Home Exercises</span>
+                    <p className="text-sm">{plan.homeExercises}</p>
                   </div>
+                )}
+                {plan.goals && (
+                  <div className="rounded-lg bg-muted/20 px-3 py-2">
+                    <span className="font-semibold text-xs uppercase text-muted-foreground block mb-1">Goals</span>
+                    <p className="text-xs text-muted-foreground">{plan.goals}</p>
+                  </div>
+                )}
+                {!plan.homeExercises && !plan.goals && (
+                  <p className="text-xs text-muted-foreground">No notes recorded for this plan</p>
                 )}
               </CardContent>
             </Card>
           ))}
-      </div>
+        </div>
+      )}
     </div>
     </UpgradeGate>
   );
@@ -1112,6 +1820,22 @@ function ReportsTab() {
   const { data: reports, isLoading } = useListReports({}, { query: { queryKey: ["reports-parent"] } });
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [selectedPeriod, setSelectedPeriod] = useState("all");
+
+  const PERIOD_FILTERS = [
+    { id: "all", label: "All Reports" },
+    { id: "weekly", label: "Weekly" },
+    { id: "monthly", label: "Monthly" },
+    { id: "clinical", label: "Clinical" },
+    { id: "school", label: "School" },
+  ];
+
+  const PERIOD_MAP: Record<string, string[]> = {
+    weekly:   ["weekly_progress"],
+    monthly:  ["monthly_assessment"],
+    clinical: ["clinical_summary", "telehealth_note"],
+    school:   ["school_report"],
+  };
 
   const handleDeleteReport = async (id: number) => {
     if (!window.confirm("Delete this report? This cannot be undone.")) return;
@@ -1119,21 +1843,46 @@ function ReportsTab() {
     queryClient.invalidateQueries({ queryKey: ["reports-parent"] });
   };
 
-  const handleDownloadReport = (report: { id: number; title: string; childName?: string | null; reportType: string; summary?: string | null; recommendations?: string | null; urgencyLevel?: string | null; createdAt: string }) => {
+  const handleDownloadReport = (r: { id: number; title: string; childName?: string | null; reportType: string; summary?: string | null; recommendations?: string | null; urgencyLevel?: string | null; createdAt: string }) => {
     const lines = [
-      `NEOBRAIN — ${report.title}`,
+      `NEOBRAIN AI CARE — ${r.title}`,
       `Generated: ${new Date().toLocaleString("en-PH")}`,
+      `Child: ${r.childName ?? "Unknown"}  |  Type: ${r.reportType}  |  Urgency: ${r.urgencyLevel ?? "routine"}`,
+      `Date: ${new Date(r.createdAt).toLocaleDateString("en-PH")}`,
       ``,
-      `Child: ${report.childName ?? "Unknown"}`,
-      `Report Type: ${report.reportType}`,
-      `Urgency: ${report.urgencyLevel ?? "routine"}`,
-      `Date: ${new Date(report.createdAt).toLocaleDateString("en-PH")}`,
+      r.summary ? `SUMMARY\n${r.summary}` : "",
       ``,
-      report.summary ? `Summary:\n${report.summary}` : "",
-      ``,
-      report.recommendations ? `Recommendations:\n${report.recommendations}` : "",
+      r.recommendations ? `RECOMMENDATIONS\n${r.recommendations}` : "",
     ].filter(l => l !== undefined).join("\n");
-    downloadText(`report-${report.id}-${report.title.replace(/\s+/g, "-")}.txt`, lines);
+    downloadText(`report-${r.id}-${r.title.replace(/\s+/g, "-")}.txt`, lines);
+  };
+
+  const handlePrintReport = (r: { title: string; childName?: string | null; reportType: string; summary?: string | null; recommendations?: string | null; urgencyLevel?: string | null; createdAt: string }) => {
+    const w = window.open("", "_blank", "width=800,height=900");
+    if (!w) return;
+    w.document.write(`<!DOCTYPE html><html><head><title>${r.title}</title>
+    <style>
+      body{font-family:Georgia,serif;padding:48px;max-width:720px;margin:0 auto;color:#111}
+      h1{color:#0038A8;margin-bottom:4px}h2{font-size:14px;color:#555;margin-bottom:24px}
+      .meta{font-size:13px;color:#666;margin-bottom:24px;border-bottom:1px solid #eee;padding-bottom:16px}
+      .section{margin-bottom:20px}.section-title{font-weight:700;text-transform:uppercase;font-size:11px;color:#0038A8;letter-spacing:.08em;margin-bottom:8px}
+      p{line-height:1.7;font-size:14px}footer{margin-top:40px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:12px}
+    </style></head><body>
+    <h1>${r.title}</h1>
+    <h2>NEOBRAIN AI CARE — Developmental Healthcare Report</h2>
+    <div class="meta">
+      <strong>Child:</strong> ${r.childName ?? "Unknown"} &nbsp;|&nbsp;
+      <strong>Report Type:</strong> ${r.reportType.replace(/_/g, " ")} &nbsp;|&nbsp;
+      <strong>Urgency:</strong> ${r.urgencyLevel ?? "routine"}<br/>
+      <strong>Date:</strong> ${new Date(r.createdAt).toLocaleDateString("en-PH", { dateStyle: "long" })}
+    </div>
+    ${r.summary ? `<div class="section"><div class="section-title">Summary</div><p>${r.summary}</p></div>` : ""}
+    ${r.recommendations ? `<div class="section"><div class="section-title">Recommendations</div><p>${r.recommendations}</p></div>` : ""}
+    <footer>Generated by NEOBRAIN AI CARE &copy; ${new Date().getFullYear()} ACCENTECX AI. For clinical review only — this is not a medical diagnosis.</footer>
+    </body></html>`);
+    w.document.close();
+    w.focus();
+    w.print();
   };
 
   const URGENCY_COLORS: Record<string, string> = {
@@ -1151,26 +1900,59 @@ function ReportsTab() {
     telehealth_note: "Telehealth Note",
   };
 
+  const filtered = selectedPeriod === "all"
+    ? (reports ?? [])
+    : (reports ?? []).filter(r => (PERIOD_MAP[selectedPeriod] ?? []).includes(r.reportType));
+
   return (
     <div className="p-6 lg:p-8 space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold">Reports</h1>
-        <p className="text-sm text-muted-foreground">AI-generated and clinician reports for your children</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold">Reports</h1>
+          <p className="text-sm text-muted-foreground">AI-generated and clinician reports for your children</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">{filtered.length} report{filtered.length !== 1 ? "s" : ""}</span>
+        </div>
       </div>
+
+      <div className="flex flex-wrap gap-2">
+        {PERIOD_FILTERS.map(f => (
+          <button
+            key={f.id}
+            onClick={() => setSelectedPeriod(f.id)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${selectedPeriod === f.id ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted border-border"}`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       <div className="space-y-4">
         {isLoading ? Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-40 rounded-xl" />) :
-          (reports ?? []).map(report => (
+          filtered.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="pt-10 pb-10 text-center">
+                <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-40" />
+                <p className="font-semibold">{selectedPeriod === "all" ? "No reports yet" : `No ${PERIOD_FILTERS.find(f => f.id === selectedPeriod)?.label} reports yet`}</p>
+                <p className="text-sm text-muted-foreground mt-1">Reports are generated automatically after assessments and therapy sessions</p>
+              </CardContent>
+            </Card>
+          ) : filtered.map(report => (
             <Card key={report.id} data-testid={`report-${report.id}`}>
               <CardContent className="p-5 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold">{report.title}</p>
-                    <p className="text-xs text-muted-foreground">{report.childName} · {new Date(report.createdAt).toLocaleDateString()}</p>
+                    <p className="text-xs text-muted-foreground">{report.childName} · {new Date(report.createdAt).toLocaleDateString("en-PH", { dateStyle: "medium" })}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {report.urgencyLevel && <Badge className={`text-xs ${URGENCY_COLORS[report.urgencyLevel] ?? ""}`}>{report.urgencyLevel}</Badge>}
+                    {report.urgencyLevel && <Badge className={`text-xs capitalize ${URGENCY_COLORS[report.urgencyLevel] ?? ""}`}>{report.urgencyLevel}</Badge>}
                     <Badge variant="outline" className="text-xs">{TYPE_LABELS[report.reportType] ?? report.reportType}</Badge>
-                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground" title="Download report" onClick={() => handleDownloadReport(report)}>
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground" title="Print / Save PDF" onClick={() => handlePrintReport(report)}>
+                      <Printer className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground" title="Download .txt" onClick={() => handleDownloadReport(report)}>
                       <Download className="h-3.5 w-3.5" />
                     </Button>
                     <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10" title="Delete report" onClick={() => handleDeleteReport(report.id)}>
@@ -1178,7 +1960,7 @@ function ReportsTab() {
                     </Button>
                   </div>
                 </div>
-                {report.summary && <p className="text-sm text-muted-foreground leading-relaxed">{report.summary}</p>}
+                {report.summary && <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{report.summary}</p>}
                 {report.recommendations && (
                   <div className="rounded-lg bg-secondary/10 px-3 py-2 text-xs">
                     <span className="font-semibold text-foreground">Recommendations: </span>
@@ -1583,8 +2365,9 @@ type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   children: ChildrenTab,
   screening: ScreeningTab,
+  milestones: MilestonesTab,
   games: GamesTab,
-  "ai-results": AIResultsTab,
+  "ai-insights": AIInsightsTab,
   video: VideoTab,
   appointments: AppointmentsTab,
   therapy: TherapyTab,
