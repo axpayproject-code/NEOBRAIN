@@ -37,3 +37,8 @@ externalPort = 3000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+BOOTSTRAP_TOKEN = "a6ce8498-59ff-4ef5-9dca-26729e9b3b4e"
