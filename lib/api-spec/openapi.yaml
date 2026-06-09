@@ -1212,6 +1212,255 @@ paths:
         "204":
           description: Deleted
 
+  # ─── Nutrition ────────────────────────────────────────────────────────────────
+  /nutrition/profile/{childId}:
+    get:
+      operationId: getNutritionProfile
+      tags: [nutrition]
+      summary: Get nutrition profile for a child
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Nutrition profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NutritionProfile" }
+        "404":
+          description: Not found
+    patch:
+      operationId: updateNutritionProfile
+      tags: [nutrition]
+      summary: Update nutrition profile
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NutritionProfileInput" }
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NutritionProfile" }
+
+  /nutrition/profile:
+    post:
+      operationId: createNutritionProfile
+      tags: [nutrition]
+      summary: Create nutrition profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NutritionProfileInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NutritionProfile" }
+
+  /nutrition/growth/{childId}:
+    get:
+      operationId: listGrowthRecords
+      tags: [nutrition]
+      summary: List growth records for a child
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: List of growth records
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/GrowthRecord" }
+
+  /nutrition/growth:
+    post:
+      operationId: createGrowthRecord
+      tags: [nutrition]
+      summary: Record a growth measurement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/GrowthRecordInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GrowthRecord" }
+
+  /nutrition/feeding/{childId}:
+    get:
+      operationId: listFeedingHistory
+      tags: [nutrition]
+      summary: List feeding history for a child
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Feeding history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/FeedingEntry" }
+
+  /nutrition/feeding:
+    post:
+      operationId: createFeedingEntry
+      tags: [nutrition]
+      summary: Log a feeding entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FeedingEntryInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FeedingEntry" }
+
+  /nutrition/meals/{childId}:
+    get:
+      operationId: listMealLogs
+      tags: [nutrition]
+      summary: List meal logs for a child
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Meal logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MealLog" }
+
+  /nutrition/meals:
+    post:
+      operationId: createMealLog
+      tags: [nutrition]
+      summary: Log a meal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MealLogInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MealLog" }
+
+  /nutrition/food-exposures/{childId}:
+    get:
+      operationId: listFoodExposures
+      tags: [nutrition]
+      summary: List food exposures for a child
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Food exposures
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/FoodExposure" }
+
+  /nutrition/food-exposures:
+    post:
+      operationId: createFoodExposure
+      tags: [nutrition]
+      summary: Record a new food introduction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FoodExposureInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FoodExposure" }
+
+  /nutrition/insights/{childId}:
+    get:
+      operationId: listNutritionInsights
+      tags: [nutrition]
+      summary: List AI nutrition insights for a child
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Nutrition insights
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/NutritionInsight" }
+
+  /nutrition/insights:
+    post:
+      operationId: createNutritionInsight
+      tags: [nutrition]
+      summary: Create a nutrition insight
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NutritionInsightInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NutritionInsight" }
+
+  /nutrition/population-summary:
+    get:
+      operationId: getNutritionPopulationSummary
+      tags: [nutrition]
+      summary: Aggregate nutrition stats for government portal (no PII)
+      responses:
+        "200":
+          description: Population nutrition summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NutritionPopulationSummary" }
+
 components:
   schemas:
     HealthStatus:
@@ -2283,3 +2532,274 @@ components:
         expiresAt:
           type: string
 
+    # ─── Nutrition ────────────────────────────────────────────────────────────
+    NutritionProfile:
+      type: object
+      required: [id, childId, nutritionStatus, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        feedingType:
+          type: ["string", "null"]
+        dietaryPattern:
+          type: ["string", "null"]
+        nutritionStatus:
+          type: string
+          enum: [normal, at_risk, malnourished, overweight]
+        foodDiversityScore:
+          type: ["number", "null"]
+        mealConsistencyScore:
+          type: ["number", "null"]
+        hydrationTracking:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: ["string", "null"]
+
+    NutritionProfileInput:
+      type: object
+      properties:
+        childId:
+          type: integer
+        feedingType:
+          type: string
+        dietaryPattern:
+          type: string
+        nutritionStatus:
+          type: string
+        foodDiversityScore:
+          type: number
+        mealConsistencyScore:
+          type: number
+        hydrationTracking:
+          type: string
+        notes:
+          type: string
+
+    GrowthRecord:
+      type: object
+      required: [id, childId, measurementDate, source, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        measurementDate:
+          type: string
+        weight:
+          type: ["number", "null"]
+        height:
+          type: ["number", "null"]
+        headCircumference:
+          type: ["number", "null"]
+        bmi:
+          type: ["number", "null"]
+        source:
+          type: string
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    GrowthRecordInput:
+      type: object
+      required: [childId, measurementDate]
+      properties:
+        childId:
+          type: integer
+        measurementDate:
+          type: string
+        weight:
+          type: number
+        height:
+          type: number
+        headCircumference:
+          type: number
+        bmi:
+          type: number
+        source:
+          type: string
+        notes:
+          type: string
+
+    FeedingEntry:
+      type: object
+      required: [id, childId, feedingType, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        feedingType:
+          type: string
+        frequency:
+          type: ["string", "null"]
+        duration:
+          type: ["string", "null"]
+        amount:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+        feedingTimestamp:
+          type: string
+        createdAt:
+          type: string
+
+    FeedingEntryInput:
+      type: object
+      required: [childId, feedingType]
+      properties:
+        childId:
+          type: integer
+        feedingType:
+          type: string
+        frequency:
+          type: string
+        duration:
+          type: string
+        amount:
+          type: number
+        notes:
+          type: string
+
+    MealLog:
+      type: object
+      required: [id, childId, date, mealType, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        date:
+          type: string
+        mealType:
+          type: string
+        foodsConsumed:
+          type: ["string", "null"]
+        portion:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    MealLogInput:
+      type: object
+      required: [childId, date, mealType]
+      properties:
+        childId:
+          type: integer
+        date:
+          type: string
+        mealType:
+          type: string
+        foodsConsumed:
+          type: string
+        portion:
+          type: string
+        notes:
+          type: string
+
+    FoodExposure:
+      type: object
+      required: [id, childId, foodItem, firstIntroduced, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        foodItem:
+          type: string
+        foodCategory:
+          type: ["string", "null"]
+        firstIntroduced:
+          type: string
+        reactions:
+          type: ["string", "null"]
+        accepted:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    FoodExposureInput:
+      type: object
+      required: [childId, foodItem, firstIntroduced]
+      properties:
+        childId:
+          type: integer
+        foodItem:
+          type: string
+        foodCategory:
+          type: string
+        firstIntroduced:
+          type: string
+        reactions:
+          type: string
+        accepted:
+          type: string
+        notes:
+          type: string
+
+    NutritionInsight:
+      type: object
+      required: [id, childId, insightType, generatedInsight, generatedDate, createdAt]
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        insightType:
+          type: string
+        generatedInsight:
+          type: string
+        generatedDate:
+          type: string
+        confidenceLevel:
+          type: ["string", "null"]
+        isRead:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+
+    NutritionInsightInput:
+      type: object
+      required: [childId, insightType, generatedInsight, generatedDate]
+      properties:
+        childId:
+          type: integer
+        insightType:
+          type: string
+        generatedInsight:
+          type: string
+        generatedDate:
+          type: string
+        confidenceLevel:
+          type: string
+
+    NutritionPopulationSummary:
+      type: object
+      required: [totalChildrenWithGrowthData, totalMealsLogged, totalFoodExposures, totalInsights, avgFoodDiversityScore]
+      properties:
+        totalChildrenWithGrowthData:
+          type: integer
+        totalMealsLogged:
+          type: integer
+        totalFoodExposures:
+          type: integer
+        totalInsights:
+          type: integer
+        avgFoodDiversityScore:
+          type: number
+        growthMonitoringCoverage:
+          type: number
+        nutritionProgramParticipation:
+          type: integer
+        feedingProgramEngagement:
+          type: integer

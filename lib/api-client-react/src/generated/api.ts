@@ -39,7 +39,13 @@ import type {
   Document,
   DocumentInput,
   DomainScores,
+  FeedingEntry,
+  FeedingEntryInput,
+  FoodExposure,
+  FoodExposureInput,
   GetAvailableSlotsParams,
+  GrowthRecord,
+  GrowthRecordInput,
   HealthStatus,
   ListAiAnalysisResultsParams,
   ListAppointmentsParams,
@@ -53,7 +59,14 @@ import type {
   ListScreeningsParams,
   ListTherapyPlansParams,
   ListTherapySessionNotesParams,
+  MealLog,
+  MealLogInput,
   MeetingUrlInput,
+  NutritionInsight,
+  NutritionInsightInput,
+  NutritionPopulationSummary,
+  NutritionProfile,
+  NutritionProfileInput,
   Payment,
   PaymentInput,
   Report,
@@ -4420,4 +4433,1041 @@ export const useDeleteDocument = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getDeleteDocumentMutationOptions(options));
     }
+
+export const getGetNutritionProfileUrl = (childId: number,) => {
+
+
+
+
+  return `/api/nutrition/profile/${childId}`
+}
+
+/**
+ * @summary Get nutrition profile for a child
+ */
+export const getNutritionProfile = async (childId: number, options?: RequestInit): Promise<NutritionProfile> => {
+
+  return customFetch<NutritionProfile>(getGetNutritionProfileUrl(childId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetNutritionProfileQueryKey = (childId: number,) => {
+    return [
+    `/api/nutrition/profile/${childId}`
+    ] as const;
+    }
+
+
+export const getGetNutritionProfileQueryOptions = <TData = Awaited<ReturnType<typeof getNutritionProfile>>, TError = ErrorType<void>>(childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNutritionProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNutritionProfileQueryKey(childId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNutritionProfile>>> = ({ signal }) => getNutritionProfile(childId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(childId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNutritionProfile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetNutritionProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getNutritionProfile>>>
+export type GetNutritionProfileQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get nutrition profile for a child
+ */
+
+export function useGetNutritionProfile<TData = Awaited<ReturnType<typeof getNutritionProfile>>, TError = ErrorType<void>>(
+ childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNutritionProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetNutritionProfileQueryOptions(childId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateNutritionProfileUrl = (childId: number,) => {
+
+
+
+
+  return `/api/nutrition/profile/${childId}`
+}
+
+/**
+ * @summary Update nutrition profile
+ */
+export const updateNutritionProfile = async (childId: number,
+    nutritionProfileInput: NutritionProfileInput, options?: RequestInit): Promise<NutritionProfile> => {
+
+  return customFetch<NutritionProfile>(getUpdateNutritionProfileUrl(childId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      nutritionProfileInput,)
+  }
+);}
+
+
+
+
+export const getUpdateNutritionProfileMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateNutritionProfile>>, TError,{childId: number;data: BodyType<NutritionProfileInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateNutritionProfile>>, TError,{childId: number;data: BodyType<NutritionProfileInput>}, TContext> => {
+
+const mutationKey = ['updateNutritionProfile'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateNutritionProfile>>, {childId: number;data: BodyType<NutritionProfileInput>}> = (props) => {
+          const {childId,data} = props ?? {};
+
+          return  updateNutritionProfile(childId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateNutritionProfileMutationResult = NonNullable<Awaited<ReturnType<typeof updateNutritionProfile>>>
+    export type UpdateNutritionProfileMutationBody = BodyType<NutritionProfileInput>
+    export type UpdateNutritionProfileMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update nutrition profile
+ */
+export const useUpdateNutritionProfile = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateNutritionProfile>>, TError,{childId: number;data: BodyType<NutritionProfileInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateNutritionProfile>>,
+        TError,
+        {childId: number;data: BodyType<NutritionProfileInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateNutritionProfileMutationOptions(options));
+    }
+
+export const getCreateNutritionProfileUrl = () => {
+
+
+
+
+  return `/api/nutrition/profile`
+}
+
+/**
+ * @summary Create nutrition profile
+ */
+export const createNutritionProfile = async (nutritionProfileInput: NutritionProfileInput, options?: RequestInit): Promise<NutritionProfile> => {
+
+  return customFetch<NutritionProfile>(getCreateNutritionProfileUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      nutritionProfileInput,)
+  }
+);}
+
+
+
+
+export const getCreateNutritionProfileMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createNutritionProfile>>, TError,{data: BodyType<NutritionProfileInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createNutritionProfile>>, TError,{data: BodyType<NutritionProfileInput>}, TContext> => {
+
+const mutationKey = ['createNutritionProfile'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createNutritionProfile>>, {data: BodyType<NutritionProfileInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createNutritionProfile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateNutritionProfileMutationResult = NonNullable<Awaited<ReturnType<typeof createNutritionProfile>>>
+    export type CreateNutritionProfileMutationBody = BodyType<NutritionProfileInput>
+    export type CreateNutritionProfileMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create nutrition profile
+ */
+export const useCreateNutritionProfile = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createNutritionProfile>>, TError,{data: BodyType<NutritionProfileInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createNutritionProfile>>,
+        TError,
+        {data: BodyType<NutritionProfileInput>},
+        TContext
+      > => {
+      return useMutation(getCreateNutritionProfileMutationOptions(options));
+    }
+
+export const getListGrowthRecordsUrl = (childId: number,) => {
+
+
+
+
+  return `/api/nutrition/growth/${childId}`
+}
+
+/**
+ * @summary List growth records for a child
+ */
+export const listGrowthRecords = async (childId: number, options?: RequestInit): Promise<GrowthRecord[]> => {
+
+  return customFetch<GrowthRecord[]>(getListGrowthRecordsUrl(childId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListGrowthRecordsQueryKey = (childId: number,) => {
+    return [
+    `/api/nutrition/growth/${childId}`
+    ] as const;
+    }
+
+
+export const getListGrowthRecordsQueryOptions = <TData = Awaited<ReturnType<typeof listGrowthRecords>>, TError = ErrorType<unknown>>(childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGrowthRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListGrowthRecordsQueryKey(childId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listGrowthRecords>>> = ({ signal }) => listGrowthRecords(childId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(childId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listGrowthRecords>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListGrowthRecordsQueryResult = NonNullable<Awaited<ReturnType<typeof listGrowthRecords>>>
+export type ListGrowthRecordsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List growth records for a child
+ */
+
+export function useListGrowthRecords<TData = Awaited<ReturnType<typeof listGrowthRecords>>, TError = ErrorType<unknown>>(
+ childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGrowthRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListGrowthRecordsQueryOptions(childId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateGrowthRecordUrl = () => {
+
+
+
+
+  return `/api/nutrition/growth`
+}
+
+/**
+ * @summary Record a growth measurement
+ */
+export const createGrowthRecord = async (growthRecordInput: GrowthRecordInput, options?: RequestInit): Promise<GrowthRecord> => {
+
+  return customFetch<GrowthRecord>(getCreateGrowthRecordUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      growthRecordInput,)
+  }
+);}
+
+
+
+
+export const getCreateGrowthRecordMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGrowthRecord>>, TError,{data: BodyType<GrowthRecordInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createGrowthRecord>>, TError,{data: BodyType<GrowthRecordInput>}, TContext> => {
+
+const mutationKey = ['createGrowthRecord'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createGrowthRecord>>, {data: BodyType<GrowthRecordInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createGrowthRecord(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateGrowthRecordMutationResult = NonNullable<Awaited<ReturnType<typeof createGrowthRecord>>>
+    export type CreateGrowthRecordMutationBody = BodyType<GrowthRecordInput>
+    export type CreateGrowthRecordMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Record a growth measurement
+ */
+export const useCreateGrowthRecord = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createGrowthRecord>>, TError,{data: BodyType<GrowthRecordInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createGrowthRecord>>,
+        TError,
+        {data: BodyType<GrowthRecordInput>},
+        TContext
+      > => {
+      return useMutation(getCreateGrowthRecordMutationOptions(options));
+    }
+
+export const getListFeedingHistoryUrl = (childId: number,) => {
+
+
+
+
+  return `/api/nutrition/feeding/${childId}`
+}
+
+/**
+ * @summary List feeding history for a child
+ */
+export const listFeedingHistory = async (childId: number, options?: RequestInit): Promise<FeedingEntry[]> => {
+
+  return customFetch<FeedingEntry[]>(getListFeedingHistoryUrl(childId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListFeedingHistoryQueryKey = (childId: number,) => {
+    return [
+    `/api/nutrition/feeding/${childId}`
+    ] as const;
+    }
+
+
+export const getListFeedingHistoryQueryOptions = <TData = Awaited<ReturnType<typeof listFeedingHistory>>, TError = ErrorType<unknown>>(childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFeedingHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListFeedingHistoryQueryKey(childId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listFeedingHistory>>> = ({ signal }) => listFeedingHistory(childId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(childId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listFeedingHistory>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListFeedingHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof listFeedingHistory>>>
+export type ListFeedingHistoryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List feeding history for a child
+ */
+
+export function useListFeedingHistory<TData = Awaited<ReturnType<typeof listFeedingHistory>>, TError = ErrorType<unknown>>(
+ childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFeedingHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListFeedingHistoryQueryOptions(childId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateFeedingEntryUrl = () => {
+
+
+
+
+  return `/api/nutrition/feeding`
+}
+
+/**
+ * @summary Log a feeding entry
+ */
+export const createFeedingEntry = async (feedingEntryInput: FeedingEntryInput, options?: RequestInit): Promise<FeedingEntry> => {
+
+  return customFetch<FeedingEntry>(getCreateFeedingEntryUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      feedingEntryInput,)
+  }
+);}
+
+
+
+
+export const getCreateFeedingEntryMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFeedingEntry>>, TError,{data: BodyType<FeedingEntryInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createFeedingEntry>>, TError,{data: BodyType<FeedingEntryInput>}, TContext> => {
+
+const mutationKey = ['createFeedingEntry'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createFeedingEntry>>, {data: BodyType<FeedingEntryInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createFeedingEntry(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateFeedingEntryMutationResult = NonNullable<Awaited<ReturnType<typeof createFeedingEntry>>>
+    export type CreateFeedingEntryMutationBody = BodyType<FeedingEntryInput>
+    export type CreateFeedingEntryMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Log a feeding entry
+ */
+export const useCreateFeedingEntry = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFeedingEntry>>, TError,{data: BodyType<FeedingEntryInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createFeedingEntry>>,
+        TError,
+        {data: BodyType<FeedingEntryInput>},
+        TContext
+      > => {
+      return useMutation(getCreateFeedingEntryMutationOptions(options));
+    }
+
+export const getListMealLogsUrl = (childId: number,) => {
+
+
+
+
+  return `/api/nutrition/meals/${childId}`
+}
+
+/**
+ * @summary List meal logs for a child
+ */
+export const listMealLogs = async (childId: number, options?: RequestInit): Promise<MealLog[]> => {
+
+  return customFetch<MealLog[]>(getListMealLogsUrl(childId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListMealLogsQueryKey = (childId: number,) => {
+    return [
+    `/api/nutrition/meals/${childId}`
+    ] as const;
+    }
+
+
+export const getListMealLogsQueryOptions = <TData = Awaited<ReturnType<typeof listMealLogs>>, TError = ErrorType<unknown>>(childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMealLogs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListMealLogsQueryKey(childId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMealLogs>>> = ({ signal }) => listMealLogs(childId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(childId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMealLogs>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListMealLogsQueryResult = NonNullable<Awaited<ReturnType<typeof listMealLogs>>>
+export type ListMealLogsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List meal logs for a child
+ */
+
+export function useListMealLogs<TData = Awaited<ReturnType<typeof listMealLogs>>, TError = ErrorType<unknown>>(
+ childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMealLogs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListMealLogsQueryOptions(childId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateMealLogUrl = () => {
+
+
+
+
+  return `/api/nutrition/meals`
+}
+
+/**
+ * @summary Log a meal
+ */
+export const createMealLog = async (mealLogInput: MealLogInput, options?: RequestInit): Promise<MealLog> => {
+
+  return customFetch<MealLog>(getCreateMealLogUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      mealLogInput,)
+  }
+);}
+
+
+
+
+export const getCreateMealLogMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMealLog>>, TError,{data: BodyType<MealLogInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createMealLog>>, TError,{data: BodyType<MealLogInput>}, TContext> => {
+
+const mutationKey = ['createMealLog'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createMealLog>>, {data: BodyType<MealLogInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createMealLog(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateMealLogMutationResult = NonNullable<Awaited<ReturnType<typeof createMealLog>>>
+    export type CreateMealLogMutationBody = BodyType<MealLogInput>
+    export type CreateMealLogMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Log a meal
+ */
+export const useCreateMealLog = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMealLog>>, TError,{data: BodyType<MealLogInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createMealLog>>,
+        TError,
+        {data: BodyType<MealLogInput>},
+        TContext
+      > => {
+      return useMutation(getCreateMealLogMutationOptions(options));
+    }
+
+export const getListFoodExposuresUrl = (childId: number,) => {
+
+
+
+
+  return `/api/nutrition/food-exposures/${childId}`
+}
+
+/**
+ * @summary List food exposures for a child
+ */
+export const listFoodExposures = async (childId: number, options?: RequestInit): Promise<FoodExposure[]> => {
+
+  return customFetch<FoodExposure[]>(getListFoodExposuresUrl(childId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListFoodExposuresQueryKey = (childId: number,) => {
+    return [
+    `/api/nutrition/food-exposures/${childId}`
+    ] as const;
+    }
+
+
+export const getListFoodExposuresQueryOptions = <TData = Awaited<ReturnType<typeof listFoodExposures>>, TError = ErrorType<unknown>>(childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFoodExposures>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListFoodExposuresQueryKey(childId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listFoodExposures>>> = ({ signal }) => listFoodExposures(childId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(childId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listFoodExposures>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListFoodExposuresQueryResult = NonNullable<Awaited<ReturnType<typeof listFoodExposures>>>
+export type ListFoodExposuresQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List food exposures for a child
+ */
+
+export function useListFoodExposures<TData = Awaited<ReturnType<typeof listFoodExposures>>, TError = ErrorType<unknown>>(
+ childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFoodExposures>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListFoodExposuresQueryOptions(childId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateFoodExposureUrl = () => {
+
+
+
+
+  return `/api/nutrition/food-exposures`
+}
+
+/**
+ * @summary Record a new food introduction
+ */
+export const createFoodExposure = async (foodExposureInput: FoodExposureInput, options?: RequestInit): Promise<FoodExposure> => {
+
+  return customFetch<FoodExposure>(getCreateFoodExposureUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      foodExposureInput,)
+  }
+);}
+
+
+
+
+export const getCreateFoodExposureMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFoodExposure>>, TError,{data: BodyType<FoodExposureInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createFoodExposure>>, TError,{data: BodyType<FoodExposureInput>}, TContext> => {
+
+const mutationKey = ['createFoodExposure'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createFoodExposure>>, {data: BodyType<FoodExposureInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createFoodExposure(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateFoodExposureMutationResult = NonNullable<Awaited<ReturnType<typeof createFoodExposure>>>
+    export type CreateFoodExposureMutationBody = BodyType<FoodExposureInput>
+    export type CreateFoodExposureMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Record a new food introduction
+ */
+export const useCreateFoodExposure = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFoodExposure>>, TError,{data: BodyType<FoodExposureInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createFoodExposure>>,
+        TError,
+        {data: BodyType<FoodExposureInput>},
+        TContext
+      > => {
+      return useMutation(getCreateFoodExposureMutationOptions(options));
+    }
+
+export const getListNutritionInsightsUrl = (childId: number,) => {
+
+
+
+
+  return `/api/nutrition/insights/${childId}`
+}
+
+/**
+ * @summary List AI nutrition insights for a child
+ */
+export const listNutritionInsights = async (childId: number, options?: RequestInit): Promise<NutritionInsight[]> => {
+
+  return customFetch<NutritionInsight[]>(getListNutritionInsightsUrl(childId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListNutritionInsightsQueryKey = (childId: number,) => {
+    return [
+    `/api/nutrition/insights/${childId}`
+    ] as const;
+    }
+
+
+export const getListNutritionInsightsQueryOptions = <TData = Awaited<ReturnType<typeof listNutritionInsights>>, TError = ErrorType<unknown>>(childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listNutritionInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListNutritionInsightsQueryKey(childId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listNutritionInsights>>> = ({ signal }) => listNutritionInsights(childId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(childId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listNutritionInsights>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListNutritionInsightsQueryResult = NonNullable<Awaited<ReturnType<typeof listNutritionInsights>>>
+export type ListNutritionInsightsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List AI nutrition insights for a child
+ */
+
+export function useListNutritionInsights<TData = Awaited<ReturnType<typeof listNutritionInsights>>, TError = ErrorType<unknown>>(
+ childId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listNutritionInsights>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListNutritionInsightsQueryOptions(childId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateNutritionInsightUrl = () => {
+
+
+
+
+  return `/api/nutrition/insights`
+}
+
+/**
+ * @summary Create a nutrition insight
+ */
+export const createNutritionInsight = async (nutritionInsightInput: NutritionInsightInput, options?: RequestInit): Promise<NutritionInsight> => {
+
+  return customFetch<NutritionInsight>(getCreateNutritionInsightUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      nutritionInsightInput,)
+  }
+);}
+
+
+
+
+export const getCreateNutritionInsightMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createNutritionInsight>>, TError,{data: BodyType<NutritionInsightInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createNutritionInsight>>, TError,{data: BodyType<NutritionInsightInput>}, TContext> => {
+
+const mutationKey = ['createNutritionInsight'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createNutritionInsight>>, {data: BodyType<NutritionInsightInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createNutritionInsight(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateNutritionInsightMutationResult = NonNullable<Awaited<ReturnType<typeof createNutritionInsight>>>
+    export type CreateNutritionInsightMutationBody = BodyType<NutritionInsightInput>
+    export type CreateNutritionInsightMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a nutrition insight
+ */
+export const useCreateNutritionInsight = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createNutritionInsight>>, TError,{data: BodyType<NutritionInsightInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createNutritionInsight>>,
+        TError,
+        {data: BodyType<NutritionInsightInput>},
+        TContext
+      > => {
+      return useMutation(getCreateNutritionInsightMutationOptions(options));
+    }
+
+export const getGetNutritionPopulationSummaryUrl = () => {
+
+
+
+
+  return `/api/nutrition/population-summary`
+}
+
+/**
+ * @summary Aggregate nutrition stats for government portal (no PII)
+ */
+export const getNutritionPopulationSummary = async ( options?: RequestInit): Promise<NutritionPopulationSummary> => {
+
+  return customFetch<NutritionPopulationSummary>(getGetNutritionPopulationSummaryUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetNutritionPopulationSummaryQueryKey = () => {
+    return [
+    `/api/nutrition/population-summary`
+    ] as const;
+    }
+
+
+export const getGetNutritionPopulationSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getNutritionPopulationSummary>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNutritionPopulationSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNutritionPopulationSummaryQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNutritionPopulationSummary>>> = ({ signal }) => getNutritionPopulationSummary({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNutritionPopulationSummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetNutritionPopulationSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getNutritionPopulationSummary>>>
+export type GetNutritionPopulationSummaryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Aggregate nutrition stats for government portal (no PII)
+ */
+
+export function useGetNutritionPopulationSummary<TData = Awaited<ReturnType<typeof getNutritionPopulationSummary>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNutritionPopulationSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetNutritionPopulationSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 

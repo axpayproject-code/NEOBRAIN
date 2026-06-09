@@ -7,7 +7,7 @@ import {
   CheckCircle, Clock, Globe, GraduationCap, Stethoscope,
   Plus, Download, RefreshCw, X, Mail, Shield,
   MapPin, FileText, Activity, FlaskConical, UserPlus, Eye, EyeOff, Settings, CreditCard, Zap,
-  Check, Copy, BadgeCheck, AlertCircle, Send, Ticket, Ban, Trash2, Search, Phone, Building
+  Check, Copy, BadgeCheck, AlertCircle, Send, Ticket, Ban, Trash2, Search, Phone, Building, Salad, Scale, Apple, Leaf
 } from "lucide-react";
 import { CollaborationPanel } from "@/components/CollaborationPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +35,7 @@ import { ChildSearchBar } from "@/components/shared/ChildSearchBar";
 const NAV: NavItem[] = [
   { id: "overview", label: "National Overview", icon: LayoutDashboard },
   { id: "analytics", label: "Population Analytics", icon: BarChart3 },
+  { id: "nutrition", label: "Population Nutrition", icon: Salad },
   { id: "programs", label: "Regional Programs", icon: Globe },
   { id: "health-programs", label: "Health Programs", icon: Activity },
   { id: "geo-drilldown", label: "Geographic Drill-down", icon: MapPin },
@@ -1663,10 +1664,88 @@ function AdminCollaborationTab() {
   return <div className="p-4 sm:p-6 lg:p-8"><CollaborationPanel /></div>;
 }
 
+function PopulationNutritionTab() {
+  const [data, setData] = useState<{
+    totalChildrenWithGrowthData: number; totalMealsLogged: number; totalFoodExposures: number;
+    totalInsights: number; avgFoodDiversityScore: number; growthMonitoringCoverage: number;
+    nutritionProgramParticipation: number; feedingProgramEngagement: number;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/nutrition/population-summary")
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { setData(d as typeof data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const metrics = data ? [
+    { label: "Children with Growth Data", value: data.totalChildrenWithGrowthData, icon: Scale, color: "text-blue-600" },
+    { label: "Total Meals Logged", value: data.totalMealsLogged, icon: Apple, color: "text-green-600" },
+    { label: "Food Introductions", value: data.totalFoodExposures, icon: Leaf, color: "text-emerald-600" },
+    { label: "Avg Diversity Score", value: `${data.avgFoodDiversityScore}%`, icon: Salad, color: "text-primary" },
+    { label: "Growth Monitoring Coverage", value: `${data.growthMonitoringCoverage}%`, icon: TrendingUp, color: "text-purple-600" },
+    { label: "Program Participation", value: data.nutritionProgramParticipation, icon: Activity, color: "text-orange-500" },
+  ] : [];
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold font-syne flex items-center gap-2"><Salad className="h-6 w-6 text-primary" /> Population Nutrition Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Aggregate nutrition monitoring — no personally identifiable information</p>
+      </div>
+      {loading && <div className="flex justify-center py-12"><div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>}
+      {!loading && data && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {metrics.map(m => (
+              <div key={m.label} className="rounded-xl border bg-card p-4 flex items-start gap-3">
+                <m.icon className={`h-5 w-5 ${m.color} mt-0.5 shrink-0`} />
+                <div>
+                  <div className="text-2xl font-bold">{m.value}</div>
+                  <div className="text-xs text-muted-foreground leading-tight mt-0.5">{m.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-xl border bg-card p-4">
+            <p className="text-sm font-semibold mb-3">Coverage Indicators</p>
+            <div className="space-y-3">
+              {[
+                { label: "Growth Monitoring Coverage", value: data.growthMonitoringCoverage, color: "bg-blue-500" },
+                { label: "Nutrition Program Participation", value: Math.min(100, data.nutritionProgramParticipation), color: "bg-green-500" },
+                { label: "Avg Food Diversity Score", value: data.avgFoodDiversityScore, color: "bg-emerald-500" },
+              ].map(b => (
+                <div key={b.label}>
+                  <div className="flex justify-between text-xs mb-1"><span>{b.label}</span><span className="font-semibold">{b.value}%</span></div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className={`h-full rounded-full ${b.color}`} style={{ width: `${b.value}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-xs font-semibold text-amber-800 mb-1">Data Privacy Notice</p>
+            <p className="text-xs text-amber-700">All statistics shown are aggregate counts only. No personally identifiable information is displayed. Data is used for public health planning and program evaluation.</p>
+          </div>
+        </div>
+      )}
+      {!loading && !data && (
+        <div className="text-center py-12 text-muted-foreground">
+          <Salad className="h-10 w-10 mx-auto mb-3 opacity-30" />
+          <p>No nutrition data available yet. Data will appear as families log meals and growth records.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   overview: NationalOverviewTab,
   analytics: PopulationAnalyticsTab,
+  nutrition: PopulationNutritionTab,
   programs: RegionalProgramsTab,
   "health-programs": HealthProgramsTabWrapper,
   "geo-drilldown": GeoDrilldownWrapper,

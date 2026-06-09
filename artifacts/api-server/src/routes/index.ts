@@ -38,6 +38,7 @@ import messagingRouter from "./messaging";
 import communityRouter from "./community";
 import otpRouter from "./otp";
 import adminRouter from "./admin";
+import nutritionRouter from "./nutrition";
 
 const router: IRouter = Router();
 
@@ -80,5 +81,6 @@ router.use(messagingRouter);
 router.use(communityRouter);
 router.use(otpRouter);
 router.use(adminRouter);
+router.use(nutritionRouter);
 
 export default router;

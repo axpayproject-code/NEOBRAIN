@@ -5,7 +5,7 @@ import {
   HeartPulse, History, LayoutDashboard, AlertTriangle, Clock, CheckCircle2,
   CalendarDays, Link, ShieldCheck, MapPin, XCircle, ExternalLink, CalendarCheck,
   BarChart3, MessageSquare, Download, Send, CheckCircle, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap, Brain,
-  Check, Copy, BadgeCheck, AlertCircle, Ticket, NotebookPen, ListChecks
+  Check, Copy, BadgeCheck, AlertCircle, Ticket, NotebookPen, ListChecks, Salad, Scale, TrendingUp, Apple, UtensilsCrossed
 } from "lucide-react";
 import { PatientIntakeTab } from "@/components/clinic/PatientIntakeTab";
 import { SoapNotesTab } from "@/components/clinic/SoapNotesTab";
@@ -45,6 +45,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const NAV: NavItem[] = [
   { id: "queue", label: "Patient Queue", icon: Users },
+  { id: "nutrition", label: "Patient Nutrition", icon: Salad },
   { id: "ai-triage", label: "AI Triage", icon: Zap },
   { id: "intake", label: "Patient Intake", icon: ClipboardList },
   { id: "soap-notes", label: "SOAP Notes", icon: NotebookPen },
@@ -1681,9 +1682,119 @@ function DoctorCollaborationTab() {
   );
 }
 
+function ClinicNutritionTab() {
+  const { data: children } = useListChildren({ query: { queryKey: ["children-clinic-nutrition"] } });
+  const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
+  const [growth, setGrowth] = useState<Array<{id:number;measurementDate:string;weight?:number|null;height?:number|null;bmi?:number|null;source:string}>>([]);
+  const [meals, setMeals] = useState<Array<{id:number;date:string;mealType:string;foodsConsumed?:string|null}>>([]);
+  const [foods, setFoods] = useState<Array<{id:number;foodItem:string;foodCategory?:string|null;accepted?:string|null}>>([]);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+
+  const load = async (childId: number) => {
+    setLoading(true);
+    const headers: Record<string, string> = user?.id ? { Authorization: `Bearer ${user.id}` } : {};
+    const [g, m, f] = await Promise.all([
+      fetch(`/api/nutrition/growth/${childId}`, { headers }).then(r => r.ok ? r.json() : []),
+      fetch(`/api/nutrition/meals/${childId}`, { headers }).then(r => r.ok ? r.json() : []),
+      fetch(`/api/nutrition/food-exposures/${childId}`, { headers }).then(r => r.ok ? r.json() : []),
+    ]);
+    setGrowth(g as typeof growth);
+    setMeals(m as typeof meals);
+    setFoods(f as typeof foods);
+    setLoading(false);
+  };
+
+  const select = (id: number) => { setSelectedChildId(id); void load(id); };
+
+  const catCounts = ["fruits","vegetables","protein","grains","dairy","legumes"].map(cat => ({
+    cat, count: (foods as Array<{foodCategory?:string|null;accepted?:string|null}>).filter(f => f.foodCategory === cat && f.accepted !== "no").length
+  }));
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold font-syne flex items-center gap-2"><Salad className="h-6 w-6 text-primary" /> Patient Nutrition</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Review growth history, food diversity, and meal logs for each patient</p>
+      </div>
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {(children ?? []).slice(0, 12).map(c => (
+          <button key={c.id} onClick={() => select(c.id)}
+            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium border transition-colors ${selectedChildId === c.id ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-foreground"}`}>
+            {c.fullName.split(" ")[0]}
+          </button>
+        ))}
+      </div>
+      {!selectedChildId && <div className="text-center py-12 text-muted-foreground"><Salad className="h-10 w-10 mx-auto mb-3 opacity-30" /><p>Select a patient above to view their nutrition data</p></div>}
+      {selectedChildId && loading && <div className="flex justify-center py-8"><div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>}
+      {selectedChildId && !loading && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { label: "Growth Records", value: growth.length, icon: Scale, color: "text-blue-600" },
+              { label: "Meals Logged", value: meals.length, icon: UtensilsCrossed, color: "text-green-600" },
+              { label: "Foods Introduced", value: foods.length, icon: Apple, color: "text-orange-500" },
+              { label: "Latest Weight", value: growth[0]?.weight ? `${growth[0].weight}kg` : "—", icon: Scale, color: "text-primary" },
+            ].map(s => (
+              <div key={s.label} className="rounded-xl border bg-card p-3 flex items-center gap-3">
+                <s.icon className={`h-5 w-5 ${s.color}`} />
+                <div><div className="text-lg font-bold">{s.value}</div><div className="text-xs text-muted-foreground">{s.label}</div></div>
+              </div>
+            ))}
+          </div>
+          {growth.length > 0 && (
+            <div className="rounded-xl border bg-card p-4">
+              <p className="text-sm font-semibold mb-3">Growth History</p>
+              <div className="space-y-2">
+                {growth.slice(0, 5).map(g => (
+                  <div key={g.id} className="flex items-center gap-3 text-sm border-b pb-2 last:border-0">
+                    <Scale className="h-4 w-4 text-blue-600 shrink-0" />
+                    <div className="flex-1 flex flex-wrap gap-3">
+                      {g.weight && <span><strong>{g.weight}kg</strong> <span className="text-muted-foreground">wt</span></span>}
+                      {g.height && <span><strong>{g.height}cm</strong> <span className="text-muted-foreground">ht</span></span>}
+                      {g.bmi && <span><strong>{g.bmi}</strong> <span className="text-muted-foreground">BMI</span></span>}
+                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0">{g.measurementDate} · {g.source}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="rounded-xl border bg-card p-4">
+            <p className="text-sm font-semibold mb-2">Food Category Coverage</p>
+            <div className="grid grid-cols-3 gap-2">
+              {catCounts.map(c => (
+                <div key={c.cat} className={`rounded-xl p-2 text-center text-xs capitalize border ${c.count > 0 ? "border-green-200 bg-green-50 text-green-700" : "border-dashed text-muted-foreground"}`}>
+                  <div className="font-bold text-base">{c.count}</div>{c.cat}
+                </div>
+              ))}
+            </div>
+          </div>
+          {meals.slice(0, 5).length > 0 && (
+            <div className="rounded-xl border bg-card p-4">
+              <p className="text-sm font-semibold mb-2">Recent Parent Meal Logs</p>
+              <div className="space-y-2">
+                {meals.slice(0, 5).map(m => (
+                  <div key={m.id} className="flex items-center gap-2 text-sm">
+                    <UtensilsCrossed className="h-3.5 w-3.5 text-green-600 shrink-0" />
+                    <span className="capitalize font-medium">{m.mealType}</span>
+                    {m.foodsConsumed && <span className="text-muted-foreground text-xs truncate">{m.foodsConsumed}</span>}
+                    <span className="ml-auto text-xs text-muted-foreground shrink-0">{m.date}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   queue: QueueManagementTab,
+  nutrition: ClinicNutritionTab,
   "ai-triage": AITriageTab,
   intake: PatientIntakeTab,
   "soap-notes": SoapNotesTab,

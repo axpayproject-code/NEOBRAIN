@@ -1273,3 +1273,259 @@ export const DeleteDocumentParams = zod.object({
 })
 
 
+/**
+ * @summary Get nutrition profile for a child
+ */
+export const GetNutritionProfileParams = zod.object({
+  "childId": zod.coerce.number()
+})
+
+export const GetNutritionProfileResponse = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "feedingType": zod.string().nullish(),
+  "dietaryPattern": zod.string().nullish(),
+  "nutritionStatus": zod.enum(['normal', 'at_risk', 'malnourished', 'overweight']),
+  "foodDiversityScore": zod.number().nullish(),
+  "mealConsistencyScore": zod.number().nullish(),
+  "hydrationTracking": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Update nutrition profile
+ */
+export const UpdateNutritionProfileParams = zod.object({
+  "childId": zod.coerce.number()
+})
+
+export const UpdateNutritionProfileBody = zod.object({
+  "childId": zod.number().optional(),
+  "feedingType": zod.string().optional(),
+  "dietaryPattern": zod.string().optional(),
+  "nutritionStatus": zod.string().optional(),
+  "foodDiversityScore": zod.number().optional(),
+  "mealConsistencyScore": zod.number().optional(),
+  "hydrationTracking": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+export const UpdateNutritionProfileResponse = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "feedingType": zod.string().nullish(),
+  "dietaryPattern": zod.string().nullish(),
+  "nutritionStatus": zod.enum(['normal', 'at_risk', 'malnourished', 'overweight']),
+  "foodDiversityScore": zod.number().nullish(),
+  "mealConsistencyScore": zod.number().nullish(),
+  "hydrationTracking": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Create nutrition profile
+ */
+export const CreateNutritionProfileBody = zod.object({
+  "childId": zod.number().optional(),
+  "feedingType": zod.string().optional(),
+  "dietaryPattern": zod.string().optional(),
+  "nutritionStatus": zod.string().optional(),
+  "foodDiversityScore": zod.number().optional(),
+  "mealConsistencyScore": zod.number().optional(),
+  "hydrationTracking": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+
+/**
+ * @summary List growth records for a child
+ */
+export const ListGrowthRecordsParams = zod.object({
+  "childId": zod.coerce.number()
+})
+
+export const ListGrowthRecordsResponseItem = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "measurementDate": zod.string(),
+  "weight": zod.number().nullish(),
+  "height": zod.number().nullish(),
+  "headCircumference": zod.number().nullish(),
+  "bmi": zod.number().nullish(),
+  "source": zod.string(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListGrowthRecordsResponse = zod.array(ListGrowthRecordsResponseItem)
+
+
+/**
+ * @summary Record a growth measurement
+ */
+export const CreateGrowthRecordBody = zod.object({
+  "childId": zod.number(),
+  "measurementDate": zod.string(),
+  "weight": zod.number().optional(),
+  "height": zod.number().optional(),
+  "headCircumference": zod.number().optional(),
+  "bmi": zod.number().optional(),
+  "source": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+
+/**
+ * @summary List feeding history for a child
+ */
+export const ListFeedingHistoryParams = zod.object({
+  "childId": zod.coerce.number()
+})
+
+export const ListFeedingHistoryResponseItem = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "feedingType": zod.string(),
+  "frequency": zod.string().nullish(),
+  "duration": zod.string().nullish(),
+  "amount": zod.number().nullish(),
+  "notes": zod.string().nullish(),
+  "feedingTimestamp": zod.string().optional(),
+  "createdAt": zod.string()
+})
+export const ListFeedingHistoryResponse = zod.array(ListFeedingHistoryResponseItem)
+
+
+/**
+ * @summary Log a feeding entry
+ */
+export const CreateFeedingEntryBody = zod.object({
+  "childId": zod.number(),
+  "feedingType": zod.string(),
+  "frequency": zod.string().optional(),
+  "duration": zod.string().optional(),
+  "amount": zod.number().optional(),
+  "notes": zod.string().optional()
+})
+
+
+/**
+ * @summary List meal logs for a child
+ */
+export const ListMealLogsParams = zod.object({
+  "childId": zod.coerce.number()
+})
+
+export const ListMealLogsResponseItem = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "date": zod.string(),
+  "mealType": zod.string(),
+  "foodsConsumed": zod.string().nullish(),
+  "portion": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListMealLogsResponse = zod.array(ListMealLogsResponseItem)
+
+
+/**
+ * @summary Log a meal
+ */
+export const CreateMealLogBody = zod.object({
+  "childId": zod.number(),
+  "date": zod.string(),
+  "mealType": zod.string(),
+  "foodsConsumed": zod.string().optional(),
+  "portion": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+
+/**
+ * @summary List food exposures for a child
+ */
+export const ListFoodExposuresParams = zod.object({
+  "childId": zod.coerce.number()
+})
+
+export const ListFoodExposuresResponseItem = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "foodItem": zod.string(),
+  "foodCategory": zod.string().nullish(),
+  "firstIntroduced": zod.string(),
+  "reactions": zod.string().nullish(),
+  "accepted": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListFoodExposuresResponse = zod.array(ListFoodExposuresResponseItem)
+
+
+/**
+ * @summary Record a new food introduction
+ */
+export const CreateFoodExposureBody = zod.object({
+  "childId": zod.number(),
+  "foodItem": zod.string(),
+  "foodCategory": zod.string().optional(),
+  "firstIntroduced": zod.string(),
+  "reactions": zod.string().optional(),
+  "accepted": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+
+/**
+ * @summary List AI nutrition insights for a child
+ */
+export const ListNutritionInsightsParams = zod.object({
+  "childId": zod.coerce.number()
+})
+
+export const ListNutritionInsightsResponseItem = zod.object({
+  "id": zod.number(),
+  "childId": zod.number(),
+  "insightType": zod.string(),
+  "generatedInsight": zod.string(),
+  "generatedDate": zod.string(),
+  "confidenceLevel": zod.string().nullish(),
+  "isRead": zod.number().nullish(),
+  "createdAt": zod.string()
+})
+export const ListNutritionInsightsResponse = zod.array(ListNutritionInsightsResponseItem)
+
+
+/**
+ * @summary Create a nutrition insight
+ */
+export const CreateNutritionInsightBody = zod.object({
+  "childId": zod.number(),
+  "insightType": zod.string(),
+  "generatedInsight": zod.string(),
+  "generatedDate": zod.string(),
+  "confidenceLevel": zod.string().optional()
+})
+
+
+/**
+ * @summary Aggregate nutrition stats for government portal (no PII)
+ */
+export const GetNutritionPopulationSummaryResponse = zod.object({
+  "totalChildrenWithGrowthData": zod.number(),
+  "totalMealsLogged": zod.number(),
+  "totalFoodExposures": zod.number(),
+  "totalInsights": zod.number(),
+  "avgFoodDiversityScore": zod.number(),
+  "growthMonitoringCoverage": zod.number().optional(),
+  "nutritionProgramParticipation": zod.number().optional(),
+  "feedingProgramEngagement": zod.number().optional()
+})
+
+

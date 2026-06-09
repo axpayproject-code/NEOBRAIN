@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,8 @@ import {
   X, User, Clock, BarChart3, ClipboardList, Calendar, HeartPulse,
   Brain, Dumbbell, FileText, ImageIcon, ChevronRight, AlertTriangle,
   CheckCircle, Circle, TrendingUp, Zap, Activity, Star, Video,
-  Settings, BookOpen, MapPin, Flag, Play, Upload, Stethoscope, Building2, GraduationCap, UserRound
+  Settings, BookOpen, MapPin, Flag, Play, Upload, Stethoscope, Building2, GraduationCap, UserRound,
+  Salad, Scale, UtensilsCrossed, Apple, Droplets
 } from "lucide-react";
 import {
   useGetChildDomainScores, useGetChildTimeline,
@@ -48,6 +49,7 @@ const TABS = [
   { id: "settings",     label: "Settings",     icon: Settings },
   { id: "domains",      label: "Domains",      icon: BarChart3 },
   { id: "appointments", label: "Appointments", icon: Calendar },
+  { id: "nutrition",    label: "Nutrition",    icon: Salad },
   { id: "brain-gym",    label: "Brain Gym",    icon: Dumbbell },
   { id: "ai-insights",  label: "AI Insights",  icon: Brain },
 ];
@@ -506,6 +508,121 @@ function TherapyTab({ childId }: { childId: number }) {
           </CardContent>
         </Card>
       ))}
+    </div>
+  );
+}
+
+function NutritionChildTab({ child }: { child: Child }) {
+  const { user } = useAuth();
+  const token = user?.id ?? "";
+  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+  const [growth, setGrowth] = useState<Array<{id:number;measurementDate:string;weight?:number|null;height?:number|null;bmi?:number|null;source:string}>>([]);
+  const [meals, setMeals] = useState<Array<{id:number;date:string;mealType:string;foodsConsumed?:string|null}>>([]);
+  const [foods, setFoods] = useState<Array<{id:number;foodItem:string;foodCategory?:string|null;accepted?:string|null}>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      fetch(`/api/nutrition/growth/${child.id}`, { headers }).then(r => r.ok ? r.json() : []),
+      fetch(`/api/nutrition/meals/${child.id}`, { headers }).then(r => r.ok ? r.json() : []),
+      fetch(`/api/nutrition/food-exposures/${child.id}`, { headers }).then(r => r.ok ? r.json() : []),
+    ]).then(([g, m, f]) => {
+      setGrowth(g as typeof growth);
+      setMeals(m as typeof meals);
+      setFoods(f as typeof foods);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [child.id]);
+
+  const latestGrowth = growth[0];
+  const catCounts = ["fruits","vegetables","protein","grains","dairy","legumes","seafood"].map(cat => ({
+    cat, count: foods.filter(f => f.foodCategory === cat && f.accepted !== "no").length
+  }));
+  const totalAccepted = foods.filter(f => f.accepted !== "no").length;
+  const diversityScore = Math.min(100, Math.round((new Set(foods.filter(f => f.accepted !== "no").map(f => f.foodCategory)).size / 7) * 100));
+
+  if (loading) return <div className="flex justify-center py-12"><div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>;
+
+  return (
+    <div className="p-4 space-y-4">
+      <div className="flex items-center gap-2 mb-1">
+        <Salad className="h-5 w-5 text-primary" />
+        <h3 className="font-semibold">Nutrition & Growth</h3>
+      </div>
+
+      {/* Quick stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {[
+          { label: "Growth Records", value: growth.length, icon: Scale, color: "text-blue-600" },
+          { label: "Meals Logged", value: meals.length, icon: UtensilsCrossed, color: "text-green-600" },
+          { label: "Foods Introduced", value: foods.length, icon: Apple, color: "text-orange-500" },
+          { label: "Food Diversity", value: `${diversityScore}%`, icon: Salad, color: "text-primary" },
+        ].map(s => (
+          <div key={s.label} className="rounded-xl border bg-card p-3 text-center">
+            <s.icon className={`h-4 w-4 ${s.color} mx-auto mb-1`} />
+            <div className="text-xl font-bold">{s.value}</div>
+            <div className="text-xs text-muted-foreground leading-tight">{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Latest measurements */}
+      {latestGrowth ? (
+        <div className="rounded-xl border bg-card p-4">
+          <p className="text-sm font-semibold mb-2 flex items-center gap-1.5"><Scale className="h-4 w-4 text-primary" /> Latest Growth Measurements</p>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            {latestGrowth.weight && <div className="rounded-lg bg-muted/50 p-2"><div className="text-lg font-bold">{latestGrowth.weight}<span className="text-xs font-normal text-muted-foreground">kg</span></div><div className="text-xs text-muted-foreground">Weight</div></div>}
+            {latestGrowth.height && <div className="rounded-lg bg-muted/50 p-2"><div className="text-lg font-bold">{latestGrowth.height}<span className="text-xs font-normal text-muted-foreground">cm</span></div><div className="text-xs text-muted-foreground">Height</div></div>}
+            {latestGrowth.bmi && <div className="rounded-lg bg-muted/50 p-2"><div className="text-lg font-bold">{latestGrowth.bmi}</div><div className="text-xs text-muted-foreground">BMI</div></div>}
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">Recorded: {latestGrowth.measurementDate} · {latestGrowth.source}</p>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed p-4 text-center text-muted-foreground">
+          <Scale className="h-6 w-6 mx-auto mb-1 opacity-40" />
+          <p className="text-xs">No growth records yet. Log measurements in the Nutrition tab.</p>
+        </div>
+      )}
+
+      {/* Food category coverage */}
+      <div className="rounded-xl border bg-card p-4">
+        <p className="text-sm font-semibold mb-2">Food Category Coverage <span className="text-muted-foreground font-normal text-xs">({totalAccepted} foods accepted)</span></p>
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+          {catCounts.map(c => (
+            <div key={c.cat} className={`rounded-lg border p-1.5 text-center text-xs capitalize ${c.count > 0 ? "border-green-200 bg-green-50 text-green-700" : "border-dashed text-muted-foreground"}`}>
+              <div className="font-bold text-sm">{c.count}</div>{c.cat}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent meals */}
+      {meals.length > 0 && (
+        <div className="rounded-xl border bg-card p-4">
+          <p className="text-sm font-semibold mb-2">Recent Meals</p>
+          <div className="space-y-1.5">
+            {meals.slice(0, 4).map(m => (
+              <div key={m.id} className="flex items-center gap-2 text-xs">
+                <UtensilsCrossed className="h-3 w-3 text-green-600 shrink-0" />
+                <span className="capitalize font-medium">{m.mealType.replace("_", " ")}</span>
+                {m.foodsConsumed && <span className="text-muted-foreground truncate">{m.foodsConsumed}</span>}
+                <span className="ml-auto text-muted-foreground shrink-0">{m.date}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {meals.length === 0 && foods.length === 0 && growth.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <Salad className="h-10 w-10 mx-auto mb-2 opacity-30" />
+          <p className="text-sm font-medium">No nutrition data yet</p>
+          <p className="text-xs mt-1">Families can log meals, growth, and food introductions from the Family portal's Nutrition tab.</p>
+        </div>
+      )}
+
+      <p className="text-xs text-muted-foreground text-center italic">ⓘ Nutrition data is informational only. Not medical advice.</p>
     </div>
   );
 }
@@ -1024,6 +1141,7 @@ export function ChildProfileModal({ child, open, onClose }: { child: Child | nul
                 {activeTab === "settings"     && <SettingsProfileTab child={child} />}
                 {activeTab === "domains"      && <DomainsTab childId={child.id} />}
                 {activeTab === "appointments" && <AppointmentsTab childId={child.id} />}
+                {activeTab === "nutrition"     && <NutritionChildTab child={child} />}
                 {activeTab === "brain-gym"    && <BrainGymProfileTab childId={child.id} childName={child.fullName.split(" ")[0]} />}
                 {activeTab === "ai-insights"  && <AIInsightsTab child={child} />}
                 {activeTab === "reports"      && <ReportsProfileTab childId={child.id} />}

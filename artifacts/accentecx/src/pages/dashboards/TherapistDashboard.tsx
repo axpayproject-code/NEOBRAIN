@@ -5,7 +5,7 @@ import {
   MessageSquare, LayoutDashboard, CheckCircle,
   Clock, AlertTriangle, Plus, BarChart3, FileText,
   Link, Send, Download, RefreshCw, UserPlus, Eye, EyeOff, Gamepad2, Settings, CreditCard, Zap,
-  Check, Copy, BadgeCheck, AlertCircle, Camera, Ticket, Video, Target
+  Check, Copy, BadgeCheck, AlertCircle, Camera, Ticket, Video, Target, Salad, UtensilsCrossed, Scale
 } from "lucide-react";
 import { ClassManagementTab } from "@/components/school/ClassManagementTab";
 import { InterventionTrackingTab } from "@/components/school/InterventionTrackingTab";
@@ -32,6 +32,7 @@ import { ChildSearchBar } from "@/components/shared/ChildSearchBar";
 const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "students", label: "Student Roster", icon: Users },
+  { id: "nutrition-support", label: "Nutrition Support", icon: Salad },
   { id: "classes", label: "Classes", icon: BookOpen },
   { id: "screening-forms", label: "Screening Forms", icon: ClipboardList },
   { id: "camera-observation", label: "Camera Observation", icon: Camera },
@@ -1384,12 +1385,109 @@ function TherapistCollaborationTab() {
   return <div className="p-4 sm:p-6 lg:p-8"><CollaborationPanel /></div>;
 }
 
+function SchoolNutritionTab() {
+  const { data: children } = useListChildren({ query: { queryKey: ["children-school-nutrition"] } });
+  const { user } = useAuth();
+  const [obs, setObs] = useState<Array<{childId: number; name: string; eating: string; participation: string; concern: string}>>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ childId: "", eating: "good", participation: "yes", concern: "" });
+  const [saving, setSaving] = useState(false);
+  const token = user?.id ?? "";
+
+  const save = async () => {
+    if (!form.childId) return;
+    setSaving(true);
+    const child = (children ?? []).find(c => c.id === Number(form.childId));
+    setObs(prev => [{ childId: Number(form.childId), name: child?.fullName ?? "Unknown", eating: form.eating, participation: form.participation, concern: form.concern }, ...prev]);
+    // Log as meal observation via meal log
+    await fetch("/api/nutrition/meals", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ childId: Number(form.childId), date: new Date().toISOString().split("T")[0], mealType: "school_lunch", notes: `Eating habits: ${form.eating}. School feeding participation: ${form.participation}. ${form.concern ? "Concern: " + form.concern : ""}` }),
+    });
+    setSaving(false);
+    setShowForm(false);
+    setForm({ childId: "", eating: "good", participation: "yes", concern: "" });
+  };
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold font-syne flex items-center gap-2"><Salad className="h-6 w-6 text-primary" /> Nutrition Support</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Track eating habits and school feeding participation</p>
+        </div>
+        <button onClick={() => setShowForm(v => !v)} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-xl">
+          <Scale className="h-4 w-4" /> Log Observation
+        </button>
+      </div>
+      {showForm && (
+        <div className="rounded-xl border bg-card p-4 space-y-3">
+          <p className="text-sm font-semibold">New Feeding Observation</p>
+          <div>
+            <label className="text-xs font-semibold">Student</label>
+            <select value={form.childId} onChange={e => setForm(f => ({ ...f, childId: e.target.value }))} className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm mt-1">
+              <option value="">Select student…</option>
+              {(children ?? []).map(c => <option key={c.id} value={c.id}>{c.fullName}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold">Eating Habits</label>
+              <select value={form.eating} onChange={e => setForm(f => ({ ...f, eating: e.target.value }))} className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm mt-1">
+                {["excellent", "good", "fair", "poor", "refused"].map(o => <option key={o} value={o} className="capitalize">{o}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold">School Feeding Program</label>
+              <select value={form.participation} onChange={e => setForm(f => ({ ...f, participation: e.target.value }))} className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm mt-1">
+                <option value="yes">Participated</option>
+                <option value="no">Did not participate</option>
+                <option value="partial">Partially</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-semibold">Concern (optional — no diagnoses)</label>
+            <input value={form.concern} onChange={e => setForm(f => ({ ...f, concern: e.target.value }))} placeholder="e.g. refused vegetables, appeared hungry…" className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm mt-1" />
+          </div>
+          <p className="text-xs text-muted-foreground italic">ⓘ Observations only. Teachers must not provide diagnoses or medical assessments.</p>
+          <button onClick={save} disabled={saving || !form.childId} className="w-full h-9 rounded-xl bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50">
+            {saving ? "Saving…" : "Save Observation"}
+          </button>
+        </div>
+      )}
+      {obs.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <UtensilsCrossed className="h-10 w-10 mx-auto mb-3 opacity-30" />
+          <p className="font-medium">No observations recorded yet</p>
+          <p className="text-sm mt-1">Log feeding observations for students to support nutrition monitoring.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {obs.map((o, i) => (
+            <div key={i} className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3">
+              <UtensilsCrossed className="h-4 w-4 text-green-600 shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">{o.name}</p>
+                <p className="text-xs text-muted-foreground capitalize">Eating: {o.eating} · Feeding program: {o.participation}</p>
+                {o.concern && <p className="text-xs text-orange-600 mt-0.5">{o.concern}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TherapistDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
   const TAB_CONTENT: Record<string, React.ReactNode> = {
     "overview": <OverviewTab />,
     "students": <StudentRosterTab />,
+    "nutrition-support": <SchoolNutritionTab />,
     "screening-forms": <ScreeningFormsTab />,
     "camera-observation": <CameraObservationTab />,
     "games": <GamesAssessment />,

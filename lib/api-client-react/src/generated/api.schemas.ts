@@ -961,6 +961,183 @@ export interface DocumentInput {
   expiresAt?: string;
 }
 
+export type NutritionProfileNutritionStatus = typeof NutritionProfileNutritionStatus[keyof typeof NutritionProfileNutritionStatus];
+
+
+export const NutritionProfileNutritionStatus = {
+  normal: 'normal',
+  at_risk: 'at_risk',
+  malnourished: 'malnourished',
+  overweight: 'overweight',
+} as const;
+
+export interface NutritionProfile {
+  id: number;
+  childId: number;
+  /** @nullable */
+  feedingType?: string | null;
+  /** @nullable */
+  dietaryPattern?: string | null;
+  nutritionStatus: NutritionProfileNutritionStatus;
+  /** @nullable */
+  foodDiversityScore?: number | null;
+  /** @nullable */
+  mealConsistencyScore?: number | null;
+  /** @nullable */
+  hydrationTracking?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+  /** @nullable */
+  updatedAt?: string | null;
+}
+
+export interface NutritionProfileInput {
+  childId?: number;
+  feedingType?: string;
+  dietaryPattern?: string;
+  nutritionStatus?: string;
+  foodDiversityScore?: number;
+  mealConsistencyScore?: number;
+  hydrationTracking?: string;
+  notes?: string;
+}
+
+export interface GrowthRecord {
+  id: number;
+  childId: number;
+  measurementDate: string;
+  /** @nullable */
+  weight?: number | null;
+  /** @nullable */
+  height?: number | null;
+  /** @nullable */
+  headCircumference?: number | null;
+  /** @nullable */
+  bmi?: number | null;
+  source: string;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface GrowthRecordInput {
+  childId: number;
+  measurementDate: string;
+  weight?: number;
+  height?: number;
+  headCircumference?: number;
+  bmi?: number;
+  source?: string;
+  notes?: string;
+}
+
+export interface FeedingEntry {
+  id: number;
+  childId: number;
+  feedingType: string;
+  /** @nullable */
+  frequency?: string | null;
+  /** @nullable */
+  duration?: string | null;
+  /** @nullable */
+  amount?: number | null;
+  /** @nullable */
+  notes?: string | null;
+  feedingTimestamp?: string;
+  createdAt: string;
+}
+
+export interface FeedingEntryInput {
+  childId: number;
+  feedingType: string;
+  frequency?: string;
+  duration?: string;
+  amount?: number;
+  notes?: string;
+}
+
+export interface MealLog {
+  id: number;
+  childId: number;
+  date: string;
+  mealType: string;
+  /** @nullable */
+  foodsConsumed?: string | null;
+  /** @nullable */
+  portion?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface MealLogInput {
+  childId: number;
+  date: string;
+  mealType: string;
+  foodsConsumed?: string;
+  portion?: string;
+  notes?: string;
+}
+
+export interface FoodExposure {
+  id: number;
+  childId: number;
+  foodItem: string;
+  /** @nullable */
+  foodCategory?: string | null;
+  firstIntroduced: string;
+  /** @nullable */
+  reactions?: string | null;
+  /** @nullable */
+  accepted?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface FoodExposureInput {
+  childId: number;
+  foodItem: string;
+  foodCategory?: string;
+  firstIntroduced: string;
+  reactions?: string;
+  accepted?: string;
+  notes?: string;
+}
+
+export interface NutritionInsight {
+  id: number;
+  childId: number;
+  insightType: string;
+  generatedInsight: string;
+  generatedDate: string;
+  /** @nullable */
+  confidenceLevel?: string | null;
+  /** @nullable */
+  isRead?: number | null;
+  createdAt: string;
+}
+
+export interface NutritionInsightInput {
+  childId: number;
+  insightType: string;
+  generatedInsight: string;
+  generatedDate: string;
+  confidenceLevel?: string;
+}
+
+export interface NutritionPopulationSummary {
+  totalChildrenWithGrowthData: number;
+  totalMealsLogged: number;
+  totalFoodExposures: number;
+  totalInsights: number;
+  avgFoodDiversityScore: number;
+  growthMonitoringCoverage?: number;
+  nutritionProgramParticipation?: number;
+  feedingProgramEngagement?: number;
+}
+
 export type ListScreeningsParams = {
 childId?: number;
 };

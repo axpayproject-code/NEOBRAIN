@@ -5,8 +5,9 @@ import {
   HeartPulse, FileText, Settings, Plus, ChevronRight,
   AlertTriangle, CheckCircle, Clock, TrendingUp, Activity, Video, Play, Lock, Star, CreditCard,
   Trash2, Download, Pencil, MessageSquare, Heart, BookOpen, ThumbsUp, Gamepad2, Ticket, Mail,
-  Bell, Target, Trophy, Flag, Zap, ArrowRight, Filter, Circle, MapPin, Printer
+  Bell, Target, Trophy, Flag, Zap, ArrowRight, Filter, Circle, MapPin, Printer, Salad
 } from "lucide-react";
+import NutritionDashboard from "@/components/nutrition/NutritionDashboard";
 import GamesAssessment from "@/pages/GamesAssessment";
 import { SpecialistMessagingTab } from "@/components/messaging/SpecialistMessagingTab";
 import { CollaborationPanel } from "@/components/CollaborationPanel";
@@ -70,6 +71,7 @@ const NAV: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "children", label: "My Children", icon: Users },
   { id: "screening", label: "Assessments", icon: ClipboardList },
+  { id: "nutrition", label: "Nutrition", icon: Salad },
   { id: "brain-gym", label: "Brain Gym", icon: Brain },
   { id: "milestones", label: "Milestones", icon: Flag },
   { id: "games", label: "Games Assessment", icon: Gamepad2 },
@@ -2448,6 +2450,7 @@ type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   children: ChildrenTab,
   screening: ScreeningTab,
+  nutrition: NutritionDashboard,
   milestones: MilestonesTab,
   games: GamesTab,
   "ai-insights": AIInsightsTab,
