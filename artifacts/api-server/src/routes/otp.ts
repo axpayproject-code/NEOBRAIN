@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { otpCodes } from "@workspace/db";
 import { and, eq, gt, desc } from "drizzle-orm";
 import crypto from "crypto";
+import { sendEmail, otpEmail } from "../lib/email";
 
 const router = Router();
 
@@ -26,13 +27,12 @@ router.post("/otp/send", async (req, res) => {
 
   await db.insert(otpCodes).values({ email, code, purpose, expiresAt });
 
-  // In production: send via email/SMS provider
-  // In development: return code in response for testing
-  const isDev = process.env.NODE_ENV !== "production";
+  sendEmail(otpEmail(email, code, purpose)).catch(() => {});
 
+  const isDev = process.env.NODE_ENV !== "production";
   return res.json({
     success: true,
-    message: isDev ? `OTP sent to ${email}` : `A verification code was sent to ${email}`,
+    message: `A verification code was sent to ${email}`,
     ...(isDev ? { code } : {}),
     expiresInMinutes: 10,
   });

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { sendEmail, welcomeEmail } from "../lib/email";
 const router = Router();
 
 function hashPassword(password: string): string {
@@ -75,6 +76,7 @@ router.post("/auth/signup", async (req, res) => {
   });
 
   req.log.info({ userId: user.id }, "User created with 14-day trial");
+  sendEmail(welcomeEmail(user.name, user.email)).catch(() => {});
   return res.status(201).json({
     id: user.id,
     email: user.email,

@@ -126,6 +126,12 @@ router.post("/billing/subscribe", async (req, res) => {
 
   if (!updated) return res.status(404).json({ error: "User not found" });
 
+  const [userInfo] = await db.select({ name: usersTable.name, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, userId));
+  if (userInfo) {
+    const { sendEmail: se, paymentSubmittedEmail: pse } = await import("../lib/email");
+    se(pse(userInfo.name, userInfo.email, PLANS[tier]?.name ?? tier, paymentRef.trim())).catch(() => {});
+  }
+
   return res.json({
     success: true,
     tier: updated.subscriptionTier,

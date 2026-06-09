@@ -118,21 +118,6 @@ const PAYMENT_METHODS = [
       "Take a screenshot of your payment confirmation",
     ],
   },
-  {
-    id: "unionbank",
-    name: "UnionBank",
-    label: "InstaPay",
-    logo: "U",
-    gradient: "from-[#003E9B] to-[#0063E5]",
-    accountNumber: "0987 6543 2100",
-    accountName: "ACCENTECX AI Inc.",
-    steps: [
-      "Open UnionBank app → Send Money → InstaPay",
-      "Enter the account number above and the plan amount",
-      "Add the TXN reference as your payment remarks",
-      "Take a screenshot of your payment confirmation",
-    ],
-  },
 ];
 
 interface BillingStatus {

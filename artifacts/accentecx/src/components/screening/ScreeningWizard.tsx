@@ -11,76 +11,192 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, ChevronLeft, CheckCircle, Brain, ClipboardList, AlertTriangle } from "lucide-react";
 import type { ScreeningResult as ScreeningResultType } from "./ScreeningResult";
 
-const DOMAINS = [
-  {
-    key: "communication",
-    label: "Communication",
-    color: "blue",
-    questions: [
-      { id: "comm_1", text: "Does the child respond to their name when called?", positive: true },
-      { id: "comm_2", text: "Can the child form sentences appropriate for their age?", positive: true },
-      { id: "comm_3", text: "Does the child use gestures to communicate (pointing, waving, nodding)?", positive: true },
-      { id: "comm_4", text: "Does the child have difficulty understanding simple instructions?", positive: false },
-      { id: "comm_5", text: "Does the child initiate communication with others?", positive: true },
-    ],
-  },
-  {
-    key: "social",
-    label: "Social Interaction",
-    color: "purple",
-    questions: [
-      { id: "soc_1", text: "Does the child make eye contact during interactions?", positive: true },
-      { id: "soc_2", text: "Does the child show interest in playing with other children?", positive: true },
-      { id: "soc_3", text: "Does the child share enjoyment or achievements with others?", positive: true },
-      { id: "soc_4", text: "Does the child prefer being alone rather than with others?", positive: false },
-      { id: "soc_5", text: "Does the child engage in pretend or imaginative play?", positive: true },
-    ],
-  },
-  {
-    key: "attention",
-    label: "Attention & Focus",
-    color: "yellow",
-    questions: [
-      { id: "att_1", text: "Can the child focus on an activity for an age-appropriate duration?", positive: true },
-      { id: "att_2", text: "Does the child follow two-step instructions without reminders?", positive: true },
-      { id: "att_3", text: "Does the child get easily distracted from tasks?", positive: false },
-      { id: "att_4", text: "Does the child have difficulty completing simple tasks?", positive: false },
-      { id: "att_5", text: "Can the child wait for their turn in games or activities?", positive: true },
-    ],
-  },
-  {
-    key: "motor",
-    label: "Motor Skills",
-    color: "green",
-    questions: [
-      { id: "mot_1", text: "Does the child walk and run without significant difficulty?", positive: true },
-      { id: "mot_2", text: "Can the child use their hands for fine motor tasks (drawing, buttons, utensils)?", positive: true },
-      { id: "mot_3", text: "Does the child show poor coordination or frequently falls?", positive: false },
-      { id: "mot_4", text: "Can the child partially dress/undress themselves for their age?", positive: true },
-      { id: "mot_5", text: "Does the child climb stairs or playground equipment with typical ease?", positive: true },
-    ],
-  },
-  {
-    key: "emotional",
-    label: "Emotional Regulation",
-    color: "red",
-    questions: [
-      { id: "emo_1", text: "Does the child have meltdowns that are excessive or longer than typical for their age?", positive: false },
-      { id: "emo_2", text: "Can the child transition between activities without major difficulty?", positive: true },
-      { id: "emo_3", text: "Does the child show empathy or concern when others are upset?", positive: true },
-      { id: "emo_4", text: "Can the child self-soothe when upset without constant adult intervention?", positive: true },
-      { id: "emo_5", text: "Does the child express emotions in a proportionate way to situations?", positive: true },
-    ],
-  },
+const PARENT_DOMAINS = [
+  { key: "communication", label: "Communication", color: "blue", questions: [
+    { id: "p_comm_1", text: "Does the child respond to their name when called?", positive: true },
+    { id: "p_comm_2", text: "Can the child form sentences appropriate for their age?", positive: true },
+    { id: "p_comm_3", text: "Does the child use gestures to communicate (pointing, waving, nodding)?", positive: true },
+    { id: "p_comm_4", text: "Does the child have difficulty understanding simple instructions?", positive: false },
+    { id: "p_comm_5", text: "Does the child initiate communication with others spontaneously at home?", positive: true },
+  ]},
+  { key: "social", label: "Social Interaction", color: "purple", questions: [
+    { id: "p_soc_1", text: "Does the child make eye contact during interactions?", positive: true },
+    { id: "p_soc_2", text: "Does the child show interest in playing with other children?", positive: true },
+    { id: "p_soc_3", text: "Does the child share enjoyment or achievements with family members?", positive: true },
+    { id: "p_soc_4", text: "Does the child prefer being alone rather than with others?", positive: false },
+    { id: "p_soc_5", text: "Does the child engage in pretend or imaginative play?", positive: true },
+  ]},
+  { key: "attention", label: "Attention & Focus", color: "yellow", questions: [
+    { id: "p_att_1", text: "Can the child focus on an activity for an age-appropriate duration at home?", positive: true },
+    { id: "p_att_2", text: "Does the child follow two-step instructions without reminders?", positive: true },
+    { id: "p_att_3", text: "Does the child get easily distracted during quiet activities?", positive: false },
+    { id: "p_att_4", text: "Does the child have difficulty completing simple household tasks?", positive: false },
+    { id: "p_att_5", text: "Can the child wait for their turn in games or activities?", positive: true },
+  ]},
+  { key: "motor", label: "Motor Skills", color: "green", questions: [
+    { id: "p_mot_1", text: "Does the child walk and run without significant difficulty?", positive: true },
+    { id: "p_mot_2", text: "Can the child use their hands for fine motor tasks (drawing, buttons, utensils)?", positive: true },
+    { id: "p_mot_3", text: "Does the child show poor coordination or frequently fall?", positive: false },
+    { id: "p_mot_4", text: "Can the child partially dress/undress themselves for their age?", positive: true },
+    { id: "p_mot_5", text: "Does the child climb stairs or playground equipment with typical ease?", positive: true },
+  ]},
+  { key: "emotional", label: "Emotional Regulation", color: "red", questions: [
+    { id: "p_emo_1", text: "Does the child have meltdowns that are excessive or longer than typical for their age?", positive: false },
+    { id: "p_emo_2", text: "Can the child transition between activities at home without major difficulty?", positive: true },
+    { id: "p_emo_3", text: "Does the child show empathy or concern when others are upset?", positive: true },
+    { id: "p_emo_4", text: "Can the child self-soothe when upset without constant adult intervention?", positive: true },
+    { id: "p_emo_5", text: "Does the child express emotions in a proportionate way to situations?", positive: true },
+  ]},
 ];
 
-const FREQUENCY_ITEMS = [
+const TEACHER_DOMAINS = [
+  { key: "communication", label: "Classroom Communication", color: "blue", questions: [
+    { id: "t_comm_1", text: "Does the child participate in class discussions and group activities?", positive: true },
+    { id: "t_comm_2", text: "Can the child follow multi-step verbal instructions in class?", positive: true },
+    { id: "t_comm_3", text: "Does the child express needs and thoughts clearly to teachers?", positive: true },
+    { id: "t_comm_4", text: "Does the child understand grade-level questions and respond appropriately?", positive: true },
+  ]},
+  { key: "social", label: "Peer Interaction", color: "purple", questions: [
+    { id: "t_soc_1", text: "Does the child interact positively with peers during group work?", positive: true },
+    { id: "t_soc_2", text: "Does the child share materials and take turns without conflict?", positive: true },
+    { id: "t_soc_3", text: "Does the child seek peer interaction during free time?", positive: true },
+    { id: "t_soc_4", text: "Does the child demonstrate difficulty in group or cooperative tasks?", positive: false },
+  ]},
+  { key: "attention", label: "Classroom Focus", color: "yellow", questions: [
+    { id: "t_att_1", text: "Can the child stay on-task for a 10–15 minute lesson?", positive: true },
+    { id: "t_att_2", text: "Does the child complete assignments without frequent redirection?", positive: true },
+    { id: "t_att_3", text: "Does the child transition smoothly between classroom activities?", positive: true },
+    { id: "t_att_4", text: "Does the child frequently lose materials or forget instructions?", positive: false },
+  ]},
+  { key: "motor", label: "Motor in School", color: "green", questions: [
+    { id: "t_mot_1", text: "Does the child write legibly for their grade level?", positive: true },
+    { id: "t_mot_2", text: "Can the child use scissors, rulers, and school tools appropriately?", positive: true },
+    { id: "t_mot_3", text: "Does the child participate in physical education without difficulty?", positive: true },
+    { id: "t_mot_4", text: "Does the child show appropriate posture and grip when writing?", positive: true },
+  ]},
+  { key: "emotional", label: "Classroom Behavior", color: "red", questions: [
+    { id: "t_emo_1", text: "Does the child manage frustration without outbursts in class?", positive: true },
+    { id: "t_emo_2", text: "Does the child follow classroom rules and expectations consistently?", positive: true },
+    { id: "t_emo_3", text: "Does the child respond appropriately to teacher feedback?", positive: true },
+    { id: "t_emo_4", text: "Does the child show disruptive behavior that interrupts learning?", positive: false },
+  ]},
+];
+
+const CLINICAL_DOMAINS = [
+  { key: "communication", label: "Language & Speech", color: "blue", questions: [
+    { id: "c_comm_1", text: "Has the child met language milestones appropriate for their age?", positive: true },
+    { id: "c_comm_2", text: "Does the child demonstrate spontaneous speech in the clinical setting?", positive: true },
+    { id: "c_comm_3", text: "Can the child name objects, actions, and categories accurately?", positive: true },
+    { id: "c_comm_4", text: "Is the child's speech clarity sufficient for easy understanding?", positive: true },
+  ]},
+  { key: "social", label: "Social Responsiveness", color: "purple", questions: [
+    { id: "c_soc_1", text: "Does the child make appropriate eye contact during the session?", positive: true },
+    { id: "c_soc_2", text: "Does the child respond to joint attention bids (pointing, showing)?", positive: true },
+    { id: "c_soc_3", text: "Does the child show reciprocal social interaction with the examiner?", positive: true },
+    { id: "c_soc_4", text: "Does the child demonstrate difficulty reading social cues or facial expressions?", positive: false },
+  ]},
+  { key: "attention", label: "Attention & Executive Function", color: "yellow", questions: [
+    { id: "c_att_1", text: "Can the child sustain attention during a 10-minute structured task?", positive: true },
+    { id: "c_att_2", text: "Does the child complete directed activities without redirection?", positive: true },
+    { id: "c_att_3", text: "Does the child demonstrate organized, goal-directed behavior?", positive: true },
+    { id: "c_att_4", text: "Does the child show difficulty shifting focus between tasks?", positive: false },
+  ]},
+  { key: "motor", label: "Motor Development", color: "green", questions: [
+    { id: "c_mot_1", text: "Does the child demonstrate age-appropriate gross motor coordination?", positive: true },
+    { id: "c_mot_2", text: "Can the child perform fine motor tasks (stacking, threading) accurately?", positive: true },
+    { id: "c_mot_3", text: "Does the child show adequate postural stability during seated tasks?", positive: true },
+    { id: "c_mot_4", text: "Is the child's grip strength and hand preference age-appropriate?", positive: true },
+  ]},
+  { key: "emotional", label: "Behavioral & Emotional Profile", color: "red", questions: [
+    { id: "c_emo_1", text: "Does the child demonstrate emotional regulation during the session?", positive: true },
+    { id: "c_emo_2", text: "Does the child show proportionate responses to task difficulty?", positive: true },
+    { id: "c_emo_3", text: "Does the child express emotions verbally rather than through behavior?", positive: true },
+    { id: "c_emo_4", text: "Does the child display anxiety or avoidance during evaluation tasks?", positive: false },
+  ]},
+];
+
+const BEHAVIORAL_DOMAINS = [
+  { key: "communication", label: "Observed Communication", color: "blue", questions: [
+    { id: "b_comm_1", text: "Did the child initiate communication during the observation period?", positive: true },
+    { id: "b_comm_2", text: "Did the child use appropriate verbal or nonverbal communication to express needs?", positive: true },
+    { id: "b_comm_3", text: "Did the child respond to communicative bids from others?", positive: true },
+    { id: "b_comm_4", text: "Did the child demonstrate difficulty comprehending spoken instructions?", positive: false },
+  ]},
+  { key: "social", label: "Observed Social Behavior", color: "purple", questions: [
+    { id: "b_soc_1", text: "Did the child approach or engage with others during observation?", positive: true },
+    { id: "b_soc_2", text: "Did the child demonstrate shared attention and joint focus?", positive: true },
+    { id: "b_soc_3", text: "Did the child show interest in others' activities or feelings?", positive: true },
+    { id: "b_soc_4", text: "Did the child display avoidant or withdrawn behavior?", positive: false },
+  ]},
+  { key: "attention", label: "Observed Attention", color: "yellow", questions: [
+    { id: "b_att_1", text: "Did the child maintain focus on a single activity for 5+ minutes?", positive: true },
+    { id: "b_att_2", text: "Did the child complete an activity before moving to another?", positive: true },
+    { id: "b_att_3", text: "Did the child demonstrate purposeful, organized play?", positive: true },
+    { id: "b_att_4", text: "Was the child's attention easily disrupted by minor distractions?", positive: false },
+  ]},
+  { key: "motor", label: "Observed Motor Behavior", color: "green", questions: [
+    { id: "b_mot_1", text: "Did the child's gross motor movement appear coordinated and purposeful?", positive: true },
+    { id: "b_mot_2", text: "Did the child demonstrate appropriate fine motor manipulation?", positive: true },
+    { id: "b_mot_3", text: "Did the child show body awareness during movement activities?", positive: true },
+    { id: "b_mot_4", text: "Did the child display unusual motor mannerisms or repetitive movements?", positive: false },
+  ]},
+  { key: "emotional", label: "Observed Emotional Regulation", color: "red", questions: [
+    { id: "b_emo_1", text: "Did the child's emotional responses seem proportionate to events?", positive: true },
+    { id: "b_emo_2", text: "Did the child display positive affect during preferred activities?", positive: true },
+    { id: "b_emo_3", text: "Did the child recover from frustration within a typical timeframe?", positive: true },
+    { id: "b_emo_4", text: "Did the child show self-regulation difficulties (aggression, self-injury, shutdown)?", positive: false },
+  ]},
+];
+
+const DOMAIN_SETS: Record<string, typeof PARENT_DOMAINS> = {
+  parent_questionnaire: PARENT_DOMAINS,
+  teacher_report: TEACHER_DOMAINS,
+  clinical_intake: CLINICAL_DOMAINS,
+  behavioral_observation: BEHAVIORAL_DOMAINS,
+};
+
+const DOMAINS = PARENT_DOMAINS;
+
+const PARENT_FREQUENCY_ITEMS = [
   { id: "freq_1", text: "Repetitive behaviors (hand flapping, spinning, rocking)" },
   { id: "freq_2", text: "Extreme sensory sensitivities (sounds, textures, lights, tastes)" },
   { id: "freq_3", text: "Intense difficulty with changes in routine or schedule" },
   { id: "freq_4", text: "Aggressive or self-injurious behavior" },
   { id: "freq_5", text: "Unusual sleep patterns or severe sleep difficulties" },
 ];
+
+const TEACHER_FREQUENCY_ITEMS = [
+  { id: "tf_1", text: "Disruptive outbursts or meltdowns during class" },
+  { id: "tf_2", text: "Inability to stay seated or constant movement (hyperactivity)" },
+  { id: "tf_3", text: "Refuses tasks or goes selectively mute under pressure" },
+  { id: "tf_4", text: "Bullying or aggressive behavior toward classmates" },
+  { id: "tf_5", text: "Extreme anxiety or distress in academic or social situations" },
+];
+
+const CLINICAL_FREQUENCY_ITEMS = [
+  { id: "cf_1", text: "Stereotyped or repetitive motor behaviors observed in session" },
+  { id: "cf_2", text: "Restricted interests or fixations dominating interaction" },
+  { id: "cf_3", text: "Pronounced sensory over- or under-reactivity noted clinically" },
+  { id: "cf_4", text: "Self-injurious behavior reported or observed" },
+  { id: "cf_5", text: "Significant developmental regression from previously acquired skills" },
+];
+
+const BEHAVIORAL_FREQUENCY_ITEMS = [
+  { id: "bf_1", text: "Physical aggression toward objects or people during session" },
+  { id: "bf_2", text: "Scripted or echolalic speech during the observation" },
+  { id: "bf_3", text: "Avoidance or escape behavior when task demands increase" },
+  { id: "bf_4", text: "Sensory-seeking behaviors (rocking, spinning, mouthing objects)" },
+  { id: "bf_5", text: "Emotional dysregulation requiring adult intervention" },
+];
+
+const FREQ_SETS: Record<string, typeof PARENT_FREQUENCY_ITEMS> = {
+  parent_questionnaire: PARENT_FREQUENCY_ITEMS,
+  teacher_report: TEACHER_FREQUENCY_ITEMS,
+  clinical_intake: CLINICAL_FREQUENCY_ITEMS,
+  behavioral_observation: BEHAVIORAL_FREQUENCY_ITEMS,
+};
+
+const FREQUENCY_ITEMS = PARENT_FREQUENCY_ITEMS;
 
 const FREQ_LABELS = ["Never", "Rarely", "Sometimes", "Often", "Very Often"];
 const FREQ_SCORES = [100, 75, 50, 25, 0];
@@ -97,8 +213,8 @@ interface ContextData {
   familyHistory: string;
 }
 
-function computeDomainScore(domainKey: string, answers: MilestoneAnswers): number {
-  const domain = DOMAINS.find((d) => d.key === domainKey);
+function computeDomainScore(domainKey: string, answers: MilestoneAnswers, domains: typeof PARENT_DOMAINS = PARENT_DOMAINS): number {
+  const domain = domains.find((d) => d.key === domainKey);
   if (!domain) return 50;
   let total = 0;
   let answered = 0;
@@ -156,13 +272,16 @@ export default function ScreeningWizard({ onComplete, onCancel }: Props) {
 
   const selectedChild = children?.find((c) => c.id === childId);
 
+  const activeDomains = DOMAIN_SETS[screeningType] ?? PARENT_DOMAINS;
+  const activeFreqItems = FREQ_SETS[screeningType] ?? PARENT_FREQUENCY_ITEMS;
+
   const totalSteps = 4;
   const progressPct = ((step) / totalSteps) * 100;
 
-  const allMilestonesAnswered = DOMAINS.every((d) =>
+  const allMilestonesAnswered = activeDomains.every((d) =>
     d.questions.every((q) => milestoneAnswers[q.id] !== undefined && milestoneAnswers[q.id] !== null)
   );
-  const allFreqAnswered = FREQUENCY_ITEMS.every(
+  const allFreqAnswered = activeFreqItems.every(
     (f) => freqAnswers[f.id] !== undefined && freqAnswers[f.id] !== null
   );
 
@@ -185,11 +304,11 @@ export default function ScreeningWizard({ onComplete, onCancel }: Props) {
     if (!childId) return;
     setIsSubmitting(true);
 
-    const commScore = computeDomainScore("communication", milestoneAnswers);
-    const socialScore = computeDomainScore("social", milestoneAnswers);
-    const attScore = computeDomainScore("attention", milestoneAnswers);
-    const motorScore = computeDomainScore("motor", milestoneAnswers);
-    const emoScore = computeDomainScore("emotional", milestoneAnswers);
+    const commScore = computeDomainScore("communication", milestoneAnswers, activeDomains);
+    const socialScore = computeDomainScore("social", milestoneAnswers, activeDomains);
+    const attScore = computeDomainScore("attention", milestoneAnswers, activeDomains);
+    const motorScore = computeDomainScore("motor", milestoneAnswers, activeDomains);
+    const emoScore = computeDomainScore("emotional", milestoneAnswers, activeDomains);
     const behavScore = computeBehavioralScore(freqAnswers);
 
     const scores: ComputedScores = {
@@ -324,7 +443,7 @@ export default function ScreeningWizard({ onComplete, onCancel }: Props) {
             <Brain className="w-4 h-4 mt-0.5 shrink-0" />
             <span>Answer based on your <strong>consistent observations</strong> over the past 1–3 months, not isolated incidents.</span>
           </div>
-          {DOMAINS.map((domain) => (
+          {activeDomains.map((domain) => (
             <Card key={domain.key}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">{domain.label}</CardTitle>
@@ -372,7 +491,7 @@ export default function ScreeningWizard({ onComplete, onCancel }: Props) {
               <CardDescription>How often do you observe the following behaviors?</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
-              {FREQUENCY_ITEMS.map((item) => (
+              {activeFreqItems.map((item) => (
                 <div key={item.id} className="space-y-2">
                   <p className="text-sm font-medium">{item.text}</p>
                   <div className="flex gap-1 flex-wrap">

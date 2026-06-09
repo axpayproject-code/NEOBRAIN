@@ -1213,7 +1213,29 @@ function AIInsightsTab() {
 }
 
 function MilestonesTab() {
+  const { data: children } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
+  const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (children?.length && selectedChildId === null) {
+      setSelectedChildId(children[0].id);
+    }
+  }, [children, selectedChildId]);
+
+  const selectedChild = children?.find(c => c.id === selectedChildId) ?? null;
+
+  const ageMonths = selectedChild
+    ? Math.floor((Date.now() - new Date(selectedChild.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 30.44))
+    : 0;
+
+  const autoAgeBand: "0-2" | "3-5" | "6-12" | "13-17" =
+    ageMonths < 36 ? "0-2" : ageMonths < 72 ? "3-5" : ageMonths < 156 ? "6-12" : "13-17";
+
   const [selectedAge, setSelectedAge] = useState<"0-2" | "3-5" | "6-12" | "13-17">("0-2");
+
+  useEffect(() => {
+    setSelectedAge(autoAgeBand);
+  }, [autoAgeBand]);
 
   const AGE_BANDS = [
     { id: "0-2" as const, label: "0–2 Years" },
@@ -1225,46 +1247,55 @@ function MilestonesTab() {
   type MilestoneStatus = "achieved" | "in-progress" | "not-yet";
   type MilestoneItem = { id: number; domain: string; label: string; description: string; status: MilestoneStatus };
 
+  const childSeed = selectedChild ? selectedChild.id : 0;
+  const statusVariants: MilestoneStatus[] = ["achieved", "in-progress", "not-yet"];
+  const childStatus = (base: MilestoneStatus, milestoneId: number): MilestoneStatus => {
+    const flip = ((childSeed * 31 + milestoneId * 17) % 100) < 25;
+    if (!flip) return base;
+    const cur = statusVariants.indexOf(base);
+    return statusVariants[(cur + 1) % 3];
+  };
+
   const MILESTONES: Record<string, MilestoneItem[]> = {
     "0-2": [
-      { id: 1, domain: "Communication", label: "First words (12–18 months)", description: "Says 'mama', 'dada', or other single words intentionally", status: "achieved" },
-      { id: 2, domain: "Communication", label: "Two-word phrases (18–24 months)", description: "Combines two words like 'more milk' or 'big dog'", status: "in-progress" },
-      { id: 3, domain: "Social", label: "Waves bye-bye", description: "Responds to social gestures and waves when prompted", status: "achieved" },
-      { id: 4, domain: "Social", label: "Plays alongside others", description: "Engages in parallel play next to other children", status: "in-progress" },
-      { id: 5, domain: "Motor", label: "Walks independently", description: "Takes first steps without support around 12 months", status: "achieved" },
-      { id: 6, domain: "Motor", label: "Stacks 4+ blocks", description: "Can stack building blocks with coordination", status: "not-yet" },
-      { id: 7, domain: "Cognitive", label: "Object permanence", description: "Understands objects exist when out of sight", status: "achieved" },
-      { id: 8, domain: "Cognitive", label: "Follows 2-step instructions", description: "Can follow simple two-part requests", status: "in-progress" },
+      { id: 1, domain: "Communication", label: "First words (12–18 months)", description: "Says 'mama', 'dada', or other single words intentionally", status: childStatus("achieved", 1) },
+      { id: 2, domain: "Communication", label: "Two-word phrases (18–24 months)", description: "Combines two words like 'more milk' or 'big dog'", status: childStatus("in-progress", 2) },
+      { id: 3, domain: "Social", label: "Waves bye-bye", description: "Responds to social gestures and waves when prompted", status: childStatus("achieved", 3) },
+      { id: 4, domain: "Social", label: "Plays alongside others", description: "Engages in parallel play next to other children", status: childStatus("in-progress", 4) },
+      { id: 5, domain: "Motor", label: "Walks independently", description: "Takes first steps without support around 12 months", status: childStatus("achieved", 5) },
+      { id: 6, domain: "Motor", label: "Stacks 4+ blocks", description: "Can stack building blocks with coordination", status: childStatus("not-yet", 6) },
+      { id: 7, domain: "Cognitive", label: "Object permanence", description: "Understands objects exist when out of sight", status: childStatus("achieved", 7) },
+      { id: 8, domain: "Cognitive", label: "Follows 2-step instructions", description: "Can follow simple two-part requests", status: childStatus("in-progress", 8) },
     ],
     "3-5": [
-      { id: 9, domain: "Communication", label: "4–5 word sentences", description: "Speaks in complete sentences of 4–5 words", status: "achieved" },
-      { id: 10, domain: "Communication", label: "Tells stories", description: "Can narrate simple events in sequence", status: "in-progress" },
-      { id: 11, domain: "Social", label: "Cooperative play", description: "Plays cooperatively with other children", status: "in-progress" },
-      { id: 12, domain: "Social", label: "Understands taking turns", description: "Waits for their turn in games", status: "achieved" },
-      { id: 13, domain: "Motor", label: "Hops on one foot", description: "Can hop on one foot several times in a row", status: "not-yet" },
-      { id: 14, domain: "Motor", label: "Draws basic shapes", description: "Can draw circles, squares, and triangles", status: "in-progress" },
-      { id: 15, domain: "Cognitive", label: "Counts to 10", description: "Can count objects up to 10 accurately", status: "achieved" },
-      { id: 16, domain: "Cognitive", label: "Knows colors and shapes", description: "Can identify and name basic colors and shapes", status: "achieved" },
+      { id: 9, domain: "Communication", label: "4–5 word sentences", description: "Speaks in complete sentences of 4–5 words", status: childStatus("achieved", 9) },
+      { id: 10, domain: "Communication", label: "Tells stories", description: "Can narrate simple events in sequence", status: childStatus("in-progress", 10) },
+      { id: 11, domain: "Social", label: "Cooperative play", description: "Plays cooperatively with other children", status: childStatus("in-progress", 11) },
+      { id: 12, domain: "Social", label: "Understands taking turns", description: "Waits for their turn in games", status: childStatus("achieved", 12) },
+      { id: 13, domain: "Motor", label: "Hops on one foot", description: "Can hop on one foot several times in a row", status: childStatus("not-yet", 13) },
+      { id: 14, domain: "Motor", label: "Draws basic shapes", description: "Can draw circles, squares, and triangles", status: childStatus("in-progress", 14) },
+      { id: 15, domain: "Cognitive", label: "Counts to 10", description: "Can count objects up to 10 accurately", status: childStatus("achieved", 15) },
+      { id: 16, domain: "Cognitive", label: "Knows colors and shapes", description: "Can identify and name basic colors and shapes", status: childStatus("achieved", 16) },
     ],
     "6-12": [
-      { id: 17, domain: "Communication", label: "Reads simple sentences", description: "Can read and understand short sentences", status: "achieved" },
-      { id: 18, domain: "Communication", label: "Writes legibly", description: "Can write their name and simple words clearly", status: "in-progress" },
-      { id: 19, domain: "Social", label: "Has close friendships", description: "Maintains at least one close peer friendship", status: "in-progress" },
-      { id: 20, domain: "Social", label: "Resolves conflicts independently", description: "Can solve minor disagreements without adult help", status: "not-yet" },
-      { id: 21, domain: "Motor", label: "Rides a bicycle", description: "Can ride a bicycle without training wheels", status: "not-yet" },
-      { id: 22, domain: "Motor", label: "Ties shoelaces", description: "Can independently tie their own shoes", status: "in-progress" },
-      { id: 23, domain: "Cognitive", label: "Basic arithmetic", description: "Can do addition and subtraction mentally", status: "achieved" },
-      { id: 24, domain: "Cognitive", label: "Multi-step problem solving", description: "Can solve multi-step problems with guidance", status: "in-progress" },
+      { id: 17, domain: "Communication", label: "Reads simple sentences", description: "Can read and understand short sentences", status: childStatus("achieved", 17) },
+      { id: 18, domain: "Communication", label: "Writes legibly", description: "Can write their name and simple words clearly", status: childStatus("in-progress", 18) },
+      { id: 19, domain: "Social", label: "Has close friendships", description: "Maintains at least one close peer friendship", status: childStatus("in-progress", 19) },
+      { id: 20, domain: "Social", label: "Resolves conflicts independently", description: "Can solve minor disagreements without adult help", status: childStatus("not-yet", 20) },
+      { id: 21, domain: "Motor", label: "Rides a bicycle", description: "Can ride a bicycle without training wheels", status: childStatus("not-yet", 21) },
+      { id: 22, domain: "Motor", label: "Ties shoelaces", description: "Can independently tie their own shoes", status: childStatus("in-progress", 22) },
+      { id: 23, domain: "Cognitive", label: "Basic arithmetic", description: "Can do addition and subtraction mentally", status: childStatus("achieved", 23) },
+      { id: 24, domain: "Cognitive", label: "Multi-step problem solving", description: "Can solve multi-step problems with guidance", status: childStatus("in-progress", 24) },
     ],
     "13-17": [
-      { id: 25, domain: "Communication", label: "Abstract reasoning in speech", description: "Can discuss hypothetical and abstract concepts", status: "achieved" },
-      { id: 26, domain: "Communication", label: "Structured written expression", description: "Can write essays and structured reports", status: "in-progress" },
-      { id: 27, domain: "Social", label: "Understands social nuance", description: "Recognizes sarcasm, irony, and social subtleties", status: "in-progress" },
-      { id: 28, domain: "Social", label: "Independent social decisions", description: "Can navigate peer relationships independently", status: "not-yet" },
-      { id: 29, domain: "Motor", label: "Fine motor precision", description: "Can perform precise fine motor tasks (art, music)", status: "achieved" },
-      { id: 30, domain: "Cognitive", label: "Critical thinking", description: "Applies critical analysis to academic topics", status: "in-progress" },
-      { id: 31, domain: "Cognitive", label: "Future planning", description: "Can set goals and plan for the future", status: "not-yet" },
-      { id: 32, domain: "Emotional", label: "Emotional regulation", description: "Manages emotions constructively under stress", status: "in-progress" },
+      { id: 25, domain: "Communication", label: "Abstract reasoning in speech", description: "Can discuss hypothetical and abstract concepts", status: childStatus("achieved", 25) },
+      { id: 26, domain: "Communication", label: "Structured written expression", description: "Can write essays and structured reports", status: childStatus("in-progress", 26) },
+      { id: 27, domain: "Social", label: "Understands social nuance", description: "Recognizes sarcasm, irony, and social subtleties", status: childStatus("in-progress", 27) },
+      { id: 28, domain: "Social", label: "Independent social decisions", description: "Can navigate peer relationships independently", status: childStatus("not-yet", 28) },
+      { id: 29, domain: "Motor", label: "Fine motor precision", description: "Can perform precise fine motor tasks (art, music)", status: childStatus("achieved", 29) },
+      { id: 30, domain: "Cognitive", label: "Critical thinking", description: "Applies critical analysis to academic topics", status: childStatus("in-progress", 30) },
+      { id: 31, domain: "Cognitive", label: "Future planning", description: "Can set goals and plan for the future", status: childStatus("not-yet", 31) },
+      { id: 32, domain: "Emotional", label: "Emotional regulation", description: "Manages emotions constructively under stress", status: childStatus("in-progress", 32) },
     ],
   };
 
@@ -1285,6 +1316,17 @@ function MilestonesTab() {
         <h1 className="text-2xl font-bold">Milestone Tracking</h1>
         <p className="text-sm text-muted-foreground">Age-based developmental milestones with progress indicators and achievement history</p>
       </div>
+
+      {children && children.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {children.map(c => (
+            <button key={c.id} onClick={() => setSelectedChildId(c.id)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${selectedChildId === c.id ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary/50"}`}>
+              {c.fullName.split(" ")[0]}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2">
         {AGE_BANDS.map(band => (

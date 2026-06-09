@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Brain, Play, Trophy, Star, Zap, Target, ChevronRight, Timer, CheckCircle2 } from "lucide-react";
+import { Brain, Play, Trophy, Star, Zap, Timer, CheckCircle2 } from "lucide-react";
+import { BrainGymGame } from "@/components/BrainGymGame";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,7 @@ export function BrainGymTab({ children }: { children: Child[] }) {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [playing, setPlaying] = useState(false);
   const [playScore, setPlayScore] = useState(0);
+  const [gameScore, setGameScore] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [activityDone, setActivityDone] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
@@ -123,13 +125,14 @@ export function BrainGymTab({ children }: { children: Child[] }) {
     setSelectedActivity(activity);
     setPlaying(true);
     setPlayScore(0);
+    setGameScore(null);
     setActivityDone(false);
   };
 
   const completeActivity = async () => {
     if (!user?.id || !selectedActivity) return;
     if (timerRef.current) clearInterval(timerRef.current);
-    const score = Math.floor(Math.random() * 25) + 75;
+    const score = gameScore !== null ? gameScore : Math.floor(Math.random() * 20) + 70;
     setPlayScore(score);
     setLoading(true);
     try {
@@ -273,10 +276,19 @@ export function BrainGymTab({ children }: { children: Child[] }) {
                     </div>
                   </div>
 
-                  <div className="bg-muted/50 rounded-xl p-4 space-y-1.5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">How to do this activity</p>
-                    <p className="text-sm text-foreground leading-relaxed">{selectedActivity.description}</p>
+                  <div className="bg-muted/50 rounded-xl p-3 space-y-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Activity</p>
+                    <p className="text-xs text-foreground leading-relaxed">{selectedActivity.description}</p>
                   </div>
+
+                  <BrainGymGame activity={selectedActivity} onScore={(s) => { setGameScore(s); setActivityDone(true); }} />
+
+                  {gameScore !== null && (
+                    <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                      <p className="text-sm font-semibold text-green-700">Game complete!</p>
+                      <p className="text-lg font-bold text-green-700">{gameScore}%</p>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
