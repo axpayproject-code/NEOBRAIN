@@ -91,41 +91,46 @@ const PAYMENT_METHODS = [
   {
     id: "gcash",
     name: "GCash",
-    icon: "📱",
-    instructions: [
-      "Open your GCash app and tap Send Money → GCash",
-      "Number: 0917-XXX-XXXX (ACCENTECX AI)",
-      "Enter the plan amount for your chosen billing cycle",
-      'Set message/reference: use "NEOBRAIN-[your email]"',
-      "Screenshot the successful transaction",
-      "Enter the GCash reference number below and submit",
+    label: "Mobile Wallet",
+    logo: "G",
+    gradient: "from-[#1A6EF7] via-[#0B9EFB] to-[#00C2FF]",
+    accountNumber: "0998 2550 149",
+    accountName: "Joseph Francois",
+    steps: [
+      "Open GCash app → Send Money → GCash",
+      "Enter the account number above and the plan amount",
+      "Add the TXN reference as your payment remarks",
+      "Take a screenshot of your payment confirmation",
     ],
   },
   {
     id: "bpi",
-    name: "BPI Transfer",
-    icon: "🏦",
-    instructions: [
-      "Log into BPI Online or the BPI app",
-      "Go to Transfer → Other BPI Account",
-      "Account Name: ACCENTECX AI Inc.",
-      "Account Number: 1234-5678-90",
-      "Enter the plan amount",
-      'Remarks: "NEOBRAIN-[your email]"',
-      "Enter the transaction reference number below",
+    name: "BPI",
+    label: "Bank Transfer",
+    logo: "B",
+    gradient: "from-[#CC0000] via-[#E83333] to-[#FF5555]",
+    accountNumber: "0656 2994 12",
+    accountName: "Joseph Francois",
+    steps: [
+      "Open BPI Online or BPI app → Send Money → Other BPI",
+      "Enter the account number above and the plan amount",
+      "Add the TXN reference as your payment remarks",
+      "Take a screenshot of your payment confirmation",
     ],
   },
   {
     id: "unionbank",
     name: "UnionBank",
-    icon: "💳",
-    instructions: [
-      "Open the UnionBank Online app",
-      "Tap Send Money → Other Bank / InstaPay",
-      "Account: ACCENTECX AI Inc., 0987-6543-21",
-      "Enter the plan amount",
-      'Reference: "NEOBRAIN-[your email]"',
-      "Enter the transaction reference number below",
+    label: "InstaPay",
+    logo: "U",
+    gradient: "from-[#003E9B] to-[#0063E5]",
+    accountNumber: "0987 6543 2100",
+    accountName: "ACCENTECX AI Inc.",
+    steps: [
+      "Open UnionBank app → Send Money → InstaPay",
+      "Enter the account number above and the plan amount",
+      "Add the TXN reference as your payment remarks",
+      "Take a screenshot of your payment confirmation",
     ],
   },
 ];
@@ -154,8 +159,11 @@ export default function BillingPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [copiedAcct, setCopiedAcct] = useState(false);
 
-  const refHint = user ? `NEOBRAIN-${user.email}` : "NEOBRAIN-youremail@example.com";
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const userPart = (user?.id ?? "00000").replace(/-/g, "").slice(0, 5).toUpperCase();
+  const txnRef = `TXN-${today}-${userPart}`;
 
   useEffect(() => {
     if (!user) return;
@@ -188,7 +196,10 @@ export default function BillingPage() {
   }
 
   function copyRef() {
-    navigator.clipboard.writeText(refHint).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+    navigator.clipboard.writeText(txnRef).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  }
+  function copyAcct(num: string) {
+    navigator.clipboard.writeText(num).then(() => { setCopiedAcct(true); setTimeout(() => setCopiedAcct(false), 2000); });
   }
 
   const currentTier = status?.tier ?? user?.tier ?? "free";
@@ -334,96 +345,137 @@ export default function BillingPage() {
       </div>
 
       {/* Payment section */}
-      {selectedPlan && !submitted && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-          <h2 className="font-semibold text-foreground">Complete Payment</h2>
+      {selectedPlan && !submitted && (() => {
+        const method = PAYMENT_METHODS.find(p => p.id === selectedPayment)!;
+        const price = billingCycle === "annual" ? (chosen?.priceAnnual ?? 0) : (chosen?.priceMonthly ?? 0);
+        return (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+            <div>
+              <h2 className="font-bold text-xl text-foreground">How to pay</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Send exactly <strong className="text-foreground">₱{price.toLocaleString()}</strong> using the account below:
+              </p>
+            </div>
 
-          <div className="flex gap-2 flex-wrap">
-            {PAYMENT_METHODS.map(pm => (
-              <button
-                key={pm.id}
-                onClick={() => setSelectedPayment(pm.id)}
-                className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all ${
-                  selectedPayment === pm.id ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/30"
-                }`}
-              >
-                <span>{pm.icon}</span> {pm.name}
-              </button>
-            ))}
-          </div>
+            {/* Payment method tabs */}
+            <div className="flex gap-2 flex-wrap">
+              {PAYMENT_METHODS.map(pm => (
+                <button
+                  key={pm.id}
+                  onClick={() => setSelectedPayment(pm.id)}
+                  className={`rounded-xl px-5 py-2 text-sm font-semibold transition-all ${
+                    selectedPayment === pm.id
+                      ? "bg-[#9FE870] text-[#163300] shadow-sm"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  {pm.name}
+                </button>
+              ))}
+            </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="rounded-2xl border bg-muted/30 p-5">
-              <p className="font-semibold text-sm mb-3">Payment Instructions</p>
-              <ol className="space-y-2.5">
-                {PAYMENT_METHODS.find(p => p.id === selectedPayment)?.instructions.map((step, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-muted-foreground">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0 mt-0.5">{i + 1}</span>
-                    {step}
-                  </li>
-                ))}
-              </ol>
-              <div className="mt-4 rounded-xl bg-primary/5 border border-primary/20 p-3 flex items-center justify-between gap-2">
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Use this as reference</p>
-                  <p className="text-sm font-mono font-bold text-primary">{refHint}</p>
+            {/* AXPay-style payment card */}
+            <div className={`rounded-2xl bg-gradient-to-br ${method.gradient} p-5 text-white shadow-lg`}>
+              <div className="flex items-start justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center font-bold text-lg">
+                    {method.logo}
+                  </div>
+                  <div>
+                    <p className="font-bold text-white">{method.name}</p>
+                    <p className="text-xs text-white/70">{method.label}</p>
+                  </div>
                 </div>
-                <button onClick={copyRef} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 shrink-0">
-                  {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied ? "Copied" : "Copy"}
+                <div className="text-right">
+                  <p className="text-xs text-white/60 uppercase tracking-wide">Amount due</p>
+                  <p className="text-2xl font-bold text-white">₱{price.toLocaleString()}</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[10px] text-white/60 uppercase tracking-widest mb-1">Account Number</p>
+                  <p className="text-2xl font-mono font-bold tracking-widest">{method.accountNumber}</p>
+                </div>
+                <div className="flex items-center justify-between border-t border-white/20 pt-3">
+                  <div>
+                    <p className="text-[10px] text-white/60 uppercase tracking-widest mb-0.5">Account Name</p>
+                    <p className="font-semibold text-white">{method.accountName}</p>
+                  </div>
+                  <button
+                    onClick={() => copyAcct(method.accountNumber)}
+                    className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors"
+                  >
+                    {copiedAcct ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedAcct ? "Copied!" : "Copy number"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* TXN Reference — dark forest green box */}
+            <div className="rounded-2xl bg-[#163300] text-white p-4">
+              <div className="flex items-start gap-2 mb-3">
+                <AlertCircle className="h-4 w-4 text-[#9FE870] shrink-0 mt-0.5" />
+                <p className="text-sm text-white/80">Add this as your payment reference / remarks</p>
+              </div>
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <p className="font-mono font-bold text-[#9FE870] tracking-wide">{txnRef}</p>
+                <button
+                  onClick={copyRef}
+                  className="flex items-center gap-1.5 bg-[#9FE870]/20 hover:bg-[#9FE870]/30 text-[#9FE870] rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors shrink-0"
+                >
+                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? "Copied" : "Copy ref"}
                 </button>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <Card className="bg-primary/5 border-primary/20">
-                <CardContent className="pt-4 pb-4 px-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Plan</p>
-                      <p className="font-bold">{chosen?.name}</p>
+            {/* Next Steps */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Next Steps</p>
+              <div className="space-y-2.5">
+                {[...method.steps, "Enter your transaction reference number below and submit"].map((step, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold shrink-0 mt-0.5">
+                      {i + 1}
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">{billingCycle === "annual" ? "Annual" : "Monthly"}</p>
-                      <p className="text-xl font-bold text-primary">
-                        ₱{(billingCycle === "annual" ? (chosen?.priceAnnual ?? 0) : (chosen?.priceMonthly ?? 0)).toLocaleString()}
-                      </p>
-                    </div>
+                    <p className="text-sm text-muted-foreground">{step}</p>
                   </div>
-                </CardContent>
-              </Card>
+                ))}
+              </div>
+            </div>
 
+            {/* Transaction reference input */}
+            <div className="rounded-2xl border bg-muted/20 p-5 space-y-4">
               <div>
-                <Label className="text-sm font-medium">Transaction Reference Number</Label>
+                <Label className="text-sm font-semibold">Your Transaction Reference Number</Label>
                 <Input
-                  className="mt-1"
-                  placeholder="e.g. GCASH-20260528-XXXXXXXX"
+                  className="mt-1.5"
+                  placeholder="e.g. GCASH-20260609-XXXXXXXX"
                   value={paymentRef}
                   onChange={e => setPaymentRef(e.target.value)}
                 />
-                <p className="text-xs text-muted-foreground mt-1">The reference number from your GCash or bank receipt</p>
+                <p className="text-xs text-muted-foreground mt-1">Copy this from your GCash / bank confirmation screen</p>
               </div>
-
               {error && (
                 <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                   <AlertCircle className="h-4 w-4 shrink-0" /> {error}
                 </div>
               )}
-
               <Button
-                className="w-full bg-primary text-primary-foreground rounded-xl h-11"
+                className="w-full bg-[#163300] hover:bg-[#1e4a00] text-[#9FE870] font-semibold rounded-xl h-11"
                 disabled={!paymentRef.trim() || submitting}
                 onClick={handleSubmit}
               >
-                {submitting ? "Submitting…" : "Submit Payment Reference"}
+                {submitting ? "Submitting…" : "Submit Payment Reference →"}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
-                Plan activation within 24 hours after verification by our team. Questions? Email <strong>support@accentecx.com</strong>
+                Plan activation within 24 hours on business days. Questions? Email <strong>support@accentecx.com</strong>
               </p>
             </div>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        );
+      })()}
 
       {/* Success state */}
       {submitted && (

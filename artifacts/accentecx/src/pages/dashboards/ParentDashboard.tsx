@@ -361,6 +361,17 @@ function OverviewTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
+  const DAILY_MISSIONS = [
+    { icon: "📊", label: "Weekly Report Day", desc: "Review your child's weekly progress — celebrate wins!", tab: "reports", gradient: "from-amber-500 to-orange-400", xp: 20 },
+    { icon: "🧩", label: "Brain Challenge", desc: "Today's featured cognitive activity awaits your child", tab: "brain-gym", gradient: "from-[#0038A8] to-[#1e5bc6]", xp: 15 },
+    { icon: "💡", label: "Parent Insight", desc: "Read today's developmental tip tailored for your child", tab: "ai-insights", gradient: "from-purple-600 to-indigo-500", xp: 10 },
+    { icon: "📋", label: "Mini Assessment", desc: "2-minute check-in to track your child's progress", tab: "screening", gradient: "from-emerald-600 to-green-500", xp: 25 },
+    { icon: "🏋️", label: "Brain Gym Session", desc: "Fun activities that build your child's skills today", tab: "brain-gym", gradient: "from-[#163300] to-[#1e5000]", xp: 15 },
+    { icon: "📈", label: "Progress Update", desc: "See milestones reached and the journey ahead", tab: "milestones", gradient: "from-teal-600 to-cyan-500", xp: 10 },
+    { icon: "👨‍👩‍👧", label: "Family Activity Day", desc: "Weekend family bonding activity from Brain Gym", tab: "brain-gym", gradient: "from-rose-500 to-pink-400", xp: 20 },
+  ];
+  const todayMission = DAILY_MISSIONS[new Date().getDay()];
+
   function calcAge(dob: string) {
     const m = (new Date().getFullYear() - new Date(dob).getFullYear()) * 12 + new Date().getMonth() - new Date(dob).getMonth();
     return m < 24 ? `${m}m` : `${Math.floor(m / 12)}y ${m % 12 > 0 ? `${m % 12}m` : ""}`.trim();
@@ -371,6 +382,22 @@ function OverviewTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
       <div>
         <h1 className="text-xl lg:text-2xl font-bold">{greeting}, {user?.name?.split(" ")[0]} 👋</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Here's your family's developmental care overview</p>
+      </div>
+
+      {/* Daily Mission Banner */}
+      <div className={`rounded-2xl bg-gradient-to-r ${todayMission.gradient} text-white p-4 flex items-center gap-4 shadow-md`}>
+        <div className="text-4xl shrink-0">{todayMission.icon}</div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 mb-0.5">Today's Mission · +{todayMission.xp} XP</p>
+          <p className="font-bold text-base leading-tight">{todayMission.label}</p>
+          <p className="text-sm text-white/75 mt-0.5 line-clamp-1">{todayMission.desc}</p>
+        </div>
+        <button
+          onClick={() => onNavigate?.(todayMission.tab)}
+          className="shrink-0 bg-white/20 hover:bg-white/30 transition-colors rounded-xl px-4 py-2 text-sm font-semibold whitespace-nowrap"
+        >
+          Start →
+        </button>
       </div>
 
       {/* Stat cards */}
@@ -887,23 +914,24 @@ function ScreeningTab() {
         </Button>
       </div>
 
-      {/* Age group quick-start cards */}
+      {/* Assessment type quick-start cards */}
       <div>
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Start Age-Appropriate Assessment</p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Choose Assessment Type</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { label: "0–2 Years", color: "bg-pink-50 border-pink-200 text-pink-800", desc: "Early screening" },
-            { label: "3–5 Years", color: "bg-purple-50 border-purple-200 text-purple-800", desc: "Pre-school" },
-            { label: "6–12 Years", color: "bg-blue-50 border-blue-200 text-blue-800", desc: "School age" },
-            { label: "13–17 Years", color: "bg-green-50 border-green-200 text-green-800", desc: "Adolescent" },
-          ].map(g => (
+            { icon: "⚡", label: "Quick Baseline", desc: "5–8 min · 3 sections", color: "bg-purple-50 border-2 border-purple-200 hover:border-purple-400 hover:shadow-sm", textColor: "text-purple-800" },
+            { icon: "👁️", label: "Parent Report", desc: "Observe & log at home", color: "bg-blue-50 border-2 border-blue-200 hover:border-blue-400 hover:shadow-sm", textColor: "text-blue-800" },
+            { icon: "🏥", label: "Clinical Intake", desc: "Full developmental intake", color: "bg-green-50 border-2 border-green-200 hover:border-green-400 hover:shadow-sm", textColor: "text-green-800" },
+            { icon: "🏫", label: "Teacher Report", desc: "For school professionals", color: "bg-orange-50 border-2 border-orange-200 hover:border-orange-400 hover:shadow-sm", textColor: "text-orange-800" },
+          ].map(t => (
             <button
-              key={g.label}
+              key={t.label}
               onClick={() => setMode("wizard")}
-              className={`rounded-xl border p-3 text-left hover:shadow-sm transition-shadow ${g.color}`}
+              className={`rounded-xl p-3.5 text-left transition-all ${t.color}`}
             >
-              <p className="font-semibold text-sm">{g.label}</p>
-              <p className="text-xs opacity-70 mt-0.5">{g.desc}</p>
+              <span className="text-2xl">{t.icon}</span>
+              <p className={`font-semibold text-sm mt-2 ${t.textColor}`}>{t.label}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t.desc}</p>
             </button>
           ))}
         </div>

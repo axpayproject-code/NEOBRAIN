@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Brain, Play, Trophy, Star, Zap, Target, ChevronRight, Timer } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Brain, Play, Trophy, Star, Zap, Target, ChevronRight, Timer, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,9 +73,11 @@ export function BrainGymTab({ children }: { children: Child[] }) {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [playing, setPlaying] = useState(false);
   const [playScore, setPlayScore] = useState(0);
-  const [playTime, setPlayTime] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [activityDone, setActivityDone] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   const [loading, setLoading] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const ageMonths = selectedChild
     ? Math.floor((Date.now() - new Date(selectedChild.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 30.44))
@@ -96,31 +98,54 @@ export function BrainGymTab({ children }: { children: Child[] }) {
       .then(r => r.json()).then(setSummary).catch(() => {});
   }, [user?.id, selectedChild]);
 
+  useEffect(() => {
+    if (!playing) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setElapsedSeconds(0);
+      setActivityDone(false);
+      return;
+    }
+    setElapsedSeconds(0);
+    timerRef.current = setInterval(() => {
+      setElapsedSeconds(s => {
+        const next = s + 1;
+        if (selectedActivity && next >= selectedActivity.durationMinutes * 60) {
+          setActivityDone(true);
+          if (timerRef.current) clearInterval(timerRef.current);
+        }
+        return next;
+      });
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [playing, selectedActivity]);
+
   const startActivity = (activity: Activity) => {
     setSelectedActivity(activity);
     setPlaying(true);
     setPlayScore(0);
-    setPlayTime(0);
+    setActivityDone(false);
   };
 
   const completeActivity = async () => {
-    if (!user?.id || !selectedActivity || !selectedChild) return;
-    const score = Math.floor(Math.random() * 30) + 70;
+    if (!user?.id || !selectedActivity) return;
+    if (timerRef.current) clearInterval(timerRef.current);
+    const score = Math.floor(Math.random() * 25) + 75;
     setPlayScore(score);
     setLoading(true);
     try {
+      const childId = selectedChild?.id ?? null;
       const res = await fetch("/api/brain-gym/sessions", {
         method: "POST",
         headers: { Authorization: `Bearer ${user.id}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          childId: selectedChild.id,
+          childId,
           activityId: selectedActivity.id,
           activityName: selectedActivity.name,
           category: selectedActivity.category,
           domain: selectedActivity.domain,
           score,
           maxScore: 100,
-          durationSeconds: selectedActivity.durationMinutes * 60,
+          durationSeconds: elapsedSeconds || selectedActivity.durationMinutes * 60,
           completed: true,
         }),
       });
@@ -133,15 +158,18 @@ export function BrainGymTab({ children }: { children: Child[] }) {
           }, 500);
         }
       }
-      const newSummaryRes = await fetch(`/api/brain-gym/sessions?childId=${selectedChild.id}`, { headers: { Authorization: `Bearer ${user.id}` } });
-      setSummary(await newSummaryRes.json() as SessionSummary);
+      if (childId) {
+        const newSummaryRes = await fetch(`/api/brain-gym/sessions?childId=${childId}`, { headers: { Authorization: `Bearer ${user.id}` } });
+        setSummary(await newSummaryRes.json() as SessionSummary);
+      }
     } catch {} finally {
       setLoading(false);
     }
-    setTimeout(() => { setPlaying(false); setSelectedActivity(null); }, 1500);
+    setTimeout(() => { setPlaying(false); setSelectedActivity(null); }, 2000);
   };
 
-  const filteredActivities = activeFilter === "all" ? activities : activities.filter(a => a.domain === activeFilter);
+  const allActivities = activeFilter === "all" ? activities : activities.filter(a => a.domain === activeFilter);
+  const filteredActivities = allActivities;
   const domains = ["all", ...new Set(activities.map(a => a.domain))];
 
   return (
@@ -211,32 +239,81 @@ export function BrainGymTab({ children }: { children: Child[] }) {
 
       {/* Activity Player Modal */}
       {playing && selectedActivity && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md shadow-2xl">
-            <CardContent className="p-6 text-center space-y-4">
-              <div className="text-6xl">{selectedActivity.iconEmoji}</div>
-              <h2 className="text-xl font-bold font-syne">{selectedActivity.name}</h2>
-              <p className="text-muted-foreground text-sm">{selectedActivity.description}</p>
-              <div className="bg-muted rounded-xl p-4 text-left space-y-2">
-                <p className="text-sm font-medium">How to play:</p>
-                <p className="text-sm text-muted-foreground">{selectedActivity.description}</p>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="outline" className={DOMAIN_COLORS[selectedActivity.domain] ?? DOMAIN_COLORS.general}>{selectedActivity.domain}</Badge>
-                  <Badge variant="outline">{selectedActivity.durationMinutes} min</Badge>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md shadow-2xl border-0">
+            <CardContent className="p-6 space-y-5">
+              {playScore > 0 ? (
+                <div className="text-center space-y-3 py-4">
+                  <div className="text-6xl animate-bounce">{selectedActivity.iconEmoji}</div>
+                  <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
+                  <h2 className="text-xl font-bold font-syne text-green-700">Activity Complete!</h2>
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                    <p className="text-sm text-muted-foreground">Your score</p>
+                    <p className="text-4xl font-bold text-green-600">{playScore}<span className="text-lg">%</span></p>
+                    <Progress value={playScore} className="h-2 mt-2" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">+{Math.round(playScore / 10)} Brain Points earned 🧠</p>
                 </div>
-              </div>
-              {playScore > 0 && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Score: {playScore}%</p>
-                  <Progress value={playScore} className="h-3" />
-                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center text-4xl shrink-0">
+                      {selectedActivity.iconEmoji}
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold font-syne">{selectedActivity.name}</h2>
+                      <div className="flex gap-2 mt-1">
+                        <Badge variant="outline" className={cn("text-xs", DOMAIN_COLORS[selectedActivity.domain] ?? DOMAIN_COLORS.general)}>
+                          {selectedActivity.domain}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          <Timer className="h-3 w-3 mr-1" />{selectedActivity.durationMinutes} min
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted/50 rounded-xl p-4 space-y-1.5">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">How to do this activity</p>
+                    <p className="text-sm text-foreground leading-relaxed">{selectedActivity.description}</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <Timer className="h-3.5 w-3.5" /> Time elapsed
+                      </span>
+                      <span className="font-mono font-semibold text-primary">
+                        {String(Math.floor(elapsedSeconds / 60)).padStart(2, "0")}:{String(elapsedSeconds % 60).padStart(2, "0")}
+                        <span className="text-muted-foreground font-normal text-xs ml-1">/ {selectedActivity.durationMinutes}:00</span>
+                      </span>
+                    </div>
+                    <Progress
+                      value={Math.min((elapsedSeconds / (selectedActivity.durationMinutes * 60)) * 100, 100)}
+                      className="h-2.5"
+                    />
+                    {activityDone && (
+                      <p className="text-xs text-green-600 font-medium flex items-center gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Time's up! Tap Complete to save your session.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button variant="outline" onClick={() => { setPlaying(false); setSelectedActivity(null); }} className="flex-1">
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={completeActivity}
+                      disabled={loading}
+                      className={cn("flex-1 gap-2", activityDone ? "bg-green-600 hover:bg-green-700" : "")}
+                    >
+                      <Star className="h-4 w-4" />
+                      {loading ? "Saving..." : activityDone ? "Complete! 🎉" : "Mark Complete"}
+                    </Button>
+                  </div>
+                </>
               )}
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => { setPlaying(false); setSelectedActivity(null); }} className="flex-1">Cancel</Button>
-                <Button onClick={completeActivity} disabled={loading} className="flex-1 gap-2">
-                  <Star className="h-4 w-4" /> {loading ? "Saving..." : "Complete Activity"}
-                </Button>
-              </div>
             </CardContent>
           </Card>
         </div>
