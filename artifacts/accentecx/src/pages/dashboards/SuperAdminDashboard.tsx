@@ -19,6 +19,7 @@ import { AdminSchoolTab, AdminClinicTab, AdminGovernmentTab } from "@/components
 import { AdminAnalyticsTab } from "@/components/admin/AdminAnalyticsTab";
 import { AdminAuditLogsTab } from "@/components/admin/AdminAuditLogsTab";
 import { AdminSystemSettingsTab } from "@/components/admin/AdminSystemSettingsTab";
+import { AdminApprovalsTab } from "@/components/admin/AdminApprovalsTab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const NAV: NavItem[] = [
   { id: "overview",             label: "Platform Overview",       icon: LayoutDashboard },
+  { id: "approvals",            label: "Approval Queue",          icon: UserCheck },
   { id: "user-management",      label: "User Management",         icon: Users },
   { id: "subscription-mgmt",    label: "Subscription Management", icon: CreditCard },
   { id: "content-management",   label: "Content Management",      icon: FileText },
@@ -1549,6 +1551,7 @@ function SACollaborationTab() {
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
   overview:                OverviewTab,
+  approvals:               AdminApprovalsTab,
   "user-management":       AdminUserManagementTab,
   "subscription-mgmt":     SABillingControlTab,
   "content-management":    AdminContentTab,

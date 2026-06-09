@@ -63,7 +63,6 @@ const NAV: NavItem[] = [
   { id: "analytics", label: "Clinic Analytics", icon: BarChart3 },
   { id: "calendar", label: "My Availability", icon: CalendarDays },
   { id: "team", label: "Manage Team", icon: UserPlus },
-  { id: "billing", label: "Billing & Plans", icon: CreditCard },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -1696,7 +1695,6 @@ const TABS: Record<string, TabComponent> = {
   assessment: AssessmentScoringEngine,
   recommendations: RecommendationEngine,
   analytics: ClinicAnalyticsTab,
-  billing: ClinicBillingTab,
   calendar: DoctorAvailabilityTab,
   team: ClinicTeamTab,
   settings: ClinicSettingsTab,

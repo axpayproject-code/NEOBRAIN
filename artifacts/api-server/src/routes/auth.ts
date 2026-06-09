@@ -49,7 +49,9 @@ router.post("/auth/signup", async (req, res) => {
   const passwordHash = hashPassword(password);
 
   const now = new Date();
-  const trialExpiresAt = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+  // Family accounts get a 14-day trial; school, clinic, government, superadmin are free & active immediately
+  const needsTrial = role === "family";
+  const trialExpiry = needsTrial ? new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000) : null;
 
   const [user] = await db.insert(usersTable).values({
     email: email.toLowerCase(),
@@ -57,10 +59,10 @@ router.post("/auth/signup", async (req, res) => {
     role,
     passwordHash,
     subscriptionTier: "free",
-    subscriptionStatus: "trial",
-    trialStartedAt: now,
-    trialExpiresAt,
-    trialUsed: true,
+    subscriptionStatus: needsTrial ? "trial" : "active",
+    trialStartedAt: needsTrial ? now : null,
+    trialExpiresAt: trialExpiry,
+    trialUsed: needsTrial,
     orgName: typeof orgName === "string" && orgName.trim() ? orgName.trim() : null,
     region: typeof region === "string" && region.trim() ? region.trim() : null,
     phone: typeof phone === "string" && phone.trim() ? phone.trim() : null,
@@ -75,7 +77,7 @@ router.post("/auth/signup", async (req, res) => {
     createdAt: usersTable.createdAt,
   });
 
-  req.log.info({ userId: user.id }, "User created with 14-day trial");
+  req.log.info({ userId: user.id, role }, needsTrial ? "Family user created with 14-day trial" : "Org/admin user created (free, active)");
   sendEmail(welcomeEmail(user.name, user.email)).catch(() => {});
   return res.status(201).json({
     id: user.id,

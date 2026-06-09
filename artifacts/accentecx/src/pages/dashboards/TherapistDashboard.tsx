@@ -43,7 +43,6 @@ const NAV: NavItem[] = [
   { id: "analytics", label: "School Analytics", icon: BarChart3 },
   { id: "team", label: "Manage Team", icon: UserPlus },
   { id: "collaboration", label: "Collaboration", icon: Ticket },
-  { id: "billing", label: "Billing & Plans", icon: CreditCard },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -1394,7 +1393,6 @@ export default function TherapistDashboard() {
     "analytics": <SchoolAnalyticsTab />,
     "team": <SchoolTeamTab />,
     "collaboration": <TherapistCollaborationTab />,
-    "billing": <SchoolBillingTab />,
     "settings": <SchoolSettingsTab />,
   };
 

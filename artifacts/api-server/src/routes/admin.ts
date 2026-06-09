@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db, usersTable, childrenTable, screeningsTable, brainGymActivitiesTable, auditLogsTable } from "@workspace/db";
-import { eq, desc, and, inArray, sql } from "drizzle-orm";
+import { db, usersTable, childrenTable, screeningsTable, brainGymActivitiesTable, auditLogsTable, appointmentsTable, therapyPlansTable } from "@workspace/db";
+import { eq, desc, asc, and, inArray, sql } from "drizzle-orm";
 
 const router = Router();
 
@@ -334,6 +334,59 @@ router.put("/admin/system-settings", requireSuperAdmin, async (req, res) => {
   }
   await logAdminAction((req as any).adminId, "update_system_settings", "system_settings", undefined, {}, updates);
   return res.json(settingsStore);
+});
+
+// GET /admin/users/:id/family-details — deep profile for family-role users
+router.get("/admin/users/:id/family-details", requireSuperAdmin, async (req, res) => {
+  const { id } = req.params;
+  const [u] = await db.select().from(usersTable).where(eq(usersTable.id, id));
+  if (!u) return res.status(404).json({ error: "User not found" });
+
+  const children = await db.select().from(childrenTable).where(eq(childrenTable.userId, id)).orderBy(asc(childrenTable.createdAt));
+
+  const childDetails = await Promise.all(children.map(async child => {
+    const screenings = await db.select({
+      id: screeningsTable.id, screeningType: screeningsTable.screeningType,
+      status: screeningsTable.status, riskLevel: screeningsTable.riskLevel,
+      createdAt: screeningsTable.createdAt,
+    }).from(screeningsTable).where(eq(screeningsTable.childId, child.id)).orderBy(desc(screeningsTable.createdAt));
+
+    const appts = await db.select({
+      id: appointmentsTable.id, specialistType: appointmentsTable.specialistType,
+      status: appointmentsTable.status, scheduledAt: appointmentsTable.scheduledAt,
+    }).from(appointmentsTable).where(eq(appointmentsTable.childId, child.id)).orderBy(desc(appointmentsTable.scheduledAt));
+
+    const plans = await db.select({
+      id: therapyPlansTable.id, therapyType: therapyPlansTable.therapyType,
+      status: therapyPlansTable.status, title: therapyPlansTable.title,
+      startDate: therapyPlansTable.startDate,
+    }).from(therapyPlansTable).where(eq(therapyPlansTable.childId, child.id));
+
+    return { ...child, screenings, appointments: appts, therapyPlans: plans };
+  }));
+
+  return res.json({
+    user: {
+      id: u.id, name: u.name, email: u.email, phone: u.phone, region: u.region,
+      subscriptionTier: u.subscriptionTier, subscriptionStatus: u.subscriptionStatus,
+      trialExpiresAt: u.trialExpiresAt?.toISOString() ?? null,
+      createdAt: u.createdAt.toISOString(),
+    },
+    children: childDetails,
+    summary: {
+      totalChildren: children.length,
+      totalScreenings: childDetails.reduce((s, c) => s + c.screenings.length, 0),
+      totalAppointments: childDetails.reduce((s, c) => s + c.appointments.length, 0),
+      totalTherapyPlans: childDetails.reduce((s, c) => s + c.therapyPlans.length, 0),
+      riskBreakdown: {
+        critical: children.filter(c => c.riskLevel === "critical").length,
+        high:     children.filter(c => c.riskLevel === "high").length,
+        moderate: children.filter(c => c.riskLevel === "moderate").length,
+        low:      children.filter(c => c.riskLevel === "low").length,
+        unknown:  children.filter(c => !c.riskLevel || c.riskLevel === "unknown").length,
+      },
+    },
+  });
 });
 
 export default router;

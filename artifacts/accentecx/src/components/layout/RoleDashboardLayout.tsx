@@ -195,12 +195,14 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
 
       {/* ── Desktop main ─────────────────────────────────────────────────── */}
       <main className="hidden md:flex flex-col flex-1 min-h-[100dvh] overflow-hidden">
-        <TrialBanner
-          subscriptionStatus={user?.subscriptionStatus}
-          trialExpiresAt={user?.trialExpiresAt}
-          inTrial={user?.inTrial}
-          trialDaysLeft={user?.trialDaysLeft}
-        />
+        {user?.role === "family" && (
+          <TrialBanner
+            subscriptionStatus={user?.subscriptionStatus}
+            trialExpiresAt={user?.trialExpiresAt}
+            inTrial={user?.inTrial}
+            trialDaysLeft={user?.trialDaysLeft}
+          />
+        )}
         <div className="flex-1 overflow-auto bg-background">
           {children}
         </div>
@@ -234,12 +236,14 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
 
         {/* Scrollable content */}
         <main className="flex-1 overflow-auto bg-background pb-20">
-          <TrialBanner
-            subscriptionStatus={user?.subscriptionStatus}
-            trialExpiresAt={user?.trialExpiresAt}
-            inTrial={user?.inTrial}
-            trialDaysLeft={user?.trialDaysLeft}
-          />
+          {user?.role === "family" && (
+            <TrialBanner
+              subscriptionStatus={user?.subscriptionStatus}
+              trialExpiresAt={user?.trialExpiresAt}
+              inTrial={user?.inTrial}
+              trialDaysLeft={user?.trialDaysLeft}
+            />
+          )}
           {children}
         </main>
 
