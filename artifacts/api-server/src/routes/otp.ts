@@ -29,7 +29,8 @@ router.post("/otp/send", async (req, res) => {
 
   await db.insert(otpCodes).values({ email, code, purpose, expiresAt });
 
-  sendEmail(otpEmail(email, code, purpose)).catch(() => {});
+  // Await so the email is sent before a serverless invocation finishes
+  await sendEmail(otpEmail(email, code, purpose)).catch(() => {});
 
   const isDev = process.env.NODE_ENV !== "production";
   return res.json({
