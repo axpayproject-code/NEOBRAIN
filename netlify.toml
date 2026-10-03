@@ -1,0 +1,16 @@
+[build]
+  command = "pnpm --filter @workspace/accentecx... run build"
+  publish = "artifacts/accentecx/dist/public"
+
+# Backend API (Express) runs as a Netlify Function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# Single-page app: serve index.html for client-side routes
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

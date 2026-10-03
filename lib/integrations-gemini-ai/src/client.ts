@@ -1,21 +1,17 @@
 import { GoogleGenAI } from "@google/genai";
 
-if (!process.env.AI_INTEGRATIONS_GEMINI_BASE_URL) {
-  throw new Error(
-    "AI_INTEGRATIONS_GEMINI_BASE_URL must be set. Did you forget to provision the Gemini AI integration?",
-  );
-}
+// On Replit, use the provisioned Gemini integration. Elsewhere (e.g. Netlify),
+// the Netlify AI Gateway supplies GEMINI_API_KEY / GOOGLE_GEMINI_BASE_URL automatically.
+const replitBaseUrl = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL;
+const replitApiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
 
-if (!process.env.AI_INTEGRATIONS_GEMINI_API_KEY) {
-  throw new Error(
-    "AI_INTEGRATIONS_GEMINI_API_KEY must be set. Did you forget to provision the Gemini AI integration?",
-  );
-}
-
-export const ai = new GoogleGenAI({
-  apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
-  httpOptions: {
-    apiVersion: "",
-    baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL,
-  },
-});
+export const ai =
+  replitBaseUrl && replitApiKey
+    ? new GoogleGenAI({
+        apiKey: replitApiKey,
+        httpOptions: {
+          apiVersion: "",
+          baseUrl: replitBaseUrl,
+        },
+      })
+    : new GoogleGenAI({});
