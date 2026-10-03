@@ -1,3 +1,4 @@
+import { startSession, endSession } from "../lib/session";
 import { Router } from "express";
 import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { db, usersTable } from "@workspace/db";
@@ -39,6 +40,7 @@ router.post("/auth/signup", async (req, res) => {
   if (!password || typeof password !== "string" || password.length < 6) {
     return res.status(400).json({ error: "Password must be at least 6 characters." });
   }
+  if (roleRaw === "superadmin") return res.status(403).json({error:"Administrator accounts require provisioning"});
   const role: Role = isValidRole(roleRaw) ? roleRaw : "family";
 
   const [existing] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
@@ -80,6 +82,7 @@ router.post("/auth/signup", async (req, res) => {
 
   req.log.info({ userId: user.id, role }, needsTrial ? "Family user created with 14-day trial" : needsOrgApproval ? "Org account created — pending admin activation" : "Superadmin created (active)");
   sendEmail(welcomeEmail(user.name, user.email)).catch(() => {});
+  await startSession(res, user.id);
   return res.status(201).json({
     id: user.id,
     email: user.email,
@@ -122,11 +125,12 @@ router.post("/auth/login", async (req, res) => {
     : 0;
 
   req.log.info({ userId: user.id }, "User logged in");
+  await startSession(res, user.id);
   return res.json({
     id: user.id,
     email: user.email,
     name: user.name,
-    role: isValidRole(roleRaw) ? role : user.role,
+    role: user.role,
     subscriptionTier: finalTier,
     subscriptionStatus: finalStatus,
     trialExpiresAt: user.trialExpiresAt?.toISOString() ?? null,
@@ -161,4 +165,6 @@ router.patch("/auth/profile", async (req, res) => {
   return res.json({ success: true, ...updated });
 });
 
+router.get("/auth/me", (req,res) => { const {passwordHash,...user}=res.locals.user; return res.json(user); });
+router.post("/auth/logout", async(req,res)=>{await endSession(req,res);res.status(204).end();});
 export default router;

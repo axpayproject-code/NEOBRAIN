@@ -85,7 +85,7 @@ interface GeoFeature {
   properties: { name: string; regionId: string | null };
   geometry: {
     type: "Polygon" | "MultiPolygon";
-    coordinates: Ring[][] | Ring[][][];
+    coordinates: Ring[] | Ring[][];
   } | null;
 }
 
@@ -96,7 +96,7 @@ function featureToD(feat: GeoFeature): string {
     return (g.coordinates as Ring[]).map(ringToD).join(" ");
   }
   if (g.type === "MultiPolygon") {
-    return (g.coordinates as Ring[][][]).flatMap(poly => poly.map(ringToD)).join(" ");
+    return (g.coordinates as Ring[][]).flatMap(poly => poly.map(ringToD)).join(" ");
   }
   return "";
 }

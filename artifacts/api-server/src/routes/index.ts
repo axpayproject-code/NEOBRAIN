@@ -1,3 +1,4 @@
+import casesRouter from "./cases";
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
 import authRouter from "./auth";
@@ -42,6 +43,7 @@ import nutritionRouter from "./nutrition";
 
 const router: IRouter = Router();
 
+router.use(casesRouter);
 router.use(healthRouter);
 router.use(authRouter);
 router.use(passwordResetRouter);

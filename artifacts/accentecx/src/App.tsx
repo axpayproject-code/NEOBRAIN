@@ -65,7 +65,8 @@ function roleHome(role: string): string {
 }
 
 function ProtectedRoute({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if(loading) return <div className="p-8 text-muted-foreground">Loading your workspace…</div>;
   if (!user) return <Redirect to="/login" />;
   // Org accounts awaiting admin activation cannot access dashboards
   if (user.subscriptionStatus === "pending_org_activation") return <Redirect to="/pending-approval" />;
@@ -128,34 +129,34 @@ function AppRoutes() {
 
       {/* ── Legacy generic routes ── */}
       <Route path="/dashboard">
-        <SidebarLayout><Dashboard /></SidebarLayout>
+        <ProtectedRoute><SidebarLayout><Dashboard /></SidebarLayout></ProtectedRoute>
       </Route>
       <Route path="/children">
-        <SidebarLayout><ChildrenList /></SidebarLayout>
+        <ProtectedRoute><SidebarLayout><ChildrenList /></SidebarLayout></ProtectedRoute>
       </Route>
       <Route path="/children/:id">
-        {params => <SidebarLayout><ChildDetail id={Number(params.id)} /></SidebarLayout>}
+        {params => <ProtectedRoute><SidebarLayout><ChildDetail id={Number(params.id)} /></SidebarLayout></ProtectedRoute>}
       </Route>
       <Route path="/screenings">
-        <SidebarLayout><ScreeningsList /></SidebarLayout>
+        <ProtectedRoute><SidebarLayout><ScreeningsList /></SidebarLayout></ProtectedRoute>
       </Route>
       <Route path="/screenings/:id">
-        {params => <SidebarLayout><ScreeningDetail id={Number(params.id)} /></SidebarLayout>}
+        {params => <ProtectedRoute><SidebarLayout><ScreeningDetail id={Number(params.id)} /></SidebarLayout></ProtectedRoute>}
       </Route>
       <Route path="/appointments">
-        <SidebarLayout><AppointmentsList /></SidebarLayout>
+        <ProtectedRoute><SidebarLayout><AppointmentsList /></SidebarLayout></ProtectedRoute>
       </Route>
       <Route path="/therapy">
-        <SidebarLayout><TherapyPlansList /></SidebarLayout>
+        <ProtectedRoute><SidebarLayout><TherapyPlansList /></SidebarLayout></ProtectedRoute>
       </Route>
       <Route path="/reports">
-        <SidebarLayout><ReportsList /></SidebarLayout>
+        <ProtectedRoute><SidebarLayout><ReportsList /></SidebarLayout></ProtectedRoute>
       </Route>
       <Route path="/games">
-        <SidebarLayout><GamesAssessment /></SidebarLayout>
+        <ProtectedRoute><SidebarLayout><GamesAssessment /></SidebarLayout></ProtectedRoute>
       </Route>
       <Route path="/settings">
-        <SidebarLayout><Settings /></SidebarLayout>
+        <ProtectedRoute><SidebarLayout><Settings /></SidebarLayout></ProtectedRoute>
       </Route>
 
       <Route component={NotFound} />
