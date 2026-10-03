@@ -21,6 +21,9 @@ export const professionalProfilesTable = pgTable("professional_profiles", {
     .primaryKey()
     .references(() => usersTable.id),
   specialty: text("specialty").notNull(),
+  approvalScopes: jsonb("approval_scopes").$type<string[]>().notNull().default([]),
+  expiresAt: timestamp("expires_at", {withTimezone:true}),
+  evidence: text("evidence"),
   licenseNumber: text("license_number").notNull(),
   verifiedBy: uuid("verified_by").references(() => usersTable.id),
   verifiedAt: timestamp("verified_at", { withTimezone: true }),
@@ -34,6 +37,9 @@ export const casesTable = pgTable("developmental_cases", {
     .notNull()
     .references(() => usersTable.id),
   reviewerId: uuid("reviewer_id").references(() => usersTable.id),
+  organizationId: integer("organization_id"),
+  coordinatorId: uuid("coordinator_id").references(()=>usersTable.id),
+  consentWithdrawnAt: timestamp("consent_withdrawn_at", {withTimezone:true}),
   title: text("title").notNull(),
   observations: text("observations").notNull(),
   status: text("status").notNull().default("submitted"),
@@ -50,6 +56,7 @@ export const caseResultsTable = pgTable("case_result_versions", {
   authorId: uuid("author_id")
     .notNull()
     .references(() => usersTable.id),
+  resultType: text("result_type").notNull().default("developmental_review"),
   content: text("content").notNull(),
   status: text("status").notNull().default("draft"),
   approvedBy: uuid("approved_by").references(() => usersTable.id),

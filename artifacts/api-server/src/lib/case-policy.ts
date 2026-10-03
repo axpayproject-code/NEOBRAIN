@@ -21,7 +21,7 @@ export function supportedChildAge(
   now = new Date(),
 ): boolean {
   const dob = new Date(dateOfBirth);
-  if (!Number.isFinite(dob.getTime()) || dob > now) return false;
+  if (!Number.isFinite(dob.getTime()) || dob > now || dob.toISOString().slice(0,10)!==dateOfBirth) return false;
   const age =
     now.getFullYear() -
     dob.getFullYear() -

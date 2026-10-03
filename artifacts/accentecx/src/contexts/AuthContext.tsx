@@ -54,36 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }).catch(()=>{}).finally(()=>setLoading(false));
   }, []);
 
-  const refreshTier = useCallback(async (currentUser?: AuthUser | null) => {
-    const u = currentUser ?? user;
-    if (!u?.id) return;
-    try {
-      const base = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
-      const res = await fetch(`${base}/api/billing/status`, {
-        headers: { Authorization: `Bearer ${u.id}` },
-      });
-      if (!res.ok) return;
-      const data = await res.json() as {
-        tier?: string;
-        status?: string;
-        trialExpiresAt?: string | null;
-        inTrial?: boolean;
-        trialDaysLeft?: number;
-      };
-      const updated: AuthUser = {
-        ...u,
-        tier: data.tier ?? u.tier,
-        subscriptionStatus: data.status ?? u.subscriptionStatus,
-        trialExpiresAt: data.trialExpiresAt ?? u.trialExpiresAt,
-        inTrial: data.inTrial ?? u.inTrial,
-        trialDaysLeft: data.trialDaysLeft ?? u.trialDaysLeft,
-      };
-
-      setUser(updated);
-    } catch {
-      // silently ignore
-    }
-  }, [user]);
+  const refreshTier = useCallback(async (_overrideUser?: AuthUser) => {}, []);
 
   useEffect(() => {
     if (user?.id) {

@@ -1,6 +1,6 @@
 import { randomBytes, createHash } from "crypto";
 import type { Request, Response, NextFunction } from "express";
-import { db, sessionsTable, usersTable } from "@workspace/db";
+import { db, sessionsTable, usersTable, userOnboardingTable } from "@workspace/db";
 import { eq, and, gt } from "drizzle-orm";
 const hash = (token: string) =>
   createHash("sha256").update(token).digest("hex");
@@ -42,6 +42,7 @@ export async function authenticate(
     "/otp/verify",
     "/auth/forgot-password",
     "/auth/reset-password",
+    "/auth/verify-reset-token",
     "/healthz",
   ];
   if (publicPaths.includes(req.path)) return next();
@@ -58,12 +59,8 @@ export async function authenticate(
       ),
     );
   if (!row) return res.status(401).json({ error: "Session expired" });
-  if (
-    row.user.subscriptionStatus === "pending_org_activation" &&
-    !req.path.startsWith("/auth/") &&
-    !req.path.startsWith("/billing/")
-  )
-    return res.status(403).json({ error: "Organization activation required" });
+  const [onboarding]=await db.select().from(userOnboardingTable).where(eq(userOnboardingTable.userId,row.user.id));
+  if(!onboarding?.emailVerifiedAt && !["/auth/me","/auth/logout","/workflow/me"].includes(req.path)) return res.status(403).json({error:"Verify your email to activate this account"});
   res.locals.user = row.user;
   // Compatibility adapter: legacy handlers receive only the server-verified identity.
   req.headers.authorization = `Bearer ${row.user.id}`;

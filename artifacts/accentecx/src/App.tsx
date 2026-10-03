@@ -1,3 +1,4 @@
+import PlatformDashboard from "@/pages/dashboards/PlatformDashboard";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -12,13 +13,6 @@ import Login from "@/pages/Login";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import Onboarding from "@/pages/Onboarding";
-
-// Role-based dashboard pages (aligned to 4 business types)
-import ParentDashboard from "@/pages/dashboards/ParentDashboard";    // For Families
-import DoctorDashboard from "@/pages/dashboards/DoctorDashboard";    // For Clinics
-import TherapistDashboard from "@/pages/dashboards/TherapistDashboard"; // For Schools
-import AdminDashboard from "@/pages/dashboards/AdminDashboard";       // For Government
-import SuperAdminDashboard from "@/pages/dashboards/SuperAdminDashboard"; // Platform Super Admin
 
 // Platform pages
 import FamilyCare from "@/pages/platform/FamilyCare";
@@ -35,19 +29,6 @@ import ForGovernment from "@/pages/company/ForGovernment";
 import Privacy from "@/pages/company/Privacy";
 import Terms from "@/pages/company/Terms";
 import Contact from "@/pages/company/Contact";
-
-// Legacy generic pages (still accessible for reference)
-import { SidebarLayout } from "@/components/layout/SidebarLayout";
-import Dashboard from "@/pages/Dashboard";
-import ChildrenList from "@/pages/ChildrenList";
-import ChildDetail from "@/pages/ChildDetail";
-import ScreeningsList from "@/pages/ScreeningsList";
-import ScreeningDetail from "@/pages/ScreeningDetail";
-import AppointmentsList from "@/pages/AppointmentsList";
-import TherapyPlansList from "@/pages/TherapyPlansList";
-import ReportsList from "@/pages/ReportsList";
-import Settings from "@/pages/Settings";
-import GamesAssessment from "@/pages/GamesAssessment";
 
 const queryClient = new QueryClient();
 
@@ -69,7 +50,7 @@ function ProtectedRoute({ children, requiredRole }: { children: React.ReactNode;
   if(loading) return <div className="p-8 text-muted-foreground">Loading your workspace…</div>;
   if (!user) return <Redirect to="/login" />;
   // Org accounts awaiting admin activation cannot access dashboards
-  if (user.subscriptionStatus === "pending_org_activation") return <Redirect to="/pending-approval" />;
+
   if (requiredRole && user.role !== requiredRole) return <Redirect to={roleHome(user.role)} />;
   return <>{children}</>;
 }
@@ -91,26 +72,28 @@ function AppRoutes() {
       </Route>
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
-      <Route path="/onboarding" component={Onboarding} />
+      <Route path="/onboarding"><Redirect to={user ? roleHome(user.role) : "/login"} /></Route>
       <Route path="/pending-approval" component={PendingApproval} />
 
       {/* ── Role-based dashboards (4 business types) ── */}
       <Route path="/family">
-        <ProtectedRoute requiredRole="family"><ParentDashboard /></ProtectedRoute>
+        <ProtectedRoute><PlatformDashboard workspace="family" /></ProtectedRoute>
       </Route>
       <Route path="/clinic">
-        <ProtectedRoute requiredRole="clinic"><DoctorDashboard /></ProtectedRoute>
+        <ProtectedRoute><PlatformDashboard workspace="clinical" /></ProtectedRoute>
       </Route>
       <Route path="/school">
-        <ProtectedRoute requiredRole="school"><TherapistDashboard /></ProtectedRoute>
+        <ProtectedRoute><PlatformDashboard workspace="school" /></ProtectedRoute>
       </Route>
       <Route path="/government">
-        <ProtectedRoute requiredRole="government"><AdminDashboard /></ProtectedRoute>
+        <ProtectedRoute><PlatformDashboard workspace="program" /></ProtectedRoute>
       </Route>
       <Route path="/admin">
-        <ProtectedRoute requiredRole="superadmin"><SuperAdminDashboard /></ProtectedRoute>
+        <ProtectedRoute><PlatformDashboard workspace="platform" /></ProtectedRoute>
       </Route>
 
+      <Route path="/coordination"><ProtectedRoute><PlatformDashboard workspace="coordination" /></ProtectedRoute></Route>
+      <Route path="/organization"><ProtectedRoute><PlatformDashboard workspace="organization" /></ProtectedRoute></Route>
       {/* ── Platform pages ── */}
       <Route path="/family-care" component={FamilyCare} />
       <Route path="/clinical-system" component={ClinicalSystem} />
@@ -127,37 +110,11 @@ function AppRoutes() {
       <Route path="/terms" component={Terms} />
       <Route path="/contact" component={Contact} />
 
-      {/* ── Legacy generic routes ── */}
-      <Route path="/dashboard">
-        <ProtectedRoute><SidebarLayout><Dashboard /></SidebarLayout></ProtectedRoute>
-      </Route>
-      <Route path="/children">
-        <ProtectedRoute><SidebarLayout><ChildrenList /></SidebarLayout></ProtectedRoute>
-      </Route>
-      <Route path="/children/:id">
-        {params => <ProtectedRoute><SidebarLayout><ChildDetail id={Number(params.id)} /></SidebarLayout></ProtectedRoute>}
-      </Route>
-      <Route path="/screenings">
-        <ProtectedRoute><SidebarLayout><ScreeningsList /></SidebarLayout></ProtectedRoute>
-      </Route>
-      <Route path="/screenings/:id">
-        {params => <ProtectedRoute><SidebarLayout><ScreeningDetail id={Number(params.id)} /></SidebarLayout></ProtectedRoute>}
-      </Route>
-      <Route path="/appointments">
-        <ProtectedRoute><SidebarLayout><AppointmentsList /></SidebarLayout></ProtectedRoute>
-      </Route>
-      <Route path="/therapy">
-        <ProtectedRoute><SidebarLayout><TherapyPlansList /></SidebarLayout></ProtectedRoute>
-      </Route>
-      <Route path="/reports">
-        <ProtectedRoute><SidebarLayout><ReportsList /></SidebarLayout></ProtectedRoute>
-      </Route>
-      <Route path="/games">
-        <ProtectedRoute><SidebarLayout><GamesAssessment /></SidebarLayout></ProtectedRoute>
-      </Route>
-      <Route path="/settings">
-        <ProtectedRoute><SidebarLayout><Settings /></SidebarLayout></ProtectedRoute>
-      </Route>
+      {/* Existing bookmarks now enter the case-scoped workspace. */}
+      <Route path="/dashboard"><Redirect to={user ? roleHome(user.role) : "/login"} /></Route>
+      <Route path="/children/:id"><Redirect to="/family" /></Route>
+      <Route path="/screenings/:id"><Redirect to={user ? roleHome(user.role) : "/login"} /></Route>
+      {["/children","/screenings","/appointments","/therapy","/reports","/games","/settings"].map(route=><Route key={route} path={route}><Redirect to={user ? roleHome(user.role) : "/login"} /></Route>)}
 
       <Route component={NotFound} />
     </Switch>
@@ -165,6 +122,8 @@ function AppRoutes() {
 }
 
 function App() {
+  const invite=new URLSearchParams(window.location.search).get("invite");
+  if(invite) sessionStorage.setItem("neobrain_invite",invite);
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

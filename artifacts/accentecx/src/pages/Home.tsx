@@ -29,7 +29,7 @@ const SYSTEMS = [
     color: "bg-secondary/15 border-secondary/30",
     iconBg: "bg-blue-100",
     iconColor: "text-blue-700",
-    desc: "Daily parental engagement through child tracking, behavioral monitoring, therapy tasks, and AI-generated progress reports accessible from any device.",
+    desc: "Daily parental engagement through child tracking, behavioral monitoring, therapy tasks, and clinician-approved progress reports accessible from any device.",
     features: ["Child developmental profiles", "Daily activity guidance", "Therapy compliance tracking", "Appointment booking", "Progress visualization"]
   },
   {
@@ -40,8 +40,8 @@ const SYSTEMS = [
     color: "bg-primary/5 border-primary/15",
     iconBg: "bg-green-100",
     iconColor: "text-green-700",
-    desc: "Structured clinical tools that give practitioners AI-generated summaries, behavioral video reviews, and longitudinal tracking — not replacing judgment, enhancing it.",
-    features: ["AI intake summaries", "Structured behavioral reports", "Video analysis review", "Patient queue system", "Therapy planning tools"]
+    desc: "Structured clinical tools that give practitioners structured case records, clinician video reviews, and longitudinal tracking — not replacing judgment, enhancing it.",
+    features: ["Structured case documentation", "Structured behavioral reports", "Human evidence review", "Patient queue system", "Therapy planning tools"]
   },
   {
     num: "03",
@@ -92,95 +92,34 @@ const SYSTEMS = [
 const JOURNEY_STEPS = [
   { step: 1, icon: Users, title: "Account Creation", desc: "Parent registers and creates their household account." },
   { step: 2, icon: ClipboardList, title: "Child Profile", desc: "Input age, language, developmental concerns, and medical history." },
-  { step: 3, icon: Brain, title: "Structured Screening", desc: "Adaptive questionnaire across 6 developmental domains." },
-  { step: 4, icon: Video, title: "Video Assessment", desc: "Guided structured behavioral tasks recorded and uploaded." },
-  { step: 5, icon: Activity, title: "AI Processing", desc: "Domain scoring, behavioral cluster detection, risk classification." },
-  { step: 6, icon: ClipboardList, title: "Report Generation", desc: "Clinical summary + parent-friendly explanation delivered." },
-  { step: 7, icon: Stethoscope, title: "Specialist Matching", desc: "Smart referral engine assigns the right specialist type." },
-  { step: 8, icon: Calendar, title: "Consultation", desc: "Doctor reviews full AI intake, video, and history." },
+  { step: 3, icon: Brain, title: "Structured Documentation", desc: "Age-specific history and observations for children from birth through age 12." },
+  { step: 4, icon: Video, title: "Supporting Evidence", desc: "Upload documents and optional videos for human review." },
+  { step: 5, icon: Activity, title: "Clinician Review", desc: "A verified professional reviews the evidence within their authorized scope." },
+  { step: 6, icon: ClipboardList, title: "Approved Results", desc: "Clinical findings are released only after clinician approval." },
+  { step: 7, icon: Stethoscope, title: "Referral Routing", desc: "Clinician-approved referral, guardian sharing authorization, and provider acceptance." },
+  { step: 8, icon: Calendar, title: "Consultation", desc: "Book a remote or onsite consultation with a verified provider." },
   { step: 9, icon: HeartPulse, title: "Therapy Plan", desc: "Therapist sets goals, exercises, and tracking schedule." },
-  { step: 10, icon: LineChart, title: "Long-term Tracking", desc: "Monthly AI reassessment, milestone monitoring, plan updates." }
+  { step: 10, icon: LineChart, title: "Long-term Tracking", desc: "Follow-up tasks, observations, and clinician-approved updates." }
 ];
 
 const AI_LAYERS = [
   { layer: "Layer 1", title: "Data Collection Engine", icon: ClipboardList, desc: "Questionnaires, video uploads, teacher input, therapist entries — all structured and normalized." },
-  { layer: "Layer 2", title: "Feature Extraction Engine", icon: Video, desc: "From video: gaze tracking, motion detection, gesture frequency, speech presence, interaction analysis." },
-  { layer: "Layer 3", title: "Rule-Based Clinical Engine", icon: ShieldCheck, desc: "DSM-aligned logic, validated screening thresholds, structured scoring systems." },
-  { layer: "Layer 4", title: "ML Pattern Engine", icon: Brain, desc: "Behavioral clustering, developmental trajectory modeling, anomaly detection across history." },
+  { layer: "Layer 2", title: "Private Evidence", icon: Video, desc: "Documents and videos remain private and are reviewed by authorized people." },
+  { layer: "Layer 3", title: "Clinical Approval", icon: ShieldCheck, desc: "Verified credentials, authorized specialty scopes, and immutable approved results." },
+  { layer: "Layer 4", title: "Care Coordination", icon: Brain, desc: "Accountable assignments, accepted referrals, appointments, and follow-up tasks." },
   { layer: "Layer 5", title: "Report Generation Engine", icon: MessageSquare, desc: "Clinical documentation, parent-simplified summaries, doctor-ready structured reports." }
 ];
 
 const B2C_TIERS = [
-  {
-    name: "Free",
-    price: "Free",
-    period: "",
-    tagline: "Try NEOBRAIN, no commitment",
-    highlight: false,
-    badge: "No credit card",
-    features: [
-      "1 child profile",
-      "1 developmental screening",
-      "Appointment booking",
-      "Milestone tracking"
-    ],
-    excluded: ["Full screening engine", "Video behavioral analysis", "Therapy tracking", "AI reports", "Specialist messaging"]
-  },
-  {
-    name: "Starter Care",
-    price: "₱200",
-    period: "/month",
-    tagline: "For families just getting started",
-    highlight: false,
-    features: [
-      "1 child profile",
-      "Basic developmental screening (2×/yr)",
-      "AI summary report (text only)",
-      "Appointment booking",
-      "Milestone tracking"
-    ],
-    excluded: ["Video behavioral analysis", "School input system", "Specialist messaging", "Therapy automation"]
-  },
-  {
-    name: "Care Plus",
-    price: "₱799",
-    period: "/month",
-    tagline: "For active care management",
-    highlight: true,
-    badge: "Most Popular",
-    features: [
-      "Up to 4 child profiles",
-      "Full screening engine",
-      "Video behavioral analysis",
-      "Therapy plan tracking",
-      "School input system",
-      "Specialist messaging"
-    ],
-    excluded: ["Priority AI processing", "Therapy automation", "Priority specialist access"]
-  },
-  {
-    name: "Care Family Pro",
-    price: "₱1,999",
-    period: "/month",
-    tagline: "For families who need everything",
-    highlight: false,
-    badge: "Premium",
-    features: [
-      "Up to 6 children",
-      "Priority AI processing",
-      "Full video analytics suite",
-      "Advanced clinical reports",
-      "Therapy automation",
-      "Priority specialist access"
-    ],
-    excluded: []
-  }
+ {name:"Family Documentation",price:"Free",period:"",tagline:"Gather the information your care team needs",highlight:true,badge:"No subscription required",features:["Children from birth through age 12","Developmental history and observations","Private document and video uploads","School sharing with guardian consent","Clinician-approved results and follow-up"],excluded:[]},
+ {name:"Professional Consultation",price:"Provider fee",period:"",tagline:"Pay when you book a professional service",highlight:false,badge:"Fee shown before booking",features:["Verified provider directory","Approved referrals","Remote or onsite consultation","Consultation report approved by the clinician","Payment and refund status"],excluded:[]},
+ {name:"Sponsored Care",price:"Program-funded",period:"",tagline:"Request funding from a participating program",highlight:false,badge:"Subject to sponsor approval",features:["Guardian-authorized funding request","Sponsor budget approval","Confirmed sponsored appointments","Same clinical approval requirements"],excluded:[]},
 ];
 
 const B2B_TIERS = [
   {
     name: "Clinic SaaS",
-    price: "₱4,999 – ₱19,999",
+    price: "By agreement",
     period: "/month",
     tagline: "For clinics and multi-doctor practices",
     icon: Stethoscope,
@@ -196,7 +135,7 @@ const B2B_TIERS = [
   },
   {
     name: "School Licensing",
-    price: "₱10 – ₱50",
+    price: "By agreement",
     period: "/student/year",
     tagline: "For schools and SPED programs",
     icon: GraduationCap,
@@ -489,7 +428,7 @@ function PricingSection() {
                       variant={tier.highlight ? "default" : "outline"}
                       data-testid={`button-pricing-b2c-${i + 1}`}
                     >
-                      {tier.price === "Free" ? "Start for Free" : `Get Started — ${tier.price}/mo`}
+                      {tier.price === "Free" ? "Start for Free" : "Explore care options"}
                     </Button>
                   </Link>
                 </motion.div>
@@ -621,10 +560,10 @@ function PricingSection() {
                   <p className="text-sm font-semibold text-foreground mb-4">Clinic Size Tiers</p>
                   <div className="space-y-3">
                     {[
-                      { size: "Solo Practice", docs: "1 doctor", price: "₱4,999/mo" },
-                      { size: "Small Clinic", docs: "2–5 doctors", price: "₱9,999/mo" },
-                      { size: "Multi-Doctor Center", docs: "6–15 doctors", price: "₱14,999/mo" },
-                      { size: "Hospital / Large Network", docs: "15+ doctors", price: "₱19,999+/mo" },
+                      { size: "Solo Practice", docs: "1 doctor", price: "By agreement" },
+                      { size: "Small Clinic", docs: "2–5 doctors", price: "By agreement" },
+                      { size: "Multi-Doctor Center", docs: "6–15 doctors", price: "By agreement" },
+                      { size: "Hospital / Large Network", docs: "15+ doctors", price: "By agreement" },
                     ].map(t => (
                       <div key={t.size} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
                         <div>
@@ -703,10 +642,10 @@ function PricingSection() {
                   <p className="text-sm font-semibold text-foreground mb-4">Student Volume Tiers</p>
                   <div className="space-y-3">
                     {[
-                      { range: "Up to 200 students", price: "₱50/student/yr", note: "Small schools" },
-                      { range: "201 – 500 students", price: "₱35/student/yr", note: "Medium schools" },
-                      { range: "501 – 2,000 students", price: "₱20/student/yr", note: "Large schools" },
-                      { range: "2,000+ students / networks", price: "₱10/student/yr", note: "School networks" },
+                      { range: "Up to 200 students", price: "By agreement", note: "Small schools" },
+                      { range: "201 – 500 students", price: "By agreement", note: "Medium schools" },
+                      { range: "501 – 2,000 students", price: "By agreement", note: "Large schools" },
+                      { range: "2,000+ students / networks", price: "By agreement", note: "School networks" },
                     ].map(t => (
                       <div key={t.range} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
                         <div>
@@ -1571,12 +1510,12 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8 md:gap-16 items-center">
               <div>
-                <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">AI Architecture</p>
+                <p className="text-secondary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">Care Architecture</p>
                 <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-3 md:mb-5">
                   Five-layer behavioral intelligence engine.
                 </h2>
                 <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 leading-relaxed">
-                  The AI system processes structured questionnaires, video behavioral signals, teacher inputs, and historical data through a pipeline of specialized engines — each designed for one job.
+                  The care system connects guardian documentation, private evidence, professional review, approved referrals, appointments and follow-up.
                 </p>
                 <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5">
                   <div className="flex items-start gap-3">
@@ -1650,7 +1589,7 @@ export default function Home() {
               ))}
             </div>
             <p className="text-background/60 text-sm mt-8 max-w-2xl mx-auto leading-relaxed">
-              All AI outputs are framed as structured developmental risk indicators with referral recommendations. The system is a clinical decision support tool, not a replacement for qualified medical judgment.
+              Clinical conclusions require a verified clinician’s approval before release. Uploaded videos are evidence for human review; automated diagnostic video scoring is disabled.
             </p>
           </div>
         </section>
@@ -1776,7 +1715,7 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Lock className="h-3.5 w-3.5" />
-                <span>This platform does not diagnose. All AI outputs are for clinical decision support only.</span>
+                <span>All clinical results require clinician review and approval before release.</span>
               </div>
               <a href="https://accentecxai.com" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-border bg-background hover:border-primary/30 transition-colors shrink-0">

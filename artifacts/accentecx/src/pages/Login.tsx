@@ -25,7 +25,7 @@ const ROLES: {
     subLabel: "Family Care",
     icon: Users,
     tier: "B2C Subscription",
-    description: "Track your child's developmental journey, complete screenings, book specialists, and follow AI-guided therapy plans.",
+    description: "Gather free developmental documentation, receive clinician-approved findings, and book professional care.",
   },
   {
     id: "clinic",
@@ -422,9 +422,9 @@ export default function Login() {
                       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-1.5">
                         <p className="text-sm font-semibold text-foreground">Organization onboarding</p>
                         <p className="text-xs text-muted-foreground">
-                          {selectedRole === "clinic" && "Set up your clinic or hospital workspace with DOH licensing, PhilHealth accreditation, plan selection, and admin account — takes about 3 minutes."}
-                          {selectedRole === "school" && "Register your school with DepEd details, grade coverage, enrollment size, plan selection, and admin account — takes about 3 minutes."}
-                          {selectedRole === "government" && "Register your government agency with LGU details, regional coverage, plan selection, and responsible officer account — takes about 3 minutes."}
+                          {selectedRole === "clinic" && "Create your account, register your organization, and invite staff. Clinical authority requires separate credential verification."}
+                          {selectedRole === "school" && "Register your school organization and invite staff. Learner information requires guardian authorization."}
+                          {selectedRole === "government" && "Register your agency organization, reporting roles and sponsored care programs."}
                         </p>
                       </div>
                       <Button
@@ -507,12 +507,6 @@ export default function Login() {
                   </Button>
 
                   <div className="flex items-center justify-between text-sm">
-                    <button
-                      onClick={handleSkipOTP}
-                      className="text-muted-foreground hover:text-foreground hover:underline"
-                    >
-                      Skip for now
-                    </button>
                     <button
                       onClick={async () => {
                         if (!pendingUser) return;

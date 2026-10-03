@@ -1,7 +1,7 @@
 import { startSession, endSession } from "../lib/session";
 import { Router } from "express";
 import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
-import { db, usersTable } from "@workspace/db";
+import { db, usersTable, userOnboardingTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { sendEmail, welcomeEmail } from "../lib/email";
 const router = Router();
@@ -37,13 +37,13 @@ router.post("/auth/signup", async (req, res) => {
   if (!name || typeof name !== "string" || name.trim().length === 0) {
     return res.status(400).json({ error: "Name is required." });
   }
-  if (!password || typeof password !== "string" || password.length < 6) {
-    return res.status(400).json({ error: "Password must be at least 6 characters." });
+  if (!password || typeof password !== "string" || password.length < 8) {
+    return res.status(400).json({ error: "Password must be at least 8 characters." });
   }
   if (roleRaw === "superadmin") return res.status(403).json({error:"Administrator accounts require provisioning"});
   const role: Role = isValidRole(roleRaw) ? roleRaw : "family";
 
-  const [existing] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
+  const [existing] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, email.trim().toLowerCase()));
   if (existing) {
     return res.status(409).json({ error: "An account with this email already exists." });
   }
@@ -51,13 +51,13 @@ router.post("/auth/signup", async (req, res) => {
   const passwordHash = hashPassword(password);
 
   const now = new Date();
-  // Family → 14-day trial. Clinic/School/Government → pending admin activation. Superadmin → active.
-  const needsTrial = role === "family";
-  const needsOrgApproval = role === "clinic" || role === "school" || role === "government";
+  // Documentation is free; organization participation is verified independently.
+  const needsTrial = false;
+  const needsOrgApproval = false;
   const trialExpiry = needsTrial ? new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000) : null;
 
   const [user] = await db.insert(usersTable).values({
-    email: email.toLowerCase(),
+    email: email.trim().toLowerCase(),
     name,
     role,
     passwordHash,
@@ -80,8 +80,9 @@ router.post("/auth/signup", async (req, res) => {
     createdAt: usersTable.createdAt,
   });
 
-  req.log.info({ userId: user.id, role }, needsTrial ? "Family user created with 14-day trial" : needsOrgApproval ? "Org account created — pending admin activation" : "Superadmin created (active)");
+  req.log.info({ userId: user.id, role }, "Account created; email verification required");
   sendEmail(welcomeEmail(user.name, user.email)).catch(() => {});
+  await db.insert(userOnboardingTable).values({userId:user.id});
   await startSession(res, user.id);
   return res.status(201).json({
     id: user.id,
@@ -101,7 +102,7 @@ router.post("/auth/login", async (req, res) => {
   }
   const role: Role = isValidRole(roleRaw) ? roleRaw : "family";
 
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase()));
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email.trim().toLowerCase()));
   if (!user || !verifyPassword(password, user.passwordHash)) {
     return res.status(401).json({ error: "Invalid email or password." });
   }
