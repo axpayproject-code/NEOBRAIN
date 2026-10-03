@@ -67,35 +67,18 @@ router.post("/screenings", async (req, res) => {
     else riskLevel = "critical";
   }
 
-  const status = scores.length > 0 ? "completed" : "pending";
+  const status = "pending";
+  riskLevel = null;
 
   const [screening] = await db
     .insert(screeningsTable)
-    .values({ ...parsed.data, riskLevel, status, completedAt: status === "completed" ? new Date() : undefined })
+    .values({ ...parsed.data, riskLevel, status, completedAt: undefined })
     .returning();
-
-  if (riskLevel) {
-    const [prevChild] = await db.select({ riskLevel: childrenTable.riskLevel })
-      .from(childrenTable).where(eq(childrenTable.id, parsed.data.childId));
-    await db.update(childrenTable).set({ riskLevel }).where(eq(childrenTable.id, parsed.data.childId));
-    await db.insert(riskHistoryTable).values({
-      childId: parsed.data.childId,
-      previousRiskLevel: prevChild?.riskLevel ?? null,
-      newRiskLevel: riskLevel,
-      triggerType: "screening",
-      triggerResourceId: screening.id,
-      communicationScore: parsed.data.communicationScore ?? null,
-      socialScore: parsed.data.socialScore ?? null,
-      attentionScore: parsed.data.attentionScore ?? null,
-      motorScore: parsed.data.motorScore ?? null,
-      emotionalScore: parsed.data.emotionalScore ?? null,
-    });
-  }
 
   await db.insert(timelineEventsTable).values({
     childId: parsed.data.childId,
     eventType: "screening",
-    title: `Screening completed: ${parsed.data.screeningType.replace(/_/g, " ")}`,
+    title: `Screening submitted: ${parsed.data.screeningType.replace(/_/g, " ")}`,
     description: riskLevel ? `Risk level assessed as ${riskLevel}` : "Screening submitted",
     occurredAt: new Date(),
   });

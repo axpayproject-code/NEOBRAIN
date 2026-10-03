@@ -1,3 +1,4 @@
+import {expireBookingHolds} from "./lib/booking-holds";
 import app from "./app";
 import { logger } from "./lib/logger";
 
@@ -23,3 +24,5 @@ app.listen(port, (err) => {
 
   logger.info({ port }, "Server listening");
 });
+
+const holdTimer=setInterval(()=>{void expireBookingHolds().catch(err=>logger.error({err},"Booking hold cleanup failed"));},60000);holdTimer.unref();

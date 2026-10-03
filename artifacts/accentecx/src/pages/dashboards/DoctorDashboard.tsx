@@ -1,3 +1,4 @@
+import CaseWorkspace from "@/components/CaseWorkspace";
 import { useState } from "react";
 import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashboardLayout";
 import {
@@ -44,6 +45,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV: NavItem[] = [
+  { id: "cases", label: "Case Workspace", icon: ClipboardList },
   { id: "queue", label: "Patient Queue", icon: Users },
   { id: "nutrition", label: "Patient Nutrition", icon: Salad },
   { id: "ai-triage", label: "AI Triage", icon: Zap },
@@ -1793,6 +1795,7 @@ function ClinicNutritionTab() {
 
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
+  cases: CaseWorkspace,
   queue: QueueManagementTab,
   nutrition: ClinicNutritionTab,
   "ai-triage": AITriageTab,
@@ -1818,7 +1821,7 @@ const TABS: Record<string, TabComponent> = {
 };
 
 export default function DoctorDashboard() {
-  const [activeTab, setActiveTab] = useState("queue");
+  const [activeTab, setActiveTab] = useState("cases");
   const { data: children } = useListChildren({ query: { queryKey: ["children-queue"] } });
   const criticalCount = (children ?? []).filter(c => c.riskLevel === "critical" || c.riskLevel === "high").length;
 

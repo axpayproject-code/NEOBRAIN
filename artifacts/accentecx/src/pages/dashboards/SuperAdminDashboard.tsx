@@ -1,3 +1,4 @@
+import CaseWorkspace from "@/components/CaseWorkspace";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashboardLayout";
 import {
@@ -42,6 +43,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV: NavItem[] = [
+  { id: "cases", label: "Case Workspace", icon: ClipboardList },
   { id: "overview",             label: "Platform Overview",       icon: LayoutDashboard },
   { id: "approvals",            label: "Approval Queue",          icon: UserCheck },
   { id: "user-management",      label: "User Management",         icon: Users },
@@ -1566,6 +1568,7 @@ function SACollaborationTab() {
 // ─── Main export ──────────────────────────────────────────────────────────────
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
+  cases: CaseWorkspace,
   overview:                OverviewTab,
   approvals:               AdminApprovalsTab,
   "user-management":       AdminUserManagementTab,
@@ -1585,7 +1588,7 @@ const TABS: Record<string, TabComponent> = {
 
 export default function SuperAdminDashboard() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("cases");
   const TabContent = TABS[activeTab] ?? OverviewTab;
 
   return (

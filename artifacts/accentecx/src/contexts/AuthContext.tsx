@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
 
@@ -21,6 +22,7 @@ export interface AuthUser {
 
 interface AuthContextValue {
   user: AuthUser | null;
+  loading: boolean;
   login: (user: AuthUser) => void;
   logout: () => void;
   updateProfile: (data: Partial<Pick<AuthUser, "name" | "email" | "profilePhoto" | "tier" | "subscriptionStatus" | "trialExpiresAt" | "inTrial" | "trialDaysLeft" | "orgName" | "region" | "phone">>) => void;
@@ -30,6 +32,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
+  loading: true,
   login: () => {},
   logout: () => {},
   updateProfile: () => {},
@@ -40,59 +43,18 @@ const AuthContext = createContext<AuthContextValue>({
 const VALID_ROLES: UserRole[] = ["family", "clinic", "school", "government", "superadmin"];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    try {
-      const stored = localStorage.getItem("accentecx_user");
-      if (!stored) return null;
-      const parsed = JSON.parse(stored) as AuthUser;
-      if (!parsed?.role || !VALID_ROLES.includes(parsed.role)) {
-        localStorage.removeItem("accentecx_user");
-        return null;
-      }
-      return parsed;
-    } catch {
-      return null;
-    }
-  });
-
+  const cache=useQueryClient();
+  const [loading,setLoading]=useState(true);
+  const [user, setUser] = useState<AuthUser | null>(null);
   useEffect(() => {
-    if (user?.id) {
-      setAuthTokenGetter(() => user.id);
-    } else {
-      setAuthTokenGetter(null);
-    }
-  }, [user?.id]);
+    setAuthTokenGetter(null);
+    localStorage.removeItem("accentecx_user");
+    fetch("/api/auth/me").then(async res => {
+      if(res.ok) { const data=await res.json(); setUser({...data,tier:data.subscriptionTier}); }
+    }).catch(()=>{}).finally(()=>setLoading(false));
+  }, []);
 
-  const refreshTier = useCallback(async (currentUser?: AuthUser | null) => {
-    const u = currentUser ?? user;
-    if (!u?.id) return;
-    try {
-      const base = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
-      const res = await fetch(`${base}/api/billing/status`, {
-        headers: { Authorization: `Bearer ${u.id}` },
-      });
-      if (!res.ok) return;
-      const data = await res.json() as {
-        tier?: string;
-        status?: string;
-        trialExpiresAt?: string | null;
-        inTrial?: boolean;
-        trialDaysLeft?: number;
-      };
-      const updated: AuthUser = {
-        ...u,
-        tier: data.tier ?? u.tier,
-        subscriptionStatus: data.status ?? u.subscriptionStatus,
-        trialExpiresAt: data.trialExpiresAt ?? u.trialExpiresAt,
-        inTrial: data.inTrial ?? u.inTrial,
-        trialDaysLeft: data.trialDaysLeft ?? u.trialDaysLeft,
-      };
-      localStorage.setItem("accentecx_user", JSON.stringify(updated));
-      setUser(updated);
-    } catch {
-      // silently ignore
-    }
-  }, [user]);
+  const refreshTier = useCallback(async (_overrideUser?: AuthUser) => {}, []);
 
   useEffect(() => {
     if (user?.id) {
@@ -102,13 +64,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = (newUser: AuthUser) => {
-    localStorage.setItem("accentecx_user", JSON.stringify(newUser));
+    cache.clear();
+
     setUser(newUser);
     setTimeout(() => refreshTier(newUser), 500);
   };
 
   const logout = () => {
-    localStorage.removeItem("accentecx_user");
+    cache.clear();
+    void fetch("/api/auth/logout", {method:"POST"});
     setUser(null);
   };
 
@@ -116,13 +80,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(prev => {
       if (!prev) return prev;
       const updated = { ...prev, ...data };
-      localStorage.setItem("accentecx_user", JSON.stringify(updated));
+
       return updated;
     });
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateProfile, isAuthenticated: !!user, refreshTier }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateProfile, isAuthenticated: !!user, refreshTier }}>
       {children}
     </AuthContext.Provider>
   );

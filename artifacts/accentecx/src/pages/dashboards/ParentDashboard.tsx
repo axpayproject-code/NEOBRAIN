@@ -1,3 +1,4 @@
+import CaseWorkspace from "@/components/CaseWorkspace";
 import { useState, useEffect } from "react";
 import { RoleDashboardLayout, type NavItem } from "@/components/layout/RoleDashboardLayout";
 import {
@@ -68,6 +69,7 @@ function downloadText(filename: string, content: string) {
 }
 
 const NAV: NavItem[] = [
+  { id: "cases", label: "Case Workspace", icon: ClipboardList },
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "children", label: "My Children", icon: Users },
   { id: "screening", label: "Assessments", icon: ClipboardList },
@@ -75,8 +77,8 @@ const NAV: NavItem[] = [
   { id: "brain-gym", label: "Brain Gym", icon: Brain },
   { id: "milestones", label: "Milestones", icon: Flag },
   { id: "games", label: "Games Assessment", icon: Gamepad2 },
-  { id: "ai-insights", label: "AI Insights", icon: TrendingUp },
-  { id: "video", label: "Video Analysis", icon: Video },
+  { id: "ai-insights", label: "Approved Results", icon: TrendingUp },
+  { id: "video", label: "Professional Review", icon: Video },
   { id: "appointments", label: "Appointments", icon: Calendar },
   { id: "therapy", label: "Therapy Tracking", icon: HeartPulse },
   { id: "reports", label: "Reports", icon: FileText },
@@ -2448,16 +2450,17 @@ function ParentCollaborationTab() {
 
 type TabComponent = () => React.ReactElement;
 const TABS: Record<string, TabComponent> = {
+  cases: CaseWorkspace,
   children: ChildrenTab,
   screening: ScreeningTab,
   nutrition: NutritionDashboard,
   milestones: MilestonesTab,
   games: GamesTab,
-  "ai-insights": AIInsightsTab,
-  video: VideoTab,
+  "ai-insights": CaseWorkspace,
+  video: CaseWorkspace,
   appointments: AppointmentsTab,
   therapy: TherapyTab,
-  reports: ReportsTab,
+  reports: CaseWorkspace,
   messages: () => <SpecialistMessagingTab role="parent" />,
   community: CommunityTab,
   collaboration: ParentCollaborationTab,
@@ -2466,7 +2469,7 @@ const TABS: Record<string, TabComponent> = {
 };
 
 export default function ParentDashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("cases");
   const { data: children } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const { data: summary } = useGetDashboardSummary({ query: { queryKey: ["dashboard-summary"] } });
 

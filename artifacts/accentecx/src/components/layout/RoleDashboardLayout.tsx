@@ -8,7 +8,7 @@ import { getPlanFeatures } from "@/lib/planFeatures";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrialBanner } from "@/components/TrialBanner";
-import { NotificationBell } from "@/components/NotificationBell";
+import { WorkflowNotificationBell } from "@/components/workflow/NotificationBell";
 import { AIChatAssistant } from "@/components/AIChatAssistant";
 
 export interface NavItem {
@@ -111,7 +111,7 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
     : "?";
 
   const planName = user?.role === "family"
-    ? getPlanFeatures(user.tier).planName
+    ? "Free documentation"
     : ROLE_LABELS[user?.role ?? "family"];
 
   const badgeColor = user?.role === "family"
@@ -195,14 +195,7 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
 
       {/* ── Desktop main ─────────────────────────────────────────────────── */}
       <main className="hidden md:flex flex-col flex-1 min-h-[100dvh] overflow-hidden">
-        {user?.role === "family" && (
-          <TrialBanner
-            subscriptionStatus={user?.subscriptionStatus}
-            trialExpiresAt={user?.trialExpiresAt}
-            inTrial={user?.inTrial}
-            trialDaysLeft={user?.trialDaysLeft}
-          />
-        )}
+
         <div className="flex-1 overflow-auto bg-background">
           {children}
         </div>
@@ -217,7 +210,7 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
             <NeoBrainLogo size="xs" variant="sidebar" />
           </Link>
           <div className="flex items-center gap-2">
-            <NotificationBell />
+            <WorkflowNotificationBell />
             <button
               onClick={() => setDrawerOpen(true)}
               aria-label="Open menu"
@@ -236,14 +229,7 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
 
         {/* Scrollable content */}
         <main className="flex-1 overflow-auto bg-background pb-20">
-          {user?.role === "family" && (
-            <TrialBanner
-              subscriptionStatus={user?.subscriptionStatus}
-              trialExpiresAt={user?.trialExpiresAt}
-              inTrial={user?.inTrial}
-              trialDaysLeft={user?.trialDaysLeft}
-            />
-          )}
+
           {children}
         </main>
 
@@ -384,7 +370,7 @@ export function RoleDashboardLayout({ navItems, activeTab, onTabChange, children
       </div>
 
     </div>
-    <AIChatAssistant />
+
     </>
   );
 }

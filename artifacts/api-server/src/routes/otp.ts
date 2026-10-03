@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { otpCodes } from "@workspace/db";
+import { otpCodes, usersTable, userOnboardingTable } from "@workspace/db";
 import { and, eq, gt, desc } from "drizzle-orm";
 import crypto from "crypto";
 import { sendEmail, otpEmail } from "../lib/email";
@@ -8,14 +8,16 @@ import { sendEmail, otpEmail } from "../lib/email";
 const router = Router();
 
 function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 // POST /otp/send — send an OTP code (simulated — logs to console in dev)
 router.post("/otp/send", async (req, res) => {
-  const { email, purpose = "verify" } = req.body as { email?: string; purpose?: string };
+  let { email, purpose = "verify" } = req.body as { email?: string; purpose?: string };
   if (!email) return res.status(400).json({ error: "email is required" });
 
+  if(typeof email!=="string"||!email.includes("@")||purpose!=="verify")return res.status(400).json({error:"Valid verification email required"});
+  email=email.trim().toLowerCase();
   const code = generateCode();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
@@ -40,9 +42,11 @@ router.post("/otp/send", async (req, res) => {
 
 // POST /otp/verify — verify an OTP code
 router.post("/otp/verify", async (req, res) => {
-  const { email, code, purpose = "verify" } = req.body as { email?: string; code?: string; purpose?: string };
+  let { email, code, purpose = "verify" } = req.body as { email?: string; code?: string; purpose?: string };
   if (!email || !code) return res.status(400).json({ error: "email and code are required" });
 
+  if(typeof email!=="string"||typeof code!=="string"||purpose!=="verify")return res.status(400).json({error:"Invalid verification request"});
+  email=email.trim().toLowerCase();
   const [otp] = await db
     .select()
     .from(otpCodes)
@@ -62,6 +66,9 @@ router.post("/otp/verify", async (req, res) => {
     return res.status(400).json({ error: "Invalid or expired verification code" });
   }
 
+  const normalizedEmail=email.trim().toLowerCase();
+  const [account]=await db.select().from(usersTable).where(eq(usersTable.email,normalizedEmail));
+  if(account && purpose==="verify") await db.insert(userOnboardingTable).values({userId:account.id,emailVerifiedAt:new Date()}).onConflictDoUpdate({target:userOnboardingTable.userId,set:{emailVerifiedAt:new Date()}});
   // Mark as used
   await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, otp.id));
 
