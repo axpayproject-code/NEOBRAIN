@@ -1,2 +1,0 @@
-import CarePlatformPage from "./CarePlatformPage";
-export default function ClinicalSystem(){return <CarePlatformPage title="Clinical System" description="Review assigned cases, approve findings within verified professional scopes, and coordinate referrals and consultations." features={["Verified credentials, specialties, affiliations and expiration", "Assignment acceptance and private clinical worknotes", "Immutable clinician-approved result versions", "Availability, consultation notes and approved encounter reports"]}/>;}

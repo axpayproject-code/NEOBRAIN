@@ -1,0 +1,16 @@
+{
+  "title": "DOST-PAGASA Climate Advisory for Very Strong El Niño",
+  "provider": "DOST-PAGASA",
+  "issue_date": "2026-09-23",
+  "source_url": "https://www.pagasa.dost.gov.ph/press-release/34",
+  "advisory_status": "Strong El Niño active in the Tropical Pacific",
+  "outlook": "Expected to intensify into a Very Strong El Niño between the September-December 2026 season and persist through the first half of 2027.",
+  "risks_mentioned": [
+    "Prolonged rainfall deficits and agricultural dry spells",
+    "Water supply stress",
+    "Food security, energy production, public health, and economic impacts"
+  ],
+  "important_qualification": "Habagat and active tropical cyclones may still cause localized above-normal rainfall, particularly in western areas.",
+  "use_in_product": "Show as an official national advisory with issue date and link. Do not translate this national outlook into an unvalidated municipal forecast.",
+  "retrieved_on": "2026-10-04"
+}

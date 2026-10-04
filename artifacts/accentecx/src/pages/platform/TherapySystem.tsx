@@ -1,2 +1,0 @@
-import CarePlatformPage from "./CarePlatformPage";
-export default function TherapySystem(){return <CarePlatformPage title="Therapy and Follow-up" description="Keep professional assessment, goals and follow-up connected to the child\u2019s case." features={["Therapy assessment approval within the professional\u2019s verified scope", "Professional support plans and assigned follow-up tasks", "Family and school progress observations", "Remote and onsite appointments with accountable providers"]}/>;}

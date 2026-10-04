@@ -1,2 +1,0 @@
-import CarePlatformPage from "./CarePlatformPage";
-export default function Telehealth(){return <CarePlatformPage title="Remote and Onsite Care" description="Use one booking pathway for professional care at home or at a participating facility." features={["Secure external consultation link supplied by the provider", "Remote check-in with callback number and current location", "Onsite location, check-in and waiting queue", "Consultation reports released only after clinician approval"]}/>;}

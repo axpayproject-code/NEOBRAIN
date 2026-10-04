@@ -1,2 +1,0 @@
-import CarePlatformPage from "./CarePlatformPage";
-export default function NationalAnalytics(){return <CarePlatformPage title="Program Analytics" description="Understand service demand and care outcomes within your authorized organization." features={["Organization-scoped review, booking and referral counts", "Small nonzero counts suppressed for program reporting", "Guardian-authorized sponsorship requests", "Sponsor budget commitments without routine access to clinical records"]}/>;}

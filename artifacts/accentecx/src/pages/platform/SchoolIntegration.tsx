@@ -1,2 +1,0 @@
-import CarePlatformPage from "./CarePlatformPage";
-export default function SchoolIntegration(){return <CarePlatformPage title="School and ECCD" description="Contribute classroom observations and support progress when a guardian authorizes access." features={["Guardian-authorized learner access", "Classroom observations and family coordination", "Approved clinical information only when explicitly shared", "Age-specific resources approved by a professional"]}/>;}

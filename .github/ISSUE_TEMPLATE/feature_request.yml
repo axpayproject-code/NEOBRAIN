@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest a capability or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: Include the intended users, evidence, and any data or validation needs.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safeguards
+    attributes:
+      label: Data and interpretation
+      options:
+        - label: This request does not require publishing personal or confidential client data.
+        - label: Any climate or impact indicator can be documented and independently checked.

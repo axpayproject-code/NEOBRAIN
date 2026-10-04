@@ -1,0 +1,21 @@
+name: Bug report
+description: Report a reproducible problem
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not attach personal, household, farm, utility customer, or confidential client data.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Include the expected behavior and steps to reproduce.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and data shape
+      description: Python version, operating system, file type, column names, units, and date range. Use synthetic examples.
+    validations:
+      required: true

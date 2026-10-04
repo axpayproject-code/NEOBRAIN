@@ -1,0 +1,27 @@
+{
+  "dataset_file": "iloilo_city_daily.csv",
+  "raw_file": "iloilo_city_nasa_power.json",
+  "provider": "NASA POWER Daily API",
+  "api_version": "v2.10.0",
+  "retrieved_on": "2026-10-04",
+  "source_url": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+  "request": {
+    "latitude": 10.72,
+    "longitude": 122.56,
+    "start": "19910101",
+    "end": "20261002",
+    "community": "AG",
+    "time_standard": "UTC",
+    "parameters": ["PRECTOTCORR", "T2M_MAX", "T2M_MIN"]
+  },
+  "units": {
+    "PRECTOTCORR": "mm/day",
+    "T2M_MAX": "degrees C",
+    "T2M_MIN": "degrees C"
+  },
+  "row_count": 13059,
+  "returned_missing_values": 0,
+  "spatial_support": "One point request at approximate Iloilo City reference coordinates; values are grid/model/reanalysis estimates, not a local station observation and not municipal averages.",
+  "validation_status": "Schema, date continuity, sentinel conversion, and monthly aggregation tested. Not yet calibrated against PAGASA station or CliMap records.",
+  "interpretation_limit": "Use for prototype exploration only until a climate specialist or pilot partner validates it against PAGASA data."
+}

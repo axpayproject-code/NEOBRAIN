@@ -1,0 +1,23 @@
+{
+  "name": "elnino-impact-intelligence-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run check && vite build",
+    "preview": "vite preview",
+    "check": "tsc --noEmit --project tsconfig.json --pretty false && tsc --noEmit --project tsconfig.node.json --pretty false"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^6.0.1",
+    "vite": "^8.3.2"
+  }
+}

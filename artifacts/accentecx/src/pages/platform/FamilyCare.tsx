@@ -1,2 +1,0 @@
-import CarePlatformPage from "./CarePlatformPage";
-export default function FamilyCare(){return <CarePlatformPage title="Family Care" description="Gather developmental history, school observations and supporting evidence in one private case record. Your care team reviews the information and approves clinical conclusions before release." features={["Free child profiles, history, documents and optional videos", "Guardian consent and control over case sharing", "Clinician-approved results and follow-up tasks", "Verified referrals and remote or onsite appointments"]}/>;}
