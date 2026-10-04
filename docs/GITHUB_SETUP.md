@@ -1,19 +1,18 @@
-# Publishing this project on GitHub
+# GitHub repository
 
-## Before the first push
+The canonical public repository for this project is [`axpayproject-code/NEOBRAIN`](https://github.com/axpayproject-code/NEOBRAIN). Its default branch is currently named `Neobrain`. Keep contributions in this repository; do not create a second official copy.
 
-1. Create a **public** repository named `elnino-impact-intelligence` under the project owner's GitHub account. Do not initialize it with a README, license, or `.gitignore`; this local repository already has those files.
-2. Review `DATA_SOURCES.md` and confirm the linked reference data may be redistributed under its listed terms.
-3. Confirm that `data/iloilo_city_daily.csv`, raw NASA POWER downloads, and restricted CliMap exports are absent from Git. The `.gitignore` excludes these local files.
-4. Add the GitHub repository URL as `origin`, then push the current branch:
+## Clone the project
 
-   ```bash
-   git remote add origin https://github.com/OWNER/elnino-impact-intelligence.git
-   git push -u origin HEAD
-   ```
+```bash
+git clone --branch Neobrain https://github.com/axpayproject-code/NEOBRAIN.git
+cd NEOBRAIN
+```
 
-5. Confirm the Actions workflow passes. Add maintainers and protect the default branch with required status checks before accepting outside contributions.
+The repository contains the El Niño Impact Intelligence project on its default branch. The former NEOBRAIN source snapshot is preserved on `backup/neobrain-before-elnino-20261004` for recovery.
 
-The repository includes an MIT license for code, issue and pull-request templates, a Code of Conduct, a security policy, contribution instructions, and GitHub Actions checks for Python tests and the frontend build. Dataset terms remain separate from the software license.
+## Maintainer setup
 
-After the first push, create one GitHub Project board and protect the default branch using the setup in [`CONTRIBUTOR_WORKFLOW.md`](CONTRIBUTOR_WORKFLOW.md). The board and issue/PR history become the shared contributor tracker.
+Create one GitHub Project board connected to this repository and follow [`CONTRIBUTOR_WORKFLOW.md`](CONTRIBUTOR_WORKFLOW.md) to manage issues, owners, reviews, and status. Protect the default branch so changes require pull requests, passing Python and frontend checks, and maintainer review. Add maintainers with individual GitHub accounts; do not share a personal access token.
+
+The repository contains an MIT license for code, contribution and security guidance, issue and pull-request templates, Dependabot updates, and GitHub Actions checks. Dataset terms remain separate from the software license; review `DATA_SOURCES.md` before redistributing data.

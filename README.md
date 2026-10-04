@@ -7,7 +7,7 @@ An early-stage React + TypeScript dashboard, Python JSON API, and reproducible d
 The project code is licensed under the MIT License. Third-party datasets have separate conditions; see [`DATA_SOURCES.md`](DATA_SOURCES.md) before sharing data or a public build. Contributions are welcome through issues and pull requests; read [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`docs/CONTRIBUTOR_WORKFLOW.md`](docs/CONTRIBUTOR_WORKFLOW.md) first. GitHub Actions runs the Python unit suite and frontend build on every push and pull request.
 
 See [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) for the pilot goal, phases, success measures, and next actions.
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the app boundary and [`docs/GITHUB_SETUP.md`](docs/GITHUB_SETUP.md) to publish the repository.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the app boundary and [`docs/GITHUB_SETUP.md`](docs/GITHUB_SETUP.md) for the canonical GitHub repository and maintainer setup.
 
 ## What this pilot does
 
