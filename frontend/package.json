@@ -10,7 +10,7 @@
     "check": "tsc --noEmit --project tsconfig.json --pretty false && tsc --noEmit --project tsconfig.node.json --pretty false"
   },
   "dependencies": {
-    "react": "^19.3.0",
+    "react": "^19.3.1",
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
